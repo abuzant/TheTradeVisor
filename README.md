@@ -2,17 +2,29 @@
 
 A comprehensive trading analytics and account management platform built with Laravel 11 and modern web technologies.
 
+## 📚 Documentation
+
+**[📖 Browse Complete Documentation →](docs/index.html)**
+
+- [Installation Guide](docs/installation.md)
+- [Quick Start Guide](docs/quick-start.md)
+- [API Documentation](docs/api/overview.md)
+- [GeoIP Analytics](docs/features/geoip-analytics.md)
+- [Architecture Overview](docs/development/architecture.md)
+
 ## 🚀 Features
 
-- **Trading Account Management** - Connect and manage multiple trading accounts
+- **Trading Account Management** - Connect and manage multiple MT4/MT5 trading accounts
 - **Performance Analytics** - Detailed analytics and performance metrics for trading activities
+- **GeoIP Country Analytics** - Location-based trading insights with MaxMind GeoLite2
 - **Trade History** - Complete trade history tracking and analysis
-- **Broker Integration** - Support for multiple broker integrations
-- **Symbol Mapping** - Advanced symbol mapping and management
-- **Data Export** - Export trading data in various formats
+- **Broker Analytics** - Compare broker performance and execution
+- **Symbol Mapping** - Advanced symbol mapping and normalization
+- **Data Export** - Export trading data to CSV, PDF, and other formats
 - **User Management** - Role-based access control and user administration
 - **Real-time Dashboard** - Interactive dashboard with real-time updates
 - **Currency Conversion** - Multi-currency support with automatic rate conversion
+- **REST API** - Complete API for MT4/MT5 integration
 
 ## 📋 Requirements
 
