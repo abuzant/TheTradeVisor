@@ -21,7 +21,6 @@ return Application::configure(basePath: dirname(__DIR__))
 		        'admin' => \App\Http\Middleware\IsAdmin::class,
 			'recaptcha' => \App\Http\Middleware\VerifyRecaptcha::class,
 			'track.country' => \App\Http\Middleware\TrackCountryMiddleware::class,
-			'api.rate.limit' => \App\Http\Middleware\ApiRateLimiter::class,
 			
 		    ]);
 

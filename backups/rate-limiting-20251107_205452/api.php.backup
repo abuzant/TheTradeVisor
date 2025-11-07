@@ -13,8 +13,8 @@ Route::get('/health', function () {
     ]);
 });
 
-// Protected API routes with rate limiting
-Route::middleware(['api.key', 'api.rate.limit'])->group(function () {
+// Protected API routes
+Route::middleware('api.key')->group(function () {
     
     // Data collection endpoint
     Route::post('/v1/data/collect', [DataCollectionController::class, 'collect']);

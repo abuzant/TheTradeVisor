@@ -69,6 +69,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('settings.currency.update');
     // Global Analytics
     Route::get('/analytics', [App\Http\Controllers\AnalyticsController::class, 'index'])->name('analytics');
+    
+    // Country Analytics
+    Route::get('/analytics/countries', [App\Http\Controllers\CountryAnalyticsController::class, 'topTradingCountries'])->name('analytics.countries');
 });
 
 // Admin routes
@@ -114,6 +117,15 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::put('/symbols/{symbol}', [App\Http\Controllers\Admin\SymbolManagementController::class, 'update'])->name('symbols.update.alt');
     Route::post('/symbols/bulk-normalize', [App\Http\Controllers\Admin\SymbolManagementController::class, 'bulkNormalize'])->name('symbols.bulk-normalize');
     Route::post('/symbols/auto-normalize', [App\Http\Controllers\Admin\SymbolManagementController::class, 'autoNormalize'])->name('symbols.auto-normalize');
+    
+    // Rate Limit Management
+    Route::get('/rate-limits', [App\Http\Controllers\Admin\RateLimitController::class, 'index'])->name('rate-limits.index');
+    Route::post('/rate-limits', [App\Http\Controllers\Admin\RateLimitController::class, 'store'])->name('rate-limits.store');
+    Route::put('/rate-limits/{setting}', [App\Http\Controllers\Admin\RateLimitController::class, 'update'])->name('rate-limits.update');
+    Route::delete('/rate-limits/{setting}', [App\Http\Controllers\Admin\RateLimitController::class, 'destroy'])->name('rate-limits.destroy');
+    Route::patch('/rate-limits/{setting}/toggle', [App\Http\Controllers\Admin\RateLimitController::class, 'toggle'])->name('rate-limits.toggle');
+    Route::post('/rate-limits/clear-cache', [App\Http\Controllers\Admin\RateLimitController::class, 'clearCache'])->name('rate-limits.clear-cache');
+    Route::get('/rate-limits/statistics', [App\Http\Controllers\Admin\RateLimitController::class, 'statistics'])->name('rate-limits.statistics');
 });
 
 // Legal pages (public)
