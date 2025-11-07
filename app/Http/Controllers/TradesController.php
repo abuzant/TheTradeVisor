@@ -1,0 +1,283 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Deal;
+use App\Models\SymbolMapping;
+use Illuminate\Http\Request;
+use App\Traits\Sortable;
+
+class TradesController extends Controller
+{
+    use Sortable;
+    
+    public function index(Request $request)
+    {
+        $user = $request->user();
+
+        $query = Deal::whereHas('tradingAccount', function($q) use ($user) {
+            $q->where('user_id', $user->id);
+        })
+        ->whereNotNull('symbol')
+        ->where('symbol', '!=', '')
+        ->where('symbol', '!=', 'UNKNOWN')
+        ->with('tradingAccount');
+
+        // Search filter
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where('symbol', 'like', "%{$search}%");
+        }
+
+        // Type filter
+        if ($request->filled('type')) {
+            $query->where('type', 'like', $request->type . '%');
+        }
+
+        // Date range filter
+        if ($request->filled('start_date')) {
+            $query->where('time', '>=', \Carbon\Carbon::parse($request->start_date)->startOfDay());
+        }
+
+        if ($request->filled('end_date')) {
+            $query->where('time', '<=', \Carbon\Carbon::parse($request->end_date)->endOfDay());
+        }
+
+        // Define sortable columns
+        $sortableColumns = ['time', 'symbol', 'type', 'volume', 'price', 'profit', 'commission', 'swap'];
+        
+        // Apply sorting
+        if ($request->has('sort_by')) {
+            $query = $this->applySorting($query, $request, $sortableColumns, 'time', 'desc');
+        } else {
+            $query->orderBy('time', 'desc');
+        }
+
+        $deals = $query->paginate(50)->withQueryString();
+
+        // Get sort parameters for view
+        $sortBy = $request->get('sort_by', 'time');
+        $sortDirection = $request->get('sort_direction', 'desc');
+        
+        // Get display currency
+        $display_currency = $user->display_currency ?? 'USD';
+
+        return view('trades.index', compact('deals', 'sortBy', 'sortDirection', 'display_currency'));
+    }
+
+
+    public function symbol(Request $request, $symbol)
+    {
+        $user = $request->user();
+    
+    // Normalize the symbol
+    $normalizedSymbol = strtoupper($symbol);
+    
+    // Find all raw symbols that map to this normalized symbol
+    $symbolMappings = SymbolMapping::where('normalized_symbol', $normalizedSymbol)
+        ->pluck('raw_symbol')
+        ->toArray();
+    
+    // If no mappings, search for the symbol directly
+    if (empty($symbolMappings)) {
+        $symbolMappings = [$symbol];
+    }
+    
+    // Get ALL deals for this user and these symbols (for stats calculation)
+    $allDeals = Deal::whereHas('tradingAccount', function($q) use ($user) {
+        $q->where('user_id', $user->id);
+    })
+    ->whereNotNull('symbol')               // ADD THIS
+    ->where('symbol', '!=', '')            // ADD THIS
+    ->whereIn('symbol', $symbolMappings)
+    ->orderBy('time', 'desc')
+    ->get();
+    
+    // If no deals found, return empty stats
+    if ($allDeals->isEmpty()) {
+        $stats = [
+            'total_trades' => 0,
+            'winning_trades' => 0,
+            'losing_trades' => 0,
+            'win_rate' => 0,
+            'total_profit' => 0,
+            'total_volume' => 0,
+            'avg_volume' => 0,
+            'avg_profit' => 0,
+            'best_trade' => 0,
+            'worst_trade' => 0,
+            'profit_factor' => 0,
+            'risk_reward' => 0,
+            'avg_win' => 0,
+            'avg_loss' => 0,
+            'buy_trades' => 0,
+            'sell_trades' => 0,
+            'buy_percentage' => 0,
+            'sell_percentage' => 0,
+            'best_direction' => 'N/A',
+            'first_trade' => 'N/A',
+            'last_trade' => 'N/A',
+            'trading_days' => 0,
+            'trades_per_day' => 0,
+            'most_active_hour' => 'N/A',
+            'day_distribution' => collect([]),
+            'max_win_streak' => 0,
+            'max_loss_streak' => 0,
+            'current_streak' => 0,
+            'total_commission' => 0,
+            'total_swap' => 0,
+            'total_fees' => 0,
+            'avg_cost_per_trade' => 0,
+        ];
+        
+        $deals = Deal::whereHas('tradingAccount', function($q) use ($user) {
+            $q->where('user_id', $user->id);
+        })
+
+        ->whereIn('symbol', $symbolMappings)
+        ->orderBy('time', 'desc')
+        ->paginate(50);
+        
+        // Get display currency
+        $display_currency = $user->display_currency ?? 'USD';
+        
+        return view('trades.symbol', compact('deals', 'symbol', 'stats', 'display_currency'));
+    }
+    
+    // Calculate stats
+    $totalTrades = $allDeals->count();
+    $winningTrades = $allDeals->where('profit', '>', 0)->count();
+    $losingTrades = $allDeals->where('profit', '<', 0)->count();
+    $totalProfit = $allDeals->sum('profit');
+    $totalVolume = $allDeals->sum('volume');
+    
+    $grossProfit = $allDeals->where('profit', '>', 0)->sum('profit');
+    $grossLoss = abs($allDeals->where('profit', '<', 0)->sum('profit'));
+    
+    $buyTrades = $allDeals->filter(function($d) {
+        return stripos($d->type, 'buy') !== false;
+    })->count();
+    
+    $sellTrades = $allDeals->filter(function($d) {
+        return stripos($d->type, 'sell') !== false;
+    })->count();
+    
+    $buyProfit = $allDeals->filter(function($d) {
+        return stripos($d->type, 'buy') !== false;
+    })->sum('profit');
+    
+    $sellProfit = $allDeals->filter(function($d) {
+        return stripos($d->type, 'sell') !== false;
+    })->sum('profit');
+    
+    // Streaks
+    $maxWinStreak = 0;
+    $maxLossStreak = 0;
+    $currentStreak = 0;
+    $tempWin = 0;
+    $tempLoss = 0;
+    
+    foreach($allDeals as $deal) {
+        if ($deal->profit > 0) {
+            $tempWin++;
+            $tempLoss = 0;
+            $maxWinStreak = max($maxWinStreak, $tempWin);
+            $currentStreak = $tempWin;
+        } elseif ($deal->profit < 0) {
+            $tempLoss++;
+            $tempWin = 0;
+            $maxLossStreak = max($maxLossStreak, $tempLoss);
+            $currentStreak = -$tempLoss;
+        }
+    }
+    
+    // Time analysis
+    $firstTrade = $allDeals->last();
+    $lastTrade = $allDeals->first();
+    
+    $tradingDays = $firstTrade && $lastTrade && $firstTrade->time && $lastTrade->time ? 
+        \Carbon\Carbon::parse($firstTrade->time)->diffInDays(\Carbon\Carbon::parse($lastTrade->time)) + 1 : 1;
+    
+    // Day distribution
+    $dayDist = [];
+    foreach($allDeals as $deal) {
+        if ($deal->time) {
+            $day = \Carbon\Carbon::parse($deal->time)->format('l');
+            if (!isset($dayDist[$day])) {
+                $dayDist[$day] = 0;
+            }
+            $dayDist[$day]++;
+        }
+    }
+    arsort($dayDist);
+    
+    // Hour analysis
+    $hours = [];
+    foreach($allDeals as $deal) {
+        if ($deal->time) {
+            $hour = \Carbon\Carbon::parse($deal->time)->format('H');
+            if (!isset($hours[$hour])) {
+                $hours[$hour] = 0;
+            }
+            $hours[$hour]++;
+        }
+    }
+    arsort($hours);
+    $mostActiveHour = !empty($hours) ? sprintf('%02d:00', array_key_first($hours)) : 'N/A';
+    
+    // Costs
+    $totalCommission = $allDeals->sum('commission');
+    $totalSwap = $allDeals->sum('swap');
+    $totalFees = abs($totalCommission) + abs($allDeals->sum('fee'));
+    
+    $stats = [
+        'total_trades' => $totalTrades,
+        'winning_trades' => $winningTrades,
+        'losing_trades' => $losingTrades,
+        'win_rate' => $totalTrades > 0 ? round(($winningTrades / $totalTrades) * 100, 1) : 0,
+        'total_profit' => $totalProfit,
+        'total_volume' => $totalVolume,
+        'avg_volume' => $totalTrades > 0 ? $totalVolume / $totalTrades : 0,
+        'avg_profit' => $totalTrades > 0 ? $totalProfit / $totalTrades : 0,
+        'best_trade' => $allDeals->max('profit') ?? 0,
+        'worst_trade' => $allDeals->min('profit') ?? 0,
+        'profit_factor' => $grossLoss > 0 ? round($grossProfit / $grossLoss, 2) : ($grossProfit > 0 ? 999 : 0),
+        'risk_reward' => $grossLoss > 0 ? round($grossProfit / $grossLoss, 2) : 0,
+        'avg_win' => $winningTrades > 0 ? $grossProfit / $winningTrades : 0,
+        'avg_loss' => $losingTrades > 0 ? $grossLoss / $losingTrades : 0,
+        'buy_trades' => $buyTrades,
+        'sell_trades' => $sellTrades,
+        'buy_percentage' => $totalTrades > 0 ? round(($buyTrades / $totalTrades) * 100, 1) : 0,
+        'sell_percentage' => $totalTrades > 0 ? round(($sellTrades / $totalTrades) * 100, 1) : 0,
+        'best_direction' => $buyProfit > $sellProfit ? 'Buy' : ($sellProfit > $buyProfit ? 'Sell' : 'Balanced'),
+        'first_trade' => $firstTrade && $firstTrade->time ? \Carbon\Carbon::parse($firstTrade->time)->format('M d, Y') : 'N/A',
+        'last_trade' => $lastTrade && $lastTrade->time ? \Carbon\Carbon::parse($lastTrade->time)->format('M d, Y') : 'N/A',
+        'trading_days' => $tradingDays,
+        'trades_per_day' => $tradingDays > 0 ? round($totalTrades / $tradingDays, 1) : 0,
+        'most_active_hour' => $mostActiveHour,
+        'day_distribution' => collect($dayDist)->take(7),
+        'max_win_streak' => $maxWinStreak,
+        'max_loss_streak' => $maxLossStreak,
+        'current_streak' => $currentStreak,
+        'total_commission' => $totalCommission,
+        'total_swap' => $totalSwap,
+        'total_fees' => $totalFees,
+        'avg_cost_per_trade' => $totalTrades > 0 ? $totalFees / $totalTrades : 0,
+    ];
+    
+    // Paginate
+    $deals = Deal::whereHas('tradingAccount', function($q) use ($user) {
+        $q->where('user_id', $user->id);
+    })
+    ->whereIn('symbol', $symbolMappings)
+    ->orderBy('time', 'desc')
+    ->paginate(50);
+    
+    // Get display currency
+    $display_currency = $user->display_currency ?? 'USD';
+    
+    return view('trades.symbol', compact('deals', 'symbol', 'stats', 'display_currency'));
+}
+
+
+}

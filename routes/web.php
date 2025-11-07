@@ -1,0 +1,123 @@
+<?php
+
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ApiKeyController;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\SymbolMappingController;
+
+// Landing page
+Route::get('/', [App\Http\Controllers\LandingController::class, 'index'])->name('landing');
+
+// Logged-in Users
+Route::middleware(['auth', 'verified'])->group(function () {
+
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Performance
+    Route::get('/performance', [App\Http\Controllers\PerformanceController::class, 'index'])
+        ->name('performance');
+
+    //    Broker Analytics
+    Route::get('/broker-analytics', [App\Http\Controllers\BrokerAnalyticsController::class, 'index'])
+        ->name('broker.analytics');
+    Route::get('/broker/{broker}', [App\Http\Controllers\BrokerDetailsController::class, 'show'])
+        ->name('broker-details');
+
+    // User account management
+    Route::get('/accounts', [App\Http\Controllers\AccountManagementController::class, 'index'])
+        ->name('accounts.index');
+    Route::post('/accounts/{account}/pause', [App\Http\Controllers\AccountManagementController::class, 'pause'])
+        ->name('accounts.pause');
+    Route::post('/accounts/{account}/unpause', [App\Http\Controllers\AccountManagementController::class, 'unpause'])
+        ->name('accounts.unpause');
+
+    Route::get('/account/{accountId}', [DashboardController::class, 'account'])->name('account.show');
+
+    // API Key management
+    Route::get('/settings/api-key', [ApiKeyController::class, 'index'])->name('settings.api-key');
+    Route::post('/settings/api-key/regenerate', [ApiKeyController::class, 'regenerate'])->name('settings.api-key.regenerate');
+
+    // Trades
+    Route::get('/trades', [App\Http\Controllers\TradesController::class, 'index'])
+        ->name('trades.index');
+    Route::get('/trades/symbol/{symbol}', [App\Http\Controllers\TradesController::class, 'symbol'])
+        ->name('trades.symbol');
+
+    // Export routes
+    Route::get('/export/trades/csv', [App\Http\Controllers\ExportController::class, 'exportTradesCsv'])
+        ->name('export.trades.csv');
+    Route::get('/export/trades/pdf', [App\Http\Controllers\ExportController::class, 'exportTradesPdf'])
+        ->name('export.trades.pdf');
+    Route::get('/export/symbol/{symbol}/csv', [App\Http\Controllers\ExportController::class, 'exportSymbolCsv'])
+        ->name('export.symbol.csv');
+    Route::get('/export/dashboard/csv', [App\Http\Controllers\ExportController::class, 'exportDashboardCsv'])
+        ->name('export.dashboard.csv');
+    Route::get('/export/account-data', [App\Http\Controllers\ExportController::class, 'exportAccountData'])
+        ->name('export.account.data');
+
+    // Profile routes (from Breeze)
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Currency Settings
+    Route::get('/settings/currency', [App\Http\Controllers\Settings\CurrencyController::class, 'edit'])
+        ->name('settings.currency');
+    Route::put('/settings/currency', [App\Http\Controllers\Settings\CurrencyController::class, 'update'])
+        ->name('settings.currency.update');
+    // Global Analytics
+    Route::get('/analytics', [App\Http\Controllers\AnalyticsController::class, 'index'])->name('analytics');
+});
+
+// Admin routes
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+
+    Route::get('/dashboard', [App\Http\Controllers\Admin\AdminController::class, 'index'])->name('dashboard');
+
+    // Log Viewer
+    Route::get('/logs', [App\Http\Controllers\Admin\LogViewerController::class, 'index'])->name('logs');
+    Route::get('/logs/download', [App\Http\Controllers\Admin\LogViewerController::class, 'download'])->name('logs.download');
+
+    // Service Management
+    Route::get('/services', [App\Http\Controllers\Admin\ServiceController::class, 'index'])->name('services');
+    Route::post('/services/{service}/restart', [App\Http\Controllers\Admin\ServiceController::class, 'restart'])->name('services.restart');
+
+    // User Management
+    Route::get('/users', [App\Http\Controllers\Admin\UserManagementController::class, 'index'])->name('users.index');
+    Route::get('/users/{user}', [App\Http\Controllers\Admin\UserManagementController::class, 'show'])->name('users.show');
+    Route::get('/users/{user}/edit', [App\Http\Controllers\Admin\UserManagementController::class, 'edit'])->name('users.edit');
+    Route::put('/users/{user}', [App\Http\Controllers\Admin\UserManagementController::class, 'update'])->name('users.update');
+    Route::post('/users/{user}/suspend', [App\Http\Controllers\Admin\UserManagementController::class, 'suspend'])->name('users.suspend');
+    Route::post('/users/{user}/activate', [App\Http\Controllers\Admin\UserManagementController::class, 'activate'])->name('users.activate');
+    Route::post('/users/{user}/regenerate-api-key', [App\Http\Controllers\Admin\UserManagementController::class, 'regenerateApiKey'])->name('users.regenerate-api-key');
+    Route::delete('/users/{user}', [App\Http\Controllers\Admin\UserManagementController::class, 'destroy'])->name('users.destroy');
+
+    // Trade Management
+    Route::get('/trades', [App\Http\Controllers\Admin\TradesController::class, 'index'])->name('trades.index');
+
+    // Admin account management
+    Route::get('/accounts', [App\Http\Controllers\Admin\AccountManagementController::class, 'index'])->name('accounts.index');
+    Route::post('/accounts/{account}/pause', [App\Http\Controllers\Admin\AccountManagementController::class, 'pause'])->name('accounts.pause');
+    Route::post('/accounts/{account}/unpause', [App\Http\Controllers\Admin\AccountManagementController::class, 'unpause'])->name('accounts.unpause');
+
+    Route::get('/plans', function() {
+        return view('plans');
+    })->name('plans');
+
+    // Symbol Management
+    Route::get('/symbols', [SymbolMappingController::class, 'index'])->name('symbols.index');
+    Route::post('/symbols/{id}', [SymbolMappingController::class, 'update'])->name('symbols.update');
+    Route::post('/symbols/{id}/verify', [SymbolMappingController::class, 'verify'])->name('symbols.verify');
+    Route::post('/symbols/bulk-verify', [SymbolMappingController::class, 'bulkVerify'])->name('symbols.bulk-verify');
+    Route::put('/symbols/{symbol}', [App\Http\Controllers\Admin\SymbolManagementController::class, 'update'])->name('symbols.update.alt');
+    Route::post('/symbols/bulk-normalize', [App\Http\Controllers\Admin\SymbolManagementController::class, 'bulkNormalize'])->name('symbols.bulk-normalize');
+    Route::post('/symbols/auto-normalize', [App\Http\Controllers\Admin\SymbolManagementController::class, 'autoNormalize'])->name('symbols.auto-normalize');
+});
+
+// Legal pages (public)
+Route::get('/terms', [App\Http\Controllers\LegalController::class, 'termsOfService'])->name('terms');
+Route::get('/privacy', [App\Http\Controllers\LegalController::class, 'privacyPolicy'])->name('privacy');
+
+require __DIR__.'/auth.php';

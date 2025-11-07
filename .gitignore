@@ -1,0 +1,58 @@
+# Laravel
+/.phpunit.cache
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+/vendor
+.env
+.env.backup
+.env.production
+.env.local
+.phpactor.json
+.phpunit.result.cache
+Homestead.json
+Homestead.yaml
+npm-debug.log
+yarn-error.log
+/auth.json
+
+# IDE
+/.fleet
+/.idea
+/.nova
+/.vscode
+/.zed
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Laravel Passport
+/storage/oauth-private.key
+/storage/oauth-public.key
+
+# Logs
+*.log
+/storage/logs/*.log
+
+# Database
+*.sqlite
+*.sqlite-journal
+/database/*.sqlite
+/database/*.sqlite-journal
+
+# Temporary files
+*.tmp
+*.temp
+*.cache
+
+# Build artifacts
+/public/mix-manifest.json
+/public/js/app.js
+/public/css/app.css

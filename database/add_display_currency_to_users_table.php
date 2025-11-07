@@ -1,0 +1,36 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+
+
+Schema::table('users', function (Blueprint $table) {
+    $table->string('display_currency', 3)->default('USD')->after('max_accounts');
+});
+
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+    }
+
+    /**
+     * Get the migration connection name.
+     */
+    public function getConnection(): ?string
+    {
+        return $this->connection ?? config('passport.connection');
+    }
+};
