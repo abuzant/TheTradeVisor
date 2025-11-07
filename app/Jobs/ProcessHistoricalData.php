@@ -200,8 +200,11 @@ class ProcessHistoricalData implements ShouldQueue
             ['started_at' => now()]
         );
 
+        // Convert date format from 2025.09.20 to 2025-09-20
+        $formattedDate = str_replace('.', '-', $historyDate);
+
         $progress->update([
-            'last_day_uploaded' => Carbon::parse($historyDate),
+            'last_day_uploaded' => Carbon::parse($formattedDate),
             'days_processed' => $dayNumber,
         ]);
 
