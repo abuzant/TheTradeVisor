@@ -248,7 +248,7 @@
                                     @foreach($recentDeals as $deal)
                                         <tr>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ $deal->time->format('M d, H:i') }}
+                                                {{ $deal->time ? $deal->time->format('M d, H:i') : 'N/A' }}
                                             </td>
 						<td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
 						    @if($deal->symbol && $deal->symbol !== '' && $deal->symbol !== 'UNKNOWN')
