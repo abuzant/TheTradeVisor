@@ -96,7 +96,8 @@ class ProcessHistoricalData implements ShouldQueue
         $accountHash = $accountData['account_hash'] ?? null;
         $brokerServer = $accountData['server'];
 
-        return TradingAccount::where('user_id', $userId)
+        // Try to find existing account first
+        $tradingAccount = TradingAccount::where('user_id', $userId)
             ->where('broker_server', $brokerServer)
             ->where(function($query) use ($accountNumber, $accountHash) {
                 if ($accountNumber) {
@@ -107,6 +108,27 @@ class ProcessHistoricalData implements ShouldQueue
                 }
             })
             ->first();
+
+        // If not found, create it
+        if (!$tradingAccount) {
+            $tradingAccount = TradingAccount::firstOrCreate(
+                [
+                    'user_id' => $userId,
+                    'broker_server' => $brokerServer,
+                    'account_number' => $accountNumber,
+                    'account_hash' => $accountHash,
+                ],
+                [
+                    'account_uuid' => (string) \Illuminate\Support\Str::uuid(),
+                    'broker_name' => $accountData['broker'] ?? 'Unknown',
+                    'account_name' => $accountData['name'] ?? 'Trading Account',
+                    'account_currency' => $accountData['currency'] ?? 'USD',
+                    'leverage' => $accountData['leverage'] ?? 100,
+                ]
+            );
+        }
+
+        return $tradingAccount;
     }
 
     /**
