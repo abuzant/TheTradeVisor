@@ -219,7 +219,7 @@ php artisan test --coverage
 - SQL injection protection via Eloquent ORM
 - XSS protection via Blade templating
 
-If you discover any security vulnerabilities, please email security@yourdomain.com.
+If you discover any security vulnerabilities, please email hello@thetradevisor.com.
 
 ## 📝 License
 
@@ -237,7 +237,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 👥 Support
 
-For support, email support@yourdomain.com or open an issue in the GitHub repository.
+For support, email hello@thetradevisor.com or visit https://thetradevisor.com/
 
 ## 🙏 Acknowledgments
 

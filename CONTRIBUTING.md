@@ -304,8 +304,9 @@ We especially welcome contributions in:
 
 - **General questions**: Open a GitHub Discussion
 - **Bug reports**: Create an issue
-- **Security issues**: Email security@yourdomain.com
+- **Security issues**: Email hello@thetradevisor.com
 - **Feature requests**: Create an issue with [Feature Request] tag
+- **Website**: https://thetradevisor.com/
 
 ## 📜 License
 
