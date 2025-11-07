@@ -111,6 +111,13 @@ class ProcessHistoricalData implements ShouldQueue
 
         // If not found, create it
         if (!$tradingAccount) {
+            // Extract broker name from server if not provided
+            $brokerName = $accountData['broker'] ?? $accountData['broker_name'] ?? null;
+            if (!$brokerName && $brokerServer) {
+                // Try to extract from server name (e.g., "ICMarkets-Live" -> "ICMarkets")
+                $brokerName = explode('-', $brokerServer)[0];
+            }
+            
             $tradingAccount = TradingAccount::firstOrCreate(
                 [
                     'user_id' => $userId,
@@ -120,9 +127,9 @@ class ProcessHistoricalData implements ShouldQueue
                 ],
                 [
                     'account_uuid' => (string) \Illuminate\Support\Str::uuid(),
-                    'broker_name' => $accountData['broker'] ?? 'Unknown',
-                    'account_name' => $accountData['name'] ?? 'Trading Account',
-                    'account_currency' => $accountData['currency'] ?? 'USD',
+                    'broker_name' => $brokerName ?: 'Unknown Broker',
+                    'account_name' => $accountData['name'] ?? $accountData['account_name'] ?? 'Trading Account',
+                    'account_currency' => $accountData['currency'] ?? $accountData['account_currency'] ?? 'USD',
                     'leverage' => $accountData['leverage'] ?? 100,
                 ]
             );
