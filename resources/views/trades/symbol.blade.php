@@ -209,7 +209,7 @@
                         </div>
                         <div class="flex justify-between py-2 border-b">
                             <span class="text-sm text-gray-600">Active Days:</span>
-                            <span class="text-sm font-semibold text-gray-900">{{ $stats['trading_days'] }} days</span>
+                            <span class="text-sm font-semibold text-gray-900">{{ number_format($stats['trading_days'], 1) }} days</span>
                         </div>
                         <div class="flex justify-between py-2 border-b">
                             <span class="text-sm text-gray-600">Avg/Day:</span>
@@ -281,15 +281,27 @@
             </div>
 
             <!-- Complete Trade History -->
-            <div class="bg-white overflow-hidden shadow rounded-lg">
+            <div class="bg-white overflow-hidden shadow rounded-lg" x-data="{ showCommission: false, showSwap: false }">
                 <div class="px-6 py-5 border-b border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-900 flex items-center">
-                        <svg class="w-6 h-6 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
-                        </svg>
-                        Complete Trade History
-                        <span class="ml-3 px-3 py-1 text-sm bg-indigo-100 text-indigo-800 rounded-full">{{ number_format($stats['total_trades']) }} Trades</span>
-                    </h3>
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-semibold text-gray-900 flex items-center">
+                            <svg class="w-6 h-6 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                            </svg>
+                            Complete Trade History
+                            <span class="ml-3 px-3 py-1 text-sm bg-indigo-100 text-indigo-800 rounded-full">{{ number_format($stats['total_trades']) }} Trades</span>
+                        </h3>
+                        <div class="flex gap-4">
+                            <label class="flex items-center cursor-pointer">
+                                <input type="checkbox" x-model="showCommission" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                <span class="ml-2 text-sm text-gray-700">Show Commission</span>
+                            </label>
+                            <label class="flex items-center cursor-pointer">
+                                <input type="checkbox" x-model="showSwap" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                                <span class="ml-2 text-sm text-gray-700">Show Swap</span>
+                            </label>
+                        </div>
+                    </div>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
@@ -297,31 +309,32 @@
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ticket</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Account</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Symbol</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Volume</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Entry Price</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Commission</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Swap</th>
+                                <th x-show="showCommission" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Commission</th>
+                                <th x-show="showSwap" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Swap</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Net P&L</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
                             @forelse($deals as $deal)
                                 <tr class="hover:bg-gray-50 transition duration-150">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
-                                        #{{ $deal->ticket }}
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-mono">
+                                        <div class="text-gray-900 font-semibold">#{{ $deal->ticket }}</div>
+                                        @if($deal->tradingAccount)
+                                            <div class="text-xs text-gray-500 mt-1">
+                                                {{ explode(' ', $deal->tradingAccount->broker_name)[0] }}
+                                            </div>
+                                        @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         <div>{{ $deal->time ? $deal->time->format('M d, Y') : 'N/A' }}</div>
                                         <div class="text-xs text-gray-500">{{ $deal->time ? $deal->time->format('H:i:s') : '' }}</div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                                        @if($deal->tradingAccount)
-                                            <x-broker-name :broker="$deal->tradingAccount->broker_name" class="text-indigo-600 hover:text-indigo-900" />
-                                        @else
-                                            N/A
-                                        @endif
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <span class="font-semibold text-indigo-600">{{ strtoupper($deal->symbol) }}</span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
                                         <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ str_contains(strtolower($deal->type), 'buy') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
@@ -332,12 +345,12 @@
                                         {{ number_format($deal->volume, 2) }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-mono">
-                                        {{ $display_currency }} {{ number_format($deal->price, 5) }}
+                                        {{ number_format($deal->price, 5) }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-red-600">
+                                    <td x-show="showCommission" class="px-6 py-4 whitespace-nowrap text-sm text-red-600">
                                         {{ $display_currency }} {{ number_format(abs($deal->commission), 2) }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium {{ $deal->swap >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                                    <td x-show="showSwap" class="px-6 py-4 whitespace-nowrap text-sm font-medium {{ $deal->swap >= 0 ? 'text-green-600' : 'text-red-600' }}">
                                         {{ $display_currency }} {{ number_format($deal->swap, 2) }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
@@ -348,7 +361,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="9" class="px-6 py-12 text-center">
+                                    <td colspan="7" class="px-6 py-12 text-center">
                                         <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                         </svg>
