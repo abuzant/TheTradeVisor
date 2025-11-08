@@ -142,3 +142,13 @@ Route::get('/terms', [App\Http\Controllers\LegalController::class, 'termsOfServi
 Route::get('/privacy', [App\Http\Controllers\LegalController::class, 'privacyPolicy'])->name('privacy');
 
 require __DIR__.'/auth.php';
+
+Route::get('/debug-session', function() {
+    return [
+        'session_id' => session()->getId(),
+        'csrf_token' => csrf_token(),
+        'session_driver' => config('session.driver'),
+        'session_data' => session()->all(),
+        'cookies' => request()->cookies->all(),
+    ];
+})->middleware('web');

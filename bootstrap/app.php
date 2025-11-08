@@ -15,6 +15,11 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
 
+        // TEMPORARILY DISABLE CSRF FOR DEBUGGING
+        $middleware->validateCsrfTokens(except: [
+            '*'
+        ]);
+
         //
 		    $middleware->alias([
 		        'api.key' => \App\Http\Middleware\ValidateApiKey::class,
