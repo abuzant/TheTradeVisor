@@ -23,6 +23,24 @@
                 </div>
             @endif
 
+            <!-- Info Notice -->
+            <div class="mb-6 bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
+                <div class="flex">
+                    <div class="flex-shrink-0">
+                        <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm text-blue-700">
+                            <strong>📊 IN</strong> = Position opening (profit is $0.00) • 
+                            <strong>✅ OUT</strong> = Position closing (actual profit shown) • 
+                            <span class="px-2 py-1 bg-blue-100 rounded">Blue rows</span> = Open positions (IN entries)
+                        </p>
+                    </div>
+                </div>
+            </div>
+
             <!-- Stats Cards -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
@@ -203,7 +221,7 @@
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @forelse($deals as $deal)
-                                    <tr class="hover:bg-gray-50">
+                                    <tr class="hover:bg-gray-50 {{ $deal->entry === 'in' ? 'bg-blue-50' : '' }}">
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {{ $deal->ticket }}
                                         </td>
@@ -247,6 +265,15 @@
                                                    'bg-gray-100 text-gray-800') }}">
                                                 {{ strtoupper($deal->type) }}
                                             </span>
+                                            @if($deal->entry === 'in')
+                                                <span class="ml-1 px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800" title="Position Opening">
+                                                    📊 IN
+                                                </span>
+                                            @elseif($deal->entry === 'out')
+                                                <span class="ml-1 px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800" title="Position Closing">
+                                                    ✅ OUT
+                                                </span>
+                                            @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                             {{ number_format($deal->volume, 2) }}
