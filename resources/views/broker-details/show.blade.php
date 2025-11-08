@@ -187,7 +187,7 @@
             data: {
                 labels: profitData.map(d => d.date),
                 datasets: [{
-                    label: 'Daily Profit ({{ $displayCurrency }})',
+                    label: 'Daily Profit',
                     data: profitData.map(d => parseFloat(d.profit)),
                     borderColor: 'rgb(99, 102, 241)',
                     backgroundColor: 'rgba(99, 102, 241, 0.1)',
@@ -209,7 +209,7 @@
                         beginAtZero: true,
                         ticks: {
                             callback: function(value) {
-                                return '{{ $displayCurrency }} ' + value.toFixed(2);
+                                return value.toFixed(2);
                             }
                         }
                     }
