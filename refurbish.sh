@@ -24,10 +24,10 @@ php artisan event:clear
 echo "✓ Laravel caches cleared"
 echo ""
 
-# Redis Cache
-echo "🔴 Flushing Redis cache..."
-redis-cli FLUSHDB
-echo "✓ Redis cache flushed"
+# Redis Cache (only DB 1, preserve sessions in DB 2)
+echo "🔴 Flushing Redis cache (DB 1 only)..."
+redis-cli -n 1 FLUSHDB
+echo "✓ Redis cache flushed (sessions preserved)"
 echo ""
 
 # Nginx FastCGI Cache
