@@ -58,5 +58,9 @@ Thumbs.db
 /public/css/app.css
 # EA Source Code - Keep Private
 TheTradeVisor_v2.mq5
+TheTradeVisor_MT4.mq4
+TheTradeVisor_MT5.mq5
+*.mq4
 *.mq5
+*.ex4
 *.ex5

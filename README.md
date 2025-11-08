@@ -24,6 +24,7 @@ A comprehensive, production-ready trading analytics platform built with Laravel 
 ## ✨ Core Features
 
 ### 📈 Trading & Analytics
+- **Multi-Platform Support** - Full support for both MT4 and MT5 trading platforms
 - **Multi-Account Management** - Connect and manage unlimited MT4/MT5 trading accounts
 - **Advanced Performance Analytics** - Real-time performance metrics with 80-90% cache hit rate
 - **GeoIP Country Analytics** - Location-based trading insights powered by MaxMind GeoLite2
