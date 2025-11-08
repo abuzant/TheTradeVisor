@@ -6,6 +6,7 @@ use App\Models\Deal;
 use App\Models\TradingAccount;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use Carbon\Carbon;
 
 class PerformanceMetricsService
@@ -26,16 +27,22 @@ class PerformanceMetricsService
             $accountIds = [$accountIds];
         }
 
-        return [
-            'trade_analysis' => $this->getTradeAnalysis($accountIds, $days, $displayCurrency),
-            'symbol_performance' => $this->getSymbolPerformance($accountIds, $days, $displayCurrency),
-            'timing_analysis' => $this->getTimingAnalysis($accountIds, $days, $displayCurrency),
-            'risk_metrics' => $this->getRiskMetrics($accountIds, $days, $displayCurrency),
-            'streaks' => $this->getStreakAnalysis($accountIds, $days),
-            'equity_curve' => $this->getEquityCurve($accountIds, $days, $displayCurrency),
-            'drawdown' => $this->getDrawdownAnalysis($accountIds, $days, $displayCurrency),
-            'display_currency' => $displayCurrency,
-        ];
+        // Create cache key from account IDs, days, and currency
+        $cacheKey = 'performance.' . md5(implode(',', $accountIds)) . ".{$days}.{$displayCurrency}";
+
+        // Cache for 5 minutes (heavy calculations)
+        return Cache::remember($cacheKey, 300, function() use ($accountIds, $days, $displayCurrency) {
+            return [
+                'trade_analysis' => $this->getTradeAnalysis($accountIds, $days, $displayCurrency),
+                'symbol_performance' => $this->getSymbolPerformance($accountIds, $days, $displayCurrency),
+                'timing_analysis' => $this->getTimingAnalysis($accountIds, $days, $displayCurrency),
+                'risk_metrics' => $this->getRiskMetrics($accountIds, $days, $displayCurrency),
+                'streaks' => $this->getStreakAnalysis($accountIds, $days),
+                'equity_curve' => $this->getEquityCurve($accountIds, $days, $displayCurrency),
+                'drawdown' => $this->getDrawdownAnalysis($accountIds, $days, $displayCurrency),
+                'display_currency' => $displayCurrency,
+            ];
+        });
     }
 
     /**

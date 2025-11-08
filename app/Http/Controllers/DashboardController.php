@@ -8,6 +8,7 @@ use App\Models\Position;
 use App\Models\Order;
 use App\Models\Deal;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use App\Traits\Sortable;
 
 
@@ -19,100 +20,137 @@ class DashboardController extends Controller
     {
         $user = $request->user();
         $displayCurrency = $user->display_currency;
-
-        // Define sortable columns for user's accounts
-        $sortableColumns = [
-            'broker_name',
-            'account_number',
-            'balance',
-            'equity',
-            'profit',
-            'last_sync_at',
-            'created_at'
-        ];
-
-        // Build accounts query
-        $accountsQuery = $user->tradingAccounts()
-            ->with(['openPositions', 'activeOrders']);
-
-        // Apply sorting if requested
-        if ($request->has('sort_by')) {
-            $accountsQuery = $this->applySorting($accountsQuery, $request, $sortableColumns, 'last_sync_at', 'desc');
-        } else {
-            // Default sorting
-            $accountsQuery->orderBy('last_sync_at', 'desc');
-        }
-
-        // Get accounts
-        $accounts = $accountsQuery->get();
-
-        // Calculate totals across all accounts
-        $totals = [
-            'accounts' => $accounts->count(),
-            'total_balance' => $accounts->sum(function($account) use ($displayCurrency) {
-                return $account->getBalanceInCurrency($displayCurrency);
-            }),
-            'total_equity' => $accounts->sum(function($account) use ($displayCurrency) {
-                return $account->getEquityInCurrency($displayCurrency);
-            }),
-            'total_profit' => $accounts->sum(function($account) use ($displayCurrency) {
-                return $account->getProfitInCurrency($displayCurrency);
-            }),
-            'display_currency' => $displayCurrency,
-            'open_positions' => $accounts->sum(function($acc) {
-                return $acc->openPositions->count();
-            }),
-            'pending_orders' => $accounts->sum(function($acc) {
-                return $acc->activeOrders->count();
-            }),
-        ];
-
-        // Get recent activity with pagination
-        $recentDeals = Deal::whereIn('trading_account_id', $accounts->pluck('id'))
-            ->tradesOnly()  // This now handles NULL deal_category
-            ->with('tradingAccount')
-            ->orderBy('time', 'desc')
-            ->paginate(20);
-
-
-        // Get account limit info
-        $accountLimit = $user->getAccountLimitInfo();
-
-        // Get sort parameters for view
         $sortBy = $request->get('sort_by', 'last_sync_at');
         $sortDirection = $request->get('sort_direction', 'desc');
 
-        //    ChartsData
-        $accountsChartData = $this->prepareAccountsChartData($accounts, $displayCurrency);
+        // Cache key unique to user, currency, and sorting
+        $cacheKey = "dashboard.user.{$user->id}.{$displayCurrency}.{$sortBy}.{$sortDirection}";
 
-        return view('dashboard', compact(
-            'user',
-            'accounts',
-            'totals',
-            'recentDeals',
-            'accountLimit',
-            'sortBy',
-            'sortDirection',
-        'accountsChartData'
-        ));
+        // Cache for 2 minutes (balance changes frequently)
+        $dashboardData = Cache::remember($cacheKey, 120, function() use ($user, $displayCurrency, $request, $sortBy, $sortDirection) {
+            // Define sortable columns for user's accounts
+            $sortableColumns = [
+                'broker_name',
+                'account_number',
+                'balance',
+                'equity',
+                'profit',
+                'last_sync_at',
+                'created_at'
+            ];
+
+            // Build accounts query
+            $accountsQuery = $user->tradingAccounts()
+                ->with(['openPositions', 'activeOrders']);
+
+            // Apply sorting if requested
+            if ($request->has('sort_by')) {
+                $accountsQuery = $this->applySorting($accountsQuery, $request, $sortableColumns, 'last_sync_at', 'desc');
+            } else {
+                // Default sorting
+                $accountsQuery->orderBy('last_sync_at', 'desc');
+            }
+
+            // Get accounts
+            $accounts = $accountsQuery->get();
+
+            // Calculate totals across all accounts
+            $totals = [
+                'accounts' => $accounts->count(),
+                'total_balance' => $accounts->sum(function($account) use ($displayCurrency) {
+                    return $account->getBalanceInCurrency($displayCurrency);
+                }),
+                'total_equity' => $accounts->sum(function($account) use ($displayCurrency) {
+                    return $account->getEquityInCurrency($displayCurrency);
+                }),
+                'total_profit' => $accounts->sum(function($account) use ($displayCurrency) {
+                    return $account->getProfitInCurrency($displayCurrency);
+                }),
+                'display_currency' => $displayCurrency,
+                'open_positions' => $accounts->sum(function($acc) {
+                    return $acc->openPositions->count();
+                }),
+                'pending_orders' => $accounts->sum(function($acc) {
+                    return $acc->activeOrders->count();
+                }),
+            ];
+
+            // Charts Data
+            $accountsChartData = $this->prepareAccountsChartData($accounts, $displayCurrency);
+
+            return [
+                'accounts' => $accounts,
+                'totals' => $totals,
+                'accountsChartData' => $accountsChartData,
+            ];
+        });
+
+        // Recent deals - cache separately (1 minute, updates more frequently)
+        $recentDeals = Cache::remember("dashboard.deals.{$user->id}", 60, function() use ($user) {
+            $accountIds = $user->tradingAccounts()->pluck('id');
+            if ($accountIds->isEmpty()) {
+                return collect();
+            }
+            
+            return Deal::whereIn('trading_account_id', $accountIds)
+                ->tradesOnly()
+                ->with('tradingAccount')
+                ->orderBy('time', 'desc')
+                ->limit(20)
+                ->get();
+        });
+
+        // Get account limit info (not cached, lightweight)
+        $accountLimit = $user->getAccountLimitInfo();
+
+        return view('dashboard', array_merge($dashboardData, [
+            'user' => $user,
+            'recentDeals' => $recentDeals,
+            'accountLimit' => $accountLimit,
+            'sortBy' => $sortBy,
+            'sortDirection' => $sortDirection,
+        ]));
     }
 
     public function account(Request $request, $accountId)
     {
         $user = $request->user();
+        $sortBy = $request->get('sort_by', 'time');
+        $sortDirection = $request->get('sort_direction', 'desc');
 
-        // Get specific account (ensure it belongs to user)
-        $account = TradingAccount::where('id', $accountId)
-            ->where('user_id', $user->id)
-            ->with(['openPositions', 'activeOrders'])
-            ->firstOrFail();
+        // Cache key for account details
+        $cacheKey = "account.{$accountId}.details.{$sortBy}.{$sortDirection}";
 
+        // Cache for 2 minutes
+        $accountData = Cache::remember($cacheKey, 120, function() use ($accountId, $user, $request, $sortBy, $sortDirection) {
+            // Get specific account (ensure it belongs to user)
+            $account = TradingAccount::where('id', $accountId)
+                ->where('user_id', $user->id)
+                ->with(['openPositions', 'activeOrders'])
+                ->firstOrFail();
+
+            // Calculate statistics
+            $stats = $this->calculateAccountStats($account);
+
+            // Prepare chart data
+            $chartData = $this->prepareChartData($account);
+
+            return [
+                'account' => $account,
+                'stats' => $stats,
+                'chartData' => $chartData,
+            ];
+        });
+
+        // Deals query - not cached due to pagination
+        $account = $accountData['account'];
+        
         // Define sortable columns for deals
         $sortableColumns = ['time', 'symbol', 'type', 'volume', 'price', 'profit'];
 
         // Get deals for this account (last 30 days)
         $dealsQuery = $account->deals()
-            ->tradesOnly()  // Use the scope - handles NULL deal_category
+            ->tradesOnly()
             ->where('time', '>=', now()->subDays(30));
 
         // Apply sorting
@@ -124,17 +162,11 @@ class DashboardController extends Controller
 
         $deals = $dealsQuery->paginate(50)->withQueryString();
 
-        // Get sort parameters for view
-        $sortBy = $request->get('sort_by', 'time');
-        $sortDirection = $request->get('sort_direction', 'desc');
-
-        // Calculate statistics
-        $stats = $this->calculateAccountStats($account);
-
-        // Prepare chart data
-        $chartData = $this->prepareChartData($account);
-
-        return view('account.show', compact('account', 'deals', 'stats', 'chartData', 'sortBy', 'sortDirection'));
+        return view('account.show', array_merge($accountData, [
+            'deals' => $deals,
+            'sortBy' => $sortBy,
+            'sortDirection' => $sortDirection,
+        ]));
     }
 
     private function prepareChartData($account)

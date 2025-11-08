@@ -9,6 +9,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use App\Models\TradingAccount;
 use App\Models\Deal;
 use App\Models\HistoryUploadProgress;
@@ -64,6 +65,9 @@ class ProcessHistoricalData implements ShouldQueue
             }
 
             DB::commit();
+
+            // Clear user-specific caches after successful processing
+            $this->clearUserCache($userId, $tradingAccount->id);
 
             Log::info('Successfully processed historical data', [
                 'trading_account_id' => $tradingAccount->id,
@@ -247,6 +251,37 @@ class ProcessHistoricalData implements ShouldQueue
                 'error' => $e->getMessage()
             ]);
             return null;
+        }
+    }
+
+    /**
+     * Clear user-specific caches after processing new data
+     */
+    protected function clearUserCache($userId, $accountId)
+    {
+        try {
+            // Clear dashboard caches
+            Cache::forget("dashboard.user.{$userId}.*");
+            Cache::forget("dashboard.deals.{$userId}");
+            
+            // Clear account detail caches
+            Cache::forget("account.{$accountId}.details.*");
+            
+            // Clear performance caches
+            $accountIds = TradingAccount::where('user_id', $userId)->pluck('id')->toArray();
+            $perfKey = 'performance.' . md5(implode(',', $accountIds)) . ".*";
+            Cache::forget($perfKey);
+            
+            // Clear broker analytics (global cache)
+            Cache::forget("broker_analytics_*");
+            
+            Log::debug('Cache cleared for user (historical)', ['user_id' => $userId, 'account_id' => $accountId]);
+        } catch (\Exception $e) {
+            // Don't fail the job if cache clearing fails
+            Log::warning('Failed to clear cache', [
+                'user_id' => $userId,
+                'error' => $e->getMessage()
+            ]);
         }
     }
 }
