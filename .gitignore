@@ -56,3 +56,7 @@ Thumbs.db
 /public/mix-manifest.json
 /public/js/app.js
 /public/css/app.css
+# EA Source Code - Keep Private
+TheTradeVisor_v2.mq5
+*.mq5
+*.ex5
