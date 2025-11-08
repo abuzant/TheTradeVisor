@@ -119,5 +119,53 @@ class Deal extends Model
         return $query->where('deal_category', 'balance');
     }
 
+    /**
+     * Get the appropriate number of decimal places for price display
+     * based on the symbol type
+     */
+    public function getPriceDecimalsAttribute()
+    {
+        $symbol = strtoupper($this->normalized_symbol ?? $this->symbol ?? '');
+        
+        // Crypto currencies - 2 decimals (high value)
+        if (str_contains($symbol, 'BTC') || str_contains($symbol, 'ETH')) {
+            return 2;
+        }
+        
+        // Gold/Silver/Metals - 2 decimals
+        if (str_contains($symbol, 'XAU') || str_contains($symbol, 'XAG') || 
+            str_contains($symbol, 'GOLD') || str_contains($symbol, 'SILVER')) {
+            return 2;
+        }
+        
+        // Indices - 2 decimals
+        if (str_contains($symbol, 'US30') || str_contains($symbol, 'NAS100') || 
+            str_contains($symbol, 'SPX') || str_contains($symbol, 'DAX') ||
+            str_contains($symbol, 'FTSE')) {
+            return 2;
+        }
+        
+        // JPY pairs - 3 decimals (e.g., 110.123)
+        if (str_contains($symbol, 'JPY')) {
+            return 3;
+        }
+        
+        // Exotic pairs and stocks - check if price is large
+        if ($this->price > 100) {
+            return 2; // Large numbers don't need 5 decimals
+        }
+        
+        // Standard forex pairs - 5 decimals (e.g., 1.31683)
+        return 5;
+    }
+
+    /**
+     * Get formatted price with appropriate decimals
+     */
+    public function getFormattedPriceAttribute()
+    {
+        return number_format($this->price, $this->price_decimals);
+    }
+
 
 }
