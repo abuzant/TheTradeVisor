@@ -60,11 +60,18 @@ cd /var/www
 sudo git clone git@github.com:yourusername/TheTradeVisor.git
 cd TheTradeVisor
 
-# Set permissions
+# Set permissions (IMPORTANT: Prevents 500 errors)
 sudo chown -R www-data:www-data /var/www/TheTradeVisor
 sudo chmod -R 755 /var/www/TheTradeVisor
 sudo chmod -R 775 /var/www/TheTradeVisor/storage
 sudo chmod -R 775 /var/www/TheTradeVisor/bootstrap/cache
+
+# Set setgid bit so new files inherit www-data group
+sudo find /var/www/TheTradeVisor/storage -type d -exec chmod 2775 {} \;
+sudo find /var/www/TheTradeVisor/bootstrap/cache -type d -exec chmod 2775 {} \;
+
+# Add deployment user to www-data group (if using different user)
+sudo usermod -a -G www-data $USER
 
 # Install dependencies
 composer install --no-dev --optimize-autoloader
