@@ -94,7 +94,9 @@ class BrokerDetailsController extends Controller
         // Account servers
         $servers = $userAccounts->pluck('broker_server')->unique()->filter()->values();
 
-        $displayCurrency = $user->display_currency ?? 'USD';
+        // Use the first account's currency as display currency
+        // (or user preference if all accounts have same currency)
+        $displayCurrency = $userAccounts->first()->account_currency ?? $user->display_currency ?? 'USD';
 
         return view('broker-details.show', compact(
             'broker',
