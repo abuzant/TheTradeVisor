@@ -46,8 +46,8 @@ class Position extends Model
         'magic' => 'integer',
         'identifier' => 'integer',
         'is_open' => 'boolean',
-        // 'open_time' => 'datetime',
-        // 'update_time' => 'datetime',
+        'open_time' => 'datetime',
+        'update_time' => 'datetime',
     ];
 
     protected $appends = ['normalized_symbol', 'open_time_human'];

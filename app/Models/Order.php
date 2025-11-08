@@ -52,9 +52,9 @@ class Order extends Model
         'position_by_id' => 'integer',
         'magic' => 'integer',
         'is_active' => 'boolean',
-        // 'time_setup' => 'datetime',
-        // 'time_done' => 'datetime',
-        // 'expiration' => 'datetime',
+        'time_setup' => 'datetime',
+        'time_done' => 'datetime',
+        'expiration' => 'datetime',
     ];
 
     public function tradingAccount()

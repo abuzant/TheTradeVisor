@@ -44,7 +44,7 @@ class Deal extends Model
         'fee' => 'decimal:2',
         'time_msc' => 'integer',
         'magic' => 'integer',
-        //  'time' => 'datetime',
+        'time' => 'datetime',
     ];
 
 
