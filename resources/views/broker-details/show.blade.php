@@ -181,13 +181,13 @@
                                         {{ $account->broker_server ?? 'N/A' }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {{ $displayCurrency }} {{ number_format($account->balance, 2) }}
+                                        {{ $account->account_currency }} {{ number_format($account->balance, 2) }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {{ $displayCurrency }} {{ number_format($account->equity, 2) }}
+                                        {{ $account->account_currency }} {{ number_format($account->equity, 2) }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium {{ $account->profit >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                        {{ $displayCurrency }} {{ number_format($account->profit, 2) }}
+                                        {{ $account->account_currency }} {{ number_format($account->profit, 2) }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @if($account->is_active)
