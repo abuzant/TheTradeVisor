@@ -306,7 +306,7 @@ class ProcessTradingData implements ShouldQueue
                         'swap' => $dealData['swap'] ?? 0,
                         'commission' => $dealData['commission'] ?? 0,
                         'fee' => $dealData['fee'] ?? 0,
-                        'time' => $this->parseDateTime($dealData['time']),
+                        'time' => $this->parseDateTime($dealData['time'] ?? null),
                         'time_msc' => $dealData['time_msc'] ?? null,
                         'magic' => $dealData['magic'] ?? 0,
                     ]);
