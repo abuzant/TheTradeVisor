@@ -70,6 +70,10 @@
                                         {{ __('Rate Limits') }}
                                     </x-dropdown-link>
 
+                                    <x-dropdown-link href="/horizon" target="_blank">
+                                        {{ __('Queue Monitor (Horizon)') }}
+                                    </x-dropdown-link>
+
 					<x-dropdown-link :href="route('settings.currency')">
 					    {{ __('Currency Settings') }}
 					</x-dropdown-link>

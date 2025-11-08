@@ -11,6 +11,7 @@ class LogViewerController extends Controller
     private $logPaths = [
         'laravel' => '/var/www/thetradevisor.com/storage/logs/laravel.log',
         'worker' => '/var/www/thetradevisor.com/storage/logs/worker.log',
+        'horizon' => '/var/www/thetradevisor.com/storage/logs/horizon.log',
         'nginx_access' => '/var/log/nginx/thetradevisor-access.log',
         'nginx_error' => '/var/log/nginx/thetradevisor-error.log',
         'nginx_api_access' => '/var/log/nginx/api-thetradevisor-access.log',
