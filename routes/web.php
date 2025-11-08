@@ -104,6 +104,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/accounts', [App\Http\Controllers\Admin\AccountManagementController::class, 'index'])->name('accounts.index');
     Route::post('/accounts/{account}/pause', [App\Http\Controllers\Admin\AccountManagementController::class, 'pause'])->name('accounts.pause');
     Route::post('/accounts/{account}/unpause', [App\Http\Controllers\Admin\AccountManagementController::class, 'unpause'])->name('accounts.unpause');
+    Route::delete('/accounts/{account}/reset', [App\Http\Controllers\Admin\AccountManagementController::class, 'reset'])->name('accounts.reset');
 
     Route::get('/plans', function() {
         return view('plans');

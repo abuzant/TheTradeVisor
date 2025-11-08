@@ -66,6 +66,10 @@
                                         {{ __('Accounts Management') }}
                                     </x-dropdown-link>
 
+                                    <x-dropdown-link :href="route('admin.rate-limits.index')">
+                                        {{ __('Rate Limits') }}
+                                    </x-dropdown-link>
+
 					<x-dropdown-link :href="route('settings.currency')">
 					    {{ __('Currency Settings') }}
 					</x-dropdown-link>

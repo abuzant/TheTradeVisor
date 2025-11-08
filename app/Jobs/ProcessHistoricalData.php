@@ -145,15 +145,23 @@ class ProcessHistoricalData implements ShouldQueue
     {
         $newDealsCount = 0;
         $duplicatesSkipped = 0;
+        $nonTradingSkipped = 0;
 
         foreach ($deals as $dealData) {
+            // Skip deals without symbols (admin fees, balance operations, etc.)
+            if (empty($dealData['symbol']) || trim($dealData['symbol']) === '') {
+                $nonTradingSkipped++;
+                continue;
+            }
+
             // Check if deal already exists (avoid duplicates)
             $exists = Deal::where('trading_account_id', $tradingAccount->id)
                 ->where('ticket', $dealData['ticket'])
                 ->exists();
 
             if (!$exists) {
-                Deal::create([
+                try {
+                    Deal::create([
                     'trading_account_id' => $tradingAccount->id,
                     'ticket' => $dealData['ticket'],
                     'order_id' => $dealData['order'] ?? null,
@@ -175,7 +183,13 @@ class ProcessHistoricalData implements ShouldQueue
                     'magic' => $dealData['magic'] ?? 0,
                 ]);
 
-                $newDealsCount++;
+                    $newDealsCount++;
+                } catch (\Exception $e) {
+                    Log::error('Failed to create historical deal', [
+                        'ticket' => $dealData['ticket'] ?? 'unknown',
+                        'error' => $e->getMessage(),
+                    ]);
+                }
             } else {
                 $duplicatesSkipped++;
             }
@@ -186,6 +200,7 @@ class ProcessHistoricalData implements ShouldQueue
             'history_date' => $historyDate,
             'new_deals' => $newDealsCount,
             'duplicates_skipped' => $duplicatesSkipped,
+            'non_trading_skipped' => $nonTradingSkipped,
             'total_in_batch' => count($deals)
         ]);
     }

@@ -232,6 +232,11 @@
                                                     ⏸️ Pause
                                                 </button>
                                             @endif
+                                            
+                                            <button onclick="openResetModal({{ $account->id }}, '{{ $account->broker_name }}', '{{ $account->account_number }}')"
+                                                    class="text-red-600 hover:text-red-900 font-medium">
+                                                🔄 Reset
+                                            </button>
                                         </td>
                                     </tr>
                                 @empty
@@ -307,6 +312,85 @@
         </div>
     </div>
 
+    {{-- Reset Modal --}}
+    <div id="resetModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" onclick="handleResetModalClick(event)">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white" onclick="event.stopPropagation()">
+            <div class="mt-3">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-medium leading-6 text-red-900">🔄 Reset Account</h3>
+                    <button onclick="closeResetModal()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <form id="resetForm" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    
+                    <div class="mb-4">
+                        <p class="text-sm text-gray-700 mb-2">
+                            You are about to reset account:
+                        </p>
+                        <div class="bg-gray-50 border border-gray-200 rounded-md p-3 mb-3">
+                            <p class="text-sm font-semibold" id="resetAccountInfo"></p>
+                        </div>
+                    </div>
+
+                    <div class="bg-red-50 border border-red-200 rounded-md p-4 mb-4">
+                        <div class="flex">
+                            <div class="flex-shrink-0">
+                                <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <h3 class="text-sm font-medium text-red-800">
+                                    ⚠️ WARNING: This action cannot be undone!
+                                </h3>
+                                <div class="mt-2 text-sm text-red-700">
+                                    <p class="mb-2">This will permanently delete:</p>
+                                    <ul class="list-disc list-inside space-y-1">
+                                        <li>All deals/trades</li>
+                                        <li>All open positions</li>
+                                        <li>All pending orders</li>
+                                        <li>All raw data files</li>
+                                        <li>Account statistics (balance, equity, etc.)</li>
+                                    </ul>
+                                    <p class="mt-2 font-semibold">The account will start fresh as if it was just connected.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="flex items-center">
+                            <input type="checkbox" id="confirmReset" class="rounded border-gray-300 text-red-600 focus:ring-red-500">
+                            <span class="ml-2 text-sm text-gray-700">
+                                I understand this will delete all data for this account
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="flex justify-end space-x-3">
+                        <button type="button"
+                                onclick="closeResetModal()"
+                                class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                            Cancel
+                        </button>
+                        <button type="submit"
+                                id="confirmResetButton"
+                                disabled
+                                class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                            🔄 Reset Account
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     @push('scripts')
     <script>
         function openPauseModal(accountId) {
@@ -328,6 +412,38 @@
                 closePauseModal();
             }
         }
+
+        function openResetModal(accountId, brokerName, accountNumber) {
+            document.getElementById('resetForm').action = '/admin/accounts/' + accountId + '/reset';
+            document.getElementById('resetAccountInfo').textContent = brokerName + ' - Account #' + accountNumber;
+            document.getElementById('resetModal').classList.remove('hidden');
+            document.getElementById('confirmReset').checked = false;
+            document.getElementById('confirmResetButton').disabled = true;
+        }
+
+        function closeResetModal() {
+            document.getElementById('resetModal').classList.add('hidden');
+            document.getElementById('confirmReset').checked = false;
+            document.getElementById('confirmResetButton').disabled = true;
+        }
+
+        function handleResetModalClick(event) {
+            if (event.target.id === 'resetModal') {
+                closeResetModal();
+            }
+        }
+
+        // Enable/disable reset button based on checkbox
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkbox = document.getElementById('confirmReset');
+            const button = document.getElementById('confirmResetButton');
+            
+            if (checkbox && button) {
+                checkbox.addEventListener('change', function() {
+                    button.disabled = !this.checked;
+                });
+            }
+        });
 
         // Close modal on Escape key
         document.addEventListener('keydown', function(event) {

@@ -6,7 +6,12 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\TradingAccount;
 use App\Models\User;
+use App\Models\Deal;
+use App\Models\Position;
+use App\Models\Order;
 use App\Traits\Sortable;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class AccountManagementController extends Controller
 {
@@ -127,5 +132,74 @@ class AccountManagementController extends Controller
         $account->save();
 
         return redirect()->back()->with('success', 'Account resumed successfully.');
+    }
+
+    /**
+     * Reset an account - delete all trading data
+     */
+    public function reset(Request $request, TradingAccount $account)
+    {
+        try {
+            DB::beginTransaction();
+
+            // Store counts for confirmation message
+            $dealsCount = Deal::where('trading_account_id', $account->id)->count();
+            $positionsCount = Position::where('trading_account_id', $account->id)->count();
+            $ordersCount = Order::where('trading_account_id', $account->id)->count();
+
+            // Delete all deals
+            Deal::where('trading_account_id', $account->id)->delete();
+
+            // Delete all positions
+            Position::where('trading_account_id', $account->id)->delete();
+
+            // Delete all orders
+            Order::where('trading_account_id', $account->id)->delete();
+
+            // Delete raw data files for this account
+            $userId = $account->user_id;
+            $accountNumber = $account->account_number;
+            
+            // Try to delete raw data files
+            $rawDataPath = "raw_data/{$userId}";
+            if (Storage::disk('trading_data')->exists($rawDataPath)) {
+                // Get all files in the user's directory
+                $files = Storage::disk('trading_data')->allFiles($rawDataPath);
+                
+                // Filter files that contain this account number
+                foreach ($files as $file) {
+                    if (strpos($file, (string)$accountNumber) !== false) {
+                        Storage::disk('trading_data')->delete($file);
+                    }
+                }
+            }
+
+            // Reset account statistics
+            $account->update([
+                'balance' => 0,
+                'equity' => 0,
+                'margin' => 0,
+                'free_margin' => 0,
+                'margin_level' => 0,
+                'profit' => 0,
+                'last_sync_at' => null,
+            ]);
+
+            DB::commit();
+
+            return redirect()->back()->with('success', 
+                "Account reset successfully. Deleted: {$dealsCount} deals, {$positionsCount} positions, {$ordersCount} orders.");
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            \Log::error('Failed to reset trading account', [
+                'account_id' => $account->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return redirect()->back()->with('error', 'Failed to reset account: ' . $e->getMessage());
+        }
     }
 }
