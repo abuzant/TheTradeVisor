@@ -70,9 +70,19 @@
                                         {{ __('Rate Limits') }}
                                     </x-dropdown-link>
 
+                                    <x-dropdown-link :href="route('admin.circuit-breakers.index')">
+                                        {{ __('Circuit Breakers') }}
+                                    </x-dropdown-link>
+
                                     <x-dropdown-link href="/horizon" target="_blank">
                                         {{ __('Queue Monitor (Horizon)') }}
                                     </x-dropdown-link>
+
+                                    @if(config('telescope.enabled'))
+                                        <x-dropdown-link href="/telescope" target="_blank">
+                                            {{ __('Telescope (Debug)') }}
+                                        </x-dropdown-link>
+                                    @endif
 
 					<x-dropdown-link :href="route('settings.currency')">
 					    {{ __('Currency Settings') }}

@@ -127,6 +127,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::patch('/rate-limits/{setting}/toggle', [App\Http\Controllers\Admin\RateLimitController::class, 'toggle'])->name('rate-limits.toggle');
     Route::post('/rate-limits/clear-cache', [App\Http\Controllers\Admin\RateLimitController::class, 'clearCache'])->name('rate-limits.clear-cache');
     Route::get('/rate-limits/statistics', [App\Http\Controllers\Admin\RateLimitController::class, 'statistics'])->name('rate-limits.statistics');
+    
+    // Circuit Breaker Management
+    Route::get('/circuit-breakers', [App\Http\Controllers\Admin\CircuitBreakerController::class, 'index'])->name('circuit-breakers.index');
+    Route::post('/circuit-breakers/{service}/reset', [App\Http\Controllers\Admin\CircuitBreakerController::class, 'reset'])->name('circuit-breakers.reset');
+    Route::post('/circuit-breakers/reset-all', [App\Http\Controllers\Admin\CircuitBreakerController::class, 'resetAll'])->name('circuit-breakers.reset-all');
 });
 
 // Legal pages (public)
