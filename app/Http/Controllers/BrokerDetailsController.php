@@ -30,13 +30,10 @@ class BrokerDetailsController extends Controller
 
         $accountIds = $userAccounts->pluck('id');
 
-        // Broker statistics
+        // Broker statistics (no aggregation - will show per account)
         $stats = [
             'total_accounts' => $userAccounts->count(),
             'active_accounts' => $userAccounts->where('is_active', true)->count(),
-            'total_balance' => $userAccounts->sum('balance'),
-            'total_equity' => $userAccounts->sum('equity'),
-            'total_profit' => $userAccounts->sum('profit'),
             'open_positions' => Position::whereIn('trading_account_id', $accountIds)
                 ->where('is_open', true)
                 ->count(),
@@ -94,10 +91,6 @@ class BrokerDetailsController extends Controller
         // Account servers
         $servers = $userAccounts->pluck('broker_server')->unique()->filter()->values();
 
-        // Use the first account's currency as display currency
-        // (or user preference if all accounts have same currency)
-        $displayCurrency = $userAccounts->first()->account_currency ?? $user->display_currency ?? 'USD';
-
         return view('broker-details.show', compact(
             'broker',
             'stats',
@@ -105,8 +98,7 @@ class BrokerDetailsController extends Controller
             'dailyProfitTrend',
             'userAccounts',
             'servers',
-            'days',
-            'displayCurrency'
+            'days'
         ));
     }
 }

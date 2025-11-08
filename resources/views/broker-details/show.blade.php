@@ -30,24 +30,12 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
             {{-- Overview Stats --}}
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
 
                 <div class="bg-white rounded-lg shadow p-6">
                     <div class="text-sm text-gray-600">Your Accounts</div>
                     <div class="text-3xl font-bold text-indigo-600 mt-2">{{ $stats['total_accounts'] }}</div>
                     <div class="text-xs text-gray-500 mt-1">{{ $stats['active_accounts'] }} active</div>
-                </div>
-
-                <div class="bg-white rounded-lg shadow p-6">
-                    <div class="text-sm text-gray-600">Total Balance</div>
-                    <div class="text-3xl font-bold text-green-600 mt-2">{{ $displayCurrency }} {{ number_format($stats['total_balance'], 0) }}</div>
-                    <div class="text-xs text-gray-500 mt-1">Across all accounts</div>
-                </div>
-
-                <div class="bg-white rounded-lg shadow p-6">
-                    <div class="text-sm text-gray-600">Total Equity</div>
-                    <div class="text-3xl font-bold text-blue-600 mt-2">{{ $displayCurrency }} {{ number_format($stats['total_equity'], 0) }}</div>
-                    <div class="text-xs text-gray-500 mt-1">Current value</div>
                 </div>
 
                 <div class="bg-white rounded-lg shadow p-6">
@@ -63,20 +51,53 @@
                 </div>
 
                 <div class="bg-white rounded-lg shadow p-6">
-                    <div class="text-sm text-gray-600">Trading Profit</div>
-                    <div class="text-3xl font-bold {{ $stats['trading_profit'] >= 0 ? 'text-green-600' : 'text-red-600' }} mt-2">
-                        {{ $displayCurrency }} {{ number_format($stats['trading_profit'], 2) }}
-                    </div>
-                    <div class="text-xs text-gray-500 mt-1">Last {{ $days }} days</div>
-                </div>
-
-                <div class="bg-white rounded-lg shadow p-6">
                     <div class="text-sm text-gray-600">Win Rate</div>
                     <div class="text-3xl font-bold {{ $stats['win_rate'] >= 50 ? 'text-green-600' : 'text-red-600' }} mt-2">
                         {{ $stats['win_rate'] }}%
                     </div>
                     <div class="text-xs text-gray-500 mt-1">Success rate</div>
                 </div>
+
+            </div>
+
+            {{-- Per-Account Cards --}}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                @foreach($userAccounts as $account)
+                <div class="bg-white rounded-lg shadow p-6 border-l-4 {{ $account->is_active ? 'border-green-500' : 'border-gray-300' }}">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <div class="text-sm text-gray-600">Account</div>
+                            <a href="{{ route('account.show', $account->id) }}" class="text-lg font-bold text-indigo-600 hover:text-indigo-800">
+                                {{ $account->account_number }}
+                            </a>
+                        </div>
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $account->is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
+                            {{ $account->is_active ? 'Active' : 'Inactive' }}
+                        </span>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-600">Balance:</span>
+                            <span class="text-sm font-semibold text-gray-900">{{ $account->account_currency }} {{ number_format($account->balance, 2) }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-600">Equity:</span>
+                            <span class="text-sm font-semibold text-gray-900">{{ $account->account_currency }} {{ number_format($account->equity, 2) }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-sm text-gray-600">Profit:</span>
+                            <span class="text-sm font-semibold {{ $account->profit >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                                {{ $account->account_currency }} {{ number_format($account->profit, 2) }}
+                            </span>
+                        </div>
+                        <div class="flex justify-between pt-2 border-t border-gray-200">
+                            <span class="text-sm text-gray-600">Positions:</span>
+                            <span class="text-sm font-semibold text-gray-900">{{ $account->openPositions->count() }}</span>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
 
                 <div class="bg-white rounded-lg shadow p-6">
                     <div class="text-sm text-gray-600">Total Volume</div>
@@ -126,7 +147,6 @@
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Symbol</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trades</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Volume</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Profit</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
@@ -141,9 +161,6 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {{ number_format($symbol->volume, 2) }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium {{ $symbol->profit >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                        {{ $displayCurrency }} {{ number_format($symbol->profit, 2) }}
-                                    </td>
                                 </tr>
                                 @endforeach
                             </tbody>
@@ -153,60 +170,6 @@
             </div>
             @endif
 
-            {{-- Your Accounts with this Broker --}}
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Your Accounts</h3>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Account</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Server</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Balance</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Equity</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Profit</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @foreach($userAccounts as $account)
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <a href="{{ route('account.show', $account->id) }}" class="text-sm font-medium text-indigo-600 hover:text-indigo-900">
-                                            {{ $account->account_number }}
-                                        </a>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {{ $account->broker_server ?? 'N/A' }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {{ $account->account_currency }} {{ number_format($account->balance, 2) }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {{ $account->account_currency }} {{ number_format($account->equity, 2) }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium {{ $account->profit >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                        {{ $account->account_currency }} {{ number_format($account->profit, 2) }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        @if($account->is_active)
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                            Active
-                                        </span>
-                                        @else
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                                            Inactive
-                                        </span>
-                                        @endif
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
 
         </div>
     </div>
