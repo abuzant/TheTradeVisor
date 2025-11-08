@@ -42,7 +42,17 @@
             <!-- Symbols Table -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Symbol Mappings</h3>
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">Symbol Mappings</h3>
+                        <form method="POST" action="{{ route('admin.symbols.sync') }}" class="inline">
+                            @csrf
+                            <button type="submit" 
+                                    onclick="return confirm('This will scan all deals, positions, and orders to find new symbols. Continue?')"
+                                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                🔄 Sync Symbols from Database
+                            </button>
+                        </form>
+                    </div>
 
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">

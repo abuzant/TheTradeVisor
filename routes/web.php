@@ -118,6 +118,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::put('/symbols/{symbol}', [App\Http\Controllers\Admin\SymbolManagementController::class, 'update'])->name('symbols.update.alt');
     Route::post('/symbols/bulk-normalize', [App\Http\Controllers\Admin\SymbolManagementController::class, 'bulkNormalize'])->name('symbols.bulk-normalize');
     Route::post('/symbols/auto-normalize', [App\Http\Controllers\Admin\SymbolManagementController::class, 'autoNormalize'])->name('symbols.auto-normalize');
+    Route::post('/symbols/sync', [App\Http\Controllers\Admin\SymbolManagementController::class, 'syncSymbols'])->name('symbols.sync');
     
     // Rate Limit Management
     Route::get('/rate-limits', [App\Http\Controllers\Admin\RateLimitController::class, 'index'])->name('rate-limits.index');

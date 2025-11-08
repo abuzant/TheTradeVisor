@@ -123,4 +123,67 @@ class SymbolManagementController extends Controller
             ->route('admin.symbols.index')
             ->with('success', $updated . ' symbols auto-normalized');
     }
+    
+    public function syncSymbols(Request $request)
+    {
+        // Get all unique symbols from deals, positions, and orders
+        $dealsSymbols = \DB::table('deals')
+            ->select('symbol')
+            ->distinct()
+            ->whereNotNull('symbol')
+            ->where('symbol', '<>', '')
+            ->pluck('symbol');
+            
+        $positionsSymbols = \DB::table('positions')
+            ->select('symbol')
+            ->distinct()
+            ->whereNotNull('symbol')
+            ->where('symbol', '<>', '')
+            ->pluck('symbol');
+            
+        $ordersSymbols = \DB::table('orders')
+            ->select('symbol')
+            ->distinct()
+            ->whereNotNull('symbol')
+            ->where('symbol', '<>', '')
+            ->pluck('symbol');
+        
+        // Merge and get unique symbols
+        $allSymbols = $dealsSymbols
+            ->merge($positionsSymbols)
+            ->merge($ordersSymbols)
+            ->unique()
+            ->filter()
+            ->values();
+        
+        $created = 0;
+        $skipped = 0;
+        
+        foreach ($allSymbols as $rawSymbol) {
+            // Check if mapping already exists
+            $exists = SymbolMapping::where('raw_symbol', $rawSymbol)->exists();
+            
+            if (!$exists) {
+                // Auto-normalize the symbol
+                $normalized = SymbolMapping::autoNormalize($rawSymbol);
+                
+                SymbolMapping::create([
+                    'raw_symbol' => $rawSymbol,
+                    'normalized_symbol' => $normalized,
+                    'is_verified' => false, // Needs manual verification
+                ]);
+                
+                $created++;
+            } else {
+                $skipped++;
+            }
+        }
+        
+        // Clear cache
+        Cache::flush();
+        
+        return redirect()
+            ->route('admin.symbols.index')
+            ->with('success', "Sync complete: {$created} new symbols added, {$skipped} already existed. Total unique symbols: {$allSymbols->count()}");
+    }
 }
