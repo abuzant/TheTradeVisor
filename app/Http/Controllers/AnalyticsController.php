@@ -133,9 +133,32 @@ class AnalyticsController extends Controller
      */
     private function getRegionalActivity()
     {
-        return TradingAccount::select('detected_country', DB::raw('COUNT(*) as accounts'), DB::raw('SUM(balance) as total_balance'))
+        // Try new country_code field first, fallback to detected_country
+        $query = TradingAccount::where('is_active', true);
+        
+        // Check if we have country_code data
+        $hasCountryCode = TradingAccount::whereNotNull('country_code')->exists();
+        
+        if ($hasCountryCode) {
+            return $query->select('country_code', 'country_name', DB::raw('COUNT(*) as accounts'), DB::raw('SUM(balance) as total_balance'))
+                ->whereNotNull('country_code')
+                ->groupBy('country_code', 'country_name')
+                ->orderBy('accounts', 'desc')
+                ->limit(10)
+                ->get()
+                ->map(function($item) {
+                    return [
+                        'country' => $item->country_name ?? $item->country_code,
+                        'country_code' => $item->country_code,
+                        'accounts' => $item->accounts,
+                        'balance' => round($item->total_balance, 2),
+                    ];
+                });
+        }
+        
+        // Fallback to old detected_country field
+        return $query->select('detected_country', DB::raw('COUNT(*) as accounts'), DB::raw('SUM(balance) as total_balance'))
             ->whereNotNull('detected_country')
-            ->where('is_active', true)
             ->groupBy('detected_country')
             ->orderBy('accounts', 'desc')
             ->limit(10)
@@ -143,6 +166,7 @@ class AnalyticsController extends Controller
             ->map(function($item) {
                 return [
                     'country' => $item->detected_country,
+                    'country_code' => null,
                     'accounts' => $item->accounts,
                     'balance' => round($item->total_balance, 2),
                 ];

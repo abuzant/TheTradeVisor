@@ -22,7 +22,7 @@ class ApiRateLimiter
     public function handle(Request $request, Closure $next): Response
     {
         $ip = $request->ip();
-        $user = $request->user();
+        $user = $request->get('authenticated_user') ?? $request->user();
         $apiKey = $request->bearerToken() ?? $request->input('api_key');
 
         // Check IP-based rate limit first

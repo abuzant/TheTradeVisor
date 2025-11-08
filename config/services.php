@@ -46,4 +46,8 @@ return [
         ],
     ],
 
+    'maxmind' => [
+        'license_key' => env('MAXMIND_LICENSE_KEY'),
+    ],
+
 ];

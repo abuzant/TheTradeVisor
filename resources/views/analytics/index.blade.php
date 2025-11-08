@@ -268,7 +268,15 @@
                 {{-- Regional Activity --}}
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Top Trading Countries</h3>
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900">Top Trading Countries</h3>
+                            @if(count($analytics['regional_activity']) > 0)
+                            <a href="{{ route('analytics.countries') }}" class="text-sm text-indigo-600 hover:text-indigo-800 font-medium">
+                                View Detailed Analytics →
+                            </a>
+                            @endif
+                        </div>
+                        @if(count($analytics['regional_activity']) > 0)
                         <div class="overflow-x-auto">
                             <table class="min-w-full">
                                 <thead class="bg-gray-50">
@@ -281,7 +289,14 @@
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     @foreach($analytics['regional_activity'] as $region)
                                     <tr>
-                                        <td class="px-4 py-2 text-sm font-medium text-gray-900">{{ $region['country'] }}</td>
+                                        <td class="px-4 py-2 text-sm font-medium text-gray-900">
+                                            <div class="flex items-center">
+                                                @if($region['country_code'])
+                                                <span class="mr-2 text-2xl">{{ \App\Helpers\CountryHelper::getFlag($region['country_code']) }}</span>
+                                                @endif
+                                                {{ $region['country'] }}
+                                            </div>
+                                        </td>
                                         <td class="px-4 py-2 text-sm text-gray-500">{{ number_format($region['accounts']) }}</td>
                                         <td class="px-4 py-2 text-sm text-gray-900">{{ $displayCurrency }} {{ number_format($region['balance'], 0) }}</td>
                                     </tr>
@@ -289,6 +304,15 @@
                                 </tbody>
                             </table>
                         </div>
+                        @else
+                        <div class="text-center py-8 text-gray-500">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <p class="mt-2 text-sm">No country data available yet</p>
+                            <p class="mt-1 text-xs text-gray-400">Country tracking will begin with new API requests</p>
+                        </div>
+                        @endif
                     </div>
                 </div>
 

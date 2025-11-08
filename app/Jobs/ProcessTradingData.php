@@ -122,6 +122,9 @@ class ProcessTradingData implements ShouldQueue
             ],
             [
                 'account_uuid' => (string) \Illuminate\Support\Str::uuid(),
+                'broker_name' => $accountData['broker'],
+                'account_currency' => $accountData['currency'],
+                'leverage' => $accountData['leverage'] ?? 1,
             ]
         );
 

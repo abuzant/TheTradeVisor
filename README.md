@@ -219,6 +219,7 @@ php artisan test --coverage
 
 ## 📚 Documentation
 
+- [API Documentation](API_DOCUMENTATION.md) - Complete API reference for MT5 integration
 - [Export and Filter Features](EXPORT_AND_FILTER_FEATURES.md)
 - [User Guide - Exports](USER_GUIDE_EXPORTS.md)
 - [Project Structure](PROJECT_STRUCTURE.md)

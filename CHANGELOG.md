@@ -7,6 +7,40 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2025-11-08
+
+### Added
+- API authentication middleware with enhanced logging
+- API rate limiting with configurable limits per IP and API key
+- User deletion command (`php artisan user:delete`)
+- API key validation command (`php artisan api:check`)
+- API endpoint testing command (`php artisan api:test`)
+- Comprehensive API documentation (API_DOCUMENTATION.md)
+- GeoIP country detection for trading accounts
+- Country analytics dashboard
+- API request logging
+- Duplicate EA instance detection support
+
+### Fixed
+- API rate limiter middleware not finding authenticated user
+- ProcessTradingData job failing on NULL broker_name constraint
+- Empty analytics pages due to stale cache
+- Dashboard showing "N/A" for trade times
+- Log file permission issues
+- Multiple EA instances causing 401 errors with old API keys
+
+### Changed
+- Increased rate limits: IP (60→600 req/min), API key (120→600 req/min)
+- Improved error logging for API key validation failures
+- Enhanced deal time parsing to handle MT5 format (YYYY.MM.DD HH:MM:SS)
+- Updated README with API documentation reference
+
+### Security
+- Added API key prefix logging (first 10 chars only) for security
+- Improved API key validation with inactive user detection
+
+## [1.0.0] - 2025-11-01
+
 ### Added
 - Initial release of TheTradeVisor
 - Trading account management system

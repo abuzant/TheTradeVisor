@@ -19,6 +19,12 @@ class ValidateApiKey
         }
         
         if (!$apiKey) {
+            \Log::warning('API key validation failed: No API key provided', [
+                'ip' => $request->ip(),
+                'url' => $request->fullUrl(),
+                'headers' => $request->headers->all(),
+            ]);
+            
             return response()->json([
                 'success' => false,
                 'error' => 'API key is required',
@@ -32,6 +38,24 @@ class ValidateApiKey
                     ->first();
         
         if (!$user) {
+            // Log the failed attempt with details
+            \Log::warning('API key validation failed: Invalid or inactive API key', [
+                'api_key_prefix' => substr($apiKey, 0, 10) . '...',
+                'api_key_length' => strlen($apiKey),
+                'ip' => $request->ip(),
+                'url' => $request->fullUrl(),
+                'user_agent' => $request->userAgent(),
+            ]);
+            
+            // Check if key exists but user is inactive
+            $inactiveUser = User::where('api_key', $apiKey)->first();
+            if ($inactiveUser && !$inactiveUser->is_active) {
+                \Log::warning('API key belongs to inactive user', [
+                    'user_id' => $inactiveUser->id,
+                    'user_email' => $inactiveUser->email,
+                ]);
+            }
+            
             return response()->json([
                 'success' => false,
                 'error' => 'Invalid API key',

@@ -18,7 +18,7 @@ class TradingAccount extends Model
         'account_hash',
         'broker_name',
         'broker_server',
-    'account_type',
+        'account_type',
         'account_name',
         'account_currency',
         'leverage',
@@ -40,7 +40,11 @@ class TradingAccount extends Model
         'is_paused',        
         'paused_at',        
         'paused_by',        
-        'pause_reason',     
+        'pause_reason',
+        'country_code',
+        'country_name',
+        'last_ip',
+        'last_seen_at',
     ];
 
     protected $casts = [
@@ -55,9 +59,10 @@ class TradingAccount extends Model
         'trade_allowed' => 'boolean',
         'trade_expert' => 'boolean',
         'is_active' => 'boolean',
-        'is_paused' => 'boolean',      // ← ADD THIS
+        'is_paused' => 'boolean',
         'last_sync_at' => 'datetime',
-        'paused_at' => 'datetime',     // ← ADD THIS
+        'paused_at' => 'datetime',
+        'last_seen_at' => 'datetime',
     ];
 
     // Relationships
