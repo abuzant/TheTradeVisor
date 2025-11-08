@@ -54,6 +54,80 @@
                 </div>
             </div>
 
+            {{-- Cache Management Card --}}
+            <div class="bg-gradient-to-r from-purple-500 to-indigo-600 overflow-hidden shadow-lg sm:rounded-lg">
+                <div class="p-6 text-white">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="text-xl font-bold">🧹 Clear All Caches</h3>
+                            <p class="text-sm text-purple-100 mt-1">Laravel • Redis • Nginx • PHP-FPM</p>
+                        </div>
+                    </div>
+                    <p class="text-sm mb-4 text-purple-100">
+                        Clears all application caches, rebuilds optimized caches, and restarts services. 
+                        Equivalent to running <code class="bg-purple-700 px-2 py-1 rounded">./refurbish.sh</code>
+                    </p>
+                    <form method="POST" action="{{ route('admin.services.clear-caches') }}"
+                          onsubmit="return confirm('This will clear ALL caches and restart PHP-FPM. Continue?')">
+                        @csrf
+                        <button type="submit" class="px-6 py-3 bg-white text-purple-600 rounded-md hover:bg-purple-50 font-bold shadow-md">
+                            🚀 Clear All Caches & Rebuild
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            {{-- Horizon Control Card --}}
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">Laravel Horizon (Queue Manager)</h3>
+                        <span class="px-3 py-1 text-xs font-semibold rounded-full {{ $horizonStatus['active'] ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                            {{ $horizonStatus['active'] ? 'Running' : 'Stopped' }}
+                        </span>
+                    </div>
+
+                    <div class="mb-4">
+                        <div class="text-sm text-gray-500">
+                            Status: <span class="font-medium text-gray-900 font-mono text-xs">{{ $horizonStatus['status'] }}</span>
+                        </div>
+                        <div class="text-sm text-gray-500 mt-1">
+                            Service: <span class="font-mono text-xs">supervisor → horizon</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-2">
+                        <form method="POST" action="{{ route('admin.services.horizon', 'start') }}"
+                              onsubmit="return confirm('Start Horizon queue workers?')">
+                            @csrf
+                            <button type="submit" class="w-full px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm font-medium">
+                                ▶️ Start
+                            </button>
+                        </form>
+                        <form method="POST" action="{{ route('admin.services.horizon', 'stop') }}"
+                              onsubmit="return confirm('Stop Horizon? Queued jobs will not be processed.')">
+                            @csrf
+                            <button type="submit" class="w-full px-3 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm font-medium">
+                                ⏹️ Stop
+                            </button>
+                        </form>
+                        <form method="POST" action="{{ route('admin.services.horizon', 'restart') }}"
+                              onsubmit="return confirm('Restart Horizon?')">
+                            @csrf
+                            <button type="submit" class="w-full px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm font-medium">
+                                🔄 Restart
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <div class="mt-4 pt-4 border-t border-gray-200">
+                        <a href="/horizon" target="_blank" class="text-sm text-indigo-600 hover:text-indigo-800 font-medium">
+                            📊 Open Horizon Dashboard →
+                        </a>
+                    </div>
+                </div>
+            </div>
+
             {{-- Services Grid --}}
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 @foreach($serviceStatuses as $serviceName => $service)

@@ -138,7 +138,7 @@
 
             {{-- Open Positions --}}
             @if($account->openPositions->isNotEmpty())
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg"
+            <div class="bg-blue-50 border-2 border-blue-200 overflow-hidden shadow-sm sm:rounded-lg"
                  x-data="{
                      positions: {{ $account->openPositions->toJson() }},
                      sortColumn: 'open_time',
@@ -164,7 +164,14 @@
                      }
                  }">
                 <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Open Positions</h3>
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">
+                            📊 Open Positions <span class="ml-2 px-2 py-1 bg-blue-500 text-white text-xs rounded-full">LIVE</span>
+                        </h3>
+                        <p class="text-xs text-blue-700">
+                            💡 Profit shown is from last sync. Actual P/L may vary with current market prices.
+                        </p>
+                    </div>
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
@@ -238,7 +245,7 @@
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
                                 <template x-for="position in positions" :key="position.id">
-                                    <tr>
+                                    <tr class="bg-blue-50 hover:bg-blue-100 transition-colors">
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                             <a :href="`/trades/symbol/${position.normalized_symbol}`"
                                                class="text-indigo-600 hover:text-indigo-900"

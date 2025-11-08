@@ -86,6 +86,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Service Management
     Route::get('/services', [App\Http\Controllers\Admin\ServiceController::class, 'index'])->name('services');
     Route::post('/services/{service}/restart', [App\Http\Controllers\Admin\ServiceController::class, 'restart'])->name('services.restart');
+    Route::post('/services/horizon/{action}', [App\Http\Controllers\Admin\ServiceController::class, 'horizonControl'])->name('services.horizon');
+    Route::post('/services/clear-all-caches', [App\Http\Controllers\Admin\ServiceController::class, 'clearAllCaches'])->name('services.clear-caches');
 
     // User Management
     Route::get('/users', [App\Http\Controllers\Admin\UserManagementController::class, 'index'])->name('users.index');
