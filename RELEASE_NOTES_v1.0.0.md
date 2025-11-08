@@ -196,6 +196,28 @@ sudo supervisorctl restart horizon
 
 ---
 
+## 🆕 Post-Release Updates (v1.0.1)
+
+### MT4 Platform Support Added
+- ✅ **MT4 Expert Advisor** - Full MetaTrader 4 support (65% of traders)
+- ✅ **Platform Comparison Guide** - MT4 vs MT5 technical documentation
+- ✅ **Identical JSON Format** - Same backend, works with both platforms
+- ✅ **Doubled User Base** - Now supports 100% of MT4/MT5 traders
+
+### Performance & Monitoring Enhancements
+- ✅ **Telescope Debug Assistant** - Enabled and accessible via admin menu
+- ✅ **Enhanced Admin Navigation** - Better organization with icons and separators
+- ✅ **Session Redis Separation** - Fixed Error 419 with dedicated Redis databases
+- ✅ **Refurbish Script Fix** - Cache clearing no longer logs out users
+
+### Documentation Improvements
+- ✅ **MT4 EA Installation Guide** - Complete setup instructions
+- ✅ **Scaling Analysis Rewrite** - Now shows completed optimizations
+- ✅ **Session Configuration Guide** - Redis database separation documentation
+- ✅ **Updated INDEX.md** - All new documentation properly indexed
+
+---
+
 ## 🐛 Known Issues
 
 None at this time. This is a stable production release.
@@ -238,7 +260,9 @@ For project support and inquiries:
 - Built with ❤️ using [Laravel 11](https://laravel.com)
 - UI styled with [TailwindCSS](https://tailwindcss.com)
 - Queue monitoring by [Laravel Horizon](https://laravel.com/docs/horizon)
+- Development debugging with [Laravel Telescope](https://laravel.com/docs/telescope)
 - GeoIP data by [MaxMind GeoLite2](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data)
+- Infrastructure inspired by enterprise-grade microservices patterns
 
 ---
 

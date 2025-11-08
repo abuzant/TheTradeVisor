@@ -25,6 +25,10 @@
 ### API & Integration
 - [API Documentation](reference/API_DOCUMENTATION.md) - Complete MT4/MT5 API reference
 - [Artisan Commands](reference/ARTISAN_COMMANDS.md) - Custom artisan commands reference
+- [MT4 vs MT5 Comparison](reference/MT4_VS_MT5_COMPARISON.md) - Platform comparison and migration guide
+
+### Expert Advisors
+- [MT4 EA Installation Guide](guides/MT4_EA_INSTALLATION.md) - Complete MT4 setup instructions
 
 ---
 
@@ -35,7 +39,8 @@
 - [Deployment Summary](operations/DEPLOYMENT_SUMMARY.md) - Quick deployment reference
 - [Infrastructure Recommendations](operations/INFRASTRUCTURE_RECOMMENDATIONS.md) - Nginx, Circuit Breakers, Monitoring
 - [Monitoring Implementation](operations/MONITORING_IMPLEMENTATION.md) - Complete monitoring setup guide
-- [Scaling Analysis](operations/SCALING_ANALYSIS.md) - Queue and caching optimization
+- [Scaling Analysis](operations/SCALING_ANALYSIS.md) - Performance optimization and scaling
+- [Session Redis Configuration](operations/SESSION_REDIS_CONFIGURATION.md) - Fix Error 419 with Redis session separation
 
 ---
 
