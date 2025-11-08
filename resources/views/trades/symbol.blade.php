@@ -334,7 +334,7 @@
                                         <div class="text-xs text-gray-500">{{ $deal->time ? $deal->time->format('H:i:s') : '' }}</div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                        <span class="font-semibold text-indigo-600">{{ strtoupper($deal->symbol) }}</span>
+                                        <span class="font-semibold text-indigo-600">{{ strtoupper($deal->normalized_symbol) }}</span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
                                         <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ str_contains(strtolower($deal->type), 'buy') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
