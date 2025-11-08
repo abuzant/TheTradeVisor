@@ -7,26 +7,26 @@
 ## 🚀 Quick Start
 
 ### New Users
-1. **[README.md](README.md)** - Start here! Overview, features, and installation
-2. **[Quick Start Guide](docs/quick-start.md)** - Get up and running in 5 minutes
-3. **[Installation Guide](docs/installation.md)** - Detailed installation instructions
+1. **[README.md](../../README.md)** - Start here! Overview, features, and installation
+2. **[Quick Start Guide](../quick-start.md)** - Get up and running in 5 minutes
+3. **[Installation Guide](../installation.md)** - Detailed installation instructions
 
 ### Developers
-1. **[API Documentation](API_DOCUMENTATION.md)** - Complete MT4/MT5 API reference
+1. **[API Documentation](../reference/API_DOCUMENTATION.md)** - Complete MT4/MT5 API reference
 2. **[Project Structure](PROJECT_STRUCTURE.md)** - Codebase organization
-3. **[Architecture Overview](docs/development/architecture.md)** - System architecture
+3. **[Architecture Overview](../development/architecture.md)** - System architecture
 
 ---
 
 ## 📖 User Documentation
 
 ### Core Features
-- **[Export and Filter Features](EXPORT_AND_FILTER_FEATURES.md)** - Data export capabilities (CSV, PDF)
-- **[User Guide - Exports](USER_GUIDE_EXPORTS.md)** - Step-by-step export guide
-- **[GeoIP Analytics](docs/features/geoip-analytics.md)** - Location-based trading insights
+- **[Export and Filter Features](../guides/EXPORT_AND_FILTER_FEATURES.md)** - Data export capabilities (CSV, PDF)
+- **[User Guide - Exports](../guides/USER_GUIDE_EXPORTS.md)** - Step-by-step export guide
+- **[GeoIP Analytics](../features/geoip-analytics.md)** - Location-based trading insights
 
 ### Trading Platform Integration
-- **[API Documentation](API_DOCUMENTATION.md)** - MT4/MT5 integration guide
+- **[API Documentation](../reference/API_DOCUMENTATION.md)** - MT4/MT5 integration guide
   - Authentication
   - Data collection endpoints
   - Historical data import
@@ -38,10 +38,10 @@
 ## 🏗️ Architecture & Infrastructure
 
 ### Performance & Scaling
-- **[Scaling Analysis](SCALING_ANALYSIS.md)** - Queue and caching optimization strategies
-- **[Infrastructure Recommendations](INFRASTRUCTURE_RECOMMENDATIONS.md)** - Nginx, Circuit Breakers, Monitoring
-- **[Monitoring Implementation](MONITORING_IMPLEMENTATION.md)** - Complete monitoring setup guide
-- **[Implementation Summary](IMPLEMENTATION_SUMMARY.md)** - Quick reference for all features
+- **[Scaling Analysis](../operations/SCALING_ANALYSIS.md)** - Queue and caching optimization strategies
+- **[Infrastructure Recommendations](../operations/INFRASTRUCTURE_RECOMMENDATIONS.md)** - Nginx, Circuit Breakers, Monitoring
+- **[Monitoring Implementation](../operations/MONITORING_IMPLEMENTATION.md)** - Complete monitoring setup guide
+- **[Implementation Summary](../changelog/IMPLEMENTATION_SUMMARY.md)** - Quick reference for all features
 
 ### Key Features Documented
 1. **Nginx FastCGI Caching**
@@ -106,9 +106,9 @@
 ## 🛠️ Development Documentation
 
 ### Setup & Configuration
-- **[Installation Guide](docs/installation.md)** - Complete setup instructions
+- **[Installation Guide](../installation.md)** - Complete setup instructions
 - **[Project Structure](PROJECT_STRUCTURE.md)** - Directory organization
-- **[Architecture Overview](docs/development/architecture.md)** - System design
+- **[Architecture Overview](../development/architecture.md)** - System design
 
 ### Code Organization
 ```
@@ -138,7 +138,7 @@ app/
 ## 📊 Performance Documentation
 
 ### Metrics & Benchmarks
-From **[Implementation Summary](IMPLEMENTATION_SUMMARY.md)**:
+From **[Implementation Summary](../changelog/IMPLEMENTATION_SUMMARY.md)**:
 
 | Metric | Before | After | Improvement |
 |--------|--------|-------|-------------|
@@ -190,7 +190,7 @@ php artisan test --coverage
 ## 🚀 Deployment Documentation
 
 ### Production Checklist
-From **[Monitoring Implementation](MONITORING_IMPLEMENTATION.md)**:
+From **[Monitoring Implementation](../operations/MONITORING_IMPLEMENTATION.md)**:
 
 - [x] Nginx FastCGI cache configured
 - [x] Redis cache enabled
@@ -230,7 +230,7 @@ HORIZON_ENABLED=true
 **Ruslan Abuzant**  
 📧 Email: [ruslan@abuzant.com](mailto:ruslan@abuzant.com)  
 🌐 Website: [https://abuzant.com](https://abuzant.com)  
-💼 LinkedIn: [linkedin.com/in/abuzant](https://linkedin.com/in/abuzant)
+💼 LinkedIn: [linkedin.com/in/ruslanabuzant](https://linkedin.com/in/ruslanabuzant)
 
 ---
 

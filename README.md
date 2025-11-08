@@ -11,13 +11,15 @@ A comprehensive, production-ready trading analytics platform built with Laravel 
 
 ## 📚 Documentation
 
-**[📖 Browse Complete Documentation →](docs/index.html)**
+**[📖 Complete Documentation Index →](docs/INDEX.md)** | **[Documentation Overview →](docs/README.md)**
 
-- [Installation Guide](docs/installation.md)
-- [Quick Start Guide](docs/quick-start.md)
-- [API Documentation](docs/api/overview.md)
-- [GeoIP Analytics](docs/features/geoip-analytics.md)
-- [Architecture Overview](docs/development/architecture.md)
+### Quick Links
+- [Installation Guide](docs/installation.md) - Complete setup instructions
+- [Quick Start Guide](docs/quick-start.md) - Get running in 5 minutes
+- [API Documentation](docs/reference/API_DOCUMENTATION.md) - MT4/MT5 integration
+- [Artisan Commands](docs/reference/ARTISAN_COMMANDS.md) - Custom commands reference
+- [Deployment Guide](docs/operations/DEPLOYMENT.md) - Production deployment
+- [Contributing Guide](docs/contributing/CONTRIBUTING.md) - How to contribute
 
 ## ✨ Core Features
 
@@ -296,16 +298,22 @@ php artisan test --coverage
 ## 📚 Documentation
 
 ### User Guides
-- [API Documentation](API_DOCUMENTATION.md) - Complete API reference for MT4/MT5 integration
-- [Export and Filter Features](EXPORT_AND_FILTER_FEATURES.md) - Data export capabilities
-- [User Guide - Exports](USER_GUIDE_EXPORTS.md) - Step-by-step export guide
+- [API Documentation](docs/reference/API_DOCUMENTATION.md) - Complete API reference for MT4/MT5 integration
+- [Artisan Commands](docs/reference/ARTISAN_COMMANDS.md) - Custom artisan commands reference
+- [Export and Filter Features](docs/guides/EXPORT_AND_FILTER_FEATURES.md) - Data export capabilities
+- [User Guide - Exports](docs/guides/USER_GUIDE_EXPORTS.md) - Step-by-step export guide
 
-### Architecture & Implementation
-- [Infrastructure Recommendations](INFRASTRUCTURE_RECOMMENDATIONS.md) - Nginx, Circuit Breakers, Monitoring analysis
-- [Monitoring Implementation](MONITORING_IMPLEMENTATION.md) - Complete monitoring setup guide
-- [Implementation Summary](IMPLEMENTATION_SUMMARY.md) - Quick reference for all features
-- [Scaling Analysis](SCALING_ANALYSIS.md) - Queue and caching optimization
-- [Project Structure](PROJECT_STRUCTURE.md) - Codebase organization
+### Operations & Deployment
+- [Deployment Guide](docs/operations/DEPLOYMENT.md) - Production deployment instructions
+- [Infrastructure Recommendations](docs/operations/INFRASTRUCTURE_RECOMMENDATIONS.md) - Nginx, Circuit Breakers, Monitoring analysis
+- [Monitoring Implementation](docs/operations/MONITORING_IMPLEMENTATION.md) - Complete monitoring setup guide
+- [Scaling Analysis](docs/operations/SCALING_ANALYSIS.md) - Queue and caching optimization
+
+### Project Information
+- [Project Structure](docs/project/PROJECT_STRUCTURE.md) - Codebase organization
+- [Documentation Index](docs/project/DOCUMENTATION_INDEX.md) - Complete documentation overview
+- [Contributing Guide](docs/contributing/CONTRIBUTING.md) - How to contribute to the project
+- [Changelog](docs/changelog/CHANGELOG.md) - Version history and changes
 
 ### Admin Features
 - **Circuit Breaker Dashboard** - `/admin/circuit-breakers` - Monitor service health
@@ -413,7 +421,7 @@ MT5 Data → API Endpoint → Redis Queue
 **Ruslan Abuzant**  
 📧 Email: [ruslan@abuzant.com](mailto:ruslan@abuzant.com)  
 🌐 Website: [https://abuzant.com](https://abuzant.com)  
-💼 LinkedIn: [linkedin.com/in/abuzant](https://linkedin.com/in/abuzant)  
+💼 LinkedIn: [linkedin.com/in/ruslanabuzant](https://linkedin.com/in/ruslanabuzant)  
 
 For project support and inquiries:  
 📧 [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  

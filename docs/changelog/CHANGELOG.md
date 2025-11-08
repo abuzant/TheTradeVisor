@@ -140,3 +140,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 [Unreleased]: https://github.com/yourusername/TheTradeVisor/compare/v1.0.0...HEAD
 [1.0.0]: https://github.com/yourusername/TheTradeVisor/releases/tag/v1.0.0
+
+---
+
+## 👨‍💻 Author & Contact
+
+**Ruslan Abuzant**  
+📧 Email: [ruslan@abuzant.com](mailto:ruslan@abuzant.com)  
+🌐 Website: [https://abuzant.com](https://abuzant.com)  
+💼 LinkedIn: [linkedin.com/in/ruslanabuzant](https://linkedin.com/in/ruslanabuzant)
+
+For project support and inquiries:  
+📧 [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  
+🌐 [https://thetradevisor.com](https://thetradevisor.com)

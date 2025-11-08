@@ -97,14 +97,14 @@
                     <div class="p-6">
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="text-lg font-semibold text-gray-900">Laravel Horizon</h3>
-                            <span class="px-3 py-1 text-xs font-semibold rounded-full {{ $horizonStatus['active'] ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                {{ $horizonStatus['active'] ? 'Running' : 'Stopped' }}
+                            <span class="px-3 py-1 text-xs font-semibold rounded-full {{ $horizonStatus['status']['active'] ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                {{ $horizonStatus['status']['active'] ? 'Running' : 'Stopped' }}
                             </span>
                         </div>
 
                         <div class="mb-4">
                             <div class="text-sm text-gray-500">
-                                Status: <span class="font-medium text-gray-900">{{ $horizonStatus['status'] }}</span>
+                                Status: <span class="font-medium text-gray-900">{{ $horizonStatus['status']['status'] }}</span>
                             </div>
                             <div class="text-sm text-gray-500 mt-1">
                                 Service: <span class="font-mono text-xs">supervisor → horizon</span>
@@ -221,25 +221,162 @@
             {{-- Quick Commands --}}
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Useful Commands</h3>
-                    <div class="bg-gray-900 rounded-md p-4 space-y-2">
-                        <div>
-                            <p class="text-xs text-gray-400 mb-1">Clear all Laravel caches:</p>
-                            <code class="text-sm text-green-400 font-mono">php artisan optimize:clear</code>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-400 mb-1">Restart queue workers:</p>
-                            <code class="text-sm text-green-400 font-mono">sudo supervisorctl restart thetradevisor-worker:*</code>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-400 mb-1">Check failed queue jobs:</p>
-                            <code class="text-sm text-green-400 font-mono">php artisan queue:failed</code>
-                        </div>
-                        <div>
-                            <p class="text-xs text-gray-400 mb-1">View real-time logs:</p>
-                            <code class="text-sm text-green-400 font-mono">tail -f storage/logs/laravel.log</code>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">💻 Useful Commands & One-Liners</h3>
+                    
+                    {{-- Custom Artisan Commands --}}
+                    <div class="mb-6">
+                        <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                            <span class="bg-indigo-100 text-indigo-800 text-xs font-medium px-2 py-1 rounded mr-2">Custom</span>
+                            TheTradeVisor Commands
+                        </h4>
+                        <div class="bg-gray-900 rounded-md p-4 space-y-3">
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">🔄 Sync all symbols from database:</p>
+                                <code class="text-sm text-green-400 font-mono">php artisan symbols:sync</code>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">🕐 Fix NULL timestamps in deals:</p>
+                                <code class="text-sm text-green-400 font-mono">php artisan deals:fix-times</code>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">🧹 Complete cache refresh (all caches + services):</p>
+                                <code class="text-sm text-green-400 font-mono">./refurbish.sh</code>
+                            </div>
                         </div>
                     </div>
+
+                    {{-- Laravel Cache Commands --}}
+                    <div class="mb-6">
+                        <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                            <span class="bg-purple-100 text-purple-800 text-xs font-medium px-2 py-1 rounded mr-2">Cache</span>
+                            Cache Management
+                        </h4>
+                        <div class="bg-gray-900 rounded-md p-4 space-y-3">
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">Clear all Laravel caches at once:</p>
+                                <code class="text-sm text-green-400 font-mono">php artisan optimize:clear</code>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">Clear application cache only:</p>
+                                <code class="text-sm text-green-400 font-mono">php artisan cache:clear</code>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">Clear config cache:</p>
+                                <code class="text-sm text-green-400 font-mono">php artisan config:clear</code>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">Clear route cache:</p>
+                                <code class="text-sm text-green-400 font-mono">php artisan route:clear</code>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">Clear compiled views:</p>
+                                <code class="text-sm text-green-400 font-mono">php artisan view:clear</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Queue & Horizon Commands --}}
+                    <div class="mb-6">
+                        <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                            <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2 py-1 rounded mr-2">Queue</span>
+                            Queue & Horizon
+                        </h4>
+                        <div class="bg-gray-900 rounded-md p-4 space-y-3">
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">Restart Horizon queue workers:</p>
+                                <code class="text-sm text-green-400 font-mono">sudo supervisorctl restart horizon</code>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">Check Horizon status:</p>
+                                <code class="text-sm text-green-400 font-mono">php artisan horizon:status</code>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">Gracefully terminate Horizon:</p>
+                                <code class="text-sm text-green-400 font-mono">php artisan horizon:terminate</code>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">List failed queue jobs:</p>
+                                <code class="text-sm text-green-400 font-mono">php artisan queue:failed</code>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">Retry all failed jobs:</p>
+                                <code class="text-sm text-green-400 font-mono">php artisan queue:retry all</code>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">Process one job manually:</p>
+                                <code class="text-sm text-green-400 font-mono">php artisan queue:work --once</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- System & Debugging --}}
+                    <div class="mb-6">
+                        <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                            <span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2 py-1 rounded mr-2">Debug</span>
+                            System & Debugging
+                        </h4>
+                        <div class="bg-gray-900 rounded-md p-4 space-y-3">
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">View real-time Laravel logs:</p>
+                                <code class="text-sm text-green-400 font-mono">tail -f storage/logs/laravel.log</code>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">View last 50 log lines:</p>
+                                <code class="text-sm text-green-400 font-mono">tail -n 50 storage/logs/laravel.log</code>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">Check disk space usage:</p>
+                                <code class="text-sm text-green-400 font-mono">df -h</code>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">Check memory usage:</p>
+                                <code class="text-sm text-green-400 font-mono">free -h</code>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">Check running processes:</p>
+                                <code class="text-sm text-green-400 font-mono">ps aux | grep php</code>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">Check Nginx error logs:</p>
+                                <code class="text-sm text-green-400 font-mono">sudo tail -f /var/log/nginx/error.log</code>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">Check PHP-FPM error logs:</p>
+                                <code class="text-sm text-green-400 font-mono">sudo tail -f /var/log/php8.3-fpm.log</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Database Commands --}}
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                            <span class="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded mr-2">Database</span>
+                            Database & Migrations
+                        </h4>
+                        <div class="bg-gray-900 rounded-md p-4 space-y-3">
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">Run pending migrations:</p>
+                                <code class="text-sm text-green-400 font-mono">php artisan migrate --force</code>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">Check migration status:</p>
+                                <code class="text-sm text-green-400 font-mono">php artisan migrate:status</code>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">Access PostgreSQL console:</p>
+                                <code class="text-sm text-green-400 font-mono">sudo -u postgres psql thetradevisor</code>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">Laravel Tinker (REPL):</p>
+                                <code class="text-sm text-green-400 font-mono">php artisan tinker</code>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">Seed database:</p>
+                                <code class="text-sm text-green-400 font-mono">php artisan db:seed</code>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 

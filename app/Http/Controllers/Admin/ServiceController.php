@@ -40,12 +40,23 @@ class ServiceController extends Controller
     
     private function getHorizonStatus()
     {
-        $result = Process::run("sudo supervisorctl status horizon");
+        $result = Process::run("sudo -n supervisorctl status horizon 2>&1");
         $output = trim($result->output());
         
+        // If sudo fails or output is empty, try without sudo
+        if (empty($output) || str_contains($output, 'sudo')) {
+            $result = Process::run("supervisorctl status horizon 2>&1");
+            $output = trim($result->output());
+        }
+        
+        // Match the same structure as getServiceStatus()
         return [
-            'active' => str_contains($output, 'RUNNING'),
-            'status' => $output,
+            'name' => 'Laravel Horizon',
+            'status' => [
+                'active' => str_contains($output, 'RUNNING'),
+                'status' => !empty($output) ? $output : 'Unable to check status',
+            ],
+            'can_restart' => true,
         ];
     }
     

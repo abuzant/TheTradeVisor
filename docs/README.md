@@ -38,7 +38,7 @@ Welcome to the comprehensive documentation for TheTradeVisor - a powerful tradin
 - [Architecture](development/architecture.md) - System architecture
 - [Database Schema](development/database-schema.md) - Database structure
 - [Testing](development/testing.md) - Running tests
-- [Contributing](../CONTRIBUTING.md) - How to contribute
+- [Contributing](contributing/CONTRIBUTING.md) - How to contribute
 
 ### Deployment
 - [Production Deployment](deployment/production.md) - Deploy to production
@@ -66,7 +66,20 @@ All documentation is written in Markdown and can be viewed:
 
 ## 🤝 Contributing to Documentation
 
-Found an error or want to improve the docs? See our [Contributing Guide](../CONTRIBUTING.md).
+Found an error or want to improve the docs? See our [Contributing Guide](contributing/CONTRIBUTING.md).
+
+---
+
+## 👨‍💻 Author & Contact
+
+**Ruslan Abuzant**  
+📧 Email: [ruslan@abuzant.com](mailto:ruslan@abuzant.com)  
+🌐 Website: [https://abuzant.com](https://abuzant.com)  
+💼 LinkedIn: [linkedin.com/in/ruslanabuzant](https://linkedin.com/in/ruslanabuzant)
+
+For project support and inquiries:  
+📧 [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  
+🌐 [https://thetradevisor.com](https://thetradevisor.com)
 
 ---
 

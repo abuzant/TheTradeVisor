@@ -272,3 +272,16 @@ For API support:
 - Rate limiting
 - Demo account rejection
 - Account pause functionality
+
+---
+
+## 👨‍💻 Author & Contact
+
+**Ruslan Abuzant**  
+📧 Email: [ruslan@abuzant.com](mailto:ruslan@abuzant.com)  
+🌐 Website: [https://abuzant.com](https://abuzant.com)  
+💼 LinkedIn: [linkedin.com/in/ruslanabuzant](https://linkedin.com/in/ruslanabuzant)
+
+For project support and inquiries:  
+📧 [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  
+🌐 [https://thetradevisor.com](https://thetradevisor.com)
