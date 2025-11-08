@@ -16,17 +16,17 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
 
-			<x-nav-link :href="route('analytics')" :active="request()->routeIs('analytics')">
-			    {{ __('Analytics') }}
-			</x-nav-link>
+                    <x-nav-link :href="route('analytics')" :active="request()->routeIs('analytics')">
+                        {{ __('Analytics') }}
+                    </x-nav-link>
 
-		    <x-nav-link :href="route('performance')" :active="request()->routeIs('performance')">
-		        {{ __('Performance') }}
-		    </x-nav-link>
+                    <x-nav-link :href="route('performance')" :active="request()->routeIs('performance')">
+                        {{ __('Performance') }}
+                    </x-nav-link>
 
-		    <x-nav-link :href="route('broker.analytics')" :active="request()->routeIs('broker.analytics')">
-	        	{{ __('Brokers') }}
-		    </x-nav-link>
+                    <x-nav-link :href="route('broker.analytics')" :active="request()->routeIs('broker.analytics')">
+                        {{ __('Brokers') }}
+                    </x-nav-link>
 
                     <x-nav-link :href="route('settings.api-key')" :active="request()->routeIs('settings.*')">
                         {{ __('API Key') }}
@@ -53,10 +53,9 @@
                                         {{ __('Admin Dashboard') }}
                                     </x-dropdown-link>
 
-				    <x-dropdown-link :href="route('admin.users.index')">
-				        {{ __('User Management') }}
-				    </x-dropdown-link>
-
+                                    <x-dropdown-link :href="route('admin.users.index')">
+                                        {{ __('User Management') }}
+                                    </x-dropdown-link>
 
                                     <x-dropdown-link :href="route('admin.trades.index')">
                                         {{ __('Trade Management') }}
@@ -79,18 +78,18 @@
                                     </x-dropdown-link>
 
                                     @if(config('telescope.enabled'))
-                                        <x-dropdown-link href="/telescope" target="_blank">
-                                            {{ __('Telescope (Debug)') }}
-                                        </x-dropdown-link>
+                                    <x-dropdown-link href="/telescope" target="_blank">
+                                        {{ __('Telescope (Debug)') }}
+                                    </x-dropdown-link>
                                     @endif
 
-					<x-dropdown-link :href="route('settings.currency')">
-					    {{ __('Currency Settings') }}
-					</x-dropdown-link>
+                                    <x-dropdown-link :href="route('settings.currency')">
+                                        {{ __('Currency Settings') }}
+                                    </x-dropdown-link>
 
-		                        <x-dropdown-link :href="route('admin.symbols.index')">
-		                            {{ __('Symbol Management') }}
-		                        </x-dropdown-link>
+                                    <x-dropdown-link :href="route('admin.symbols.index')">
+                                        {{ __('Symbol Management') }}
+                                    </x-dropdown-link>
 
                                     <x-dropdown-link :href="route('admin.logs')">
                                         {{ __('System Logs') }}
@@ -99,6 +98,7 @@
                                     <x-dropdown-link :href="route('admin.services')">
                                         {{ __('Service Management') }}
                                     </x-dropdown-link>
+
                                 </x-slot>
                             </x-dropdown>
                         </div>
