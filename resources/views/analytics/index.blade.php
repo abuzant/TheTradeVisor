@@ -207,7 +207,9 @@
                                 <div class="flex items-center space-x-2">
                                     <span class="text-sm text-gray-600">Vol: {{ number_format($pair['volume'], 1) }}</span>
                                     <div class="w-24 bg-gray-200 rounded-full h-2">
+                                        @if($analytics['popular_pairs']->count() > 0)
                                         <div class="bg-indigo-600 h-2 rounded-full" style="width: {{ min(100, ($pair['trades'] / $analytics['popular_pairs']->first()['trades']) * 100) }}%"></div>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -226,7 +228,7 @@
                             <div>
                                 <div class="flex items-center justify-between mb-1">
                                     <span class="text-sm font-semibold text-gray-900">{{ $item['symbol'] }}</span>
-                                    <span class="text-xs text-gray-500">{{ $item['total'] }} positions</span>
+                                    <span class="text-xs text-gray-500">{{ $item['total_positions'] + $item['recent_activity'] }} positions</span>
                                 </div>
                                 <div class="flex h-4 rounded-full overflow-hidden">
                                     <div class="bg-green-500 flex items-center justify-center text-xs text-white font-semibold" style="width: {{ $item['buy_percent'] }}%">
