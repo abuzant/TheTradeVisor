@@ -83,13 +83,14 @@ class TradesController extends Controller
         $symbolMappings = [$symbol];
     }
     
-    // Get ALL deals for this user and these symbols (for stats calculation)
+    // Get ALL CLOSED deals for this user and these symbols (for stats calculation)
     $allDeals = Deal::whereHas('tradingAccount', function($q) use ($user) {
         $q->where('user_id', $user->id);
     })
-    ->whereNotNull('symbol')               // ADD THIS
-    ->where('symbol', '!=', '')            // ADD THIS
+    ->whereNotNull('symbol')
+    ->where('symbol', '!=', '')
     ->whereIn('symbol', $symbolMappings)
+    ->whereIn('entry', ['out', 'inout'])  // Only count closed trades
     ->orderBy('time', 'desc')
     ->get();
     
