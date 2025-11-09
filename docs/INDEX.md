@@ -35,6 +35,7 @@
 ## 🚀 Operations & Deployment
 
 ### Infrastructure
+- [Nginx Setup Note](operations/NGINX_SETUP_NOTE.md) - ⚠️ **Important:** Load balancing is optional!
 - [Deployment Guide](operations/DEPLOYMENT.md) - Production deployment instructions
 - [Deployment Summary](operations/DEPLOYMENT_SUMMARY.md) - Quick deployment reference
 - [Infrastructure Recommendations](operations/INFRASTRUCTURE_RECOMMENDATIONS.md) - Nginx, Circuit Breakers, Monitoring
@@ -91,6 +92,7 @@
 
 ## ✨ Features
 
+- [Currency Display System](features/CURRENCY_DISPLAY.md) - **NEW:** How currency conversion works
 - [GeoIP Analytics](features/geoip-analytics.md) - Location-based trading insights
 
 ---

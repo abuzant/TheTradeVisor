@@ -63,14 +63,14 @@
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">
                         <div class="text-sm font-medium text-gray-500 mb-1">Total Balance</div>
-                        <div class="text-2xl font-bold text-gray-900">${{ number_format($stats['total_balance'], 2) }}</div>
+                        <div class="text-2xl font-bold text-gray-900">{{ $stats['display_currency'] }} {{ number_format($stats['total_balance'], 2) }}</div>
                     </div>
                 </div>
 
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">
                         <div class="text-sm font-medium text-gray-500 mb-1">Total Equity</div>
-                        <div class="text-2xl font-bold text-gray-900">${{ number_format($stats['total_equity'], 2) }}</div>
+                        <div class="text-2xl font-bold text-gray-900">{{ $stats['display_currency'] }} {{ number_format($stats['total_equity'], 2) }}</div>
                     </div>
                 </div>
 
@@ -89,9 +89,26 @@
                 <div class="p-6">
                     <div class="flex justify-between items-center mb-6">
                         <h3 class="text-lg font-semibold text-gray-900">User Details</h3>
-                        <a href="{{ route('admin.users.edit', $user) }}" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm font-medium">
-                            Edit User
-                        </a>
+                        <div class="flex gap-3">
+                            <a href="{{ route('admin.users.edit', $user) }}" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm font-medium">
+                                Edit User
+                            </a>
+                            @if($user->is_active)
+                                <form method="POST" action="{{ route('admin.users.suspend', $user) }}" onsubmit="return confirm('Are you sure you want to suspend this user?')">
+                                    @csrf
+                                    <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm font-medium">
+                                        Suspend User
+                                    </button>
+                                </form>
+                            @else
+                                <form method="POST" action="{{ route('admin.users.activate', $user) }}">
+                                    @csrf
+                                    <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm font-medium">
+                                        Activate User
+                                    </button>
+                                </form>
+                            @endif
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -175,40 +192,22 @@
             </div>
 
             {{-- Quick Actions --}}
+            @if($user->id !== auth()->id())
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Danger Zone</h3>
                     <div class="flex flex-wrap gap-3">
-
-                        @if($user->is_active)
-                            <form method="POST" action="{{ route('admin.users.suspend', $user) }}" onsubmit="return confirm('Are you sure you want to suspend this user?')">
-                                @csrf
-                                <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm font-medium">
-                                    Suspend User
-                                </button>
-                            </form>
-                        @else
-                            <form method="POST" action="{{ route('admin.users.activate', $user) }}">
-                                @csrf
-                                <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm font-medium">
-                                    Activate User
-                                </button>
-                            </form>
-                        @endif
-
-                        @if($user->id !== auth()->id())
-                            <form method="POST" action="{{ route('admin.users.destroy', $user) }}" onsubmit="return confirm('Are you sure you want to DELETE this user? This action cannot be undone!')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="px-4 py-2 bg-red-800 text-white rounded-md hover:bg-red-900 text-sm font-medium">
-                                    Delete User
-                                </button>
-                            </form>
-                        @endif
-
+                        <form method="POST" action="{{ route('admin.users.destroy', $user) }}" onsubmit="return confirm('Are you sure you want to DELETE this user? This action cannot be undone!')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="px-4 py-2 bg-red-800 text-white rounded-md hover:bg-red-900 text-sm font-medium">
+                                Delete User
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
+            @endif
 
             {{-- Trading Accounts --}}
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
@@ -246,8 +245,8 @@
 					        {{ ucfirst($account->account_type) }}
 					    </span>
 					</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${{ number_format($account->balance, 2) }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${{ number_format($account->equity, 2) }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $account->account_currency }} {{ number_format($account->balance, 2) }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $account->account_currency }} {{ number_format($account->equity, 2) }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {{ $account->last_sync_at ? $account->last_sync_at->diffForHumans() : 'Never' }}
                                         </td>

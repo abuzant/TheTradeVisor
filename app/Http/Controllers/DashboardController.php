@@ -55,18 +55,40 @@ class DashboardController extends Controller
             $accounts = $accountsQuery->get();
 
             // Calculate totals across all accounts
+            // RULE: Multi-account view = Always convert to USD
+            $currencyService = app(\App\Services\CurrencyService::class);
+            
+            $totalBalance = 0;
+            $totalEquity = 0;
+            $totalProfit = 0;
+            
+            foreach ($accounts as $account) {
+                // Convert each account to USD
+                $totalBalance += $currencyService->convert(
+                    $account->balance,
+                    $account->account_currency ?? 'USD',
+                    'USD'
+                );
+                
+                $totalEquity += $currencyService->convert(
+                    $account->equity,
+                    $account->account_currency ?? 'USD',
+                    'USD'
+                );
+                
+                $totalProfit += $currencyService->convert(
+                    $account->profit ?? 0,
+                    $account->account_currency ?? 'USD',
+                    'USD'
+                );
+            }
+            
             $totals = [
                 'accounts' => $accounts->count(),
-                'total_balance' => $accounts->sum(function($account) use ($displayCurrency) {
-                    return $account->getBalanceInCurrency($displayCurrency);
-                }),
-                'total_equity' => $accounts->sum(function($account) use ($displayCurrency) {
-                    return $account->getEquityInCurrency($displayCurrency);
-                }),
-                'total_profit' => $accounts->sum(function($account) use ($displayCurrency) {
-                    return $account->getProfitInCurrency($displayCurrency);
-                }),
-                'display_currency' => $displayCurrency,
+                'total_balance' => round($totalBalance, 2),
+                'total_equity' => round($totalEquity, 2),
+                'total_profit' => round($totalProfit, 2),
+                'display_currency' => 'USD', // Always USD for multi-account view
                 'open_positions' => $accounts->sum(function($acc) {
                     return $acc->openPositions->count();
                 }),
@@ -75,8 +97,8 @@ class DashboardController extends Controller
                 }),
             ];
 
-            // Charts Data
-            $accountsChartData = $this->prepareAccountsChartData($accounts, $displayCurrency);
+            // Charts Data (convert to USD for multi-account view)
+            $accountsChartData = $this->prepareAccountsChartData($accounts, 'USD');
 
             return [
                 'accounts' => $accounts,
@@ -286,13 +308,15 @@ class DashboardController extends Controller
 
     /**
      * Prepare equity and balance chart data for all accounts
+     * RULE: Multi-account view = Convert to USD
      */
-    private function prepareAccountsChartData($accounts, $displayCurrency)
+    private function prepareAccountsChartData($accounts, $displayCurrency = 'USD')
     {
         $chartData = [];
         $currencyService = app(\App\Services\CurrencyService::class);
 
         foreach ($accounts as $account) {
+
         // Get balance history for last 30 days
         $history = Deal::where('trading_account_id', $account->id)
             ->where('time', '>=', now()->subDays(30))
@@ -310,57 +334,57 @@ class DashboardController extends Controller
 
         $runningBalance = $account->balance - $history->sum('profit');
 
-        // Build data points
+        // Build data points (convert to USD for multi-account view)
         foreach ($history as $deal) {
             if ($deal->time) {
             $runningBalance += $deal->profit;
 
-            // Convert to display currency
-            $balanceInDisplayCurrency = $currencyService->convert(
+            // Convert to USD
+            $balanceInUSD = $currencyService->convert(
                 $runningBalance,
-                $account->account_currency,
+                $account->account_currency ?? 'USD',
                 $displayCurrency
             );
 
-            $equityInDisplayCurrency = $currencyService->convert(
+            $equityInUSD = $currencyService->convert(
                 $runningBalance + ($account->profit ?? 0),
-                $account->account_currency,
+                $account->account_currency ?? 'USD',
                 $displayCurrency
             );
 
             $balancePoints[] = [
                 'x' => $deal->time->format('Y-m-d H:i:s'),
-                'y' => round($balanceInDisplayCurrency, 2)
+                'y' => round($balanceInUSD, 2)
             ];
 
             $equityPoints[] = [
                 'x' => $deal->time->format('Y-m-d H:i:s'),
-                'y' => round($equityInDisplayCurrency, 2)
+                'y' => round($equityInUSD, 2)
             ];
             }
         }
 
-        // Add current point (converted to display currency)
-        $currentBalance = $currencyService->convert(
+        // Add current point (convert to USD)
+        $currentBalanceUSD = $currencyService->convert(
             $account->balance,
-            $account->account_currency,
+            $account->account_currency ?? 'USD',
             $displayCurrency
         );
 
-        $currentEquity = $currencyService->convert(
+        $currentEquityUSD = $currencyService->convert(
             $account->equity,
-            $account->account_currency,
+            $account->account_currency ?? 'USD',
             $displayCurrency
         );
 
         $balancePoints[] = [
             'x' => now()->format('Y-m-d H:i:s'),
-            'y' => round($currentBalance, 2)
+            'y' => round($currentBalanceUSD, 2)
         ];
 
         $equityPoints[] = [
             'x' => now()->format('Y-m-d H:i:s'),
-            'y' => round($currentEquity, 2)
+            'y' => round($currentEquityUSD, 2)
         ];
 
         // Random color for each account
@@ -382,7 +406,7 @@ class DashboardController extends Controller
             'account_id' => $account->id,
             'account_name' => $account->broker_name . ' - ' . ($account->account_number ?? 'Account'),
             'currency' => $account->account_currency,
-            'display_currency' => $displayCurrency,
+            'display_currency' => $displayCurrency, // Always USD for multi-account
             'color' => $color['rgb'],
             'balance_data' => $balancePoints,
             'equity_data' => $equityPoints,

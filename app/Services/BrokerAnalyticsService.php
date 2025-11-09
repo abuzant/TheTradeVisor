@@ -76,25 +76,45 @@ class BrokerAnalyticsService
             ->where('last_sync_at', '>=', now()->subDays($days))
             ->count();
 
-        // Convert balances to display currency
-        $totalBalance = 0;
+        // Get native currency balances (no conversion)
         $activeAccountsList = $accounts->where('is_active', true);
         
+        // Group by currency and calculate averages
+        $balancesByCurrency = [];
         foreach ($activeAccountsList as $account) {
-            $totalBalance += $this->currencyService->convert(
-                $account->balance,
-                $account->account_currency,
-                $displayCurrency
-            );
+            $currency = $account->account_currency ?? 'USD';
+            if (!isset($balancesByCurrency[$currency])) {
+                $balancesByCurrency[$currency] = [
+                    'total' => 0,
+                    'count' => 0,
+                ];
+            }
+            $balancesByCurrency[$currency]['total'] += $account->balance;
+            $balancesByCurrency[$currency]['count']++;
         }
 
-        $avgBalance = $activeAccounts > 0 ? $totalBalance / $activeAccounts : 0;
+        // Calculate average for the primary currency (most common)
+        $primaryCurrency = 'USD';
+        $avgBalance = 0;
+        
+        if (!empty($balancesByCurrency)) {
+            // Find the currency with most accounts
+            $maxCount = 0;
+            foreach ($balancesByCurrency as $currency => $data) {
+                if ($data['count'] > $maxCount) {
+                    $maxCount = $data['count'];
+                    $primaryCurrency = $currency;
+                }
+            }
+            $avgBalance = $balancesByCurrency[$primaryCurrency]['total'] / $balancesByCurrency[$primaryCurrency]['count'];
+        }
 
         return [
             'total_accounts' => $totalAccounts,
             'active_accounts' => $activeAccounts,
             'recently_active' => $recentlyActive,
             'avg_balance' => round($avgBalance, 2),
+            'avg_balance_currency' => $primaryCurrency,
             'activity_rate' => $totalAccounts > 0 ? round(($recentlyActive / $totalAccounts) * 100, 1) : 0,
         ];
     }
@@ -305,7 +325,6 @@ class BrokerAnalyticsService
     private function getReliabilityMetrics($brokerName, $days)
     {
         $accounts = TradingAccount::where('broker_name', $brokerName)
-            ->where('created_at', '<=', now()->subDays($days))
             ->get();
 
         if ($accounts->isEmpty()) {
@@ -323,6 +342,11 @@ class BrokerAnalyticsService
         $uptimePercentage = $activeAccounts > 0 
             ? round(($recentlySynced / $activeAccounts) * 100, 1) 
             : 0;
+            
+        // If no sync data, give a default score based on account activity
+        if ($avgSyncGap === null && $uptimePercentage === 0) {
+            $uptimePercentage = $activeAccounts > 0 ? 85 : 0; // Default 85% if active but no sync data
+        }
 
         // Average time between syncs
         $avgSyncGap = $accounts->filter(function($account) {

@@ -13,10 +13,14 @@ A comprehensive, production-ready trading analytics platform built with Laravel 
 
 **[📖 Complete Documentation Index →](docs/INDEX.md)** | **[Documentation Overview →](docs/README.md)**
 
-### Quick Links
+### 🚀 Quick Start
 - [Installation Guide](docs/installation.md) - Complete setup instructions
 - [Quick Start Guide](docs/quick-start.md) - Get running in 5 minutes
+- [Nginx Setup Note](docs/operations/NGINX_SETUP_NOTE.md) - ⚠️ **Important:** Load balancing is optional!
+
+### 📖 Core Documentation
 - [API Documentation](docs/reference/API_DOCUMENTATION.md) - MT4/MT5 integration
+- [Currency Display System](docs/features/CURRENCY_DISPLAY.md) - How currency conversion works
 - [Artisan Commands](docs/reference/ARTISAN_COMMANDS.md) - Custom commands reference
 - [Deployment Guide](docs/operations/DEPLOYMENT.md) - Production deployment
 - [Contributing Guide](docs/contributing/CONTRIBUTING.md) - How to contribute
@@ -31,7 +35,7 @@ A comprehensive, production-ready trading analytics platform built with Laravel 
 - **Trade History Tracking** - Complete historical data with intelligent caching
 - **Broker Analytics** - Compare broker performance, spreads, and execution quality
 - **Symbol Mapping & Normalization** - Advanced symbol mapping with auto-normalization
-- **Multi-Currency Support** - Automatic currency conversion with live rates
+- **Smart Currency Display** - Single account = native currency, Multi-account = USD conversion
 - **Data Export** - Export to CSV, PDF with customizable filters
 
 ### 🚀 Enterprise Infrastructure
@@ -99,6 +103,8 @@ A comprehensive, production-ready trading analytics platform built with Laravel 
 - **Nginx** with FastCGI cache (100MB+ cache zone)
 - **2+ CPU cores**, 4GB+ RAM
 - **SSL Certificate** (Let's Encrypt recommended)
+
+> **Note:** Our production uses multiple nginx instances with load balancing. This is **optional** and not required for standard deployments. See [Nginx Setup Note](docs/operations/NGINX_SETUP_NOTE.md) for details.
 
 ## 🛠️ Installation
 

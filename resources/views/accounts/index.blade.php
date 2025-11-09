@@ -1,14 +1,20 @@
+@section('title', 'My Trading Accounts - TheTradeVisor | Manage MT5 Accounts')
+@section('description', 'Manage all your MetaTrader 5 trading accounts in one place. View balances, monitor performance, and control account settings.')
+@section('og_title', 'My Trading Accounts - TheTradeVisor')
+@section('og_description', 'Manage your MT5 trading accounts and monitor performance')
+
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+        <h1 class="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
             My Trading Accounts
-        </h2>
+        </h1>
+        <p class="mt-1 text-sm text-gray-600">Manage and monitor all your MT5 accounts</p>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             {{-- Filters --}}
-            <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <div class="bg-white/90 backdrop-blur-sm rounded-xl shadow-card p-6 mb-6">
                 <form method="GET" action="{{ route('accounts.index') }}" class="space-y-4">
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div>
@@ -61,7 +67,7 @@
             </div>
 
             {{-- Accounts Table --}}
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white/90 backdrop-blur-sm overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 rounded-xl">
                 <div class="p-6">
                     @if (session('success'))
                         <div class="mb-4 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
@@ -76,7 +82,7 @@
                     @else
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
+                                <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
                                     <tr>
                                         <x-sortable-header column="broker_name" label="Broker" :sortBy="$sortBy" :sortDirection="$sortDirection" />
                                         <x-sortable-header column="account_number" label="Account" :sortBy="$sortBy" :sortDirection="$sortDirection" />

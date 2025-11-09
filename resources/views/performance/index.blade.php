@@ -1,26 +1,34 @@
+@section('title', 'Performance Metrics - TheTradeVisor | Trading Performance Analytics')
+@section('description', 'Analyze your trading performance with detailed metrics including win rate, profit factor, average hold time, and trade analysis across all your MT5 accounts.')
+@section('og_title', 'Trading Performance Metrics - TheTradeVisor')
+@section('og_description', 'Comprehensive trading performance analytics and metrics for MT5 traders')
+
 <x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Performance Metrics') }}
-            </h2>
+            <div>
+                <h1 class="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                    {{ __('Performance Metrics') }}
+                </h1>
+                <p class="mt-1 text-sm text-gray-600">Comprehensive analysis of your trading performance</p>
+            </div>
 
             {{-- Time Period Filter --}}
             <div class="flex gap-2">
                 <a href="{{ route('performance', ['days' => 7]) }}"
-                   class="px-4 py-2 rounded-md {{ $days == 7 ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                   class="px-4 py-2 rounded-lg font-medium transition-all duration-300 {{ $days == 7 ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm' }}">
                     7 Days
                 </a>
                 <a href="{{ route('performance', ['days' => 30]) }}"
-                   class="px-4 py-2 rounded-md {{ $days == 30 ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                   class="px-4 py-2 rounded-lg font-medium transition-all duration-300 {{ $days == 30 ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm' }}">
                     30 Days
                 </a>
                 <a href="{{ route('performance', ['days' => 90]) }}"
-                   class="px-4 py-2 rounded-md {{ $days == 90 ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                   class="px-4 py-2 rounded-lg font-medium transition-all duration-300 {{ $days == 90 ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm' }}">
                     90 Days
                 </a>
                 <a href="{{ route('performance', ['days' => 365]) }}"
-                   class="px-4 py-2 rounded-md {{ $days == 365 ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                   class="px-4 py-2 rounded-lg font-medium transition-all duration-300 {{ $days == 365 ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm' }}">
                     1 Year
                 </a>
             </div>
@@ -31,7 +39,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
             @if(!$hasAccounts)
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="bg-white/90 backdrop-blur-sm overflow-hidden shadow-card rounded-xl">
                     <div class="p-6 text-center">
                         <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
@@ -48,7 +56,7 @@
             @else
                 {{-- Trade Analysis Section --}}
                 @if($metrics['trade_analysis'])
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="bg-white/90 backdrop-blur-sm overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 rounded-xl">
                     <div class="p-6">
                         <h3 class="text-lg font-semibold mb-4">📊 Trade Analysis (Last {{ $days }} Days)</h3>
 
@@ -108,9 +116,9 @@
 
                 {{-- Equity Curve Chart --}}
                 @if(!empty($metrics['equity_curve']))
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="bg-white/90 backdrop-blur-sm overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 rounded-xl">
                     <div class="p-6">
-                        <h3 class="text-lg font-semibold mb-4">📈 Equity Curve</h3>
+                        <h2 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">📈 Equity Curve</h2>
                         <div style="height: 400px;">
                             <canvas id="equityCurveChart"></canvas>
                         </div>
@@ -120,12 +128,12 @@
 
                 {{-- Symbol Performance --}}
                 @if($metrics['symbol_performance'] && $metrics['symbol_performance']->isNotEmpty())
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="bg-white/90 backdrop-blur-sm overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 rounded-xl">
                     <div class="p-6">
-                        <h3 class="text-lg font-semibold mb-4">💰 Symbol Performance</h3>
+                        <h2 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">💰 Symbol Performance</h2>
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
+                                <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
                                     <tr>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Symbol</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Trades</th>
@@ -163,9 +171,9 @@
 
                 {{-- Risk Metrics --}}
                 @if($metrics['risk_metrics'])
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="bg-white/90 backdrop-blur-sm overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 rounded-xl">
                     <div class="p-6">
-                        <h3 class="text-lg font-semibold mb-4">⚖️ Risk Metrics</h3>
+                        <h2 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">⚖️ Risk Metrics</h2>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                             <div class="bg-blue-50 rounded-lg p-4">
                                 <div class="text-sm text-gray-600">Risk/Reward Ratio</div>
@@ -193,9 +201,9 @@
 
                 {{-- Streaks --}}
                 @if($metrics['streaks'])
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="bg-white/90 backdrop-blur-sm overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 rounded-xl">
                     <div class="p-6">
-                        <h3 class="text-lg font-semibold mb-4">🔥 Winning & Losing Streaks</h3>
+                        <h2 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">🔥 Winning & Losing Streaks</h2>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div class="bg-green-50 rounded-lg p-4 text-center">
                                 <div class="text-sm text-gray-600">Max Win Streak</div>
@@ -221,9 +229,9 @@
 
                 {{-- Timing Analysis - Hourly Heatmap --}}
                 @if($metrics['timing_analysis'])
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="bg-white/90 backdrop-blur-sm overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 rounded-xl">
                     <div class="p-6">
-                        <h3 class="text-lg font-semibold mb-4">⏰ Trading Hours Performance</h3>
+                        <h2 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">⏰ Trading Hours Performance</h2>
                         <div style="height: 300px;">
                             <canvas id="hourlyPerformanceChart"></canvas>
                         </div>
@@ -245,9 +253,9 @@
                 </div>
 
                 {{-- Day of Week Performance --}}
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="bg-white/90 backdrop-blur-sm overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 rounded-xl">
                     <div class="p-6">
-                        <h3 class="text-lg font-semibold mb-4">📅 Day of Week Performance</h3>
+                        <h2 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">📅 Day of Week Performance</h2>
                         <div style="height: 300px;">
                             <canvas id="dailyPerformanceChart"></canvas>
                         </div>
@@ -271,9 +279,9 @@
 
                 {{-- Drawdown Chart --}}
                 @if($metrics['drawdown'])
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="bg-white/90 backdrop-blur-sm overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 rounded-xl">
                     <div class="p-6">
-                        <h3 class="text-lg font-semibold mb-4">📉 Drawdown Analysis</h3>
+                        <h2 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">📉 Drawdown Analysis</h2>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                             <div class="bg-red-50 rounded-lg p-4">

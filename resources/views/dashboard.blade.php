@@ -1,12 +1,20 @@
+@section('title', 'Trading Dashboard - TheTradeVisor | Real-Time MT5 Analytics')
+@section('description', 'Monitor your MetaTrader 5 trading performance in real-time. View account balances, equity, profit/loss, and recent trades across all your trading accounts.')
+@section('og_title', 'Trading Dashboard - TheTradeVisor')
+@section('og_description', 'Real-time MT5 trading analytics and performance monitoring')
+
 <x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Dashboard') }}
-            </h2>
+            <div>
+                <h1 class="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                    {{ __('Trading Dashboard') }}
+                </h1>
+                <p class="mt-1 text-sm text-gray-600">Real-time overview of your trading performance</p>
+            </div>
             <a href="{{ route('export.dashboard.csv') }}"
-               class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 transition">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               class="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-green-500 to-emerald-600 border border-transparent rounded-lg font-semibold text-sm text-white shadow-lg hover:shadow-xl hover:from-green-600 hover:to-emerald-700 transition-all duration-300 transform hover:-translate-y-0.5">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
                 Export Summary
@@ -18,7 +26,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
 
             {{-- Account Limit Info --}}
-            <div class="mb-6 bg-blue-50 border-l-4 border-blue-400 p-4">
+            <div class="mb-6 bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-indigo-500 rounded-r-lg p-4 shadow-sm">
                 <div class="flex">
                     <div class="flex-shrink-0">
                         <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
@@ -41,60 +49,49 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
 
                 {{-- Total Balance --}}
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0 bg-indigo-500 rounded-md p-3">
-                                <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                            </div>
-                            <div class="ml-5 w-0 flex-1">
-                                <dl>
-                                    <dt class="text-sm font-medium text-gray-500 truncate">Total Balance <em>(all accounts)</em></dt>
-                                    <dd class="text-2xl font-semibold text-gray-900">{{ $totals['display_currency'] }} {{ number_format($totals['total_balance'], 2) }}</dd>
-                                </dl>
-                            </div>
+                <div class="stat-card bg-gradient-to-br from-indigo-500 to-purple-600 animate-fade-in">
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1">
+                            <p class="text-indigo-100 text-sm font-medium mb-1">Total Balance</p>
+                            <p class="text-xs text-indigo-200 mb-2">All accounts combined</p>
+                            <p class="text-3xl font-bold">{{ $totals['display_currency'] }} {{ number_format($totals['total_balance'], 2) }}</p>
+                        </div>
+                        <div class="bg-white/20 rounded-full p-4">
+                            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
                         </div>
                     </div>
                 </div>
 
                 {{-- Total Equity --}}
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0 bg-green-500 rounded-md p-3">
-                                <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
-                                </svg>
-                            </div>
-                            <div class="ml-5 w-0 flex-1">
-                                <dl>
-                                    <dt class="text-sm font-medium text-gray-500 truncate">Total Equity <em>(all accounts)</em></dt>
-                                    <dd class="text-2xl font-semibold text-gray-900">{{ $totals['display_currency'] }} {{ number_format($totals['total_equity'], 2) }}</dd>
-                                </dl>
-                            </div>
+                <div class="stat-card bg-gradient-to-br from-green-500 to-emerald-600 animate-fade-in" style="animation-delay: 0.1s">
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1">
+                            <p class="text-green-100 text-sm font-medium mb-1">Total Equity</p>
+                            <p class="text-xs text-green-200 mb-2">Current market value</p>
+                            <p class="text-3xl font-bold">{{ $totals['display_currency'] }} {{ number_format($totals['total_equity'], 2) }}</p>
+                        </div>
+                        <div class="bg-white/20 rounded-full p-4">
+                            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                            </svg>
                         </div>
                     </div>
                 </div>
 
                 {{-- Total Profit --}}
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6">
-                        <div class="flex items-center">
-                            <div class="flex-shrink-0 {{ $totals['total_profit'] >= 0 ? 'bg-green-500' : 'bg-red-500' }} rounded-md p-3">
-                                <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                                </svg>
-                            </div>
-                            <div class="ml-5 w-0 flex-1">
-                                <dl>
-                                    <dt class="text-sm font-medium text-gray-500 truncate">Current Profit/Loss <em>(all accounts)</em></dt>
-                                    <dd class="text-2xl font-semibold {{ $totals['total_profit'] >= 0 ? 'text-green-600' : 'text-red-600' }}">
-					{{ $totals['display_currency'] }} {{ number_format($totals['total_profit'], 2) }}
-                                    </dd>
-                                </dl>
-                            </div>
+                <div class="stat-card {{ $totals['total_profit'] >= 0 ? 'bg-gradient-to-br from-green-500 to-emerald-600' : 'bg-gradient-to-br from-red-500 to-rose-600' }} animate-fade-in" style="animation-delay: 0.2s">
+                    <div class="flex items-center justify-between">
+                        <div class="flex-1">
+                            <p class="{{ $totals['total_profit'] >= 0 ? 'text-green-100' : 'text-red-100' }} text-sm font-medium mb-1">Current Profit/Loss</p>
+                            <p class="text-xs {{ $totals['total_profit'] >= 0 ? 'text-green-200' : 'text-red-200' }} mb-2">Open positions</p>
+                            <p class="text-3xl font-bold">{{ $totals['display_currency'] }} {{ number_format($totals['total_profit'], 2) }}</p>
+                        </div>
+                        <div class="bg-white/20 rounded-full p-4">
+                            <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                            </svg>
                         </div>
                     </div>
                 </div>
@@ -106,14 +103,14 @@
 
 
 
-	{{-- ADD THIS ENTIRE SECTION --}}
+	{{-- Account Performance Chart --}}
 	@if($accounts->isNotEmpty())
-	<div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+	<div class="bg-white/90 backdrop-blur-sm overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 rounded-xl mb-6">
 	    <div class="p-6">
 	        <div class="flex justify-between items-center mb-4">
 	            <div>
-	                <h3 class="text-lg font-semibold text-gray-900">Account Performance (Last 30 Days)</h3>
-	                <p class="text-sm text-gray-500 mt-1">Balance and Equity trends across your accounts</p>
+	                <h2 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Account Performance</h2>
+	                <p class="text-sm text-gray-600 mt-1">Balance and Equity trends across your accounts (Last 30 Days)</p>
 	            </div>
 
 	            {{-- Legend / Account Toggles --}}
@@ -159,9 +156,9 @@
 
 
             {{-- Trading Accounts Table --}}
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+            <div class="bg-white/90 backdrop-blur-sm overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 rounded-xl mb-6">
                 <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Your Trading Accounts</h3>
+                    <h2 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">Your Trading Accounts</h2>
 
                     @if($accounts->isEmpty())
                         <div class="text-center py-12">
@@ -179,7 +176,7 @@
                     @else
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
+                                <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
                                     <tr>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Broker</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Account</th>
@@ -229,12 +226,12 @@
 
             {{-- Recent Activity --}}
             @if($recentDeals->isNotEmpty())
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="bg-white/90 backdrop-blur-sm overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 rounded-xl">
                     <div class="p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Recent Trades</h3>
+                        <h2 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">Recent Trades</h2>
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
+                                <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
                                     <tr>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Symbol</th>

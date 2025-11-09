@@ -1,22 +1,30 @@
+@section('title', 'Global Trading Analytics - TheTradeVisor | Worldwide MT5 Trading Insights')
+@section('description', 'Explore global trading analytics from thousands of MT5 traders worldwide. Real-time insights on trading volume, win rates, popular symbols, and market trends.')
+@section('og_title', 'Global Trading Analytics - TheTradeVisor')
+@section('og_description', 'Real-time trading analytics and insights from MT5 traders around the world')
+
 <x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Global Trading Analytics') }}
-            </h2>
+            <div>
+                <h1 class="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                    {{ __('Global Trading Analytics') }}
+                </h1>
+                <p class="mt-1 text-sm text-gray-600">Real-time insights from traders worldwide</p>
+            </div>
 
             {{-- Time Period Filter --}}
             <div class="flex gap-2">
                 <a href="{{ route('analytics', ['days' => 7]) }}"
-                   class="px-4 py-2 rounded-md text-sm {{ $days == 7 ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                   class="px-4 py-2 rounded-lg font-medium transition-all duration-300 {{ $days == 7 ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm' }}">
                     7 Days
                 </a>
                 <a href="{{ route('analytics', ['days' => 30]) }}"
-                   class="px-4 py-2 rounded-md text-sm {{ $days == 30 ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                   class="px-4 py-2 rounded-lg font-medium transition-all duration-300 {{ $days == 30 ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm' }}">
                     30 Days
                 </a>
                 <a href="{{ route('analytics', ['days' => 90]) }}"
-                   class="px-4 py-2 rounded-md text-sm {{ $days == 90 ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                   class="px-4 py-2 rounded-lg font-medium transition-all duration-300 {{ $days == 90 ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm' }}">
                     90 Days
                 </a>
             </div>
@@ -27,7 +35,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
             {{-- Info Banner --}}
-            <div class="bg-blue-50 border-l-4 border-blue-400 p-4">
+            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-indigo-500 rounded-r-lg p-4 shadow-sm">
                 <div class="flex">
                     <div class="flex-shrink-0">
                         <svg class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
@@ -104,9 +112,9 @@
             </div>
 
             {{-- Daily Volume Trend Chart --}}
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white/90 backdrop-blur-sm overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 rounded-xl">
                 <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">📊 Daily Trading Volume Trend</h3>
+                    <h2 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">📊 Daily Trading Volume Trend</h2>
                     <div class="h-64">
                         <canvas id="volumeTrendChart"></canvas>
                     </div>
@@ -115,12 +123,12 @@
 
             {{-- Win Rate by Symbol Table --}}
             @if(!empty($analytics['win_rate_by_symbol']) && count($analytics['win_rate_by_symbol']) > 0)
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white/90 backdrop-blur-sm overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 rounded-xl">
                 <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">🎯 Win Rate by Symbol</h3>
+                    <h2 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">🎯 Win Rate by Symbol</h2>
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
+                            <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Symbol</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Trades</th>
@@ -154,9 +162,9 @@
             @endif
 
             {{-- Position Size Distribution --}}
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white/90 backdrop-blur-sm overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 rounded-xl">
                 <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">📏 Position Size Distribution</h3>
+                    <h2 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">📏 Position Size Distribution</h2>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div class="bg-blue-50 rounded-lg p-4">
                             <div class="text-sm text-gray-600">Average</div>
@@ -186,9 +194,9 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
                 {{-- Popular Pairs --}}
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="bg-white/90 backdrop-blur-sm overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 rounded-xl">
                     <div class="p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Most Traded Pairs (7 Days)</h3>
+                        <h2 class="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">Most Traded Pairs (7 Days)</h2>
                         <div class="space-y-3">
                             @foreach($analytics['popular_pairs'] as $pair)
                             <div class="flex items-center justify-between">
@@ -209,9 +217,9 @@
                 </div>
 
                 {{-- Market Sentiment --}}
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="bg-white/90 backdrop-blur-sm overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 rounded-xl">
                     <div class="p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Market Sentiment (Open Positions)</h3>
+                        <h2 class="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">Market Sentiment (Open Positions)</h2>
                         @if(!empty($analytics['sentiment']) && count($analytics['sentiment']) > 0)
                         <div class="space-y-3">
                             @foreach($analytics['sentiment'] as $item)
@@ -253,9 +261,9 @@
             </div>
 
             {{-- Trading Activity by Hour --}}
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white/90 backdrop-blur-sm overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 rounded-xl">
                 <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Trading Activity by Hour (UTC, Last 7 Days)</h3>
+                    <h2 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">Trading Activity by Hour (UTC, Last 7 Days)</h2>
                     <div class="h-64">
                         <canvas id="hourlyChart"></canvas>
                     </div>
@@ -266,10 +274,10 @@
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
                 {{-- Regional Activity --}}
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="bg-white/90 backdrop-blur-sm overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 rounded-xl">
                     <div class="p-6">
                         <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-lg font-semibold text-gray-900">Top Trading Countries</h3>
+                            <h2 class="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Top Trading Countries</h2>
                             @if(count($analytics['regional_activity']) > 0)
                             <a href="{{ route('analytics.countries') }}" class="text-sm text-indigo-600 hover:text-indigo-800 font-medium">
                                 View Detailed Analytics →
@@ -317,12 +325,12 @@
                 </div>
 
                 {{-- Top Performing Pairs --}}
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="bg-white/90 backdrop-blur-sm overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 rounded-xl">
                     <div class="p-6">
-                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Top Performing Pairs (7 Days)</h3>
+                        <h2 class="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">Top Performing Pairs (7 Days)</h2>
                         <div class="overflow-x-auto">
                             <table class="min-w-full">
-                                <thead class="bg-gray-50">
+                                <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
                                     <tr>
                                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Symbol</th>
                                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Total P&L</th>
@@ -350,9 +358,9 @@
             </div>
 
             {{-- Broker Distribution --}}
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white/90 backdrop-blur-sm overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 rounded-xl">
                 <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Broker Distribution</h3>
+                    <h2 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">Broker Distribution</h2>
                     <div class="h-64">
                         <canvas id="brokerChart"></canvas>
                     </div>

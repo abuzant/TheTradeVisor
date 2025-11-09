@@ -1,22 +1,30 @@
+@section('title', 'Broker Comparison Analytics - TheTradeVisor | Compare MT5 Brokers')
+@section('description', 'Compare MetaTrader 5 brokers based on performance, reliability, costs, and trading conditions. Analyze broker statistics and make informed decisions.')
+@section('og_title', 'Broker Comparison Analytics - TheTradeVisor')
+@section('og_description', 'Comprehensive broker comparison and analytics for MT5 traders')
+
 <x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                {{ __('Broker Comparison Analytics') }}
-            </h2>
+            <div>
+                <h1 class="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                    {{ __('Broker Comparison Analytics') }}
+                </h1>
+                <p class="mt-1 text-sm text-gray-600">Compare brokers and analyze trading conditions</p>
+            </div>
 
             {{-- Time Period Filter --}}
             <div class="flex gap-2">
                 <a href="{{ route('broker.analytics', ['days' => 7]) }}"
-                   class="px-4 py-2 rounded-md text-sm {{ $days == 7 ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                   class="px-4 py-2 rounded-lg font-medium transition-all duration-300 {{ $days == 7 ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm' }}">
                     7 Days
                 </a>
                 <a href="{{ route('broker.analytics', ['days' => 30]) }}"
-                   class="px-4 py-2 rounded-md text-sm {{ $days == 30 ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                   class="px-4 py-2 rounded-lg font-medium transition-all duration-300 {{ $days == 30 ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm' }}">
                     30 Days
                 </a>
                 <a href="{{ route('broker.analytics', ['days' => 90]) }}"
-                   class="px-4 py-2 rounded-md text-sm {{ $days == 90 ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                   class="px-4 py-2 rounded-lg font-medium transition-all duration-300 {{ $days == 90 ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm' }}">
                     90 Days
                 </a>
             </div>
@@ -27,7 +35,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
             @if(empty($analytics['brokers']))
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="bg-white/90 backdrop-blur-sm overflow-hidden shadow-card rounded-xl">
                     <div class="p-6 text-center">
                         <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -100,12 +108,12 @@
             @endif
 
             {{-- Broker Comparison Table --}}
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white/90 backdrop-blur-sm overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 rounded-xl">
                 <div class="p-6">
-                    <h3 class="text-lg font-semibold mb-4">📊 Broker Overview</h3>
+                    <h2 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">📊 Broker Overview</h2>
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
+                            <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Broker</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Accounts</th>
@@ -183,9 +191,9 @@
 
             {{-- Detailed Broker Cards --}}
             @foreach($analytics['brokers'] as $broker)
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white/90 backdrop-blur-sm overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 rounded-xl">
                 <div class="p-6">
-                    <h3 class="text-xl font-bold mb-6 text-gray-900 border-b pb-2">
+                    <h2 class="text-2xl font-bold mb-6 bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent border-b pb-2">
                         <x-broker-name :broker="$broker['broker_name']" class="text-indigo-600 hover:text-indigo-900" />
                     </h3>
 
@@ -213,7 +221,7 @@
                                 </div>
                                 <div class="flex justify-between">
                                     <span class="text-gray-600">Avg Balance:</span>
-                                    <span class="font-semibold">{{ $displayCurrency }} {{ number_format($broker['accounts']['avg_balance'], 2) }}</span>
+                                    <span class="font-semibold">{{ $broker['accounts']['avg_balance_currency'] ?? 'USD' }} {{ number_format($broker['accounts']['avg_balance'], 2) }}</span>
                                 </div>
                             </div>
                         </div>
@@ -289,7 +297,7 @@
                         <h4 class="font-semibold text-gray-700 mb-3">📉 Average Spreads (Top Symbols)</h4>
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
+                                <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
                                     <tr>
                                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Symbol</th>
                                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Avg Spread (Pips)</th>
@@ -340,9 +348,9 @@
 
             {{-- Top Traded Symbols --}}
             @if(!empty($analytics['top_symbols']))
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white/90 backdrop-blur-sm overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 rounded-xl">
                 <div class="p-6">
-                    <h3 class="text-lg font-semibold mb-4">🔥 Top Traded Symbols (All Brokers)</h3>
+                    <h2 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">🔥 Top Traded Symbols (All Brokers)</h2>
                     <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
                         @foreach($analytics['top_symbols'] as $symbol)
                         <div class="rounded-lg p-4 text-center border border-indigo-200" style="background: linear-gradient(to bottom right, #eef2ff, #e0e7ff);">

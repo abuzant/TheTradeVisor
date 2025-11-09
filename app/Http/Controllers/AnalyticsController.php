@@ -136,11 +136,12 @@ class AnalyticsController extends Controller
         // Try new country_code field first, fallback to detected_country
         $query = TradingAccount::where('is_active', true);
         
-        // Check if we have country_code data
+        // Check if we have any country data
         $hasCountryCode = TradingAccount::whereNotNull('country_code')->exists();
+        $hasDetectedCountry = TradingAccount::whereNotNull('detected_country')->exists();
         
         if ($hasCountryCode) {
-            return $query->select('country_code', 'country_name', DB::raw('COUNT(*) as accounts'), DB::raw('SUM(balance) as total_balance'))
+            $data = $query->select('country_code', 'country_name', DB::raw('COUNT(*) as accounts'), DB::raw('SUM(balance) as total_balance'))
                 ->whereNotNull('country_code')
                 ->groupBy('country_code', 'country_name')
                 ->orderBy('accounts', 'desc')
@@ -154,23 +155,35 @@ class AnalyticsController extends Controller
                         'balance' => round($item->total_balance, 2),
                     ];
                 });
+        } elseif ($hasDetectedCountry) {
+            $data = $query->select('detected_country', DB::raw('COUNT(*) as accounts'), DB::raw('SUM(balance) as total_balance'))
+                ->whereNotNull('detected_country')
+                ->groupBy('detected_country')
+                ->orderBy('accounts', 'desc')
+                ->limit(10)
+                ->get()
+                ->map(function($item) {
+                    return [
+                        'country' => $item->detected_country,
+                        'country_code' => null,
+                        'accounts' => $item->accounts,
+                        'balance' => round($item->total_balance, 2),
+                    ];
+                });
+        } else {
+            // No country data available - return a message
+            return collect([
+                [
+                    'country' => 'No location data available',
+                    'country_code' => null,
+                    'accounts' => TradingAccount::where('is_active', true)->count(),
+                    'balance' => round(TradingAccount::where('is_active', true)->sum('balance'), 2),
+                    'note' => 'Country detection requires IP geolocation to be enabled'
+                ]
+            ]);
         }
         
-        // Fallback to old detected_country field
-        return $query->select('detected_country', DB::raw('COUNT(*) as accounts'), DB::raw('SUM(balance) as total_balance'))
-            ->whereNotNull('detected_country')
-            ->groupBy('detected_country')
-            ->orderBy('accounts', 'desc')
-            ->limit(10)
-            ->get()
-            ->map(function($item) {
-                return [
-                    'country' => $item->detected_country,
-                    'country_code' => null,
-                    'accounts' => $item->accounts,
-                    'balance' => round($item->total_balance, 2),
-                ];
-            });
+        return $data;
     }
 
     /**
@@ -191,6 +204,7 @@ class AnalyticsController extends Controller
      */
     private function getMarketSentiment()
     {
+        // Get open positions
         $positions = Position::select('symbol', 'type', DB::raw('COUNT(*) as count'))
             ->where('is_open', true)
             ->whereNotNull('symbol')
@@ -198,34 +212,73 @@ class AnalyticsController extends Controller
             ->groupBy('symbol', 'type')
             ->get();
 
+        // Also get recent deals (last 24 hours) for additional sentiment
+        $recentDeals = Deal::select('symbol', 'type', DB::raw('COUNT(*) as count'))
+            ->whereNotNull('symbol')
+            ->where('symbol', '!=', '')
+            ->where('time', '>=', now()->subHours(24))
+            ->whereIn('type', ['buy', 'sell'])
+            ->groupBy('symbol', 'type')
+            ->get();
+
         $sentiment = [];
 
+        // Process open positions
         foreach ($positions as $position) {
             $normalizedSymbol = \App\Models\SymbolMapping::normalize($position->symbol);
             if (!isset($sentiment[$normalizedSymbol])) {
-                $sentiment[$normalizedSymbol] = ['buy' => 0, 'sell' => 0];
+                $sentiment[$normalizedSymbol] = ['buy' => 0, 'sell' => 0, 'recent_buy' => 0, 'recent_sell' => 0];
             }
-            // Accumulate counts for each type
             $sentiment[$normalizedSymbol][$position->type] += $position->count;
+        }
+
+        // Process recent deals
+        foreach ($recentDeals as $deal) {
+            $normalizedSymbol = \App\Models\SymbolMapping::normalize($deal->symbol);
+            if (!isset($sentiment[$normalizedSymbol])) {
+                $sentiment[$normalizedSymbol] = ['buy' => 0, 'sell' => 0, 'recent_buy' => 0, 'recent_sell' => 0];
+            }
+            $sentiment[$normalizedSymbol]['recent_' . $deal->type] += $deal->count;
         }
 
         // Calculate sentiment percentage
         $result = [];
         foreach ($sentiment as $symbol => $data) {
             $total = $data['buy'] + $data['sell'];
-            if ($total > 5) { // Only show symbols with significant activity
+            $recentTotal = $data['recent_buy'] + $data['recent_sell'];
+            
+            // Include symbols with either open positions OR recent activity
+            if ($total > 0 || $recentTotal > 0) {
+                // Use open positions for primary sentiment, recent activity as secondary
+                $buyPercent = $total > 0 ? round(($data['buy'] / $total) * 100, 1) : 
+                             ($recentTotal > 0 ? round(($data['recent_buy'] / $recentTotal) * 100, 1) : 50);
+                $sellPercent = $total > 0 ? round(($data['sell'] / $total) * 100, 1) : 
+                              ($recentTotal > 0 ? round(($data['recent_sell'] / $recentTotal) * 100, 1) : 50);
+                
+                // Determine sentiment
+                $sentimentType = 'neutral';
+                if ($buyPercent > 60) $sentimentType = 'bullish';
+                elseif ($sellPercent > 60) $sentimentType = 'bearish';
+                elseif ($buyPercent > 55) $sentimentType = 'slight_bullish';
+                elseif ($sellPercent > 55) $sentimentType = 'slight_bearish';
+                
                 $result[] = [
                     'symbol' => $symbol,
-                    'buy_percent' => round(($data['buy'] / $total) * 100, 1),
-                    'sell_percent' => round(($data['sell'] / $total) * 100, 1),
-                    'total' => $total,
+                    'buy_percent' => $buyPercent,
+                    'sell_percent' => $sellPercent,
+                    'total_positions' => $total,
+                    'recent_activity' => $recentTotal,
+                    'sentiment_type' => $sentimentType,
+                    'dominant' => $buyPercent > $sellPercent ? 'buy' : 'sell',
                 ];
             }
         }
 
-        // Sort by total positions
+        // Sort by total activity (positions + recent)
         usort($result, function($a, $b) {
-            return $b['total'] - $a['total'];
+            $activityA = $a['total_positions'] + $a['recent_activity'];
+            $activityB = $b['total_positions'] + $b['recent_activity'];
+            return $activityB - $activityA;
         });
 
         return array_slice($result, 0, 10);

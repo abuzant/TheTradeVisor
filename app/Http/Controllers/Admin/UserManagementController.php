@@ -85,6 +85,7 @@ class UserManagementController extends Controller
             }),
             'member_since' => $user->created_at->diffForHumans(),
             'last_login' => $user->last_login_at ? $user->last_login_at->diffForHumans() : 'Never',
+            'display_currency' => $displayCurrency,
         ];
 
         return view('admin.users.show', compact('user', 'stats'));
