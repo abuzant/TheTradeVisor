@@ -144,3 +144,17 @@ UPDATE rate_limit_settings SET value = 500 WHERE key = 'burst_limit';
 3. Consider adding rate limit statistics dashboard
 4. Add email notification when account is reset (optional)
 5. Consider adding "Download backup before reset" option (optional)
+
+
+---
+
+## 👨‍💻 Author & Contact
+
+**Ruslan Abuzant**  
+📧 Email: [ruslan@abuzant.com](mailto:ruslan@abuzant.com)  
+🌐 Website: [https://abuzant.com](https://abuzant.com)  
+💼 LinkedIn: [linkedin.com/in/ruslanabuzant](https://linkedin.com/in/ruslanabuzant)
+
+For project support and inquiries:  
+�� [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  
+🌐 [https://thetradevisor.com](https://thetradevisor.com)

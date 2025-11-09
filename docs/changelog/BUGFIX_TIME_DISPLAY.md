@@ -216,3 +216,17 @@ All time display issues have been resolved. Times now display correctly across t
 ---
 
 **Note:** The custom accessor methods remain in the models for backward compatibility and to handle edge cases with MT5 date formats. The datetime casts work in conjunction with these accessors to provide robust date/time handling.
+
+
+---
+
+## 👨‍💻 Author & Contact
+
+**Ruslan Abuzant**  
+📧 Email: [ruslan@abuzant.com](mailto:ruslan@abuzant.com)  
+🌐 Website: [https://abuzant.com](https://abuzant.com)  
+💼 LinkedIn: [linkedin.com/in/ruslanabuzant](https://linkedin.com/in/ruslanabuzant)
+
+For project support and inquiries:  
+�� [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  
+🌐 [https://thetradevisor.com](https://thetradevisor.com)
