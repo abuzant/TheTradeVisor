@@ -12,22 +12,6 @@
                 </h1>
                 <p class="mt-1 text-sm text-gray-600">Real-time insights from traders worldwide</p>
             </div>
-
-            {{-- Time Period Filter --}}
-            <div class="flex gap-2">
-                <a href="{{ route('analytics', ['days' => 7]) }}"
-                   class="px-4 py-2 rounded-lg font-medium transition-all duration-300 {{ $days == 7 ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm' }}">
-                    7 Days
-                </a>
-                <a href="{{ route('analytics', ['days' => 30]) }}"
-                   class="px-4 py-2 rounded-lg font-medium transition-all duration-300 {{ $days == 30 ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm' }}">
-                    30 Days
-                </a>
-                <a href="{{ route('analytics', ['days' => 90]) }}"
-                   class="px-4 py-2 rounded-lg font-medium transition-all duration-300 {{ $days == 90 ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm' }}">
-                    90 Days
-                </a>
-            </div>
         </div>
     </x-slot>
 
@@ -46,6 +30,30 @@
                         <p class="text-sm text-blue-700">
                             <strong>Global Analytics:</strong> Real-time insights from thousands of traders worldwide. All data is anonymized and aggregated.
                         </p>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Time Period Selector --}}
+            <div class="bg-white/90 backdrop-blur-sm overflow-hidden shadow-card rounded-xl p-4 mb-6">
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">Select Time Period</h3>
+                        <p class="text-sm text-gray-600">View analytics for different time ranges</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <a href="{{ route('analytics', ['days' => 1]) }}"
+                           class="px-4 py-2 rounded-lg font-medium transition-all duration-300 {{ $days == 1 ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm border border-gray-200' }}">
+                            Today
+                        </a>
+                        <a href="{{ route('analytics', ['days' => 7]) }}"
+                           class="px-4 py-2 rounded-lg font-medium transition-all duration-300 {{ $days == 7 ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm border border-gray-200' }}">
+                            7 Days
+                        </a>
+                        <a href="{{ route('analytics', ['days' => 30]) }}"
+                           class="px-4 py-2 rounded-lg font-medium transition-all duration-300 {{ $days == 30 ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm border border-gray-200' }}">
+                            30 Days
+                        </a>
                     </div>
                 </div>
             </div>

@@ -24,7 +24,10 @@ class AnalyticsController extends Controller
             return view('analytics.locked');
         }
 
-        $days = $request->get('days', 30);
+        // Restrict days to only allowed values
+        $requestedDays = $request->get('days', 30);
+        $days = in_array($requestedDays, [1, 7, 30]) ? $requestedDays : 7;
+        
         $displayCurrency = $user->display_currency ?? 'USD';
 
         // Cache analytics for 5 minutes with days parameter
@@ -141,43 +144,76 @@ class AnalyticsController extends Controller
         $hasDetectedCountry = TradingAccount::whereNotNull('detected_country')->exists();
         
         if ($hasCountryCode) {
-            $data = $query->select('country_code', 'country_name', DB::raw('COUNT(*) as accounts'), DB::raw('SUM(balance) as total_balance'))
-                ->whereNotNull('country_code')
-                ->groupBy('country_code', 'country_name')
-                ->orderBy('accounts', 'desc')
-                ->limit(10)
-                ->get()
-                ->map(function($item) {
-                    return [
-                        'country' => $item->country_name ?? $item->country_code,
-                        'country_code' => $item->country_code,
-                        'accounts' => $item->accounts,
-                        'balance' => round($item->total_balance, 2),
-                    ];
-                });
+            $accounts = $query->whereNotNull('country_code')->get();
+            $grouped = $accounts->groupBy('country_code');
+            
+            $data = $grouped->map(function($accountsByCountry, $countryCode) {
+                $totalBalanceUSD = 0;
+                $currencyService = app(\App\Services\CurrencyService::class);
+                
+                foreach ($accountsByCountry as $account) {
+                    // Convert each account's balance to USD
+                    $balanceUSD = $currencyService->convert(
+                        $account->balance,
+                        $account->account_currency ?? 'USD',
+                        'USD'
+                    );
+                    $totalBalanceUSD += $balanceUSD;
+                }
+                
+                return [
+                    'country' => $accountsByCountry->first()->country_name ?? $countryCode,
+                    'country_code' => $countryCode,
+                    'accounts' => $accountsByCountry->count(),
+                    'balance' => round($totalBalanceUSD, 2),
+                ];
+            })->sortByDesc('accounts')->take(10)->values();
         } elseif ($hasDetectedCountry) {
-            $data = $query->select('detected_country', DB::raw('COUNT(*) as accounts'), DB::raw('SUM(balance) as total_balance'))
-                ->whereNotNull('detected_country')
-                ->groupBy('detected_country')
-                ->orderBy('accounts', 'desc')
-                ->limit(10)
-                ->get()
-                ->map(function($item) {
-                    return [
-                        'country' => $item->detected_country,
-                        'country_code' => null,
-                        'accounts' => $item->accounts,
-                        'balance' => round($item->total_balance, 2),
-                    ];
-                });
+            $accounts = $query->whereNotNull('detected_country')->get();
+            $grouped = $accounts->groupBy('detected_country');
+            
+            $data = $grouped->map(function($accountsByCountry, $country) {
+                $totalBalanceUSD = 0;
+                $currencyService = app(\App\Services\CurrencyService::class);
+                
+                foreach ($accountsByCountry as $account) {
+                    // Convert each account's balance to USD
+                    $balanceUSD = $currencyService->convert(
+                        $account->balance,
+                        $account->account_currency ?? 'USD',
+                        'USD'
+                    );
+                    $totalBalanceUSD += $balanceUSD;
+                }
+                
+                return [
+                    'country' => $country,
+                    'country_code' => null,
+                    'accounts' => $accountsByCountry->count(),
+                    'balance' => round($totalBalanceUSD, 2),
+                ];
+            })->sortByDesc('accounts')->take(10)->values();
         } else {
             // No country data available - return a message
+            $accounts = TradingAccount::where('is_active', true)->get();
+            $totalBalanceUSD = 0;
+            $currencyService = app(\App\Services\CurrencyService::class);
+            
+            foreach ($accounts as $account) {
+                $balanceUSD = $currencyService->convert(
+                    $account->balance,
+                    $account->account_currency ?? 'USD',
+                    'USD'
+                );
+                $totalBalanceUSD += $balanceUSD;
+            }
+            
             return collect([
                 [
                     'country' => 'No location data available',
                     'country_code' => null,
-                    'accounts' => TradingAccount::where('is_active', true)->count(),
-                    'balance' => round(TradingAccount::where('is_active', true)->sum('balance'), 2),
+                    'accounts' => $accounts->count(),
+                    'balance' => round($totalBalanceUSD, 2),
                     'note' => 'Country detection requires IP geolocation to be enabled'
                 ]
             ]);

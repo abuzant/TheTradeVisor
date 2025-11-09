@@ -28,8 +28,8 @@ class CountryAnalyticsController extends Controller
                 ->selectRaw('COUNT(DISTINCT trading_accounts.id) as account_count, SUM(balance) as total_balance')
                 ->leftJoin('deals', 'trading_accounts.id', '=', 'deals.trading_account_id')
                 ->where(function ($query) use ($startDate) {
-                    $query->whereNull('deals.time_close')
-                        ->orWhere('deals.time_close', '>=', $startDate);
+                    $query->whereNull('deals.time')
+                        ->orWhere('deals.time', '>=', $startDate);
                 })
                 ->groupBy('country_code', 'country_name')
                 ->get()
@@ -38,7 +38,7 @@ class CountryAnalyticsController extends Controller
                     $stats = Deal::whereHas('tradingAccount', function ($query) use ($country) {
                         $query->where('country_code', $country->country_code);
                     })
-                    ->where('time_close', '>=', $startDate)
+                    ->where('time', '>=', $startDate)
                     ->selectRaw('
                         COUNT(*) as total_trades,
                         SUM(CASE WHEN profit > 0 THEN 1 ELSE 0 END) as winning_trades,
@@ -86,7 +86,7 @@ class CountryAnalyticsController extends Controller
                     ->whereNotNull('country_code');
             })
             ->where('symbol', $symbol)
-            ->where('time_close', '>=', $startDate)
+            ->where('time', '>=', $startDate)
             ->join('trading_accounts', 'deals.trading_account_id', '=', 'trading_accounts.id')
             ->select('trading_accounts.country_code', 'trading_accounts.country_name')
             ->selectRaw('
@@ -139,7 +139,7 @@ class CountryAnalyticsController extends Controller
                             ->where('broker_name', $broker)
                             ->where('country_code', $country->country_code);
                     })
-                    ->where('time_close', '>=', $startDate)
+                    ->where('time', '>=', $startDate)
                     ->selectRaw('
                         COUNT(*) as total_trades,
                         SUM(profit) as total_profit
@@ -177,8 +177,8 @@ class CountryAnalyticsController extends Controller
                 $query->where('user_id', $userId)
                     ->where('country_code', $countryCode);
             })
-            ->where('time_close', '>=', $startDate)
-            ->selectRaw('DAYOFWEEK(time_close) as day, COUNT(*) as count')
+            ->where('time', '>=', $startDate)
+            ->selectRaw('DAYOFWEEK(time) as day, COUNT(*) as count')
             ->groupBy('day')
             ->pluck('count', 'day')
             ->toArray();
@@ -188,7 +188,7 @@ class CountryAnalyticsController extends Controller
                 $query->where('user_id', $userId)
                     ->where('country_code', $countryCode);
             })
-            ->where('time_close', '>=', $startDate)
+            ->where('time', '>=', $startDate)
             ->select('symbol')
             ->selectRaw('COUNT(*) as trade_count, SUM(profit) as total_profit')
             ->groupBy('symbol')
