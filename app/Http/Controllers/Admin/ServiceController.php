@@ -93,13 +93,28 @@ class ServiceController extends Controller
         // Extract instance number from backend-N format
         $instanceNum = str_replace('backend-', '', $instance);
         $pidFile = "/run/nginx-backend-{$instanceNum}.pid";
+        $port = 8080 + (int)$instanceNum; // 8081, 8082, 8083, 8084
         
         // Check if PID file exists and process is running
         $isRunning = false;
+        
         if (file_exists($pidFile)) {
             $pid = trim(file_get_contents($pidFile));
-            if ($pid && posix_kill((int)$pid, 0)) {
+            if ($pid) {
+                // Use ps command to check if process exists (more reliable than posix_kill)
+                $result = shell_exec("ps -p {$pid} -o pid= 2>/dev/null");
+                if (!empty(trim($result))) {
+                    $isRunning = true;
+                }
+            }
+        }
+        
+        // Double-check by testing port connectivity
+        if (!$isRunning) {
+            $connection = @fsockopen('127.0.0.1', $port, $errno, $errstr, 1);
+            if ($connection) {
                 $isRunning = true;
+                fclose($connection);
             }
         }
         
