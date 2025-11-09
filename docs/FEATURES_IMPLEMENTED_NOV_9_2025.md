@@ -257,3 +257,16 @@ November 9, 2025 marks a major milestone with the successful implementation of:
 **All features are production-ready and fully functional!** 🎉
 
 The platform now provides professional-grade trading analytics with a beautiful, intuitive interface that rivals industry-leading solutions.
+
+---
+
+## 👨‍💻 Author & Contact
+
+**Ruslan Abuzant**  
+📧 Email: [ruslan@abuzant.com](mailto:ruslan@abuzant.com)  
+🌐 Website: [https://abuzant.com](https://abuzant.com)  
+💼 LinkedIn: [linkedin.com/in/ruslanabuzant](https://linkedin.com/in/ruslanabuzant)
+
+For project support and inquiries:  
+📧 [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  
+🌐 [https://thetradevisor.com](https://thetradevisor.com)
