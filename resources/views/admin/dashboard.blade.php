@@ -225,7 +225,19 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $account->account_number ?? 'Anonymous' }}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $account->account_currency }} {{ number_format($account->balance, 2) }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $account->detected_country ?? 'Unknown' }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+    @if($account->country_code)
+        <span class="inline-flex items-center">
+            {!! \App\Helpers\CountryHelper::getFlag($account->country_code) !!}
+            {{ $account->country_name ?? $account->detected_country }}
+        </span>
+    @else
+        <span class="inline-flex items-center">
+            <i class="fi fi-globe mr-2"></i>
+            {{ $account->detected_country ?? 'Unknown' }}
+        </span>
+    @endif
+</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {{ $account->last_sync_at ? $account->last_sync_at->diffForHumans() : 'Never' }}
                         </td>

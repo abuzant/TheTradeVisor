@@ -1,3 +1,5 @@
+@import 'https://cdnjs.cloudflare.com/ajax/libs/flag-icons/6.6.6/css/flag-icons.min.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -17,5 +19,16 @@
     
     .nav-link-active {
         @apply bg-gradient-to-r from-indigo-500 to-purple-600 text-white;
+    }
+    
+    /* Flag icon styling */
+    .fi {
+        margin-right: 0.5rem;
+        font-size: 1.25rem;
+        line-height: 1;
+    }
+    
+    .fi.fis {
+        font-size: 1rem;
     }
 }

@@ -5,22 +5,19 @@ namespace App\Helpers;
 class CountryHelper
 {
     /**
-     * Get flag emoji for country code
+     * Get flag icon for country code using flag-icons CSS
      */
     public static function getFlag(string $countryCode): string
     {
         if (strlen($countryCode) !== 2) {
-            return '🌍';
+            return '<i class="fi fi-globe"></i>';
         }
 
-        $countryCode = strtoupper($countryCode);
+        $countryCode = strtolower($countryCode);
         
-        // Convert country code to flag emoji
-        // Flag emojis are created by combining regional indicator symbols
-        $firstLetter = mb_chr(ord($countryCode[0]) - ord('A') + 0x1F1E6);
-        $secondLetter = mb_chr(ord($countryCode[1]) - ord('A') + 0x1F1E6);
-        
-        return $firstLetter . $secondLetter;
+        // Use flag-icons CSS classes
+        // Format: <span class="fi fi-us"></span> for United States
+        return '<span class="fi fi-' . $countryCode . '"></span>';
     }
 
     /**
