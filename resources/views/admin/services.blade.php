@@ -162,6 +162,138 @@
                 </div>
             </div>
 
+            {{-- Backend Instances --}}
+            @if(isset($backendStatuses))
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">🔀 Backend Instances (Multi-Instance Architecture)</h3>
+                        <span class="px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                            Load Balanced
+                        </span>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                        @foreach($backendStatuses as $instanceName => $instance)
+                            <div class="border border-gray-200 rounded-lg p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h4 class="text-sm font-semibold text-gray-900">{{ $instance['name'] }}</h4>
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $instance['status']['active'] ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                        {{ $instance['status']['active'] ? '●' : '○' }}
+                                    </span>
+                                </div>
+                                <div class="text-xs text-gray-500 mb-3">
+                                    Status: <span class="font-medium">{{ $instance['status']['status'] }}</span>
+                                </div>
+                                @if($instance['can_restart'])
+                                    <form method="POST" action="{{ route('admin.services.backend.restart', $instanceName) }}"
+                                          onsubmit="return confirm('Restart {{ $instance['name'] }}?')">
+                                        @csrf
+                                        <button type="submit" class="w-full px-3 py-1.5 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-xs font-medium">
+                                            🔄 Restart
+                                        </button>
+                                    </form>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                    
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <p class="text-sm text-blue-800">
+                            <strong>ℹ️ Info:</strong> Traffic is distributed across 4 backend instances using least-connections algorithm. 
+                            Each instance has its own PHP-FPM pool (25 workers) for better load distribution and fault tolerance.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            {{-- Multi-Instance Management Commands --}}
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">🎛️ Multi-Instance Management</h3>
+                    
+                    <div class="mb-6">
+                        <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                            <span class="bg-indigo-100 text-indigo-800 text-xs font-medium px-2 py-1 rounded mr-2">Backend</span>
+                            Backend Instance Control
+                        </h4>
+                        <div class="bg-gray-900 rounded-md p-4 space-y-3">
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">🚀 Start all backend instances:</p>
+                                <code class="text-sm text-green-400 font-mono">./start-backends.sh</code>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">🛑 Stop all backend instances:</p>
+                                <code class="text-sm text-green-400 font-mono">./stop-backends.sh</code>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">📊 Check backend instances status:</p>
+                                <code class="text-sm text-green-400 font-mono">./status-backends.sh</code>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">🔄 Restart individual backend (example for backend 1):</p>
+                                <code class="text-sm text-green-400 font-mono">sudo kill -QUIT $(cat /run/nginx-backend-1.pid) && sudo nginx -c /etc/nginx/backends/nginx-backend-1-master.conf</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-6">
+                        <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                            <span class="bg-purple-100 text-purple-800 text-xs font-medium px-2 py-1 rounded mr-2">Logs</span>
+                            Multi-Instance Logging
+                        </h4>
+                        <div class="bg-gray-900 rounded-md p-4 space-y-3">
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">📋 View all backend error logs:</p>
+                                <code class="text-sm text-green-400 font-mono">tail -f /var/log/nginx/backend-*-error.log</code>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">📋 View all PHP-FPM pool logs:</p>
+                                <code class="text-sm text-green-400 font-mono">tail -f /var/log/php8.3-fpm-pool*.log</code>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">📋 View specific backend logs (example for backend 1):</p>
+                                <code class="text-sm text-green-400 font-mono">tail -f /var/log/nginx/backend-1-error.log</code>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">📋 View load balancer logs:</p>
+                                <code class="text-sm text-green-400 font-mono">sudo tail -f /var/log/nginx/thetradevisor-error.log</code>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">🔍 Monitor load distribution (watch which backend handles requests):</p>
+                                <code class="text-sm text-green-400 font-mono">watch -n 1 'tail -n 1 /var/log/nginx/backend-*-access.log'</code>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                            <span class="bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded mr-2">Test</span>
+                            Backend Connectivity Testing
+                        </h4>
+                        <div class="bg-gray-900 rounded-md p-4 space-y-3">
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">🧪 Test all backend instances:</p>
+                                <code class="text-sm text-green-400 font-mono">for i in 1 2 3 4; do curl -s -o /dev/null -w "Backend ${i}: %{http_code}\n" http://127.0.0.1:808${i}; done</code>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">🧪 Test specific backend (example for backend 1):</p>
+                                <code class="text-sm text-green-400 font-mono">curl -I http://127.0.0.1:8081</code>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">🔍 Check which backend handled your request:</p>
+                                <code class="text-sm text-green-400 font-mono">curl -I https://thetradevisor.com | grep X-Backend-Instance</code>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-400 mb-1">📊 Check PHP-FPM pool status:</p>
+                                <code class="text-sm text-green-400 font-mono">netstat -tlnp | grep "127.0.0.1:900[1-4]"</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {{-- System Information --}}
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">

@@ -11,11 +11,18 @@ use Illuminate\Support\Facades\Cache;
 class ServiceController extends Controller
 {
     private $services = [
-        'nginx' => 'Nginx Web Server',
-        'php8.3-fpm' => 'PHP-FPM',
+        'nginx' => 'Nginx Load Balancer',
+        'php8.3-fpm' => 'PHP-FPM (All Pools)',
         'postgresql' => 'PostgreSQL Database',
         'redis' => 'Redis Cache',
         'supervisor' => 'Supervisor (Queue Workers)',
+    ];
+    
+    private $backendInstances = [
+        'backend-1' => 'Backend Instance 1 (Port 8081)',
+        'backend-2' => 'Backend Instance 2 (Port 8082)',
+        'backend-3' => 'Backend Instance 3 (Port 8083)',
+        'backend-4' => 'Backend Instance 4 (Port 8084)',
     ];
     
     private $horizonService = 'horizon';
@@ -32,10 +39,20 @@ class ServiceController extends Controller
             ];
         }
         
+        // Add backend instance statuses
+        $backendStatuses = [];
+        foreach ($this->backendInstances as $instance => $name) {
+            $backendStatuses[$instance] = [
+                'name' => $name,
+                'status' => $this->getBackendStatus($instance),
+                'can_restart' => true,
+            ];
+        }
+        
         // Add Horizon status (supervisor-based)
         $horizonStatus = $this->getHorizonStatus();
         
-        return view('admin.services', compact('serviceStatuses', 'horizonStatus'));
+        return view('admin.services', compact('serviceStatuses', 'backendStatuses', 'horizonStatus'));
     }
     
     private function getHorizonStatus()
@@ -71,6 +88,27 @@ class ServiceController extends Controller
         ];
     }
     
+    private function getBackendStatus($instance)
+    {
+        // Extract instance number from backend-N format
+        $instanceNum = str_replace('backend-', '', $instance);
+        $pidFile = "/run/nginx-backend-{$instanceNum}.pid";
+        
+        // Check if PID file exists and process is running
+        $isRunning = false;
+        if (file_exists($pidFile)) {
+            $pid = trim(file_get_contents($pidFile));
+            if ($pid && posix_kill((int)$pid, 0)) {
+                $isRunning = true;
+            }
+        }
+        
+        return [
+            'active' => $isRunning,
+            'status' => $isRunning ? 'running' : 'stopped',
+        ];
+    }
+    
     public function restart(Request $request, $service)
     {
         if (!isset($this->services[$service])) {
@@ -87,6 +125,43 @@ class ServiceController extends Controller
             } else {
                 return redirect()->route('admin.services')
                     ->with('error', "Failed to restart {$this->services[$service]}: " . $result->errorOutput());
+            }
+        } catch (\Exception $e) {
+            return redirect()->route('admin.services')
+                ->with('error', 'Error: ' . $e->getMessage());
+        }
+    }
+    
+    public function restartBackend(Request $request, $instance)
+    {
+        if (!isset($this->backendInstances[$instance])) {
+            return redirect()->route('admin.services')
+                ->with('error', 'Invalid backend instance');
+        }
+        
+        try {
+            // Extract instance number from backend-N format
+            $instanceNum = str_replace('backend-', '', $instance);
+            $pidFile = "/run/nginx-backend-{$instanceNum}.pid";
+            
+            // Stop existing process gracefully
+            if (file_exists($pidFile)) {
+                $pid = trim(file_get_contents($pidFile));
+                if ($pid) {
+                    Process::run("sudo kill -QUIT {$pid}");
+                    usleep(500000); // Wait 0.5 seconds
+                }
+            }
+            
+            // Start new process
+            $result = Process::run("sudo nginx -c /etc/nginx/backends/nginx-backend-{$instanceNum}-master.conf");
+            
+            if ($result->successful()) {
+                return redirect()->route('admin.services')
+                    ->with('success', "{$this->backendInstances[$instance]} restarted successfully");
+            } else {
+                return redirect()->route('admin.services')
+                    ->with('error', "Failed to restart {$this->backendInstances[$instance]}: " . $result->errorOutput());
             }
         } catch (\Exception $e) {
             return redirect()->route('admin.services')
@@ -135,10 +210,26 @@ class ServiceController extends Controller
             // Clear Nginx cache
             Process::run('sudo rm -rf /var/cache/nginx/fastcgi/*');
             
-            // Restart PHP-FPM
+            // Restart PHP-FPM (all pools)
             Process::run('sudo systemctl restart php8.3-fpm');
             
-            // Reload Nginx
+            // Restart backend instances
+            for ($i = 1; $i <= 4; $i++) {
+                $pidFile = "/run/nginx-backend-{$i}.pid";
+                if (file_exists($pidFile)) {
+                    $pid = trim(file_get_contents($pidFile));
+                    if ($pid) {
+                        Process::run("sudo kill -QUIT {$pid}");
+                    }
+                }
+                usleep(100000); // Wait 0.1 seconds between stops
+            }
+            usleep(500000); // Wait 0.5 seconds before starting
+            for ($i = 1; $i <= 4; $i++) {
+                Process::run("sudo nginx -c /etc/nginx/backends/nginx-backend-{$i}-master.conf");
+            }
+            
+            // Reload Load Balancer Nginx
             Process::run('sudo systemctl reload nginx');
             
             // Rebuild optimized caches

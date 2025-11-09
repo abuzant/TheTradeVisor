@@ -36,16 +36,30 @@ $USE_SUDO rm -rf /var/cache/nginx/fastcgi/*
 echo "✓ Nginx cache cleared"
 echo ""
 
-# PHP-FPM
-echo "🐘 Restarting PHP-FPM..."
+# PHP-FPM (restart main service to reload all pools)
+echo "🐘 Restarting PHP-FPM (all 4 pools)..."
 $USE_SUDO systemctl restart php8.3-fpm
-echo "✓ PHP-FPM restarted"
+echo "✓ PHP-FPM restarted (pools 1-4)"
 echo ""
 
-# Nginx
-echo "🌐 Reloading Nginx..."
+# Backend Nginx instances
+echo "🌐 Restarting backend Nginx instances..."
+for i in 1 2 3 4; do
+    # Stop existing instance
+    if [ -f /run/nginx-backend-${i}.pid ]; then
+        $USE_SUDO kill -QUIT $(cat /run/nginx-backend-${i}.pid) 2>/dev/null || true
+        sleep 0.5
+    fi
+    # Start new instance
+    $USE_SUDO nginx -c /etc/nginx/backends/nginx-backend-${i}-master.conf
+done
+echo "✓ Backend instances restarted"
+echo ""
+
+# Load Balancer Nginx
+echo "🌐 Reloading Load Balancer Nginx..."
 $USE_SUDO systemctl reload nginx
-echo "✓ Nginx reloaded"
+echo "✓ Load balancer reloaded"
 echo ""
 
 # Rebuild Optimized Caches
@@ -71,7 +85,9 @@ echo "📊 Cache Status:"
 echo "  - Laravel: Fresh"
 echo "  - Redis: Empty"
 echo "  - Nginx: Empty"
-echo "  - PHP-FPM: Restarted"
+echo "  - PHP-FPM: Restarted (4 pools)"
+echo "  - Backend Instances: Restarted (4 instances)"
+echo "  - Load Balancer: Reloaded"
 echo "  - Optimized caches: Rebuilt"
 echo ""
-echo "🚀 Your application is now running with clean caches!"
+echo "🚀 Your application is now running with clean caches across all instances!"

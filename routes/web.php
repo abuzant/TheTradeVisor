@@ -6,6 +6,15 @@ use App\Http\Controllers\ApiKeyController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\SymbolMappingController;
 
+// Health check endpoint for Cloudflare
+Route::get('/healthcheck', function () {
+    return response()->json([
+        'status' => 'ok',
+        'timestamp' => now()->toIso8601String(),
+        'service' => 'TheTradeVisor'
+    ], 200);
+})->middleware('throttle:60,1');
+
 // Landing page
 Route::get('/', [App\Http\Controllers\LandingController::class, 'index'])->name('landing');
 
@@ -86,6 +95,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Service Management
     Route::get('/services', [App\Http\Controllers\Admin\ServiceController::class, 'index'])->name('services');
     Route::post('/services/{service}/restart', [App\Http\Controllers\Admin\ServiceController::class, 'restart'])->name('services.restart');
+    Route::post('/services/backend/{instance}/restart', [App\Http\Controllers\Admin\ServiceController::class, 'restartBackend'])->name('services.backend.restart');
     Route::post('/services/horizon/{action}', [App\Http\Controllers\Admin\ServiceController::class, 'horizonControl'])->name('services.horizon');
     Route::post('/services/clear-all-caches', [App\Http\Controllers\Admin\ServiceController::class, 'clearAllCaches'])->name('services.clear-caches');
 
