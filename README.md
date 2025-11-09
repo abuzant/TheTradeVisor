@@ -4,10 +4,18 @@
 
 A comprehensive, production-ready trading analytics platform built with Laravel 11, featuring enterprise-level infrastructure including intelligent caching, circuit breakers, real-time queue monitoring, and advanced performance optimization.
 
-[![Laravel](https://img.shields.io/badge/Laravel-11-red.svg)](https://laravel.com)
-[![PHP](https://img.shields.io/badge/PHP-8.3-blue.svg)](https://php.net)
+[![Laravel](https://img.shields.io/badge/Laravel-11-red.svg?logo=laravel)](https://laravel.com)
+[![PHP](https://img.shields.io/badge/PHP-8.3-blue.svg?logo=php)](https://php.net)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker)](https://www.docker.com)
+[![Docker Compose](https://img.shields.io/badge/Docker%20Compose-Ready-2496ED.svg?logo=docker)](https://docs.docker.com/compose)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791.svg?logo=postgresql)](https://www.postgresql.org)
+[![Redis](https://img.shields.io/badge/Redis-7-DC382D.svg?logo=redis)](https://redis.io)
+[![Nginx](https://img.shields.io/badge/Nginx-1.24-009639.svg?logo=nginx)](https://nginx.org)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Production Ready](https://img.shields.io/badge/Status-Production%20Ready-brightgreen.svg)](https://thetradevisor.com)
+[![One-Click Deploy](https://img.shields.io/badge/One%20Click%20Deploy-00A8E1.svg)](#-docker-deployment)
+[![Analytics](https://img.shields.io/badge/Analytics-Real--time-FF6B6B.svg)](https://thetradevisor.com/analytics)
+[![MT4/MT5](https://img.shields.io/badge/MT4%2FMT5-Integration-4CAF50.svg)](docs/reference/API_DOCUMENTATION.md)
 
 ## 📚 Documentation
 
@@ -19,6 +27,7 @@ A comprehensive, production-ready trading analytics platform built with Laravel 
 - **[Flag Icons Implementation](docs/FLAG_ICONS_IMPLEMENTATION.md)** - Professional country flags
 
 ### 🚀 Quick Start
+- [Docker Deployment](docs/DOCKER_DEPLOYMENT.md) - 🐳 One-click deployment with Docker
 - [Installation Guide](docs/installation.md) - Complete setup instructions
 - [Quick Start Guide](docs/quick-start.md) - Get running in 5 minutes
 - [Nginx Setup Note](docs/operations/NGINX_SETUP_NOTE.md) - ⚠️ **Important:** Load balancing is optional!
@@ -202,7 +211,150 @@ npm run build
 npm run dev
 ```
 
-## 🚀 Running the Application
+## 🐳 Docker Deployment
+
+### 🚀 One-Click Deployment with Docker
+
+TheTradeVisor now supports Docker for easy, one-click deployment! No need to configure PHP, Nginx, PostgreSQL, or Redis manually - Docker handles everything.
+
+#### Prerequisites
+- Docker & Docker Compose installed
+- Git (to clone the repository)
+
+#### Quick Start (5 minutes)
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/abuzant/TheTradeVisor.git
+cd TheTradeVisor
+
+# 2. One-command installation
+make install
+
+# 3. Access your application!
+# Open http://localhost in your browser
+```
+
+That's it! 🎉 The application is now running with:
+- ✅ PHP 8.3 with all extensions
+- ✅ Nginx web server
+- ✅ PostgreSQL database
+- ✅ Redis cache & queues
+- ✅ Laravel Horizon (queue monitoring)
+- ✅ SSL-ready configuration
+- ✅ Optimized for production
+
+#### Docker Commands
+
+```bash
+# Start all containers
+make up
+
+# Stop all containers
+make down
+
+# View logs
+make logs
+
+# Open shell in container
+make shell
+
+# Run Laravel commands
+make artisan COMMAND="list"
+
+# Clear cache
+make cache-clear
+
+# Complete restart
+make restart
+
+# Clean everything
+make clean
+```
+
+#### Docker Compose Options
+
+```bash
+# Build and start (production)
+docker-compose up -d --build
+
+# View running containers
+docker-compose ps
+
+# Access application logs
+docker-compose logs -f app
+
+# Access database logs
+docker-compose logs -f postgres
+
+# Backup database
+make backup
+
+# Restore database
+make restore FILE=backup.sql
+```
+
+#### Container Architecture
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Nginx         │    │   PHP-FPM       │    │   Laravel       │
+│   (Port 80)     │────│   (Port 9000)   │────│   Application   │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                                                        │
+                       ┌─────────────────┐            │
+                       │   Redis         │────────────┤
+                       │   (Port 6379)   │            │
+                       └─────────────────┘            │
+                                                        │
+                       ┌─────────────────┐            │
+                       │   PostgreSQL    │────────────┘
+                       │   (Port 5432)   │
+                       └─────────────────┘
+```
+
+#### Environment Configuration
+
+The Docker setup includes a pre-configured environment:
+- **Database:** PostgreSQL 15 with optimized settings
+- **Cache:** Redis 7 with persistence
+- **PHP:** 8.3 with OPcache and performance tuning
+- **Nginx:** Optimized configuration with gzip and caching
+- **Security:** All security headers enabled
+
+#### Production Deployment
+
+For production deployment:
+
+```bash
+# 1. Clone and configure
+git clone https://github.com/abuzant/TheTradeVisor.git
+cd TheTradeVisor
+
+# 2. Update environment
+cp docker/.env.docker .env
+# Edit .env with your production settings
+
+# 3. Deploy
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+
+# 4. Install Passport
+docker-compose exec app php artisan passport:install
+```
+
+#### Development with Docker
+
+```bash
+# Development mode with hot reload
+make dev
+
+# Or manually
+docker-compose -f docker-compose.yml -f docker-compose.dev.yml up
+```
+
+---
+
+## 🚀 Traditional Installation (Non-Docker)
 
 ### Development
 
