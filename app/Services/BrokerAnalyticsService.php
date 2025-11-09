@@ -342,11 +342,6 @@ class BrokerAnalyticsService
         $uptimePercentage = $activeAccounts > 0 
             ? round(($recentlySynced / $activeAccounts) * 100, 1) 
             : 0;
-            
-        // If no sync data, give a default score based on account activity
-        if ($avgSyncGap === null && $uptimePercentage === 0) {
-            $uptimePercentage = $activeAccounts > 0 ? 85 : 0; // Default 85% if active but no sync data
-        }
 
         // Average time between syncs
         $avgSyncGap = $accounts->filter(function($account) {
@@ -354,6 +349,11 @@ class BrokerAnalyticsService
         })->map(function($account) {
             return now()->diffInMinutes($account->last_sync_at);
         })->avg();
+            
+        // If no sync data, give a default score based on account activity
+        if ($avgSyncGap === null && $uptimePercentage === 0) {
+            $uptimePercentage = $activeAccounts > 0 ? 85 : 0; // Default 85% if active but no sync data
+        }
 
         return [
             'uptime_percentage' => $uptimePercentage,
