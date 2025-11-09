@@ -21,6 +21,7 @@ return Application::configure(basePath: dirname(__DIR__))
 		        'admin' => \App\Http\Middleware\IsAdmin::class,
 			'recaptcha' => \App\Http\Middleware\VerifyRecaptcha::class,
 			'track.country' => \App\Http\Middleware\TrackCountryMiddleware::class,
+			'track.web.country' => \App\Http\Middleware\TrackWebCountryMiddleware::class,
 			'api.rate.limit' => \App\Http\Middleware\ApiRateLimiter::class,
 			
 		    ]);
@@ -28,6 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Add to web middleware group
 		        $middleware->web(append: [
 		            \App\Http\Middleware\ExtendedRememberMe::class,
+		            \App\Http\Middleware\TrackWebCountryMiddleware::class,
 		        ]);
 
         // Add to api middleware group

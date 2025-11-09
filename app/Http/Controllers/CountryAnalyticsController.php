@@ -16,17 +16,16 @@ class CountryAnalyticsController extends Controller
      */
     public function topTradingCountries(Request $request)
     {
-        $userId = auth()->id();
         $days = $request->input('days', 30);
 
-        $countries = Cache::remember("country_analytics_{$userId}_{$days}", 3600, function () use ($userId, $days) {
+        $countries = Cache::remember("global_country_analytics_{$days}", 3600, function () use ($days) {
             $startDate = now()->subDays($days);
 
-            // Get countries from trading accounts with deal statistics
-            $countries = TradingAccount::where('user_id', $userId)
+            // Get countries from all trading accounts with deal statistics
+            $countries = TradingAccount::where('is_active', true)
                 ->whereNotNull('country_code')
                 ->select('country_code', 'country_name')
-                ->selectRaw('COUNT(DISTINCT trading_accounts.id) as account_count')
+                ->selectRaw('COUNT(DISTINCT trading_accounts.id) as account_count, SUM(balance) as total_balance')
                 ->leftJoin('deals', 'trading_accounts.id', '=', 'deals.trading_account_id')
                 ->where(function ($query) use ($startDate) {
                     $query->whereNull('deals.time_close')
@@ -34,11 +33,10 @@ class CountryAnalyticsController extends Controller
                 })
                 ->groupBy('country_code', 'country_name')
                 ->get()
-                ->map(function ($country) use ($userId, $startDate) {
+                ->map(function ($country) use ($startDate) {
                     // Get deal statistics for this country
-                    $stats = Deal::whereHas('tradingAccount', function ($query) use ($userId, $country) {
-                        $query->where('user_id', $userId)
-                            ->where('country_code', $country->country_code);
+                    $stats = Deal::whereHas('tradingAccount', function ($query) use ($country) {
+                        $query->where('country_code', $country->country_code);
                     })
                     ->where('time_close', '>=', $startDate)
                     ->selectRaw('
@@ -53,6 +51,7 @@ class CountryAnalyticsController extends Controller
                         'country_code' => $country->country_code,
                         'country_name' => $country->country_name,
                         'account_count' => $country->account_count,
+                        'total_balance' => round($country->total_balance ?? 0, 2),
                         'total_trades' => $stats->total_trades ?? 0,
                         'winning_trades' => $stats->winning_trades ?? 0,
                         'win_rate' => $stats->total_trades > 0 
