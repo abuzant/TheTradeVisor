@@ -13,6 +13,11 @@ A comprehensive, production-ready trading analytics platform built with Laravel 
 
 **[📖 Complete Documentation Index →](docs/INDEX.md)** | **[Documentation Overview →](docs/README.md)**
 
+### 🆕 Latest Improvements (November 2025)
+- **[Analytics Improvements](docs/ANALYTICS_IMPROVEMENTS_NOV_9_2025.md)** - Bug fixes and UI enhancements
+- **[Features Implemented](docs/FEATURES_IMPLEMENTED_NOV_9_2025.md)** - Complete feature overview
+- **[Flag Icons Implementation](docs/FLAG_ICONS_IMPLEMENTATION.md)** - Professional country flags
+
 ### 🚀 Quick Start
 - [Installation Guide](docs/installation.md) - Complete setup instructions
 - [Quick Start Guide](docs/quick-start.md) - Get running in 5 minutes
@@ -31,7 +36,11 @@ A comprehensive, production-ready trading analytics platform built with Laravel 
 - **Multi-Platform Support** - Full support for both MT4 and MT5 trading platforms
 - **Multi-Account Management** - Connect and manage unlimited MT4/MT5 trading accounts
 - **Advanced Performance Analytics** - Real-time performance metrics with 80-90% cache hit rate
-- **GeoIP Country Analytics** - Location-based trading insights powered by MaxMind GeoLite2
+- **Global Analytics Dashboard** - Real-time insights from thousands of traders worldwide
+- **Interactive Charts & Visualizations** - Chart.js powered graphs with responsive design
+- **Market Sentiment Analysis** - Buy/sell percentages with sentiment indicators
+- **GeoIP Country Analytics** - Location-based trading insights with professional flag icons
+- **Time Period Filtering** - Flexible date ranges (Today, 7 Days, 30 Days) with validation
 - **Trade History Tracking** - Complete historical data with intelligent caching
 - **Broker Analytics** - Compare broker performance, spreads, and execution quality
 - **Symbol Mapping & Normalization** - Advanced symbol mapping with auto-normalization
