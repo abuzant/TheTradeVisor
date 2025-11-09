@@ -38,7 +38,7 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center">
-                                            <span class="text-2xl mr-3">{{ \App\Helpers\CountryHelper::getFlag($country['country_code']) }}</span>
+                                            <span class="text-2xl mr-3">{!! \App\Helpers\CountryHelper::getFlag($country['country_code']) !!}</span>
                                             <span class="text-sm font-medium text-gray-900">{{ $country['country_name'] }}</span>
                                         </div>
                                     </td>

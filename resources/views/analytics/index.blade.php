@@ -310,7 +310,7 @@
                                         <td class="px-4 py-2 text-sm font-medium text-gray-900">
                                             <div class="flex items-center">
                                                 @if($region['country_code'])
-                                                <span class="mr-2 text-2xl">{{ \App\Helpers\CountryHelper::getFlag($region['country_code']) }}</span>
+                                                <span class="mr-2 text-2xl">{!! \App\Helpers\CountryHelper::getFlag($region['country_code']) !!}</span>
                                                 @endif
                                                 {{ $region['country'] }}
                                             </div>
