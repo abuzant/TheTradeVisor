@@ -2,18 +2,18 @@
 
 ## ✅ Database Cleaned
 
-All data for user `ruslan.abuzant@gmail.com` has been deleted:
+All test data has been deleted:
 
 - **Trading Accounts:** 1 deleted
 - **Deals:** 568 deleted
 - **Positions:** 16 deleted
 - **Orders:** 0 deleted
-- **Raw JSON Files:** All deleted from `storage/app/raw_data/22/`
+- **Raw JSON Files:** All deleted from storage directory
 
-## ✅ User Account Status
+## ✅ Test Account Status
 
-- **Email:** ruslan.abuzant@gmail.com
-- **API Key:** `tvsr_kEYHQbj2Wyr2jXSVEidUoNCiagSK16ZTbWkhzq0v8P29ee7MUPNHPoe3DlWQYJzy`
+- **Email:** [REDACTED]
+- **API Key:** [REDACTED]
 - **Status:** Active
 - **Role:** Admin
 - **Subscription:** Pro

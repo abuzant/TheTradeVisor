@@ -22,6 +22,7 @@ A comprehensive, production-ready trading analytics platform built with Laravel 
 **[📖 Complete Documentation Index →](docs/INDEX.md)** | **[Documentation Overview →](docs/README.md)**
 
 ### 🆕 Latest Improvements (November 2025)
+- **[Dashboard LIVE Positions](docs/features/DASHBOARD_LIVE_POSITIONS.md)** - Real-time exposure visibility across all accounts
 - **[Analytics Improvements](docs/ANALYTICS_IMPROVEMENTS_NOV_9_2025.md)** - Bug fixes and UI enhancements
 - **[Features Implemented](docs/FEATURES_IMPLEMENTED_NOV_9_2025.md)** - Complete feature overview
 - **[Flag Icons Implementation](docs/FLAG_ICONS_IMPLEMENTATION.md)** - Professional country flags
@@ -44,6 +45,7 @@ A comprehensive, production-ready trading analytics platform built with Laravel 
 ### 📈 Trading & Analytics
 - **Multi-Platform Support** - Full support for both MT4 and MT5 trading platforms
 - **Multi-Account Management** - Connect and manage unlimited MT4/MT5 trading accounts
+- **LIVE Open Positions Dashboard** - Real-time exposure visibility across all accounts with animated indicators
 - **Advanced Performance Analytics** - Real-time performance metrics with 80-90% cache hit rate
 - **Global Analytics Dashboard** - Real-time insights from thousands of traders worldwide
 - **Interactive Charts & Visualizations** - Chart.js powered graphs with responsive design

@@ -100,72 +100,102 @@ All responses follow this structure:
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
+| GET | `/api/health` | Public health check |
+| POST | `/api/v1/data/collect` | Submit trading data from MT4/MT5 |
+
+### Data Collection Endpoint
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/v1/data/collect` | Send trading data (positions, orders, deals) |
+
+**Request Body:**
+```json
+{
+  "account": {
+    "account_number": "12345678",
+    "broker_name": "IC Markets",
+    "balance": 10000.00,
+    "equity": 10500.00,
+    "profit": 500.00
+  },
+  "positions": [...],
+  "orders": [...],
+  "deals": [...]
+}
+```
+
+### Future Planned Endpoints
+
+The following endpoints are planned for future releases:
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
 | GET | `/api/accounts` | List all accounts |
 | GET | `/api/accounts/{id}` | Get account details |
-| POST | `/api/accounts` | Create/register account |
-| PUT | `/api/accounts/{id}` | Update account |
-| DELETE | `/api/accounts/{id}` | Delete account |
-
-### Trading Data
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/sync` | Sync trading data |
-| POST | `/api/positions` | Send open positions |
-| POST | `/api/orders` | Send pending orders |
-| POST | `/api/deals` | Send closed deals |
-
-### Analytics
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
 | GET | `/api/analytics/overview` | Get overview stats |
 | GET | `/api/analytics/performance` | Performance metrics |
-| GET | `/api/analytics/countries` | Country analytics |
-
-### Exports
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
 | GET | `/api/export/trades/csv` | Export trades to CSV |
 | GET | `/api/export/trades/pdf` | Export trades to PDF |
 
 ## 📝 Request Examples
 
-### Register Trading Account
+### Health Check
 
 ```http
-POST /api/accounts
-Content-Type: application/json
-Authorization: Bearer tvsr_your_api_key_here
+GET /api/health
+```
 
+**Response:**
+```json
 {
-  "account_number": "12345678",
-  "broker_name": "IC Markets",
-  "broker_server": "ICMarkets-Demo",
-  "account_type": "demo",
-  "account_currency": "USD",
-  "leverage": 500
+  "status": "ok",
+  "service": "TheTradeVisor API",
+  "version": "1.0",
+  "timestamp": "2025-11-10T10:30:00.000Z"
 }
 ```
 
-### Sync Trading Data
+### Submit Trading Data
 
 ```http
-POST /api/sync
+POST /api/v1/data/collect
 Content-Type: application/json
 Authorization: Bearer tvsr_your_api_key_here
 
 {
-  "trading_account_id": 1,
-  "balance": 10000.00,
-  "equity": 10500.00,
-  "margin": 2000.00,
-  "free_margin": 8500.00,
-  "profit": 500.00,
-  "positions": [...],
-  "orders": [...],
-  "deals": [...]
+  "account": {
+    "account_number": "12345678",
+    "broker_name": "IC Markets",
+    "balance": 10000.00,
+    "equity": 10500.00,
+    "profit": 500.00,
+    "margin": 200.00,
+    "free_margin": 9800.00,
+    "margin_level": 525.00
+  },
+  "positions": [
+    {
+      "symbol": "EURUSD",
+      "type": "buy",
+      "volume": 0.1,
+      "open_price": 1.08567,
+      "current_price": 1.08723,
+      "profit": 15.60,
+      "open_time": "2025-11-10T09:15:00.000Z"
+    }
+  ],
+  "orders": [],
+  "deals": [
+    {
+      "symbol": "EURUSD",
+      "type": "buy",
+      "volume": 0.1,
+      "price": 1.08567,
+      "profit": 15.60,
+      "time": "2025-11-10T09:15:00.000Z"
+    }
+  ]
 }
 ```
 
