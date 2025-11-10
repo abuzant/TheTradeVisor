@@ -224,6 +224,151 @@
                 </div>
             </div>
 
+            {{-- Open Positions (All Accounts) --}}
+            @if($allOpenPositions->isNotEmpty())
+            <div class="bg-blue-50 border-2 border-blue-200 overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 rounded-xl mb-6"
+                 x-data="{
+                     positions: {{ $allOpenPositions->toJson() }},
+                     sortColumn: 'open_time',
+                     sortDirection: 'desc',
+                     sortBy(column) {
+                         if (this.sortColumn === column) {
+                             this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+                         } else {
+                             this.sortColumn = column;
+                             this.sortDirection = 'asc';
+                         }
+                         this.positions = this.positions.sort((a, b) => {
+                             let aVal = a[column];
+                             let bVal = b[column];
+                             if (aVal === null) return 1;
+                             if (bVal === null) return -1;
+                             if (typeof aVal === 'string') {
+                                 aVal = aVal.toLowerCase();
+                                 bVal = bVal.toLowerCase();
+                             }
+                             return this.sortDirection === 'asc' ? (aVal > bVal ? 1 : -1) : (aVal < bVal ? 1 : -1);
+                         });
+                     }
+                 }">
+                <div class="p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                            📊 Open Positions <span class="ml-2 px-2 py-1 bg-gradient-to-r from-green-500 to-green-600 text-white text-xs rounded-full animate-pulse transition-all duration-1000">LIVE</span>
+                        </h2>
+                        <p class="text-xs text-blue-700">
+                            💡 Profit shown is from last sync. Actual P/L may vary with current market prices.
+                        </p>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th @click="sortBy('symbol')" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100 select-none">
+                                        <div class="flex items-center space-x-1">
+                                            <span>Symbol</span>
+                                            <span x-show="sortColumn === 'symbol'">
+                                                <svg x-show="sortDirection === 'asc'" class="w-4 h-4 text-indigo-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"/></svg>
+                                                <svg x-show="sortDirection === 'desc'" class="w-4 h-4 text-indigo-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                                            </span>
+                                        </div>
+                                    </th>
+                                    <th @click="sortBy('type')" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100 select-none">
+                                        <div class="flex items-center space-x-1">
+                                            <span>Type</span>
+                                            <span x-show="sortColumn === 'type'">
+                                                <svg x-show="sortDirection === 'asc'" class="w-4 h-4 text-indigo-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"/></svg>
+                                                <svg x-show="sortDirection === 'desc'" class="w-4 h-4 text-indigo-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                                            </span>
+                                        </div>
+                                    </th>
+                                    <th @click="sortBy('volume')" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100 select-none">
+                                        <div class="flex items-center space-x-1">
+                                            <span>Volume</span>
+                                            <span x-show="sortColumn === 'volume'">
+                                                <svg x-show="sortDirection === 'asc'" class="w-4 h-4 text-indigo-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"/></svg>
+                                                <svg x-show="sortDirection === 'desc'" class="w-4 h-4 text-indigo-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                                            </span>
+                                        </div>
+                                    </th>
+                                    <th @click="sortBy('open_price')" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100 select-none">
+                                        <div class="flex items-center space-x-1">
+                                            <span>Open Price</span>
+                                            <span x-show="sortColumn === 'open_price'">
+                                                <svg x-show="sortDirection === 'asc'" class="w-4 h-4 text-indigo-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"/></svg>
+                                                <svg x-show="sortDirection === 'desc'" class="w-4 h-4 text-indigo-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                                            </span>
+                                        </div>
+                                    </th>
+                                    <th @click="sortBy('current_price')" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100 select-none">
+                                        <div class="flex items-center space-x-1">
+                                            <span>Current</span>
+                                            <span x-show="sortColumn === 'current_price'">
+                                                <svg x-show="sortDirection === 'asc'" class="w-4 h-4 text-indigo-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"/></svg>
+                                                <svg x-show="sortDirection === 'desc'" class="w-4 h-4 text-indigo-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                                            </span>
+                                        </div>
+                                    </th>
+                                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">Account</th>
+                                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">S/L</th>
+                                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">T/P</th>
+                                    <th @click="sortBy('profit')" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100 select-none">
+                                        <div class="flex items-center space-x-1">
+                                            <span>Profit</span>
+                                            <span x-show="sortColumn === 'profit'">
+                                                <svg x-show="sortDirection === 'asc'" class="w-4 h-4 text-indigo-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"/></svg>
+                                                <svg x-show="sortDirection === 'desc'" class="w-4 h-4 text-indigo-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                                            </span>
+                                        </div>
+                                    </th>
+                                    <th @click="sortBy('open_time')" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100 select-none">
+                                        <div class="flex items-center space-x-1">
+                                            <span>Opened</span>
+                                            <span x-show="sortColumn === 'open_time'">
+                                                <svg x-show="sortDirection === 'asc'" class="w-4 h-4 text-indigo-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" clip-rule="evenodd"/></svg>
+                                                <svg x-show="sortDirection === 'desc'" class="w-4 h-4 text-indigo-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+                                            </span>
+                                        </div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <template x-for="position in positions" :key="position.id">
+                                    <tr class="bg-blue-50 hover:bg-blue-100 transition-colors">
+                                        <td class="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
+                                            <a :href="`/trades/symbol/${position.normalized_symbol}`"
+                                               class="text-indigo-600 hover:text-indigo-900"
+                                               :title="`Raw: ${position.symbol}`"
+                                               x-text="position.normalized_symbol"></a>
+                                        </td>
+                                        <td class="px-3 py-2 whitespace-nowrap text-sm">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
+                                                  :class="position.type === 'buy' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                                                  x-text="position.type.toUpperCase()"></span>
+                                        </td>
+                                        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500" x-text="Number(position.volume).toFixed(2).replace(/\.?0+$/, '')"></td>
+                                        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500" x-text="Number(position.open_price).toFixed(5).replace(/\.?0+$/, '')"></td>
+                                        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500" x-text="Number(position.current_price).toFixed(5).replace(/\.?0+$/, '')"></td>
+                                        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
+                                            <a :href="`/account/${position.trading_account_id}`" 
+                                               class="text-indigo-600 hover:text-indigo-900 text-xs"
+                                               x-text="`${position.broker_name}-${position.account_number || 'Anonymous'}`"></a>
+                                        </td>
+                                        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500" x-text="position.sl ? Number(position.sl).toFixed(5).replace(/\.?0+$/, '') : '-'"></td>
+                                        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500" x-text="position.tp ? Number(position.tp).toFixed(5).replace(/\.?0+$/, '') : '-'"></td>
+                                        <td class="px-3 py-2 whitespace-nowrap text-sm font-medium"
+                                            :class="position.profit >= 0 ? 'text-green-600' : 'text-red-600'"
+                                            x-text="`${position.account_currency} ${parseFloat(position.profit).toFixed(2)}`"></td>
+                                        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500" x-text="position.open_time_human"></td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            @endif
+
             {{-- Recent Activity --}}
             @if($recentDeals->isNotEmpty())
                 <div class="bg-white/90 backdrop-blur-sm overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 rounded-xl">

@@ -125,10 +125,21 @@ class DashboardController extends Controller
         // Get account limit info (not cached, lightweight)
         $accountLimit = $user->getAccountLimitInfo();
 
+        // Collect all open positions from all accounts (for dashboard display)
+        $allOpenPositions = $dashboardData['accounts']->flatMap(function($account) {
+            return $account->openPositions->map(function($position) use ($account) {
+                $position->account_currency = $account->account_currency;
+                $position->account_number = $account->account_number;
+                $position->broker_name = $account->broker_name;
+                return $position;
+            });
+        });
+
         return view('dashboard', array_merge($dashboardData, [
             'user' => $user,
             'recentDeals' => $recentDeals,
             'accountLimit' => $accountLimit,
+            'allOpenPositions' => $allOpenPositions,
             'sortBy' => $sortBy,
             'sortDirection' => $sortDirection,
         ]));

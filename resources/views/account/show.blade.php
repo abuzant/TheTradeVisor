@@ -52,7 +52,7 @@
                         <div class="text-2xl font-bold text-gray-900">
                             {{ $account->margin_level ? number_format($account->margin_level, 2) . '%' : 'N/A' }}
                         </div>
-                        <div class="text-xs text-gray-500 mt-1">Free: ${{ number_format($account->free_margin, 2) }}</div>
+                        <div class="text-xs text-gray-500 mt-1">Free: {{ $account->account_currency }} {{ number_format($account->free_margin, 2) }}</div>
                     </div>
                 </div>
 
@@ -166,7 +166,7 @@
                 <div class="p-6">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-semibold text-gray-900">
-                            📊 Open Positions <span class="ml-2 px-2 py-1 bg-blue-500 text-white text-xs rounded-full">LIVE</span>
+                            📊 Open Positions <span class="ml-2 px-2 py-1 bg-gradient-to-r from-green-500 to-green-600 text-white text-xs rounded-full animate-pulse transition-all duration-1000">LIVE</span>
                         </h3>
                         <p class="text-xs text-blue-700">
                             💡 Profit shown is from last sync. Actual P/L may vary with current market prices.
@@ -176,7 +176,7 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th @click="sortBy('symbol')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100 select-none">
+                                    <th @click="sortBy('symbol')" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100 select-none">
                                         <div class="flex items-center space-x-1">
                                             <span>Symbol</span>
                                             <span x-show="sortColumn === 'symbol'">
@@ -185,7 +185,7 @@
                                             </span>
                                         </div>
                                     </th>
-                                    <th @click="sortBy('type')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100 select-none">
+                                    <th @click="sortBy('type')" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100 select-none">
                                         <div class="flex items-center space-x-1">
                                             <span>Type</span>
                                             <span x-show="sortColumn === 'type'">
@@ -194,7 +194,7 @@
                                             </span>
                                         </div>
                                     </th>
-                                    <th @click="sortBy('volume')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100 select-none">
+                                    <th @click="sortBy('volume')" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100 select-none">
                                         <div class="flex items-center space-x-1">
                                             <span>Volume</span>
                                             <span x-show="sortColumn === 'volume'">
@@ -203,7 +203,7 @@
                                             </span>
                                         </div>
                                     </th>
-                                    <th @click="sortBy('open_price')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100 select-none">
+                                    <th @click="sortBy('open_price')" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100 select-none">
                                         <div class="flex items-center space-x-1">
                                             <span>Open Price</span>
                                             <span x-show="sortColumn === 'open_price'">
@@ -212,7 +212,7 @@
                                             </span>
                                         </div>
                                     </th>
-                                    <th @click="sortBy('current_price')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100 select-none">
+                                    <th @click="sortBy('current_price')" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100 select-none">
                                         <div class="flex items-center space-x-1">
                                             <span>Current</span>
                                             <span x-show="sortColumn === 'current_price'">
@@ -221,9 +221,9 @@
                                             </span>
                                         </div>
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">S/L</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">T/P</th>
-                                    <th @click="sortBy('profit')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100 select-none">
+                                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">S/L</th>
+                                    <th class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">T/P</th>
+                                    <th @click="sortBy('profit')" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100 select-none">
                                         <div class="flex items-center space-x-1">
                                             <span>Profit</span>
                                             <span x-show="sortColumn === 'profit'">
@@ -232,7 +232,7 @@
                                             </span>
                                         </div>
                                     </th>
-                                    <th @click="sortBy('open_time')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100 select-none">
+                                    <th @click="sortBy('open_time')" class="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase cursor-pointer hover:bg-gray-100 select-none">
                                         <div class="flex items-center space-x-1">
                                             <span>Opened</span>
                                             <span x-show="sortColumn === 'open_time'">
@@ -246,26 +246,26 @@
                             <tbody class="bg-white divide-y divide-gray-200">
                                 <template x-for="position in positions" :key="position.id">
                                     <tr class="bg-blue-50 hover:bg-blue-100 transition-colors">
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                        <td class="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
                                             <a :href="`/trades/symbol/${position.normalized_symbol}`"
                                                class="text-indigo-600 hover:text-indigo-900"
                                                :title="`Raw: ${position.symbol}`"
                                                x-text="position.normalized_symbol"></a>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        <td class="px-3 py-2 whitespace-nowrap text-sm">
                                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
                                                   :class="position.type === 'buy' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
                                                   x-text="position.type.toUpperCase()"></span>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="position.volume"></td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="position.open_price"></td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="position.current_price"></td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="position.sl || '-'"></td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="position.tp || '-'"></td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium"
+                                        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500" x-text="Number(position.volume).toFixed(2).replace(/\.?0+$/, '')"></td>
+                                        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500" x-text="Number(position.open_price).toFixed(5).replace(/\.?0+$/, '')"></td>
+                                        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500" x-text="Number(position.current_price).toFixed(5).replace(/\.?0+$/, '')"></td>
+                                        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500" x-text="position.sl ? Number(position.sl).toFixed(5).replace(/\.?0+$/, '') : '-'"></td>
+                                        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500" x-text="position.tp ? Number(position.tp).toFixed(5).replace(/\.?0+$/, '') : '-'"></td>
+                                        <td class="px-3 py-2 whitespace-nowrap text-sm font-medium"
                                             :class="position.profit >= 0 ? 'text-green-600' : 'text-red-600'"
                                             x-text="`{{ $account->account_currency }} ${parseFloat(position.profit).toFixed(2)}`"></td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" x-text="position.open_time_human"></td>
+                                        <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500" x-text="position.open_time_human"></td>
                                     </tr>
                                 </template>
                             </tbody>
@@ -303,10 +303,10 @@
                                             {{ strtoupper(str_replace('_', ' ', $order->type)) }}
                                         </span>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $order->volume_current }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $order->price_open }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $order->sl ?? '-' }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $order->tp ?? '-' }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ rtrim(rtrim(number_format($order->volume_current, 2), '0'), '.') }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ rtrim(rtrim(number_format($order->price_open, 5), '0'), '.') }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $order->sl ? rtrim(rtrim(number_format($order->sl, 5), '0'), '.') : '-' }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $order->tp ? rtrim(rtrim(number_format($order->tp, 5), '0'), '.') : '-' }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {{ $order->expiration ? $order->expiration->format('M d, H:i') : 'No expiry' }}
                                     </td>
@@ -351,8 +351,8 @@
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ strtoupper($deal->entry) }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $deal->volume }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $deal->price }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ rtrim(rtrim(number_format($deal->volume, 2), '0'), '.') }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ rtrim(rtrim(number_format($deal->price, 5), '0'), '.') }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium {{ $deal->profit >= 0 ? 'text-green-600' : 'text-red-600' }}">
                                         {{ $account->account_currency }} {{ number_format($deal->profit, 2) }}
                                     </td>
