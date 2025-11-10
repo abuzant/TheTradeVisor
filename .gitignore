@@ -64,3 +64,6 @@ TheTradeVisor_MT5.mq5
 *.mq5
 *.ex4
 *.ex5
+
+# Backups
+/backups/
