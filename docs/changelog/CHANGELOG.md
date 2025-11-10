@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.1] - 2025-11-10
+
+### Added
+- LIVE open positions table to dashboard for immediate exposure visibility
+- Multi-account open positions overview with account-specific details
+- Animated LIVE badge with gradient background for real-time feel
+- Clickable account links in open positions table for easy navigation
+
+### Enhanced
+- Decimal formatting across all trading tables (removes unnecessary trailing zeros)
+- Open positions table styling with compact padding (px-3 py-2)
+- Currency display consistency (account pages show native currency, not hardcoded USD)
+- Table sorting functionality maintained in new dashboard open positions view
+
+### Fixed
+- Free margin display showing incorrect USD currency instead of account currency
+- Inconsistent decimal formatting between open positions, recent trades, and pending orders
+- Visual hierarchy issues with table padding and spacing
+- Missing account context in multi-account position display
+
+### Technical
+- Updated DashboardController to aggregate open positions from all user accounts
+- Applied JavaScript regex and PHP rtrim for consistent decimal formatting
+- Enhanced Alpine.js sorting for multi-account position data
+- Improved caching strategy for dashboard open positions data
+
 ## [1.1.0] - 2025-11-08
 
 ### Added
