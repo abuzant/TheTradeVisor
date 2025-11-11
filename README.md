@@ -13,9 +13,13 @@ A comprehensive, production-ready trading analytics platform built with Laravel 
 [![Nginx](https://img.shields.io/badge/Nginx-1.24-009639.svg?logo=nginx)](https://nginx.org)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Production Ready](https://img.shields.io/badge/Status-Production%20Ready-brightgreen.svg)](https://thetradevisor.com)
+[![Version](https://img.shields.io/badge/Version-1.2.0-blue.svg)](CHANGELOG.md)
 [![One-Click Deploy](https://img.shields.io/badge/One%20Click%20Deploy-00A8E1.svg)](#-docker-deployment)
 [![Analytics](https://img.shields.io/badge/Analytics-Real--time-FF6B6B.svg)](https://thetradevisor.com/analytics)
-[![MT4/MT5](https://img.shields.io/badge/MT4%2FMT5-Integration-4CAF50.svg)](docs/reference/API_DOCUMENTATION.md)
+[![MT4/MT5](https://img.shields.io/badge/MT4%2FMT5-Supported-4CAF50.svg)](docs/MT4_MT5_POSITION_SYSTEM.md)
+[![Platform Detection](https://img.shields.io/badge/Platform-Auto--Detect-9C27B0.svg)](docs/MT4_MT5_POSITION_SYSTEM.md)
+[![Client-Side Filtering](https://img.shields.io/badge/Filtering-50x%20Faster-FF9800.svg)](docs/CLIENT_SIDE_FILTERING_AND_PLATFORM_DETECTION.md)
+[![Alpine.js](https://img.shields.io/badge/Alpine.js-3.x-8BC0D0.svg?logo=alpine.js)](https://alpinejs.dev)
 
 ## 📚 Documentation
 
