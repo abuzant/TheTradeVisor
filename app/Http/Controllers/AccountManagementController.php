@@ -97,4 +97,26 @@ class AccountManagementController extends Controller
 
         return redirect()->back()->with('success', 'Account resumed successfully.');
     }
+
+    public function destroy(Request $request, TradingAccount $account)
+    {
+        // Ensure account belongs to user
+        if ($account->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
+        // Get the Anonymous user
+        $anonymousUser = \App\Models\User::where('email', 'hello@thetradevisor.com')->first();
+        
+        if (!$anonymousUser) {
+            return redirect()->back()->with('error', 'System error: Anonymous user not found.');
+        }
+
+        // Transfer account to Anonymous user
+        $account->user_id = $anonymousUser->id;
+        $account->is_active = false; // Deactivate the account
+        $account->save();
+
+        return redirect()->back()->with('success', 'Account deleted successfully. It has been removed from your account but the data is preserved for global analytics.');
+    }
 }

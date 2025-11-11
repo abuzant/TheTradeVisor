@@ -31,6 +31,14 @@ class Position extends Model
         'magic',
         'identifier',
         'is_open',
+        'position_identifier',
+        'entry_type',
+        'close_time',
+        'close_price',
+        'total_volume_in',
+        'total_volume_out',
+        'deal_count',
+        'platform_type',
     ];
 
     protected $casts = [
@@ -38,16 +46,21 @@ class Position extends Model
         'volume' => 'decimal:2',
         'open_price' => 'decimal:5',
         'current_price' => 'decimal:5',
+        'close_price' => 'decimal:5',
         'sl' => 'decimal:5',
         'tp' => 'decimal:5',
         'profit' => 'decimal:2',
         'swap' => 'decimal:2',
         'commission' => 'decimal:2',
+        'total_volume_in' => 'decimal:2',
+        'total_volume_out' => 'decimal:2',
         'magic' => 'integer',
         'identifier' => 'integer',
+        'deal_count' => 'integer',
         'is_open' => 'boolean',
         'open_time' => 'datetime',
         'update_time' => 'datetime',
+        'close_time' => 'datetime',
     ];
 
     protected $appends = ['normalized_symbol', 'open_time_human'];
@@ -73,6 +86,48 @@ class Position extends Model
     public function tradingAccount()
     {
         return $this->belongsTo(TradingAccount::class);
+    }
+
+    /**
+     * Get deals associated with this position
+     */
+    public function deals()
+    {
+        // For MT5 netting, match by position_identifier
+        if ($this->platform_type === 'MT5' && $this->position_identifier) {
+            return $this->hasMany(Deal::class, 'position_id', 'position_identifier')
+                ->where('trading_account_id', $this->trading_account_id);
+        }
+        
+        // For MT4/MT5 hedging, match by ticket
+        return $this->hasMany(Deal::class, 'ticket', 'ticket')
+            ->where('trading_account_id', $this->trading_account_id);
+    }
+
+    /**
+     * Check if position is MT5 Netting
+     */
+    public function isNettingPosition(): bool
+    {
+        return $this->platform_type === 'MT5' && !empty($this->position_identifier);
+    }
+
+    /**
+     * Get platform display badge
+     */
+    public function getPlatformBadgeAttribute(): string
+    {
+        if (!$this->platform_type) {
+            return '';
+        }
+        
+        $badge = $this->platform_type;
+        
+        if ($this->platform_type === 'MT5' && $this->isNettingPosition()) {
+            $badge .= ' Netting';
+        }
+        
+        return $badge;
     }
 
     public function getNormalizedSymbol()

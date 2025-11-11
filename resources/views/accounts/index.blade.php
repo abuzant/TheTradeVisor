@@ -75,15 +75,34 @@
                         </div>
                     @endif
 
+                    @if (session('error'))
+                        <div class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                            {{ session('error') }}
+                        </div>
+                    @endif
+
                     @if($accounts->isEmpty())
                         <div class="text-center py-12">
                             <p class="text-gray-500">No accounts found.</p>
                         </div>
                     @else
+                        <div class="mb-4 flex justify-between items-center">
+                            <div class="flex items-center space-x-4">
+                                <input type="checkbox" id="selectAll" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                                <label for="selectAll" class="text-sm text-gray-700">Select All</label>
+                            </div>
+                            <button onclick="deleteSelected()" id="deleteSelectedBtn" disabled
+                                    class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed">
+                                Delete Selected
+                            </button>
+                        </div>
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
                                     <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                                            <input type="checkbox" id="headerCheckbox" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                                        </th>
                                         <x-sortable-header column="broker_name" label="Broker" :sortBy="$sortBy" :sortDirection="$sortDirection" />
                                         <x-sortable-header column="account_number" label="Account" :sortBy="$sortBy" :sortDirection="$sortDirection" />
                                         <x-sortable-header column="account_currency" label="Currency" :sortBy="$sortBy" :sortDirection="$sortDirection" />
@@ -96,11 +115,18 @@
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     @foreach($accounts as $account)
                                         <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <input type="checkbox" class="account-checkbox rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" 
+                                                       value="{{ $account->id }}" data-account-id="{{ $account->id }}">
+                                            </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                                 <x-broker-name :broker="$account->broker_name" class="text-indigo-600 hover:text-indigo-900" />
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ $account->account_number ?? 'Anonymous' }}
+                                                <div class="flex items-center space-x-2">
+                                                    <span>{{ $account->account_number ?? 'Anonymous' }}</span>
+                                                    <x-platform-badge :account="$account" />
+                                                </div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                 {{ $account->account_currency }}
@@ -139,10 +165,42 @@
                                                     <button onclick="pauseAccount({{ $account->id }})"
                                                             class="text-yellow-600 hover:text-yellow-900">Pause</button>
                                                 @endif
+                                                
+                                                <form method="POST" action="{{ route('accounts.destroy', $account) }}" class="inline" 
+                                                      onsubmit="return confirm('Are you sure you want to delete this account? The data will be transferred to an anonymous user for global analytics.')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="text-red-600 hover:text-red-900">Delete</button>
+                                                </form>
                                             </td>
                                         </tr>
                                     @endforeach
                                 </tbody>
+                                <tfoot class="bg-gray-50">
+                                    <tr>
+                                        <td colspan="8" class="px-6 py-3">
+                                            <div class="flex items-center space-x-4 text-xs text-gray-600">
+                                                <span class="font-semibold">Platform Legend:</span>
+                                                <div class="flex items-center space-x-1">
+                                                    <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-semibold">MT4</span>
+                                                    <span>= MetaTrader 4</span>
+                                                </div>
+                                                <div class="flex items-center space-x-1">
+                                                    <span class="px-2 py-0.5 rounded bg-purple-100 text-purple-800 font-semibold">MT5</span>
+                                                    <span>= MetaTrader 5</span>
+                                                </div>
+                                                <div class="flex items-center space-x-1">
+                                                    <span class="px-1.5 py-0.5 rounded bg-purple-200 text-purple-900 font-bold">N</span>
+                                                    <span>= Netting</span>
+                                                </div>
+                                                <div class="flex items-center space-x-1">
+                                                    <span class="px-1.5 py-0.5 rounded bg-blue-200 text-blue-900 font-bold">H</span>
+                                                    <span>= Hedging</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tfoot>
                             </table>
                         </div>
 
@@ -194,6 +252,87 @@
         function closePauseModal() {
             document.getElementById('pauseModal').classList.add('hidden');
         }
+
+        // Checkbox functionality
+        const headerCheckbox = document.getElementById('headerCheckbox');
+        const selectAllCheckbox = document.getElementById('selectAll');
+        const accountCheckboxes = document.querySelectorAll('.account-checkbox');
+        const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+
+        function updateDeleteButton() {
+            const checkedBoxes = document.querySelectorAll('.account-checkbox:checked');
+            deleteSelectedBtn.disabled = checkedBoxes.length === 0;
+        }
+
+        function updateHeaderCheckbox() {
+            const totalBoxes = document.querySelectorAll('.account-checkbox');
+            const checkedBoxes = document.querySelectorAll('.account-checkbox:checked');
+            headerCheckbox.checked = totalBoxes.length > 0 && totalBoxes.length === checkedBoxes.length;
+            selectAllCheckbox.checked = headerCheckbox.checked;
+        }
+
+        headerCheckbox.addEventListener('change', function() {
+            accountCheckboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+            selectAllCheckbox.checked = this.checked;
+            updateDeleteButton();
+        });
+
+        selectAllCheckbox.addEventListener('change', function() {
+            accountCheckboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+            headerCheckbox.checked = this.checked;
+            updateDeleteButton();
+        });
+
+        accountCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                updateDeleteButton();
+                updateHeaderCheckbox();
+            });
+        });
+
+        function deleteSelected() {
+            const checkedBoxes = document.querySelectorAll('.account-checkbox:checked');
+            if (checkedBoxes.length === 0) {
+                alert('Please select at least one account to delete.');
+                return;
+            }
+
+            const accountIds = Array.from(checkedBoxes).map(cb => cb.value);
+            
+            if (confirm(`Are you sure you want to delete ${accountIds.length} account(s)? The data will be transferred to an anonymous user for global analytics.`)) {
+                // Delete accounts one by one
+                accountIds.forEach((accountId, index) => {
+                    setTimeout(() => {
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = `/accounts/${accountId}`;
+                        
+                        const csrfToken = document.createElement('input');
+                        csrfToken.type = 'hidden';
+                        csrfToken.name = '_token';
+                        csrfToken.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                        
+                        const methodField = document.createElement('input');
+                        methodField.type = 'hidden';
+                        methodField.name = '_method';
+                        methodField.value = 'DELETE';
+                        
+                        form.appendChild(csrfToken);
+                        form.appendChild(methodField);
+                        document.body.appendChild(form);
+                        form.submit();
+                    }, index * 100); // Small delay between submissions
+                });
+            }
+        }
+
+        // Initialize
+        updateDeleteButton();
+        updateHeaderCheckbox();
     </script>
     @endpush
 </x-app-layout>

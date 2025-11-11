@@ -17,21 +17,31 @@
                         {{ __('Dashboard') }}
                     </x-nav-link>
 
-                    <x-nav-link :href="route('analytics')" :active="request()->routeIs('analytics')">
-                        {{ __('Analytics') }}
-                    </x-nav-link>
+                    <!-- Statistics Dropdown -->
+                    <div class="hidden sm:flex sm:items-center">
+                        <x-dropdown align="left" width="48">
+                            <x-slot name="trigger">
+                                <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
+                                    <div>Statistics</div>
+                                    <div class="ms-1">
+                                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                </button>
+                            </x-slot>
 
-                    <x-nav-link :href="route('performance')" :active="request()->routeIs('performance')">
-                        {{ __('Performance') }}
-                    </x-nav-link>
+                            <x-slot name="content">
+                                <x-dropdown-link :href="route('analytics')" :active="request()->routeIs('analytics')">
+                                    {{ __('Global Analytics') }}
+                                </x-dropdown-link>
 
-                    <x-nav-link :href="route('broker.analytics')" :active="request()->routeIs('broker.analytics')">
-                        {{ __('Brokers') }}
-                    </x-nav-link>
-
-                    <x-nav-link :href="route('settings.api-key')" :active="request()->routeIs('settings.*')">
-                        {{ __('API Key') }}
-                    </x-nav-link>
+                                <x-dropdown-link :href="route('broker.analytics')" :active="request()->routeIs('broker.analytics')">
+                                    {{ __('Brokers') }}
+                                </x-dropdown-link>
+                            </x-slot>
+                        </x-dropdown>
+                    </div>
 
                     @if(Auth::user()->is_admin)
                         <!-- Admin Dropdown -->
@@ -138,6 +148,20 @@
                     </x-slot>
 
                     <x-slot name="content">
+                        <x-dropdown-link :href="route('accounts.index')" :active="request()->routeIs('accounts.*')">
+                            {{ __('Accounts') }}
+                        </x-dropdown-link>
+
+                        <x-dropdown-link :href="route('performance')" :active="request()->routeIs('performance')">
+                            {{ __('Performance') }}
+                        </x-dropdown-link>
+
+                        <x-dropdown-link :href="route('settings.api-key')" :active="request()->routeIs('settings.*')">
+                            {{ __('API Key') }}
+                        </x-dropdown-link>
+
+                        <div class="border-t border-gray-100"></div>
+
                         <x-dropdown-link :href="route('profile.edit')">
                             {{ __('Profile') }}
                         </x-dropdown-link>
@@ -175,21 +199,21 @@
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
 
-	        <x-responsive-nav-link :href="route('performance')" :active="request()->routeIs('performance')">
-	            {{ __('Performance') }}
-	        </x-responsive-nav-link>
+            <!-- Statistics Section -->
+            <div class="pt-4 pb-1 border-t border-gray-200">
+                <div class="px-4">
+                    <div class="font-medium text-base text-gray-800">Statistics</div>
+                </div>
+                <div class="mt-3 space-y-1">
+                    <x-responsive-nav-link :href="route('analytics')" :active="request()->routeIs('analytics')">
+                        {{ __('Global Analytics') }}
+                    </x-responsive-nav-link>
 
-	        <x-responsive-nav-link :href="route('broker.analytics')" :active="request()->routeIs('broker.analytics')">
-	            {{ __('Broker') }}
-	        </x-responsive-nav-link>
-
-		<x-responsive-nav-link :href="route('analytics')" :active="request()->routeIs('analytics')">
-		    {{ __('Analytics') }}
-		</x-responsive-nav-link>
-
-            <x-responsive-nav-link :href="route('settings.api-key')" :active="request()->routeIs('settings.*')">
-                {{ __('API Key') }}
-            </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('broker.analytics')" :active="request()->routeIs('broker.analytics')">
+                        {{ __('Brokers') }}
+                    </x-responsive-nav-link>
+                </div>
+            </div>
 
             @if(Auth::user()->is_admin)
                 <div class="pt-4 pb-1 border-t border-gray-200">
@@ -236,6 +260,20 @@
             </div>
 
             <div class="mt-3 space-y-1">
+                <x-responsive-nav-link :href="route('accounts.index')" :active="request()->routeIs('accounts.*')">
+                    {{ __('Accounts') }}
+                </x-responsive-nav-link>
+
+                <x-responsive-nav-link :href="route('performance')" :active="request()->routeIs('performance')">
+                    {{ __('Performance') }}
+                </x-responsive-nav-link>
+
+                <x-responsive-nav-link :href="route('settings.api-key')" :active="request()->routeIs('settings.*')">
+                    {{ __('API Key') }}
+                </x-responsive-nav-link>
+
+                <div class="border-t border-gray-200"></div>
+
                 <x-responsive-nav-link :href="route('profile.edit')">
                     {{ __('Profile') }}
                 </x-responsive-nav-link>

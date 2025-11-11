@@ -30,6 +30,8 @@ class Deal extends Model
         'time',
         'time_msc',
         'magic',
+        'platform_type',
+        'deal_category',
     ];
 
     protected $casts = [

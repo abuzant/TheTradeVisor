@@ -86,12 +86,16 @@ class CurrencyService
                     $rate = (float) $data['rates'][$to];
 
                     // Store in database
-                    CurrencyRate::create([
-                        'from_currency' => $from,
-                        'to_currency' => $to,
-                        'rate' => $rate,
-                        'updated_at' => now(),
-                    ]);
+                    CurrencyRate::updateOrCreate(
+                        [
+                            'from_currency' => $from,
+                            'to_currency' => $to,
+                        ],
+                        [
+                            'rate' => $rate,
+                            'updated_at' => now(),
+                        ]
+                    );
 
                     Log::info("Currency rate fetched", [
                         'from' => $from,

@@ -22,6 +22,14 @@ A comprehensive, production-ready trading analytics platform built with Laravel 
 **[📖 Complete Documentation Index →](docs/INDEX.md)** | **[Documentation Overview →](docs/README.md)**
 
 ### 🆕 Latest Improvements (November 2025)
+
+#### Version 1.2.0 (Nov 11, 2025) - MT4/MT5 Position System
+- **[MT4/MT5 Position System](docs/MT4_MT5_POSITION_SYSTEM.md)** - 🎯 Platform detection and smart position aggregation
+- **[Platform Badges & Filters](docs/PLATFORM_BADGES_AND_FILTERS.md)** - Visual platform indicators with instant filtering
+- **[Client-Side Filtering](docs/CLIENT_SIDE_FILTERING_AND_PLATFORM_DETECTION.md)** - Lightning-fast filters (50x faster)
+- **[Implementation Details](docs/IMPLEMENTATION_DETAILS.md)** - Technical documentation
+
+#### Previous Updates
 - **[Dashboard LIVE Positions](docs/features/DASHBOARD_LIVE_POSITIONS.md)** - Real-time exposure visibility across all accounts
 - **[Analytics Improvements](docs/ANALYTICS_IMPROVEMENTS_NOV_9_2025.md)** - Bug fixes and UI enhancements
 - **[Features Implemented](docs/FEATURES_IMPLEMENTED_NOV_9_2025.md)** - Complete feature overview
@@ -43,6 +51,12 @@ A comprehensive, production-ready trading analytics platform built with Laravel 
 ## ✨ Core Features
 
 ### 📈 Trading & Analytics
+- **🎯 MT4/MT5 Platform Detection** - Automatic detection of platform type and account mode (Netting/Hedging)
+- **📊 Smart Position Aggregation** - Intelligent grouping of deals into positions for MT5 Netting accounts
+- **🏷️ Platform Badges** - Visual indicators showing MT4/MT5 and Netting/Hedging modes
+- **⚡ Client-Side Filtering** - Lightning-fast position filtering (50x faster, no page reload)
+- **🔍 Advanced Filters** - Filter by status (open/closed) and profitability (profitable/losses)
+- **📂 Expandable Position Rows** - View individual deals within aggregated positions
 - **Multi-Platform Support** - Full support for both MT4 and MT5 trading platforms
 - **Multi-Account Management** - Connect and manage unlimited MT4/MT5 trading accounts
 - **LIVE Open Positions Dashboard** - Real-time exposure visibility across all accounts with animated indicators

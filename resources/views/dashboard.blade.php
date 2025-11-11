@@ -195,7 +195,10 @@
                                                 <x-broker-name :broker="$account->broker_name" class="text-indigo-600 hover:text-indigo-900" />
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ $account->account_number ?? 'Anonymous' }}
+                                                <div class="flex items-center space-x-2">
+                                                    <span>{{ $account->account_number ?? 'Anonymous' }}</span>
+                                                    <x-platform-badge :account="$account" />
+                                                </div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                 {{ $account->account_currency }} {{ number_format($account->balance, 2) }}
@@ -218,6 +221,31 @@
                                         </tr>
                                     @endforeach
                                 </tbody>
+                                <tfoot class="bg-gray-50">
+                                    <tr>
+                                        <td colspan="8" class="px-6 py-3">
+                                            <div class="flex items-center space-x-4 text-xs text-gray-600">
+                                                <span class="font-semibold">Platform Legend:</span>
+                                                <div class="flex items-center space-x-1">
+                                                    <span class="px-2 py-0.5 rounded bg-blue-100 text-blue-800 font-semibold">MT4</span>
+                                                    <span>= MetaTrader 4</span>
+                                                </div>
+                                                <div class="flex items-center space-x-1">
+                                                    <span class="px-2 py-0.5 rounded bg-purple-100 text-purple-800 font-semibold">MT5</span>
+                                                    <span>= MetaTrader 5</span>
+                                                </div>
+                                                <div class="flex items-center space-x-1">
+                                                    <span class="px-1.5 py-0.5 rounded bg-purple-200 text-purple-900 font-bold">N</span>
+                                                    <span>= Netting</span>
+                                                </div>
+                                                <div class="flex items-center space-x-1">
+                                                    <span class="px-1.5 py-0.5 rounded bg-blue-200 text-blue-900 font-bold">H</span>
+                                                    <span>= Hedging</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tfoot>
                             </table>
                         </div>
                     @endif
@@ -369,53 +397,53 @@
             </div>
             @endif
 
-            {{-- Recent Activity --}}
-            @if($recentDeals->isNotEmpty())
+            {{-- Recent Closed Positions --}}
+            @if($recentPositions->isNotEmpty())
                 <div class="bg-white/90 backdrop-blur-sm overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 rounded-xl">
                     <div class="p-6">
-                        <h2 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">Recent Trades</h2>
+                        <h2 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">Recent Closed Positions</h2>
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
                                     <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Closed</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Symbol</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Volume</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Entry</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Exit</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Profit</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Reason</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
-                                    @foreach($recentDeals as $deal)
+                                    @foreach($recentPositions as $position)
                                         <tr>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ $deal->time ? $deal->time->format('M d, H:i') : 'N/A' }}
+                                                {{ $position->close_time ? $position->close_time->format('M d, H:i') : 'N/A' }}
                                             </td>
-						<td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-						    @if($deal->symbol && $deal->symbol !== '' && $deal->symbol !== 'UNKNOWN')
-						    <a href="{{ route('trades.symbol', $deal->normalized_symbol) }}"
-							       class="text-indigo-600 hover:text-indigo-900" title="({{ $deal->symbol }})"
-							       title="Raw: {{ $deal->symbol }}">
-							        {{ $deal->normalized_symbol }}
-						    </a>
-						    @else
-						    <span class="text-gray-400 italic text-xs">{{ ucfirst($deal->deal_category) }}</span>
-						    @endif
-						</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                <a href="{{ route('trades.symbol', $position->normalized_symbol) }}"
+                                                   class="text-indigo-600 hover:text-indigo-900"
+                                                   title="Raw: {{ $position->symbol }}">
+                                                    {{ $position->normalized_symbol }}
+                                                </a>
+                                            </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $deal->type == 'buy' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                                    {{ strtoupper($deal->type) }}
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $position->type == 'buy' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                                    {{ strtoupper($position->type) }}
                                                 </span>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ $deal->volume }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium {{ $deal->profit >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                                {{ $account->account_currency }} {{ number_format($deal->profit, 2) }}
+                                                {{ rtrim(rtrim(number_format($position->volume, 2), '0'), '.') }}
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ strtoupper($deal->reason) }}
+                                                {{ rtrim(rtrim(number_format($position->open_price, 5), '0'), '.') }}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {{ rtrim(rtrim(number_format($position->close_price ?? $position->current_price, 5), '0'), '.') }}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium {{ $position->profit >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                                                {{ $position->tradingAccount->account_currency }} {{ number_format($position->profit, 2) }}
                                             </td>
                                         </tr>
                                     @endforeach

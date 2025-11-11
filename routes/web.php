@@ -41,6 +41,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('accounts.pause');
     Route::post('/accounts/{account}/unpause', [App\Http\Controllers\AccountManagementController::class, 'unpause'])
         ->name('accounts.unpause');
+    Route::delete('/accounts/{account}', [App\Http\Controllers\AccountManagementController::class, 'destroy'])
+        ->name('accounts.destroy');
 
     Route::get('/account/{accountId}', [DashboardController::class, 'account'])->name('account.show');
 

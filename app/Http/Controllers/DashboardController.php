@@ -10,6 +10,7 @@ use App\Models\Deal;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use App\Traits\Sortable;
+use App\Services\PositionAggregationService;
 
 
 class DashboardController extends Controller
@@ -107,17 +108,17 @@ class DashboardController extends Controller
             ];
         });
 
-        // Recent deals - cache separately (1 minute, updates more frequently)
-        $recentDeals = Cache::remember("dashboard.deals.{$user->id}", 60, function() use ($user) {
+        // Recent positions (closed) - cache separately (1 minute, updates more frequently)
+        $recentPositions = Cache::remember("dashboard.positions.{$user->id}", 60, function() use ($user) {
             $accountIds = $user->tradingAccounts()->pluck('id');
             if ($accountIds->isEmpty()) {
                 return collect();
             }
             
-            return Deal::whereIn('trading_account_id', $accountIds)
-                ->tradesOnly()
+            return Position::whereIn('trading_account_id', $accountIds)
+                ->where('is_open', false)
                 ->with('tradingAccount')
-                ->orderBy('time', 'desc')
+                ->orderBy('update_time', 'desc')
                 ->limit(20)
                 ->get();
         });
@@ -137,7 +138,7 @@ class DashboardController extends Controller
 
         return view('dashboard', array_merge($dashboardData, [
             'user' => $user,
-            'recentDeals' => $recentDeals,
+            'recentPositions' => $recentPositions,
             'accountLimit' => $accountLimit,
             'allOpenPositions' => $allOpenPositions,
             'sortBy' => $sortBy,
@@ -145,7 +146,7 @@ class DashboardController extends Controller
         ]));
     }
 
-    public function account(Request $request, $accountId)
+    public function account(Request $request, $accountId, PositionAggregationService $positionService)
     {
         $user = $request->user();
         $sortBy = $request->get('sort_by', 'time');
@@ -175,28 +176,34 @@ class DashboardController extends Controller
             ];
         });
 
-        // Deals query - not cached due to pagination
+        // Get account
         $account = $accountData['account'];
         
-        // Define sortable columns for deals
-        $sortableColumns = ['time', 'symbol', 'type', 'volume', 'price', 'profit'];
-
-        // Get deals for this account (last 30 days)
-        $dealsQuery = $account->deals()
-            ->tradesOnly()
-            ->where('time', '>=', now()->subDays(30));
-
-        // Apply sorting
-        if ($request->has('sort_by')) {
-            $dealsQuery = $this->applySorting($dealsQuery, $request, $sortableColumns, 'time', 'desc');
-        } else {
-            $dealsQuery->orderBy('time', 'desc');
+        // Get all positions (filtering done client-side with Alpine.js)
+        $positions = Position::where('trading_account_id', $account->id)
+            ->where('open_time', '>=', now()->subDays(30))
+            ->orderBy('open_time', 'desc')
+            ->paginate(20);
+        
+        // Load deals for each position
+        foreach ($positions as $position) {
+            if ($position->platform_type === 'MT5' && $position->position_identifier) {
+                // For MT5 netting, get all deals with same position_identifier
+                $position->deals = Deal::where('trading_account_id', $account->id)
+                    ->where('position_id', $position->position_identifier)
+                    ->orderBy('time', 'asc')
+                    ->get();
+            } else {
+                // For MT4/MT5 hedging, get deals with same ticket
+                $position->deals = Deal::where('trading_account_id', $account->id)
+                    ->where('ticket', $position->ticket)
+                    ->orderBy('time', 'asc')
+                    ->get();
+            }
         }
 
-        $deals = $dealsQuery->paginate(50)->withQueryString();
-
         return view('account.show', array_merge($accountData, [
-            'deals' => $deals,
+            'positions' => $positions,
             'sortBy' => $sortBy,
             'sortDirection' => $sortDirection,
         ]));

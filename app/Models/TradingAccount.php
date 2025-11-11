@@ -45,6 +45,10 @@ class TradingAccount extends Model
         'country_name',
         'last_ip',
         'last_seen_at',
+        'platform_type',
+        'account_mode',
+        'platform_build',
+        'platform_detected_at',
     ];
 
     protected $casts = [
@@ -60,9 +64,11 @@ class TradingAccount extends Model
         'trade_expert' => 'boolean',
         'is_active' => 'boolean',
         'is_paused' => 'boolean',
+        'platform_build' => 'integer',
         'last_sync_at' => 'datetime',
         'paused_at' => 'datetime',
         'last_seen_at' => 'datetime',
+        'platform_detected_at' => 'datetime',
     ];
 
     // Relationships
