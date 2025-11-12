@@ -26,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'rate.limit.analytics' => \App\Http\Middleware\RateLimitAnalytics::class,
             'rate.limit.exports' => \App\Http\Middleware\RateLimitExports::class,
             'rate.limit.broker' => \App\Http\Middleware\RateLimitBrokerAnalytics::class,
+            'circuit.breaker' => \App\Http\Middleware\CircuitBreakerMiddleware::class,
         ]);
 
         // Add to web middleware group

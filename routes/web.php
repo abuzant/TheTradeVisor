@@ -37,16 +37,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/performance', [App\Http\Controllers\PerformanceController::class, 'index'])
         ->name('performance');
 
-    // Broker Analytics (with rate limiting)
-    Route::middleware(['rate.limit.broker'])->group(function () {
+    // Broker Analytics (with rate limiting and circuit breaker)
+    Route::middleware(['rate.limit.broker', 'circuit.breaker:analytics'])->group(function () {
         Route::get('/broker-analytics', [App\Http\Controllers\BrokerAnalyticsController::class, 'index'])
             ->name('broker.analytics');
         Route::get('/broker/{broker}', [App\Http\Controllers\BrokerDetailsController::class, 'show'])
             ->name('broker-details');
     });
 
-    // Global Analytics (with rate limiting to prevent abuse)
-    Route::middleware(['rate.limit.analytics'])->group(function () {
+    // Global Analytics (with rate limiting and circuit breaker)
+    Route::middleware(['rate.limit.analytics', 'circuit.breaker:analytics'])->group(function () {
         Route::get('/analytics/{days?}', [App\Http\Controllers\AnalyticsController::class, 'index'])
             ->name('analytics');
         Route::get('/analytics/countries', [App\Http\Controllers\CountryAnalyticsController::class, 'topTradingCountries'])
@@ -75,8 +75,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/trades/symbol/{symbol}', [App\Http\Controllers\TradesController::class, 'symbol'])
         ->name('trades.symbol');
 
-    // Export routes (with rate limiting to prevent abuse)
-    Route::middleware(['rate.limit.exports'])->group(function () {
+    // Export routes (with rate limiting and circuit breaker)
+    Route::middleware(['rate.limit.exports', 'circuit.breaker:exports'])->group(function () {
         Route::get('/export/trades/csv', [App\Http\Controllers\ExportController::class, 'exportTradesCsv'])
             ->name('export.trades.csv');
         Route::get('/export/trades/pdf', [App\Http\Controllers\ExportController::class, 'exportTradesPdf'])
