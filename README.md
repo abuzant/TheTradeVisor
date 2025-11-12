@@ -50,28 +50,26 @@ TheTradeVisor is an enterprise-grade trading analytics platform that aggregates,
 
 ### Getting Started
 
-- [Installation Guide](docs/deployment/INSTALLATION.md) - Complete setup instructions
-- [Configuration](docs/deployment/CONFIGURATION.md) - Environment and system configuration
+- [Installation Guide](docs/getting-started/INSTALLATION.md) - Complete setup instructions
+- [Configuration Guide](docs/README.md#-quick-start) - Quick start guide
 - [MT4/MT5 EA Installation](docs/guides/MT4_EA_INSTALLATION.md) - Expert Advisor setup guide
 
 ### Core Features
 
-- [Trading Analytics](docs/features/ANALYTICS.md) - Analytics system overview
-- [Broker Analytics](docs/features/BROKER_ANALYTICS.md) - Broker comparison features
 - [GeoIP Analytics](docs/features/geoip-analytics.md) - Geographic insights
-- [Export System](docs/features/EXPORTS.md) - CSV/PDF export capabilities
+- [Trading Analytics](docs/README.md#-core-features) - Analytics system overview
+- [Broker Comparison](docs/README.md#-core-features) - Broker analytics features
 
 ### System Architecture
 
 - [Architecture Overview](docs/development/architecture.md) - System design and components
-- [Database Schema](docs/reference/DATABASE_SCHEMA.md) - Complete database structure
-- [API Documentation](docs/api/README.md) - REST API reference
+- [API Documentation](docs/reference/API_DOCUMENTATION.md) - REST API reference
 - [Caching Strategy](docs/REDIS_CACHING_OPTIMIZATION.md) - Redis implementation
 
 ### Operations & Monitoring
 
 - [System Monitoring](docs/operations/MONITORING_IMPLEMENTATION.md) - Health checks and alerts
-- [Performance Optimization](docs/operations/PERFORMANCE.md) - Optimization strategies
+- [Performance Optimization](docs/REDIS_CACHING_OPTIMIZATION.md) - Caching and optimization
 - [Deployment Guide](docs/operations/DEPLOYMENT.md) - Production deployment
 - [Scaling Guide](docs/operations/SCALING_ANALYSIS.md) - Horizontal and vertical scaling
 
@@ -84,7 +82,7 @@ TheTradeVisor is an enterprise-grade trading analytics platform that aggregates,
 
 ### Troubleshooting
 
-- [Common Issues](docs/troubleshooting/COMMON_ISSUES.md) - Frequently encountered problems
+- [Troubleshooting](docs/CLOUDFLARE_521_TROUBLESHOOTING.md) - Common issues and solutions
 - [Cloudflare 521 Errors](docs/CLOUDFLARE_521_TROUBLESHOOTING.md) - Connection issues
 - [System Crash Postmortem](docs/SYSTEM_CRASH_POSTMORTEM.md) - Incident analysis
 
@@ -154,7 +152,7 @@ php artisan serve
 php artisan horizon
 ```
 
-For detailed installation instructions, see the [Installation Guide](docs/deployment/INSTALLATION.md).
+For detailed installation instructions, see the [Installation Guide](docs/getting-started/INSTALLATION.md).
 
 ---
 
