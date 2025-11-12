@@ -181,7 +181,6 @@ The models also have custom accessor methods (e.g., `getTimeAttribute()`) that r
 ### Git Commit:
 ```
 commit 21ce33f
-Author: Cascade AI
 Date: Nov 8, 2025
 
 fix: enable datetime casting for time fields in Deal, Position, and Order models
@@ -207,7 +206,6 @@ fix: enable datetime casting for time fields in Deal, Position, and Order models
 ## 📞 Resolution
 
 **Status:** ✅ **RESOLVED**  
-**Fixed By:** Cascade AI  
 **Date:** November 8, 2025, 2:15 PM UTC  
 **Git Commit:** `21ce33f`
 
