@@ -83,16 +83,31 @@ class TradesController extends Controller
         $symbolMappings = [$symbol];
     }
     
-    // Get ALL CLOSED deals for this user and these symbols (for stats calculation)
-    $allDeals = Deal::whereHas('tradingAccount', function($q) use ($user) {
+    // Get statistics using database aggregation (no memory loading)
+    $baseQuery = Deal::whereHas('tradingAccount', function($q) use ($user) {
         $q->where('user_id', $user->id);
     })
     ->whereNotNull('symbol')
     ->where('symbol', '!=', '')
     ->whereIn('symbol', $symbolMappings)
-    ->whereIn('entry', ['out', 'inout'])  // Only count closed trades
-    ->orderBy('time', 'desc')
-    ->get();
+    ->whereIn('entry', ['out', 'inout']);  // Only count closed trades
+    
+    // Get aggregated stats from database
+    $aggregateStats = $baseQuery->selectRaw('
+        COUNT(*) as total_trades,
+        SUM(CASE WHEN profit > 0 THEN 1 ELSE 0 END) as winning_trades,
+        SUM(CASE WHEN profit < 0 THEN 1 ELSE 0 END) as losing_trades,
+        SUM(profit) as total_profit,
+        SUM(volume) as total_volume,
+        MAX(profit) as best_trade,
+        MIN(profit) as worst_trade,
+        SUM(commission) as total_commission,
+        SUM(swap) as total_swap,
+        SUM(fee) as total_fee
+    ')->first();
+    
+    // Get limited sample for detailed analysis (max 5000 recent trades)
+    $allDeals = $baseQuery->orderBy('time', 'desc')->limit(5000)->get();
     
     // If no deals found, return empty stats
     if ($allDeals->isEmpty()) {
@@ -145,12 +160,12 @@ class TradesController extends Controller
         return view('trades.symbol', compact('deals', 'symbol', 'stats', 'display_currency'));
     }
     
-    // Calculate stats
-    $totalTrades = $allDeals->count();
-    $winningTrades = $allDeals->where('profit', '>', 0)->count();
-    $losingTrades = $allDeals->where('profit', '<', 0)->count();
-    $totalProfit = $allDeals->sum('profit');
-    $totalVolume = $allDeals->sum('volume');
+    // Use aggregated stats from database
+    $totalTrades = $aggregateStats->total_trades ?? 0;
+    $winningTrades = $aggregateStats->winning_trades ?? 0;
+    $losingTrades = $aggregateStats->losing_trades ?? 0;
+    $totalProfit = $aggregateStats->total_profit ?? 0;
+    $totalVolume = $aggregateStats->total_volume ?? 0;
     
     $grossProfit = $allDeals->where('profit', '>', 0)->sum('profit');
     $grossLoss = abs($allDeals->where('profit', '<', 0)->sum('profit'));
@@ -226,10 +241,10 @@ class TradesController extends Controller
     arsort($hours);
     $mostActiveHour = !empty($hours) ? sprintf('%02d:00', array_key_first($hours)) : 'N/A';
     
-    // Costs
-    $totalCommission = $allDeals->sum('commission');
-    $totalSwap = $allDeals->sum('swap');
-    $totalFees = abs($totalCommission) + abs($allDeals->sum('fee'));
+    // Costs (from aggregated stats)
+    $totalCommission = $aggregateStats->total_commission ?? 0;
+    $totalSwap = $aggregateStats->total_swap ?? 0;
+    $totalFees = abs($totalCommission) + abs($aggregateStats->total_fee ?? 0);
     
     $stats = [
         'total_trades' => $totalTrades,

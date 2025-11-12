@@ -339,10 +339,11 @@ class DashboardController extends Controller
 
         foreach ($accounts as $account) {
 
-        // Get balance history for last 30 days
+        // Get balance history for last 30 days (limit to 5000 points for chart)
         $history = Deal::where('trading_account_id', $account->id)
             ->where('time', '>=', now()->subDays(30))
             ->orderBy('time', 'asc')
+            ->limit(5000)
             ->get();
 
         $balancePoints = [];
