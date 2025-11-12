@@ -362,7 +362,7 @@ Potential additions:
 ### Getting Help
 
 - **Documentation**: See [GEOIP_SETUP_GUIDE.md](../GEOIP_SETUP_GUIDE.md)
-- **Email**: your-email@example.com
+- **Email**: hello@thetradevisor.com
 - **GitHub Issues**: https://github.com/abuzant/TheTradeVisor/issues
 
 ### Reporting Issues
@@ -385,7 +385,7 @@ Include:
 💼 LinkedIn: [linkedin.com/in/ruslanabuzant](https://linkedin.com/in/ruslanabuzant)
 
 For project support and inquiries:  
-📧 [your-email@example.com](mailto:your-email@example.com)  
+📧 [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  
 🌐 [https://thetradevisor.com](https://thetradevisor.com)
 
 ---

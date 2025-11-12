@@ -141,7 +141,7 @@ Sends notifications via:
 Configuration in `.env`:
 ```env
 SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL
-ALERT_EMAIL=your-email@example.com
+ALERT_EMAIL=hello@thetradevisor.com
 ```
 
 ### 4. Database Query Timeout

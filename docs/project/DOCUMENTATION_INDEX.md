@@ -167,7 +167,7 @@ From **[Implementation Summary](../changelog/IMPLEMENTATION_SUMMARY.md)**:
 - **HSTS** - Force HTTPS
 
 ### Reporting Security Issues
-📧 Email: [your-email@example.com](mailto:your-email@example.com)
+📧 Email: [hello@thetradevisor.com](mailto:hello@thetradevisor.com)
 
 ---
 
@@ -223,7 +223,7 @@ HORIZON_ENABLED=true
 ## 📞 Support & Contact
 
 ### Project Support
-📧 Email: [your-email@example.com](mailto:your-email@example.com)  
+📧 Email: [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  
 🌐 Website: [https://thetradevisor.com](https://thetradevisor.com)
 
 ### Author
@@ -275,5 +275,5 @@ HORIZON_ENABLED=true
 💼 LinkedIn: [linkedin.com/in/ruslanabuzant](https://linkedin.com/in/ruslanabuzant)
 
 For project support and inquiries:  
-�� [your-email@example.com](mailto:your-email@example.com)  
+�� [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  
 🌐 [https://thetradevisor.com](https://thetradevisor.com)

@@ -27,7 +27,7 @@ Your `.env` file should have:
 ```env
 # System Monitoring & Alerts
 SLACK_WEBHOOK_URL=                    # Optional: Add Slack webhook URL
-ALERT_EMAIL=your-email@example.com    # Required: Your alert email
+ALERT_EMAIL=hello@thetradevisor.com    # Required: Your alert email
 
 # Amazon SES Configuration (Already configured)
 MAIL_MAILER=smtp
@@ -36,7 +36,7 @@ MAIL_PORT=587
 MAIL_ENCRYPTION=tls
 MAIL_USERNAME=your-ses-username
 MAIL_PASSWORD=your-ses-password
-MAIL_FROM_ADDRESS=your-email@example.com
+MAIL_FROM_ADDRESS=hello@thetradevisor.com
 MAIL_FROM_NAME=TheTradeVisor
 ```
 
@@ -213,7 +213,7 @@ grep "$(date '+%Y-%m-%d %H')" /var/log/thetradevisor/alerts.log
 2. **Verify SES is working**:
    ```bash
    cd /www && php artisan tinker
-   >>> Mail::raw('Test', function($m) { $m->to('your-email@example.com')->subject('Test'); });
+   >>> Mail::raw('Test', function($m) { $m->to('hello@thetradevisor.com')->subject('Test'); });
    ```
 
 3. **Check Laravel logs**:
