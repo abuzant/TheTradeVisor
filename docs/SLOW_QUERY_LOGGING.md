@@ -420,3 +420,19 @@ mv /tmp/slow.log /var/log/thetradevisor/laravel_slow_queries.log
 - Admin: Logs viewable in admin panel
 
 **Status**: ✅ Live and monitoring
+
+
+---
+
+## 👨‍💻 Author & Contact
+
+**Ruslan Abuzant**  
+📧 Email: [ruslan@abuzant.com](mailto:ruslan@abuzant.com)  
+🌐 Website: [https://abuzant.com](https://abuzant.com)  
+💼 LinkedIn: [linkedin.com/in/ruslanabuzant](https://linkedin.com/in/ruslanabuzant)  
+❤️ From Palestine to the world with Love
+
+For project support and inquiries:  
+📧 [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  
+🌐 [https://thetradevisor.com](https://thetradevisor.com)
+

@@ -271,3 +271,19 @@ WARNING: [pool www] child 12345, script executing too slow (6.5 sec)
 **Without these fixes**: The same crash could happen again if a user loads analytics with a large dataset.
 
 **With these fixes**: System will gracefully handle load and stay responsive.
+
+
+---
+
+## 👨‍💻 Author & Contact
+
+**Ruslan Abuzant**  
+📧 Email: [ruslan@abuzant.com](mailto:ruslan@abuzant.com)  
+🌐 Website: [https://abuzant.com](https://abuzant.com)  
+💼 LinkedIn: [linkedin.com/in/ruslanabuzant](https://linkedin.com/in/ruslanabuzant)  
+❤️ From Palestine to the world with Love
+
+For project support and inquiries:  
+📧 [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  
+🌐 [https://thetradevisor.com](https://thetradevisor.com)
+

@@ -1,0 +1,284 @@
+# TheTradeVisor
+
+[![Laravel](https://img.shields.io/badge/Laravel-11.x-FF2D20?style=for-the-badge&logo=laravel&logoColor=white)](https://laravel.com)
+[![PHP](https://img.shields.io/badge/PHP-8.3-777BB4?style=for-the-badge&logo=php&logoColor=white)](https://php.net)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?style=for-the-badge&logo=postgresql&logoColor=white)](https://postgresql.org)
+[![Redis](https://img.shields.io/badge/Redis-Cache-DC382D?style=for-the-badge&logo=redis&logoColor=white)](https://redis.io)
+[![License](https://img.shields.io/badge/License-Proprietary-blue?style=for-the-badge)](LICENSE)
+[![Status](https://img.shields.io/badge/Status-Production-success?style=for-the-badge)]()
+
+**Professional Trading Analytics Platform** - Comprehensive MT4/MT5 trading data analysis, performance tracking, and broker comparison system.
+
+---
+
+## 🚀 Overview
+
+TheTradeVisor is an enterprise-grade trading analytics platform that aggregates, analyzes, and visualizes trading data from MetaTrader 4 and MetaTrader 5 platforms. Built with Laravel 11 and modern web technologies, it provides traders with deep insights into their trading performance, broker comparisons, and global market analytics.
+
+### Key Features
+
+- 📊 **Real-time Analytics** - Live trading performance metrics and statistics
+- 🌍 **Global Market Data** - Aggregated analytics from traders worldwide
+- 🏦 **Broker Comparison** - Detailed broker performance analysis
+- 📈 **Performance Tracking** - Individual and portfolio-level tracking
+- 🔒 **Enterprise Security** - Multi-layer protection and monitoring
+- ⚡ **High Performance** - Redis caching, query optimization, circuit breakers
+- 🌐 **GeoIP Analytics** - Country-based trading insights
+- 📱 **Responsive Design** - Beautiful UI across all devices
+
+---
+
+## 📚 Documentation
+
+### Getting Started
+
+- [Installation Guide](docs/deployment/INSTALLATION.md) - Complete setup instructions
+- [Configuration](docs/deployment/CONFIGURATION.md) - Environment and system configuration
+- [MT4/MT5 EA Installation](docs/guides/MT4_EA_INSTALLATION.md) - Expert Advisor setup guide
+
+### Core Features
+
+- [Trading Analytics](docs/features/ANALYTICS.md) - Analytics system overview
+- [Broker Analytics](docs/features/BROKER_ANALYTICS.md) - Broker comparison features
+- [GeoIP Analytics](docs/features/geoip-analytics.md) - Geographic insights
+- [Export System](docs/features/EXPORTS.md) - CSV/PDF export capabilities
+
+### System Architecture
+
+- [Architecture Overview](docs/development/architecture.md) - System design and components
+- [Database Schema](docs/reference/DATABASE_SCHEMA.md) - Complete database structure
+- [API Documentation](docs/api/README.md) - REST API reference
+- [Caching Strategy](docs/REDIS_CACHING_OPTIMIZATION.md) - Redis implementation
+
+### Operations & Monitoring
+
+- [System Monitoring](docs/operations/MONITORING_IMPLEMENTATION.md) - Health checks and alerts
+- [Performance Optimization](docs/operations/PERFORMANCE.md) - Optimization strategies
+- [Deployment Guide](docs/operations/DEPLOYMENT.md) - Production deployment
+- [Scaling Guide](docs/operations/SCALING_ANALYSIS.md) - Horizontal and vertical scaling
+
+### Security & Protection
+
+- [Rate Limiting](docs/RATE_LIMITING_COMPLETE.md) - Request rate limiting
+- [Circuit Breakers](docs/CIRCUIT_BREAKER_IMPLEMENTATION.md) - System overload protection
+- [Query Optimization](docs/SLOW_QUERY_LOGGING.md) - Database performance
+- [Alert System](docs/ALERT_SYSTEM_SETUP.md) - Slack/Email notifications
+
+### Troubleshooting
+
+- [Common Issues](docs/troubleshooting/COMMON_ISSUES.md) - Frequently encountered problems
+- [Cloudflare 521 Errors](docs/CLOUDFLARE_521_TROUBLESHOOTING.md) - Connection issues
+- [System Crash Postmortem](docs/SYSTEM_CRASH_POSTMORTEM.md) - Incident analysis
+
+### Development
+
+- [Contributing Guide](docs/contributing/CONTRIBUTING.md) - How to contribute
+- [Testing Guide](docs/development/testing.md) - Testing procedures
+- [Artisan Commands](docs/reference/ARTISAN_COMMANDS.md) - Custom commands reference
+
+---
+
+## 🛠️ Tech Stack
+
+### Backend
+- **Framework**: Laravel 11.x
+- **Language**: PHP 8.3
+- **Database**: PostgreSQL 16
+- **Cache**: Redis 7.x
+- **Queue**: Laravel Horizon
+
+### Frontend
+- **Framework**: Blade Templates
+- **Styling**: Tailwind CSS 3.x
+- **JavaScript**: Alpine.js, Chart.js
+- **Icons**: Lucide Icons
+
+### Infrastructure
+- **Web Server**: Nginx (Load Balanced)
+- **PHP**: PHP-FPM (5 pools)
+- **Platform**: AWS EC2
+- **CDN**: Cloudflare
+- **Monitoring**: Custom health checks
+
+---
+
+## ⚡ Quick Start
+
+### Prerequisites
+
+- PHP 8.3+
+- PostgreSQL 16+
+- Redis 7+
+- Composer 2.x
+- Node.js 18+ & NPM
+
+### Installation
+
+```bash
+# Clone repository
+git clone https://github.com/abuzant/TheTradeVisor.git
+cd TheTradeVisor
+
+# Install dependencies
+composer install
+npm install && npm run build
+
+# Configure environment
+cp .env.example .env
+php artisan key:generate
+
+# Setup database
+php artisan migrate
+php artisan db:seed
+
+# Start services
+php artisan serve
+php artisan horizon
+```
+
+For detailed installation instructions, see the [Installation Guide](docs/deployment/INSTALLATION.md).
+
+---
+
+## 🔒 Security Features
+
+### Multi-Layer Protection
+
+1. **Rate Limiting** - 10-20 requests/minute on expensive endpoints
+2. **Circuit Breakers** - Automatic protection during high load
+3. **Query Limits** - Maximum 10,000 records per query
+4. **Query Timeout** - 30-second maximum execution time
+5. **Slow Query Logging** - Performance monitoring
+6. **System Monitoring** - Health checks every 2 minutes
+7. **Alert System** - Slack/Email notifications
+
+### Authentication & Authorization
+
+- Laravel Breeze authentication
+- Role-based access control (Admin/User)
+- API key authentication
+- Session management
+- CSRF protection
+
+---
+
+## 📊 Performance
+
+### Optimizations
+
+- **Redis Caching**: 90% reduction in database load
+- **Query Optimization**: All queries paginated and limited
+- **Database Aggregation**: Statistics calculated in PostgreSQL
+- **CDN**: Cloudflare for static assets
+- **Load Balancing**: 4 Nginx backend instances
+
+### Benchmarks
+
+- **Page Load**: 50-200ms (cached)
+- **Analytics**: 5-minute cache, instant response
+- **Exports**: Rate limited to 5/minute
+- **API**: Sub-100ms response times
+
+---
+
+## 🌍 Global Analytics
+
+TheTradeVisor aggregates trading data from users worldwide, providing:
+
+- **Country-based Analytics** - Trading patterns by region
+- **Broker Comparison** - Performance across brokers
+- **Symbol Popularity** - Most traded instruments
+- **Market Sentiment** - Win rates and profitability
+- **Trading Hours** - Peak trading times globally
+
+All data is anonymized and aggregated for privacy.
+
+---
+
+## 📈 System Status
+
+### Current Version: 1.2.0
+
+**Production Status**: ✅ Stable
+
+**Recent Updates**:
+- ✅ Circuit breaker implementation
+- ✅ Comprehensive rate limiting
+- ✅ Slow query logging
+- ✅ Alert system (Slack/Email)
+- ✅ Storage permissions optimization
+- ✅ Pagination everywhere
+- ✅ Redis caching optimization
+
+See [CHANGELOG.md](docs/CHANGELOG.md) for complete history.
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](docs/contributing/CONTRIBUTING.md) for details.
+
+### Development Workflow
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Write/update tests
+5. Submit a pull request
+
+---
+
+## 📝 License
+
+This project is proprietary software. All rights reserved.
+
+For licensing inquiries, contact: [hello@thetradevisor.com](mailto:hello@thetradevisor.com)
+
+---
+
+## 🆘 Support
+
+### Getting Help
+
+- 📧 Email: [hello@thetradevisor.com](mailto:hello@thetradevisor.com)
+- 🌐 Website: [https://thetradevisor.com](https://thetradevisor.com)
+- 📖 Documentation: [docs/](docs/)
+- 🐛 Issues: [GitHub Issues](https://github.com/abuzant/TheTradeVisor/issues)
+
+### Professional Services
+
+For custom development, consulting, or enterprise support:
+📧 [ruslan@abuzant.com](mailto:ruslan@abuzant.com)
+
+---
+
+## 🏆 Acknowledgments
+
+### Technologies
+
+- [Laravel](https://laravel.com) - The PHP Framework
+- [PostgreSQL](https://postgresql.org) - Advanced Database
+- [Redis](https://redis.io) - In-Memory Data Store
+- [Tailwind CSS](https://tailwindcss.com) - Utility-First CSS
+- [Chart.js](https://chartjs.org) - Beautiful Charts
+
+### Design Patterns
+
+- Circuit Breaker Pattern (Martin Fowler)
+- Repository Pattern
+- Service Layer Architecture
+- Event-Driven Design
+
+---
+
+## 👨‍💻 Author & Contact
+
+**Ruslan Abuzant**  
+📧 Email: [ruslan@abuzant.com](mailto:ruslan@abuzant.com)  
+🌐 Website: [https://abuzant.com](https://abuzant.com)  
+💼 LinkedIn: [linkedin.com/in/ruslanabuzant](https://linkedin.com/in/ruslanabuzant)  
+❤️ From Palestine to the world with Love
+
+For project support and inquiries:  
+📧 [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  
+🌐 [https://thetradevisor.com](https://thetradevisor.com)
