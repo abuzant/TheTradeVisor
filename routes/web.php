@@ -15,8 +15,16 @@ Route::get('/healthcheck', function () {
     ], 200);
 })->middleware('throttle:60,1');
 
-// Landing page
-Route::get('/', [App\Http\Controllers\LandingController::class, 'index'])->name('landing');
+// Public pages
+Route::get('/', [App\Http\Controllers\PublicController::class, 'landing'])->name('landing');
+Route::get('/features', [App\Http\Controllers\PublicController::class, 'features'])->name('features');
+Route::get('/pricing', [App\Http\Controllers\PublicController::class, 'pricing'])->name('pricing');
+Route::get('/about', [App\Http\Controllers\PublicController::class, 'about'])->name('about');
+Route::get('/faq', [App\Http\Controllers\PublicController::class, 'faq'])->name('faq');
+Route::get('/contact', [App\Http\Controllers\PublicController::class, 'contact'])->name('contact');
+Route::post('/contact', [App\Http\Controllers\PublicController::class, 'contactSubmit'])->name('contact.submit');
+Route::get('/docs', [App\Http\Controllers\PublicController::class, 'docs'])->name('docs');
+Route::get('/api-docs', [App\Http\Controllers\PublicController::class, 'apiDocs'])->name('api.docs');
 
 // Logged-in Users
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -78,11 +86,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('settings.currency');
     Route::put('/settings/currency', [App\Http\Controllers\Settings\CurrencyController::class, 'update'])
         ->name('settings.currency.update');
-    // Global Analytics
-    Route::get('/analytics', [App\Http\Controllers\AnalyticsController::class, 'index'])->name('analytics');
-    
-    // Country Analytics
+    // Country Analytics (must come before parameterized route)
     Route::get('/analytics/countries', [App\Http\Controllers\CountryAnalyticsController::class, 'topTradingCountries'])->name('analytics.countries');
+    
+    // Global Analytics
+    Route::get('/analytics/{days?}', [App\Http\Controllers\AnalyticsController::class, 'index'])->name('analytics')->where('days', '[0-9]+');
 });
 
 // Admin routes

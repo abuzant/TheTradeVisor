@@ -105,7 +105,9 @@ For project support and inquiries:
 
 ## ✨ Features
 
-- [Currency Display System](features/CURRENCY_DISPLAY.md) - **NEW:** How currency conversion works
+- [Currency Display System](features/CURRENCY_DISPLAY.md) - How currency conversion works
+- [Country-Based Market Sentiment Analysis](features/COUNTRY_SENTIMENT_ANALYSIS.md) - **NEW:** Global market sentiment by country
+- [Platform Performance Matrix](features/PLATFORM_PERFORMANCE_MATRIX.md) - **NEW:** MT4 vs MT5 performance comparison
 - [GeoIP Analytics](features/geoip-analytics.md) - Location-based trading insights
 
 ---

@@ -52,17 +52,17 @@ class RateLimiterService
      */
     protected function getLimit(string $type, ?User $user = null): int
     {
-        // Check for user-specific limit first
+        // Check for user-specific limit first (admin override)
         if ($user && $user->rate_limit) {
             return $user->rate_limit;
         }
         
-        // Check for premium users
-        if ($user && $user->is_premium) {
-            return RateLimitSetting::get('premium_api_key_limit', 300);
+        // For API key requests, use subscription tier-based limits
+        if ($type === 'api_key' && $user) {
+            return $this->getTierBasedLimit($user);
         }
         
-        // Get default limit based on type
+        // Get default limit based on type for IP-based requests
         $key = $type === 'ip' ? 'global_ip_limit' : 'global_api_key_limit';
         
         // Check if this is a data collection request (more generous limit)
@@ -71,7 +71,24 @@ class RateLimiterService
             return RateLimitSetting::get('data_collection_api_key_limit', 100);
         }
         
-        return RateLimitSetting::get($key, $type === 'ip' ? 60 : 120);
+        return RateLimitSetting::get($key, $type === 'ip' ? 60 : 100);
+    }
+    
+    /**
+     * Get rate limit based on user's subscription tier
+     */
+    protected function getTierBasedLimit(User $user): int
+    {
+        $tier = strtolower($user->subscription_tier ?? 'free');
+        
+        // Tier-based limits per hour
+        $tierLimits = [
+            'free' => 100,           // 100 requests/hour
+            'pro' => 1000,           // 1,000 requests/hour
+            'enterprise' => 999999,  // Effectively unlimited
+        ];
+        
+        return $tierLimits[$tier] ?? $tierLimits['free'];
     }
     
     /**

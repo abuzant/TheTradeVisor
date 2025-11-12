@@ -302,6 +302,197 @@
                 </div>
                 @endif
 
+                {{-- Country-Based Market Sentiment --}}
+                @if($metrics['country_sentiment'] && $metrics['country_sentiment']->isNotEmpty())
+                <div class="bg-white/90 backdrop-blur-sm overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 rounded-xl">
+                    <div class="p-6">
+                        <h2 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">🌍 Global Market Sentiment by Country</h2>
+                        
+                        {{-- Sentiment World Map --}}
+                        <div class="mb-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                                <div>
+                                    <div class="text-sm text-gray-600">🟢 Bullish Countries</div>
+                                    <div class="text-2xl font-bold text-green-600">{{ $metrics['country_sentiment']->where('sentiment', 'bullish')->count() }}</div>
+                                </div>
+                                <div>
+                                    <div class="text-sm text-gray-600">🔴 Bearish Countries</div>
+                                    <div class="text-2xl font-bold text-red-600">{{ $metrics['country_sentiment']->where('sentiment', 'bearish')->count() }}</div>
+                                </div>
+                                <div>
+                                    <div class="text-sm text-gray-600">⚪ Neutral Countries</div>
+                                    <div class="text-2xl font-bold text-gray-600">{{ $metrics['country_sentiment']->where('sentiment', 'neutral')->count() }}</div>
+                                </div>
+                                <div>
+                                    <div class="text-sm text-gray-600">🌐 Total Countries</div>
+                                    <div class="text-2xl font-bold text-indigo-600">{{ $metrics['country_sentiment']->count() }}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Country Sentiment Table --}}
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Country</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Trades</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Buy/Sell Ratio</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Win Rate</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Profit</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sentiment</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    @foreach($metrics['country_sentiment'] as $country)
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                            <span class="inline-flex items-center">
+                                                🏳️ {{ strtoupper($country['country_code']) }}
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $country['total_trades'] }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                            <div class="flex items-center space-x-2">
+                                                <span class="text-green-600">{{ $country['buy_percentage'] }}%</span>
+                                                <span class="text-gray-400">/</span>
+                                                <span class="text-red-600">{{ $country['sell_percentage'] }}%</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                            <span class="px-2 py-1 rounded text-xs font-semibold {{ $country['win_rate'] >= 50 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                                {{ $country['win_rate'] }}%
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium {{ $country['total_profit'] >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                                            {{ $displayCurrency }} {{ number_format($country['total_profit'], 2) }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                            @if($country['sentiment'] === 'bullish')
+                                                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+                                                    🟢 Bullish {{ $country['sentiment_score'] }}%
+                                                </span>
+                                            @elseif($country['sentiment'] === 'bearish')
+                                                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800">
+                                                    🔴 Bearish {{ $country['sentiment_score'] }}%
+                                                </span>
+                                            @else
+                                                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-800">
+                                                    ⚪ Neutral
+                                                </span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {{-- Country Sentiment Chart --}}
+                        <div class="mt-6" style="height: 300px;">
+                            <canvas id="countrySentimentChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                @endif
+
+                {{-- Platform Performance Matrix --}}
+                @if($metrics['platform_performance'] && $metrics['platform_performance']->isNotEmpty())
+                <div class="bg-white/90 backdrop-blur-sm overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 rounded-xl">
+                    <div class="p-6">
+                        <h2 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">🖥️ Platform Performance Matrix</h2>
+                        
+                        {{-- Platform Overview Cards --}}
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                            @foreach($metrics['platform_performance'] as $platform)
+                            <div class="bg-gradient-to-r {{ $platform['platform_type'] === 'MT5' ? 'from-blue-50 to-indigo-50' : 'from-green-50 to-emerald-50' }} rounded-lg p-4 border-l-4 {{ $platform['platform_type'] === 'MT5' ? 'border-blue-500' : 'border-green-500' }}">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h3 class="text-lg font-bold {{ $platform['platform_type'] === 'MT5' ? 'text-blue-700' : 'text-green-700' }}">
+                                        {{ $platform['platform_type'] }} - {{ $platform['account_mode'] }}
+                                    </h3>
+                                    <span class="text-xs font-semibold bg-white px-2 py-1 rounded">
+                                        {{ $platform['unique_accounts'] }} accounts
+                                    </span>
+                                </div>
+                                <div class="space-y-1 text-sm">
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Total Trades:</span>
+                                        <span class="font-medium">{{ $platform['total_trades'] }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Win Rate:</span>
+                                        <span class="font-medium {{ $platform['win_rate'] >= 50 ? 'text-green-600' : 'text-red-600' }}">{{ $platform['win_rate'] }}%</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Profit Factor:</span>
+                                        <span class="font-medium text-blue-600">{{ $platform['profit_factor'] }}</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span class="text-gray-600">Total Profit:</span>
+                                        <span class="font-bold {{ $platform['total_profit'] >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                                            {{ $displayCurrency }} {{ number_format($platform['total_profit'], 2) }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+
+                        {{-- Platform Comparison Table --}}
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Platform</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Accounts</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Trades</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Win Rate</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Profit Factor</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Risk/Reward</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Profit</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Avg Trade</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    @foreach($metrics['platform_performance'] as $platform)
+                                    <tr>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $platform['platform_type'] === 'MT5' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800' }}">
+                                                    {{ $platform['platform_type'] }}
+                                                </span>
+                                                <span class="ml-2 text-xs text-gray-500">{{ $platform['account_mode'] }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $platform['unique_accounts'] }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $platform['total_trades'] }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                            <span class="px-2 py-1 rounded text-xs font-semibold {{ $platform['win_rate'] >= 50 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                                {{ $platform['win_rate'] }}%
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">{{ $platform['profit_factor'] }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-purple-600">{{ $platform['risk_reward_ratio'] }}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium {{ $platform['total_profit'] >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                                            {{ $displayCurrency }} {{ number_format($platform['total_profit'], 2) }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium {{ $platform['avg_profit'] >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                                            {{ $displayCurrency }} {{ number_format($platform['avg_profit'], 2) }}
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {{-- Platform Performance Chart --}}
+                        <div class="mt-6" style="height: 300px;">
+                            <canvas id="platformPerformanceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                @endif
+
             @endif
         </div>
     </div>
@@ -443,6 +634,117 @@
                         y: {
                             ticks: {
                                 callback: value => value + '%'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        @endif
+
+        // Country Sentiment Chart
+        @if($metrics['country_sentiment'])
+        const countrySentimentCtx = document.getElementById('countrySentimentChart');
+        if (countrySentimentCtx) {
+            const countryData = @json($metrics['country_sentiment']);
+            new Chart(countrySentimentCtx, {
+                type: 'bar',
+                data: {
+                    labels: countryData.map(c => c.country_code.toUpperCase()),
+                    datasets: [
+                        {
+                            label: 'Buy Trades',
+                            data: countryData.map(c => c.buy_trades),
+                            backgroundColor: 'rgba(34, 197, 94, 0.8)',
+                        },
+                        {
+                            label: 'Sell Trades',
+                            data: countryData.map(c => c.sell_trades),
+                            backgroundColor: 'rgba(239, 68, 68, 0.8)',
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            stacked: true,
+                        },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Number of Trades'
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                afterLabel: function(context) {
+                                    const country = countryData[context.dataIndex];
+                                    return [
+                                        `Win Rate: ${country.win_rate}%`,
+                                        `Total Profit: {{ $displayCurrency }} ${country.total_profit}`,
+                                        `Sentiment: ${country.sentiment}`
+                                    ];
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        @endif
+
+        // Platform Performance Chart
+        @if($metrics['platform_performance'])
+        const platformPerformanceCtx = document.getElementById('platformPerformanceChart');
+        if (platformPerformanceCtx) {
+            const platformData = @json($metrics['platform_performance']);
+            new Chart(platformPerformanceCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['Win Rate', 'Profit Factor', 'Risk/Reward', 'Total Profit', 'Avg Trade'],
+                    datasets: platformData.map((platform, index) => ({
+                        label: `${platform.platform_type} - ${platform.account_mode}`,
+                        data: [
+                            platform.win_rate,
+                            Math.min(platform.profit_factor * 10, 100), // Scale profit factor
+                            Math.min(platform.risk_reward_ratio * 20, 100), // Scale risk/reward
+                            Math.min(Math.abs(platform.total_profit) / 100, 100), // Scale profit
+                            Math.min(Math.abs(platform.avg_profit) * 10, 100) // Scale avg trade
+                        ],
+                        borderColor: index === 0 ? 'rgb(59, 130, 246)' : 'rgb(34, 197, 94)',
+                        backgroundColor: index === 0 ? 'rgba(59, 130, 246, 0.2)' : 'rgba(34, 197, 94, 0.2)',
+                        borderWidth: 2,
+                        pointBackgroundColor: index === 0 ? 'rgb(59, 130, 246)' : 'rgb(34, 197, 94)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: index === 0 ? 'rgb(59, 130, 246)' : 'rgb(34, 197, 94)'
+                    }))
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: {
+                                stepSize: 20
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const labels = ['Win Rate (%)', 'Profit Factor (×10)', 'Risk/Reward (×20)', 'Profit (÷100)', 'Avg Trade (×10)'];
+                                    return `${context.dataset.label}: ${context.raw} (${labels[context.dataIndex]})`;
+                                }
                             }
                         }
                     }

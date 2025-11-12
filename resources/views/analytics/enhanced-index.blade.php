@@ -1,3 +1,10 @@
+@extends('layouts.app')
+
+@section('title', 'Advanced Global Trading Analytics - TheTradeVisor | Worldwide MT5 Trading Insights')
+@section('description', 'Explore comprehensive trading analytics from thousands of MT5 traders worldwide. Real-time insights on country-platform matrices, symbol heatmaps, risk analytics, and market correlations.')
+@section('og_title', 'Advanced Global Trading Analytics - TheTradeVisor')
+@section('og_description', 'Comprehensive trading analytics and insights from MT5 traders around the world')
+
 <x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">

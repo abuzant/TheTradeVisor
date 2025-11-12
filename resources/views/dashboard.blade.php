@@ -419,7 +419,13 @@
                                     @foreach($recentPositions as $position)
                                         <tr>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                {{ $position->close_time ? $position->close_time->format('M d, H:i') : 'N/A' }}
+                                                @if($position->close_time)
+                                                    {{ $position->close_time->format('M d, H:i') }}
+                                                @elseif($position->update_time)
+                                                    {{ $position->update_time->format('M d, H:i') }}
+                                                @else
+                                                    N/A
+                                                @endif
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                                 <a href="{{ route('trades.symbol', $position->normalized_symbol) }}"

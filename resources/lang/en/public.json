@@ -1,0 +1,76 @@
+{
+  "nav": {
+    "home": "Home",
+    "features": "Features",
+    "pricing": "Pricing",
+    "about": "About",
+    "faq": "FAQ",
+    "contact": "Contact",
+    "login": "Login",
+    "register": "Get Started",
+    "dashboard": "Dashboard"
+  },
+  "hero": {
+    "title": "See What <span class=\"text-indigo-600\">Thousands</span> of Traders<br>Are Doing Right Now",
+    "subtitle": "The world's first platform that aggregates real-time trading data from MT4/MT5 terminals worldwide. Get insights you can't find anywhere else.",
+    "cta_primary": "Start Free Today",
+    "cta_secondary": "View Live Demo",
+    "trusted_by": "Trusted by traders in {{count}}+ countries"
+  },
+  "features": {
+    "title": "Powerful Features for Smart Traders",
+    "subtitle": "Everything you need to analyze global trading patterns and improve your strategy",
+    "realtime_title": "Real-Time Global Analytics",
+    "realtime_desc": "Track trading activity from thousands of MT4/MT5 terminals worldwide in real-time",
+    "performance_title": "Performance Tracking",
+    "performance_desc": "Comprehensive analytics on your trading performance with detailed metrics",
+    "broker_title": "Broker Comparison",
+    "broker_desc": "Compare broker performance, spreads, and execution quality across platforms",
+    "country_title": "Geographic Insights",
+    "country_desc": "See which countries and regions are most active in specific trading pairs",
+    "risk_title": "Risk Analytics",
+    "risk_desc": "Advanced risk metrics including volatility, correlation, and drawdown analysis",
+    "export_title": "Data Export",
+    "export_desc": "Export your data in CSV or PDF format for further analysis"
+  },
+  "stats": {
+    "title": "Live Trading Statistics",
+    "traders": "Active Traders",
+    "trades": "Trades Today",
+    "volume": "Daily Volume",
+    "countries": "Countries"
+  },
+  "pricing": {
+    "title": "Choose Your Plan",
+    "subtitle": "Start free, upgrade as you grow",
+    "free_title": "Free",
+    "free_price": "$0",
+    "free_desc": "Perfect for getting started",
+    "basic_title": "Basic",
+    "basic_price": "$9",
+    "basic_desc": "For serious traders",
+    "pro_title": "Pro",
+    "pro_price": "$29",
+    "pro_desc": "For professional traders",
+    "enterprise_title": "Enterprise",
+    "enterprise_price": "Custom",
+    "enterprise_desc": "For trading firms",
+    "per_month": "/month",
+    "select_plan": "Select Plan",
+    "current_plan": "Current Plan"
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "subtitle": "Everything you need to know about TheTradeVisor"
+  },
+  "footer": {
+    "tagline": "Global Trading Analytics Platform",
+    "product": "Product",
+    "company": "Company",
+    "support": "Support",
+    "legal": "Legal",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "copyright": "© {{year}} TheTradeVisor. All rights reserved."
+  }
+}

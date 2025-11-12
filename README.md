@@ -13,7 +13,7 @@ A comprehensive, production-ready trading analytics platform built with Laravel 
 [![Nginx](https://img.shields.io/badge/Nginx-1.24-009639.svg?logo=nginx)](https://nginx.org)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Production Ready](https://img.shields.io/badge/Status-Production%20Ready-brightgreen.svg)](https://thetradevisor.com)
-[![Version](https://img.shields.io/badge/Version-1.2.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-1.2.1-blue.svg)](CHANGELOG.md)
 [![One-Click Deploy](https://img.shields.io/badge/One%20Click%20Deploy-00A8E1.svg)](#-docker-deployment)
 [![Analytics](https://img.shields.io/badge/Analytics-Real--time-FF6B6B.svg)](https://thetradevisor.com/analytics)
 [![MT4/MT5](https://img.shields.io/badge/MT4%2FMT5-Supported-4CAF50.svg)](docs/MT4_MT5_POSITION_SYSTEM.md)
@@ -26,6 +26,21 @@ A comprehensive, production-ready trading analytics platform built with Laravel 
 **[📖 Complete Documentation Index →](docs/INDEX.md)** | **[Documentation Overview →](docs/README.md)**
 
 ### 🆕 Latest Improvements (November 2025)
+
+#### Version 1.3.0 (Nov 12, 2025) - Professional Marketing Website & REST API
+- **🌐 Professional Marketing Website** - Complete multi-page guest website with landing, features, pricing, FAQ, about, and contact pages
+- **📚 Comprehensive Documentation** - Full documentation viewer with installation guides, features overview, and troubleshooting
+- **🔌 REST API Endpoints** - Complete API implementation with accounts, trades, and analytics endpoints
+- **📊 API Documentation** - Professional API reference with Postman-style examples and rate limiting
+- **⭐ Testimonials & Social Proof** - Customer testimonials, trust badges, and social proof elements
+- **🔐 Tier-Based Rate Limiting** - Subscription-based API rate limits (Free: 100/hr, Pro: 1000/hr, Enterprise: Unlimited)
+
+#### Version 1.2.1 (Nov 12, 2025) - Advanced Analytics & Market Sentiment
+- **[Country-Based Market Sentiment Analysis](docs/features/COUNTRY_SENTIMENT_ANALYSIS.md)** - 🌍 Global market sentiment by geographical region with buy/sell ratios
+- **[Platform Performance Matrix](docs/features/PLATFORM_PERFORMANCE_MATRIX.md)** - 🖥️ MT4 vs MT5 and Hedging vs Netting performance comparison
+- **Interactive Radar Charts** - Multi-dimensional platform performance visualization
+- **Advanced Sentiment Scoring** - Quantified market sentiment (0-50% scale)
+- **Real-Time Country Analytics** - Live trading patterns by geographic region
 
 #### Version 1.2.0 (Nov 11, 2025) - MT4/MT5 Position System
 - **[MT4/MT5 Position System](docs/MT4_MT5_POSITION_SYSTEM.md)** - 🎯 Platform detection and smart position aggregation
@@ -47,6 +62,8 @@ A comprehensive, production-ready trading analytics platform built with Laravel 
 
 ### 📖 Core Documentation
 - [API Documentation](docs/reference/API_DOCUMENTATION.md) - MT4/MT5 integration
+- [REST API Reference](/api-docs) - Complete API endpoints with examples
+- [User Documentation](/docs) - Installation, features, and troubleshooting
 - [Currency Display System](docs/features/CURRENCY_DISPLAY.md) - How currency conversion works
 - [Artisan Commands](docs/reference/ARTISAN_COMMANDS.md) - Custom commands reference
 - [Deployment Guide](docs/operations/DEPLOYMENT.md) - Production deployment
@@ -68,6 +85,8 @@ A comprehensive, production-ready trading analytics platform built with Laravel 
 - **Global Analytics Dashboard** - Real-time insights from thousands of traders worldwide
 - **Interactive Charts & Visualizations** - Chart.js powered graphs with responsive design
 - **Market Sentiment Analysis** - Buy/sell percentages with sentiment indicators
+- **🌍 Country-Based Market Sentiment** - **NEW:** Global market sentiment analysis by geographical region
+- **🖥️ Platform Performance Matrix** - **NEW:** MT4 vs MT5 and Hedging vs Netting performance comparison
 - **GeoIP Country Analytics** - Location-based trading insights with professional flag icons
 - **Time Period Filtering** - Flexible date ranges (Today, 7 Days, 30 Days) with validation
 - **Trade History Tracking** - Complete historical data with intelligent caching
@@ -116,11 +135,25 @@ A comprehensive, production-ready trading analytics platform built with Laravel 
 - **HSTS Enabled** - Force HTTPS with strict transport security
 
 ### 📡 REST API
+- **Complete REST API** - Full API implementation for accounts, trades, and analytics
 - **MT4/MT5 Integration** - Complete API for trading platform integration
 - **Real-time Data Collection** - Async job processing for trading data
 - **Historical Data Import** - Bulk import with queue processing
 - **API Key Management** - Secure API key generation and validation
-- **Rate Limiting** - 300 requests/minute with burst protection
+- **Tier-Based Rate Limiting** - Subscription-based limits (Free: 100/hr, Pro: 1000/hr, Enterprise: Unlimited)
+- **API Documentation** - Professional Postman-style documentation with examples
+
+### 🌐 Marketing Website
+- **Professional Landing Page** - Corporate-style homepage with live global analytics
+- **Feature Showcase** - Comprehensive features page with detailed descriptions
+- **Pricing Plans** - Clear pricing structure with Free, Pay-Per-Account, Pro, and Enterprise tiers
+- **FAQ Section** - Detailed frequently asked questions organized by category
+- **Documentation Portal** - Complete documentation viewer with guides and troubleshooting
+- **API Reference** - Professional API documentation with request/response examples
+- **Testimonials** - Customer testimonials with 5-star ratings and social proof
+- **Trust Badges** - SSL, GDPR, and 24/7 support indicators
+- **SEO Optimized** - Full SEO meta tags, Open Graph, and Twitter Cards on all pages
+- **Google Analytics** - Complete tracking across all public pages
 
 ## 📋 Requirements
 

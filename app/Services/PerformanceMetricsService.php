@@ -40,6 +40,8 @@ class PerformanceMetricsService
                 'streaks' => $this->getStreakAnalysis($accountIds, $days),
                 'equity_curve' => $this->getEquityCurve($accountIds, $days, $displayCurrency),
                 'drawdown' => $this->getDrawdownAnalysis($accountIds, $days, $displayCurrency),
+                'country_sentiment' => $this->getCountryBasedMarketSentiment($accountIds, $days, $displayCurrency),
+                'platform_performance' => $this->getPlatformPerformanceMatrix($accountIds, $days, $displayCurrency),
                 'display_currency' => $displayCurrency,
             ];
         });
@@ -483,5 +485,183 @@ class PerformanceMetricsService
         $grossLoss = abs($deals->where($profitField, '<', 0)->sum($profitField));
 
         return $grossLoss > 0 ? round($grossProfit / $grossLoss, 2) : ($grossProfit > 0 ? 999 : 0);
+    }
+
+    /**
+     * Country-Based Market Sentiment Analysis
+     */
+    private function getCountryBasedMarketSentiment($accountIds, $days, $displayCurrency)
+    {
+        $deals = Deal::whereIn('trading_account_id', $accountIds)
+            ->with('tradingAccount')
+            ->tradesOnly()
+            ->where('time', '>=', now()->subDays($days))
+            ->whereHas('tradingAccount', function($query) {
+                $query->whereNotNull('detected_country');
+            })
+            ->get();
+
+        if ($deals->isEmpty()) {
+            return collect([]);
+        }
+
+        // Group by country and calculate sentiment
+        $countryGroups = $deals->groupBy(function($deal) {
+            return $deal->tradingAccount->detected_country ?? 'Unknown';
+        });
+
+        $countrySentiment = $countryGroups->map(function($countryDeals, $country) use ($displayCurrency) {
+            // Convert profits to display currency
+            $convertedDeals = $countryDeals->map(function($deal) use ($displayCurrency) {
+                $deal->converted_profit = $this->currencyService->convert(
+                    $deal->profit,
+                    $deal->tradingAccount->account_currency ?? 'USD',
+                    $displayCurrency
+                );
+                return $deal;
+            });
+
+            $buyTrades = $convertedDeals->where('type', 'buy');
+            $sellTrades = $convertedDeals->where('type', 'sell');
+            $winningTrades = $convertedDeals->where('converted_profit', '>', 0);
+            $losingTrades = $convertedDeals->where('converted_profit', '<', 0);
+
+            $totalTrades = $convertedDeals->count();
+            $totalProfit = $convertedDeals->sum('converted_profit');
+            $totalVolume = $convertedDeals->sum('volume');
+
+            // Calculate sentiment percentages
+            $buyPercentage = $totalTrades > 0 ? round(($buyTrades->count() / $totalTrades) * 100, 1) : 0;
+            $sellPercentage = $totalTrades > 0 ? round(($sellTrades->count() / $totalTrades) * 100, 1) : 0;
+            $winRate = $totalTrades > 0 ? round(($winningTrades->count() / $totalTrades) * 100, 1) : 0;
+
+            // Determine sentiment (bullish/bearish/neutral)
+            $sentiment = 'neutral';
+            $sentimentScore = 0;
+            
+            if ($buyPercentage > $sellPercentage + 10) {
+                $sentiment = 'bullish';
+                $sentimentScore = min(($buyPercentage - $sellPercentage) / 2, 50);
+            } elseif ($sellPercentage > $buyPercentage + 10) {
+                $sentiment = 'bearish';
+                $sentimentScore = min(($sellPercentage - $buyPercentage) / 2, 50);
+            }
+
+            return [
+                'country' => $country,
+                'country_code' => strtoupper($country),
+                'total_trades' => $totalTrades,
+                'buy_trades' => $buyTrades->count(),
+                'sell_trades' => $sellTrades->count(),
+                'buy_percentage' => $buyPercentage,
+                'sell_percentage' => $sellPercentage,
+                'winning_trades' => $winningTrades->count(),
+                'losing_trades' => $losingTrades->count(),
+                'win_rate' => $winRate,
+                'total_profit' => round($totalProfit, 2),
+                'total_volume' => round($totalVolume, 2),
+                'avg_profit' => round($convertedDeals->avg('converted_profit'), 2),
+                'sentiment' => $sentiment,
+                'sentiment_score' => round($sentimentScore, 1),
+                'profit_per_trade' => $totalTrades > 0 ? round($totalProfit / $totalTrades, 2) : 0,
+            ];
+        })
+        ->filter(function($country) {
+            return $country['total_trades'] >= 5; // Only show countries with at least 5 trades
+        })
+        ->sortByDesc('total_trades')
+        ->values();
+
+        return $countrySentiment;
+    }
+
+    /**
+     * Platform Performance Matrix (MT4 vs MT5, Hedging vs Netting)
+     */
+    private function getPlatformPerformanceMatrix($accountIds, $days, $displayCurrency)
+    {
+        $deals = Deal::whereIn('trading_account_id', $accountIds)
+            ->with('tradingAccount')
+            ->tradesOnly()
+            ->where('time', '>=', now()->subDays($days))
+            ->whereHas('tradingAccount', function($query) {
+                $query->whereNotNull('platform_type');
+            })
+            ->get();
+
+        if ($deals->isEmpty()) {
+            return collect([]);
+        }
+
+        // Group by platform type and account mode
+        $platformGroups = $deals->groupBy(function($deal) {
+            $platform = $deal->tradingAccount->platform_type ?? 'Unknown';
+            $mode = $deal->tradingAccount->account_mode ?? 'hedging'; // MT4 is always hedging
+            return "{$platform}_{$mode}";
+        });
+
+        $platformPerformance = $platformGroups->map(function($platformDeals, $platformKey) use ($displayCurrency) {
+            // Parse platform and mode from key
+            list($platform, $mode) = explode('_', $platformKey);
+            
+            // Convert profits to display currency
+            $convertedDeals = $platformDeals->map(function($deal) use ($displayCurrency) {
+                $deal->converted_profit = $this->currencyService->convert(
+                    $deal->profit,
+                    $deal->tradingAccount->account_currency ?? 'USD',
+                    $displayCurrency
+                );
+                return $deal;
+            });
+
+            $buyTrades = $convertedDeals->where('type', 'buy');
+            $sellTrades = $convertedDeals->where('type', 'sell');
+            $winningTrades = $convertedDeals->where('converted_profit', '>', 0);
+            $losingTrades = $convertedDeals->where('converted_profit', '<', 0);
+
+            $totalTrades = $convertedDeals->count();
+            $totalProfit = $convertedDeals->sum('converted_profit');
+            $totalVolume = $convertedDeals->sum('volume');
+
+            // Calculate metrics
+            $winRate = $totalTrades > 0 ? round(($winningTrades->count() / $totalTrades) * 100, 1) : 0;
+            $avgProfit = $convertedDeals->avg('converted_profit');
+            $avgWin = $winningTrades->count() > 0 ? $winningTrades->avg('converted_profit') : 0;
+            $avgLoss = $losingTrades->count() > 0 ? abs($losingTrades->avg('converted_profit')) : 0;
+            $riskRewardRatio = $avgLoss > 0 ? round($avgWin / $avgLoss, 2) : 0;
+            $profitFactor = $this->calculateProfitFactor($convertedDeals, 'converted_profit');
+
+            // Get unique accounts using this platform/mode
+            $uniqueAccounts = $platformDeals->pluck('trading_account_id')->unique()->count();
+
+            return [
+                'platform_type' => strtoupper($platform),
+                'account_mode' => ucfirst($mode),
+                'platform_key' => $platformKey,
+                'unique_accounts' => $uniqueAccounts,
+                'total_trades' => $totalTrades,
+                'buy_trades' => $buyTrades->count(),
+                'sell_trades' => $sellTrades->count(),
+                'winning_trades' => $winningTrades->count(),
+                'losing_trades' => $losingTrades->count(),
+                'win_rate' => $winRate,
+                'total_profit' => round($totalProfit, 2),
+                'total_volume' => round($totalVolume, 2),
+                'avg_profit' => round($avgProfit, 2),
+                'avg_win' => round($avgWin, 2),
+                'avg_loss' => round($avgLoss, 2),
+                'risk_reward_ratio' => $riskRewardRatio,
+                'profit_factor' => $profitFactor,
+                'profit_per_trade' => $totalTrades > 0 ? round($totalProfit / $totalTrades, 2) : 0,
+                'volume_per_trade' => $totalTrades > 0 ? round($totalVolume / $totalTrades, 2) : 0,
+            ];
+        })
+        ->filter(function($platform) {
+            return $platform['total_trades'] >= 3; // Only show platforms with at least 3 trades
+        })
+        ->sortByDesc('total_profit')
+        ->values();
+
+        return $platformPerformance;
     }
 }
