@@ -322,6 +322,8 @@ https://github.com/abuzant/TheTradeVisor/issues
 
 ---
 
+---
+
 ## 👨‍💻 Author & Contact
 
 **Ruslan Abuzant**  
@@ -333,4 +335,3 @@ https://github.com/abuzant/TheTradeVisor/issues
 For project support and inquiries:  
 📧 [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  
 🌐 [https://thetradevisor.com](https://thetradevisor.com)
-

@@ -485,6 +485,8 @@ tail -f /var/log/thetradevisor/health_monitor.log
 
 ---
 
+---
+
 ## 👨‍💻 Author & Contact
 
 **Ruslan Abuzant**  
@@ -496,4 +498,3 @@ tail -f /var/log/thetradevisor/health_monitor.log
 For project support and inquiries:  
 📧 [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  
 🌐 [https://thetradevisor.com](https://thetradevisor.com)
-

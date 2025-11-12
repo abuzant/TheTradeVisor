@@ -222,6 +222,8 @@ For API support, contact us at [hello@thetradevisor.com](mailto:hello@thetradevi
 
 ---
 
+---
+
 ## 👨‍💻 Author & Contact
 
 **Ruslan Abuzant**  
@@ -233,4 +235,3 @@ For API support, contact us at [hello@thetradevisor.com](mailto:hello@thetradevi
 For project support and inquiries:  
 📧 [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  
 🌐 [https://thetradevisor.com](https://thetradevisor.com)
-

@@ -396,6 +396,8 @@ redis-cli DEL "export_rate_limit:USER_ID"
 
 ---
 
+---
+
 ## 👨‍💻 Author & Contact
 
 **Ruslan Abuzant**  
@@ -407,4 +409,3 @@ redis-cli DEL "export_rate_limit:USER_ID"
 For project support and inquiries:  
 📧 [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  
 🌐 [https://thetradevisor.com](https://thetradevisor.com)
-

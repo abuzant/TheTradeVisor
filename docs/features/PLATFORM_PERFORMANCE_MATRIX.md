@@ -266,6 +266,8 @@ Authorization: Bearer {api_key}
 
 ---
 
+---
+
 ## 👨‍💻 Author & Contact
 
 **Ruslan Abuzant**  
@@ -275,6 +277,5 @@ Authorization: Bearer {api_key}
 ❤️ From Palestine to the world with Love
 
 For project support and inquiries:  
-�� [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  
+📧 [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  
 🌐 [https://thetradevisor.com](https://thetradevisor.com)
-

@@ -161,12 +161,14 @@ The system is now ready to receive fresh data from the MT5 EA:
 
 ---
 
+---
+
 ## 👨‍💻 Author & Contact
 
 **Ruslan Abuzant**  
 📧 Email: [ruslan@abuzant.com](mailto:ruslan@abuzant.com)  
-�� Website: [https://abuzant.com](https://abuzant.com)  
-💼 LinkedIn: [linkedin.com/in/ruslanabuzant](https://linkedin.com/in/ruslanabuzant)
+🌐 Website: [https://abuzant.com](https://abuzant.com)  
+💼 LinkedIn: [linkedin.com/in/ruslanabuzant](https://linkedin.com/in/ruslanabuzant)  
 ❤️ From Palestine to the world with Love
 
 For project support and inquiries:  

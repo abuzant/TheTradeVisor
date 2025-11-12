@@ -184,6 +184,8 @@ WHERE platform_type IS NOT NULL GROUP BY platform_type, account_mode;
 
 ---
 
+---
+
 ## 👨‍💻 Author & Contact
 
 **Ruslan Abuzant**  
@@ -193,6 +195,5 @@ WHERE platform_type IS NOT NULL GROUP BY platform_type, account_mode;
 ❤️ From Palestine to the world with Love
 
 For project support and inquiries:  
-�� [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  
+📧 [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  
 🌐 [https://thetradevisor.com](https://thetradevisor.com)
-

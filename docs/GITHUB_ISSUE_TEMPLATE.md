@@ -448,6 +448,8 @@ The fixes implemented are comprehensive and address not just the immediate issue
 
 ---
 
+---
+
 ## 👨‍💻 Author & Contact
 
 **Ruslan Abuzant**  
@@ -459,4 +461,3 @@ The fixes implemented are comprehensive and address not just the immediate issue
 For project support and inquiries:  
 📧 [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  
 🌐 [https://thetradevisor.com](https://thetradevisor.com)
-

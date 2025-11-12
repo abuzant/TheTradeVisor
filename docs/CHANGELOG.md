@@ -315,6 +315,8 @@ For issues, questions, or feature requests, please contact the development team 
 
 ---
 
+---
+
 ## 👨‍💻 Author & Contact
 
 **Ruslan Abuzant**  
@@ -326,4 +328,3 @@ For issues, questions, or feature requests, please contact the development team 
 For project support and inquiries:  
 📧 [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  
 🌐 [https://thetradevisor.com](https://thetradevisor.com)
-

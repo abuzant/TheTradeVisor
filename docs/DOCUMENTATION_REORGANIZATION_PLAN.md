@@ -344,6 +344,8 @@ For each file:
 
 ---
 
+---
+
 ## 👨‍💻 Author & Contact
 
 **Ruslan Abuzant**  

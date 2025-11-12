@@ -137,47 +137,6 @@
 
 ---
 
-## 👨‍💻 Author & Contact
-
-**Ruslan Abuzant**  
-📧 Email: [ruslan@abuzant.com](mailto:ruslan@abuzant.com)  
-🌐 Website: [https://abuzant.com](https://abuzant.com)  
-💼 LinkedIn: [linkedin.com/in/ruslanabuzant](https://linkedin.com/in/ruslanabuzant)
-❤️ From Palestine to the world with Love
-
-For project support and inquiries:  
-📧 [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  
-🌐 [https://thetradevisor.com](https://thetradevisor.com)
-
----
-
-*This documentation is part of TheTradeVisor enterprise trading analytics platform. For complete documentation, visit the [Documentation Index](../INDEX.md).*
-```
-
-**Backend Detection:**
-- Track `instance_id` + `user_id` + `ip` combinations
-- Alert if multiple instances detected within 5 minutes
-- Log warning if same symbol from same IP with different instance_id
-
-### 2. Required Fields
-Ensure EA sends these fields for deals:
-- `time` (timestamp)
-- `time_msc` (milliseconds)
-- `symbol`
-- `type`
-- `volume`
-- `price`
-- `profit`
-
----
-
-## Files Modified
-
-1. `/www/app/Http/Middleware/ApiRateLimiter.php` - Fixed user retrieval
-2. `/www/app/Http/Middleware/ValidateApiKey.php` - Added debug logging (temporary)
-3. `/www/app/Console/Commands/DeleteUser.php` - Created user deletion command
-4. Database `rate_limit_settings` - Increased limits
-
 ---
 
 ## 👨‍💻 Author & Contact
@@ -185,13 +144,9 @@ Ensure EA sends these fields for deals:
 **Ruslan Abuzant**  
 📧 Email: [ruslan@abuzant.com](mailto:ruslan@abuzant.com)  
 🌐 Website: [https://abuzant.com](https://abuzant.com)  
-💼 LinkedIn: [linkedin.com/in/ruslanabuzant](https://linkedin.com/in/ruslanabuzant)
+💼 LinkedIn: [linkedin.com/in/ruslanabuzant](https://linkedin.com/in/ruslanabuzant)  
 ❤️ From Palestine to the world with Love
 
 For project support and inquiries:  
 📧 [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  
 🌐 [https://thetradevisor.com](https://thetradevisor.com)
-
----
-
-*This documentation is part of TheTradeVisor enterprise trading analytics platform. For complete documentation, visit the [Documentation Index](../INDEX.md).*

@@ -153,6 +153,8 @@ But for admin panel viewing, `single` is best.
 
 ---
 
+---
+
 ## 👨‍💻 Author & Contact
 
 **Ruslan Abuzant**  
@@ -164,4 +166,3 @@ But for admin panel viewing, `single` is best.
 For project support and inquiries:  
 📧 [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  
 🌐 [https://thetradevisor.com](https://thetradevisor.com)
-

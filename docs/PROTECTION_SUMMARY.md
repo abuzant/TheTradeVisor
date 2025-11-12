@@ -440,6 +440,8 @@ tail -f /www/storage/logs/laravel.log
 
 ---
 
+---
+
 ## 👨‍💻 Author & Contact
 
 **Ruslan Abuzant**  

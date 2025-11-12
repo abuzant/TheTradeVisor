@@ -465,6 +465,8 @@ redis-cli MONITOR | grep analytics
 
 ---
 
+---
+
 ## 👨‍💻 Author & Contact
 
 **Ruslan Abuzant**  
@@ -476,4 +478,3 @@ redis-cli MONITOR | grep analytics
 For project support and inquiries:  
 📧 [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  
 🌐 [https://thetradevisor.com](https://thetradevisor.com)
-

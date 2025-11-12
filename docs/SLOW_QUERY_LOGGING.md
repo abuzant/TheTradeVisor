@@ -424,6 +424,8 @@ mv /tmp/slow.log /var/log/thetradevisor/laravel_slow_queries.log
 
 ---
 
+---
+
 ## 👨‍💻 Author & Contact
 
 **Ruslan Abuzant**  
@@ -435,4 +437,3 @@ mv /tmp/slow.log /var/log/thetradevisor/laravel_slow_queries.log
 For project support and inquiries:  
 📧 [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  
 🌐 [https://thetradevisor.com](https://thetradevisor.com)
-

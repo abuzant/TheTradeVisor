@@ -170,6 +170,8 @@ cat /www/docs/GITHUB_ISSUE_TEMPLATE.md
 
 ---
 
+---
+
 ## 👨‍💻 Author & Contact
 
 **Ruslan Abuzant**  
@@ -181,4 +183,3 @@ cat /www/docs/GITHUB_ISSUE_TEMPLATE.md
 For project support and inquiries:  
 📧 [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  
 🌐 [https://thetradevisor.com](https://thetradevisor.com)
-

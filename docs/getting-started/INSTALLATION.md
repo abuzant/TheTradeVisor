@@ -675,6 +675,8 @@ For installation support:
 
 ---
 
+---
+
 ## 👨‍💻 Author & Contact
 
 **Ruslan Abuzant**  

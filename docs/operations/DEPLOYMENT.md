@@ -473,12 +473,14 @@ For deployment issues, contact your DevOps team or refer to the main README.md f
 
 ---
 
+---
+
 ## 👨‍💻 Author & Contact
 
 **Ruslan Abuzant**  
 📧 Email: [ruslan@abuzant.com](mailto:ruslan@abuzant.com)  
 🌐 Website: [https://abuzant.com](https://abuzant.com)  
-💼 LinkedIn: [linkedin.com/in/ruslanabuzant](https://linkedin.com/in/ruslanabuzant)
+💼 LinkedIn: [linkedin.com/in/ruslanabuzant](https://linkedin.com/in/ruslanabuzant)  
 ❤️ From Palestine to the world with Love
 
 For project support and inquiries:  
