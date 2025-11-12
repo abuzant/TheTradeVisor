@@ -24,6 +24,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'track.web.country' => \App\Http\Middleware\TrackWebCountryMiddleware::class,
             'api.rate.limit' => \App\Http\Middleware\ApiRateLimiter::class,
             'rate.limit.analytics' => \App\Http\Middleware\RateLimitAnalytics::class,
+            'rate.limit.exports' => \App\Http\Middleware\RateLimitExports::class,
+            'rate.limit.broker' => \App\Http\Middleware\RateLimitBrokerAnalytics::class,
         ]);
 
         // Add to web middleware group

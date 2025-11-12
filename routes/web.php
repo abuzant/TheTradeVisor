@@ -37,11 +37,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/performance', [App\Http\Controllers\PerformanceController::class, 'index'])
         ->name('performance');
 
-    //    Broker Analytics
-    Route::get('/broker-analytics', [App\Http\Controllers\BrokerAnalyticsController::class, 'index'])
-        ->name('broker.analytics');
-    Route::get('/broker/{broker}', [App\Http\Controllers\BrokerDetailsController::class, 'show'])
-        ->name('broker-details');
+    // Broker Analytics (with rate limiting)
+    Route::middleware(['rate.limit.broker'])->group(function () {
+        Route::get('/broker-analytics', [App\Http\Controllers\BrokerAnalyticsController::class, 'index'])
+            ->name('broker.analytics');
+        Route::get('/broker/{broker}', [App\Http\Controllers\BrokerDetailsController::class, 'show'])
+            ->name('broker-details');
+    });
 
     // Global Analytics (with rate limiting to prevent abuse)
     Route::middleware(['rate.limit.analytics'])->group(function () {
@@ -73,17 +75,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/trades/symbol/{symbol}', [App\Http\Controllers\TradesController::class, 'symbol'])
         ->name('trades.symbol');
 
-    // Export routes
-    Route::get('/export/trades/csv', [App\Http\Controllers\ExportController::class, 'exportTradesCsv'])
-        ->name('export.trades.csv');
-    Route::get('/export/trades/pdf', [App\Http\Controllers\ExportController::class, 'exportTradesPdf'])
-        ->name('export.trades.pdf');
-    Route::get('/export/symbol/{symbol}/csv', [App\Http\Controllers\ExportController::class, 'exportSymbolCsv'])
-        ->name('export.symbol.csv');
-    Route::get('/export/dashboard/csv', [App\Http\Controllers\ExportController::class, 'exportDashboardCsv'])
-        ->name('export.dashboard.csv');
-    Route::get('/export/account-data', [App\Http\Controllers\ExportController::class, 'exportAccountData'])
-        ->name('export.account.data');
+    // Export routes (with rate limiting to prevent abuse)
+    Route::middleware(['rate.limit.exports'])->group(function () {
+        Route::get('/export/trades/csv', [App\Http\Controllers\ExportController::class, 'exportTradesCsv'])
+            ->name('export.trades.csv');
+        Route::get('/export/trades/pdf', [App\Http\Controllers\ExportController::class, 'exportTradesPdf'])
+            ->name('export.trades.pdf');
+        Route::get('/export/symbol/{symbol}/csv', [App\Http\Controllers\ExportController::class, 'exportSymbolCsv'])
+            ->name('export.symbol.csv');
+        Route::get('/export/dashboard/csv', [App\Http\Controllers\ExportController::class, 'exportDashboardCsv'])
+            ->name('export.dashboard.csv');
+        Route::get('/export/account-data', [App\Http\Controllers\ExportController::class, 'exportAccountData'])
+            ->name('export.account.data');
+    });
 
     // Profile routes (from Breeze)
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
