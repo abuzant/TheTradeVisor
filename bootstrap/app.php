@@ -23,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
 			'track.country' => \App\Http\Middleware\TrackCountryMiddleware::class,
 			'track.web.country' => \App\Http\Middleware\TrackWebCountryMiddleware::class,
 			'api.rate.limit' => \App\Http\Middleware\ApiRateLimiter::class,
+			'rate.limit.analytics' => \App\Http\Middleware\RateLimitAnalytics::class,
 			
 		    ]);
 
@@ -30,6 +31,7 @@ return Application::configure(basePath: dirname(__DIR__))
 		        $middleware->web(append: [
 		            \App\Http\Middleware\ExtendedRememberMe::class,
 		            \App\Http\Middleware\TrackWebCountryMiddleware::class,
+		            \App\Http\Middleware\QueryOptimizationMiddleware::class,
 		        ]);
 
         // Add to api middleware group

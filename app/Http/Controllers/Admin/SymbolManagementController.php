@@ -104,7 +104,7 @@ class SymbolManagementController extends Controller
     
     public function autoNormalize(Request $request)
     {
-        $symbols = SymbolMapping::where('is_verified', false)->get();
+        $symbols = SymbolMapping::where('is_verified', false)->limit(500)->get();
         
         $updated = 0;
         foreach ($symbols as $symbol) {

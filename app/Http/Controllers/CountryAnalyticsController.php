@@ -32,6 +32,7 @@ class CountryAnalyticsController extends Controller
                         ->orWhere('deals.time', '>=', $startDate);
                 })
                 ->groupBy('country_code', 'country_name')
+                ->limit(50)
                 ->get()
                 ->map(function ($country) use ($startDate) {
                     // Get deal statistics for this country
@@ -131,6 +132,7 @@ class CountryAnalyticsController extends Controller
                 ->select('country_code', 'country_name')
                 ->selectRaw('COUNT(*) as account_count')
                 ->groupBy('country_code', 'country_name')
+                ->limit(50)
                 ->get()
                 ->map(function ($country) use ($userId, $broker, $startDate) {
                     // Get deal statistics

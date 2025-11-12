@@ -190,14 +190,16 @@ class DashboardController extends Controller
             if ($position->platform_type === 'MT5' && $position->position_identifier) {
                 // For MT5 netting, get all deals with same position_identifier
                 $position->deals = Deal::where('trading_account_id', $account->id)
-                    ->where('position_id', $position->position_identifier)
+                    ->where('position_id', $position->id)
                     ->orderBy('time', 'asc')
+                    ->limit(100)
                     ->get();
             } else {
                 // For MT4/MT5 hedging, get deals with same ticket
                 $position->deals = Deal::where('trading_account_id', $account->id)
                     ->where('ticket', $position->ticket)
                     ->orderBy('time', 'asc')
+                    ->limit(100)
                     ->get();
             }
         }
@@ -216,6 +218,7 @@ class DashboardController extends Controller
             ->where('time', '>=', now()->subDays(30))
             ->where('entry', 'out')
             ->orderBy('time')
+            ->limit(1000)
             ->get()
             ->groupBy(function($deal) {
                 return \Carbon\Carbon::parse($deal->time)->format('Y-m-d');
@@ -246,6 +249,7 @@ class DashboardController extends Controller
         // Trading Hours
         $hoursData = Deal::where('trading_account_id', $account->id)
             ->where('time', '>=', now()->subDays(30))
+            ->limit(1000)
             ->get()
             ->groupBy(function($deal) {
                 return \Carbon\Carbon::parse($deal->time)->format('H');

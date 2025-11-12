@@ -90,7 +90,7 @@ class TradesController extends Controller
                 ->distinct()->orderBy('symbol')->pluck('symbol');
         }
 
-        $users = User::orderBy('name')->get();
+        $users = User::orderBy('name')->limit(1000)->get();
 
         $totals = [
             'totalProfit'     => (float) $totalsQuery->sum('profit'),

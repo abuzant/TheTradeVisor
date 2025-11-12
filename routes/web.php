@@ -43,6 +43,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/broker/{broker}', [App\Http\Controllers\BrokerDetailsController::class, 'show'])
         ->name('broker-details');
 
+    // Global Analytics (with rate limiting to prevent abuse)
+    Route::middleware(['rate.limit.analytics'])->group(function () {
+        Route::get('/analytics/{days?}', [App\Http\Controllers\AnalyticsController::class, 'index'])
+            ->name('analytics');
+        Route::get('/analytics/countries', [App\Http\Controllers\CountryAnalyticsController::class, 'topTradingCountries'])
+            ->name('analytics.countries');
+    });
+
     // User account management
     Route::get('/accounts', [App\Http\Controllers\AccountManagementController::class, 'index'])
         ->name('accounts.index');

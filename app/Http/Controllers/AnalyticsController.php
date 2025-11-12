@@ -165,7 +165,7 @@ class AnalyticsController extends Controller
         $hasDetectedCountry = TradingAccount::whereNotNull('detected_country')->exists();
         
         if ($hasCountryCode) {
-            $accounts = $query->whereNotNull('country_code')->get();
+            $accounts = $query->whereNotNull('country_code')->limit(100)->get();
             $grouped = $accounts->groupBy('country_code');
             
             $data = $grouped->map(function($accountsByCountry, $countryCode) {
@@ -190,7 +190,7 @@ class AnalyticsController extends Controller
                 ];
             })->sortByDesc('accounts')->take(10)->values();
         } elseif ($hasDetectedCountry) {
-            $accounts = $query->whereNotNull('detected_country')->get();
+            $accounts = $query->whereNotNull('detected_country')->limit(100)->get();
             $grouped = $accounts->groupBy('detected_country');
             
             $data = $grouped->map(function($accountsByCountry, $country) {
@@ -216,7 +216,7 @@ class AnalyticsController extends Controller
             })->sortByDesc('accounts')->take(10)->values();
         } else {
             // No country data available - return a message
-            $accounts = TradingAccount::where('is_active', true)->get();
+            $accounts = TradingAccount::where('is_active', true)->limit(100)->get();
             $totalBalanceUSD = 0;
             $currencyService = app(\App\Services\CurrencyService::class);
             
@@ -248,8 +248,9 @@ class AnalyticsController extends Controller
      */
     private function getBrokerDistribution()
     {
-        return TradingAccount::select('broker_name', DB::raw('COUNT(*) as accounts'))
+        $brokers = TradingAccount::select('broker_name', DB::raw('COUNT(*) as accounts'))
             ->where('is_active', true)
+            ->whereNotNull('broker_name')
             ->groupBy('broker_name')
             ->orderBy('accounts', 'desc')
             ->limit(8)
@@ -267,6 +268,7 @@ class AnalyticsController extends Controller
             ->whereNotNull('symbol')
             ->where('symbol', '!=', '')
             ->groupBy('symbol', 'type')
+            ->limit(50)
             ->get();
 
         // Also get recent deals (last 24 hours) for additional sentiment
@@ -276,6 +278,7 @@ class AnalyticsController extends Controller
             ->where('time', '>=', now()->subHours(24))
             ->whereIn('type', ['buy', 'sell'])
             ->groupBy('symbol', 'type')
+            ->limit(50)
             ->get();
 
         $sentiment = [];
@@ -497,6 +500,7 @@ class AnalyticsController extends Controller
             ->groupBy('trading_accounts.country_code', 'trading_accounts.platform_type', 'trading_accounts.account_mode')
             ->havingRaw('COUNT(*) >= 1')
             ->orderBy('total_trades', 'desc')
+            ->limit(50)
             ->get();
 
         return $data->map(function($item) {
@@ -589,6 +593,7 @@ class AnalyticsController extends Controller
             ->groupBy('trading_accounts.broker_name', 'trading_accounts.detected_country')
             ->havingRaw('COUNT(*) >= 5')
             ->orderBy('total_trades', 'desc')
+            ->limit(50)
             ->get();
 
         return $data->map(function($item) {
@@ -696,6 +701,7 @@ class AnalyticsController extends Controller
             ->groupBy('symbol')
             ->havingRaw('COUNT(*) >= 10')
             ->orderBy('total_trades', 'desc')
+            ->limit(50)
             ->get();
 
         return $data->map(function($item) {
@@ -734,7 +740,7 @@ class AnalyticsController extends Controller
             ->where('time', '>=', now()->subDays($days))
             ->where('symbol', '!=', '')
             ->groupBy('symbol')
-            ->havingRaw('COUNT(*) >= 20')
+            ->havingRaw('COUNT(*) >= 5')
             ->orderByRaw('COUNT(*) DESC')
             ->limit(8)
             ->pluck('symbol');
@@ -748,6 +754,7 @@ class AnalyticsController extends Controller
             ->whereIn('symbol', $symbols)
             ->groupBy('symbol', DB::raw('DATE(time)'))
             ->orderBy('date')
+            ->limit(200)
             ->get()
             ->groupBy('symbol');
 
@@ -878,6 +885,7 @@ class AnalyticsController extends Controller
             ->whereIn(DB::raw('EXTRACT(HOUR FROM time)'), $newsHours)
             ->groupBy('hour')
             ->orderBy('hour')
+            ->limit(24)
             ->get();
 
         return [
@@ -1014,6 +1022,7 @@ class AnalyticsController extends Controller
             ->where('balance', '>', 0)
             ->groupBy('account_currency')
             ->orderBy('account_count', 'desc')
+            ->limit(20)
             ->get();
 
         return $data->map(function($item) {
@@ -1092,6 +1101,7 @@ class AnalyticsController extends Controller
             ->where('time', '>=', now()->subDays($days))
             ->groupBy('day_of_week')
             ->orderBy('day_of_week')
+            ->limit(7)
             ->get();
 
         // Position holding time patterns (simplified)

@@ -51,7 +51,8 @@ class ExportController extends Controller
             $query->where('type', 'like', $request->type . '%');
         }
         
-        $deals = $query->orderBy('time', 'desc')->get();
+        // SAFETY: Limit exports to 10,000 records to prevent memory exhaustion
+        $deals = $query->orderBy('time', 'desc')->limit(10000)->get();
         
         $data = $this->exportService->prepareTradesForExport($deals, $displayCurrency);
         
@@ -108,7 +109,8 @@ class ExportController extends Controller
             $query->where('type', 'like', $request->type . '%');
         }
         
-        $deals = $query->orderBy('time', 'desc')->get();
+        // SAFETY: Limit exports to 10,000 records to prevent memory exhaustion
+        $deals = $query->orderBy('time', 'desc')->limit(10000)->get();
         
         $data = [
             'deals' => $deals,
@@ -147,7 +149,8 @@ class ExportController extends Controller
             $query->where('time', '<=', Carbon::parse($request->end_date)->endOfDay());
         }
         
-        $deals = $query->orderBy('time', 'desc')->get();
+        // SAFETY: Limit exports to 10,000 records to prevent memory exhaustion
+        $deals = $query->orderBy('time', 'desc')->limit(10000)->get();
         
         $data = $this->exportService->prepareTradesForExport($deals, $displayCurrency);
         
@@ -177,7 +180,13 @@ class ExportController extends Controller
         $user = $request->user();
         $displayCurrency = $user->display_currency ?? 'USD';
         
-        $accounts = $user->tradingAccounts()->with('deals')->get();
+        // SAFETY: Limit accounts and eager load with constraints
+        $accounts = $user->tradingAccounts()
+            ->with(['deals' => function($query) {
+                $query->limit(1000); // Limit deals per account
+            }])
+            ->limit(50)
+            ->get();
         
         $data = $accounts->map(function($account) use ($displayCurrency) {
             $deals = $account->deals;
