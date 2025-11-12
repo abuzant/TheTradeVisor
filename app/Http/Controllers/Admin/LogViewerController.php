@@ -17,6 +17,8 @@ class LogViewerController extends Controller
         'nginx_api_access' => '/var/log/nginx/api-thetradevisor-access.log',
         'nginx_api_error' => '/var/log/nginx/api-thetradevisor-error.log',
         'postgresql' => '/var/log/postgresql/postgresql-16-main.log',
+        'postgresql_slow' => '/var/log/thetradevisor/postgresql_slow_queries.log',
+        'laravel_slow' => '/var/log/thetradevisor/laravel_slow_queries.log',
         'redis' => '/var/log/redis/redis-server.log',
         'php_fpm' => '/var/log/php8.3-fpm.log',
         'php_fpm_slow' => '/var/log/php8.3-fpm-slow.log',
