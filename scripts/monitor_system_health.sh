@@ -18,22 +18,28 @@ log() {
 }
 
 alert() {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] ALERT: $1" | tee -a "$ALERT_FILE"
+    local level="${2:-WARNING}"  # Default to WARNING if not specified
+    local message="$1"
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $level: $message" | tee -a "$ALERT_FILE"
+    
+    # Send notification via Slack/Email
+    /www/scripts/send_alert.sh "$level" "$message" "" &
 }
 
 # Check CPU usage
 check_cpu() {
     CPU_USAGE=$(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | cut -d'%' -f1 | cut -d'.' -f1)
     if [ "$CPU_USAGE" -gt "$MAX_CPU" ]; then
-        alert "High CPU usage: ${CPU_USAGE}%"
+        local details=$(ps aux --sort=-%cpu | head -10)
+        alert "High CPU usage: ${CPU_USAGE}%" "CRITICAL"
         
         # Log top processes
-        ps aux --sort=-%cpu | head -10 >> "$ALERT_FILE"
+        echo "$details" >> "$ALERT_FILE"
         
         # Check for runaway PHP processes
-        SLOW_PHP=$(pgrep -c -f "php-fpm.*executing too slow")
+        SLOW_PHP=$(pgrep -c -f "php-fpm.*executing too slow" 2>/dev/null || echo 0)
         if [ "$SLOW_PHP" -gt "$MAX_PHP_SLOW_REQUESTS" ]; then
-            alert "Too many slow PHP requests: $SLOW_PHP"
+            alert "Too many slow PHP requests: $SLOW_PHP" "CRITICAL"
         fi
         
         return 1
@@ -45,10 +51,11 @@ check_cpu() {
 check_memory() {
     MEMORY_USAGE=$(free | grep Mem | awk '{print int($3/$2 * 100)}')
     if [ "$MEMORY_USAGE" -gt "$MAX_MEMORY" ]; then
-        alert "High memory usage: ${MEMORY_USAGE}%"
+        local details=$(ps aux --sort=-%mem | head -10)
+        alert "High memory usage: ${MEMORY_USAGE}%" "CRITICAL"
         
         # Log top memory consumers
-        ps aux --sort=-%mem | head -10 >> "$ALERT_FILE"
+        echo "$details" >> "$ALERT_FILE"
         
         return 1
     fi
@@ -74,10 +81,10 @@ check_disk_io() {
 # Check PostgreSQL health
 check_postgres() {
     # Check for long-running queries (>30 seconds)
-    LONG_QUERIES=$(sudo -u postgres psql -t -c "SELECT COUNT(*) FROM pg_stat_activity WHERE state = 'active' AND now() - query_start > interval '30 seconds';" 2>/dev/null)
+    LONG_QUERIES=$(sudo -u postgres psql -t -c "SELECT COUNT(*) FROM pg_stat_activity WHERE state = 'active' AND now() - query_start > interval '30 seconds';" 2>/dev/null || echo 0)
     
     if [ "$LONG_QUERIES" -gt 0 ]; then
-        alert "Long-running PostgreSQL queries detected: $LONG_QUERIES"
+        alert "Long-running PostgreSQL queries detected: $LONG_QUERIES" "WARNING"
         
         # Log the queries
         sudo -u postgres psql -c "SELECT pid, now() - query_start as duration, query FROM pg_stat_activity WHERE state = 'active' AND now() - query_start > interval '30 seconds';" >> "$ALERT_FILE" 2>/dev/null
@@ -134,14 +141,14 @@ main() {
         
         # If critical issues, consider emergency actions
         if [ "$ISSUES" -ge 3 ]; then
-            alert "CRITICAL: Multiple system issues detected!"
+            alert "CRITICAL: Multiple system issues detected! ($ISSUES issues)" "CRITICAL"
             
             # Clear Laravel cache to reduce load
-            cd /var/www/thetradevisor.com && php artisan cache:clear >> "$ALERT_FILE" 2>&1
+            cd /www && php artisan cache:clear >> "$ALERT_FILE" 2>&1
             
             # Restart PHP-FPM if needed
-            if [ "$SLOW_REQUESTS" -gt 10 ]; then
-                alert "Emergency: Restarting PHP-FPM due to excessive slow requests"
+            if [ "${SLOW_REQUESTS:-0}" -gt 10 ]; then
+                alert "Emergency: Restarting PHP-FPM due to excessive slow requests" "CRITICAL"
                 systemctl restart php8.3-fpm
             fi
         fi
