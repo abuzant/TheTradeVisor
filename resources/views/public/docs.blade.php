@@ -158,7 +158,7 @@
                         <ol class="list-decimal list-inside space-y-2 text-gray-700 ml-4">
                             <li>Check that AutoTrading is enabled (green button)</li>
                             <li>Verify your API key is correct</li>
-                            <li>Ensure WebRequest is allowed for <code>https://thetradevisor.com</code></li>
+                            <li>Ensure WebRequest is allowed for <code>https://api.thetradevisor.com</code></li>
                             <li>Check your internet connection</li>
                             <li>Restart your MT4/MT5 terminal</li>
                         </ol>
