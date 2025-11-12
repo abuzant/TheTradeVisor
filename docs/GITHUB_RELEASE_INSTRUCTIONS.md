@@ -141,7 +141,7 @@ php artisan optimize:clear
 
 **Author:** Ruslan Abuzant  
 **Website:** https://thetradevisor.com  
-**Email:** hello@thetradevisor.com
+**Email:** your-email@example.com
 ```
 
 ### 4. Set as Latest Release

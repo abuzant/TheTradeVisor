@@ -499,5 +499,5 @@ TheTradeVisor's Docker deployment provides:
 💼 LinkedIn: [linkedin.com/in/ruslanabuzant](https://linkedin.com/in/ruslanabuzant)
 
 For project support and inquiries:  
-📧 [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  
+📧 [your-email@example.com](mailto:your-email@example.com)  
 🌐 [https://thetradevisor.com](https://thetradevisor.com)

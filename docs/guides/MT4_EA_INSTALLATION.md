@@ -402,7 +402,7 @@ Look for messages like:
 - [Artisan Commands](../reference/ARTISAN_COMMANDS.md)
 
 **Contact**:
-- 📧 Email: [hello@thetradevisor.com](mailto:hello@thetradevisor.com)
+- 📧 Email: [your-email@example.com](mailto:your-email@example.com)
 - 🌐 Website: [https://thetradevisor.com](https://thetradevisor.com)
 
 **Common Questions**:
@@ -421,7 +421,7 @@ Look for messages like:
 💼 LinkedIn: [linkedin.com/in/ruslanabuzant](https://linkedin.com/in/ruslanabuzant)
 
 For project support and inquiries:  
-📧 [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  
+📧 [your-email@example.com](mailto:your-email@example.com)  
 🌐 [https://thetradevisor.com](https://thetradevisor.com)
 
 ---

@@ -13,7 +13,7 @@ if [ -f /www/.env ]; then
 fi
 
 # Default email if not set
-ALERT_EMAIL="${ALERT_EMAIL:-hello@thetradevisor.com}"
+ALERT_EMAIL="${ALERT_EMAIL:-your-email@example.com}"
 
 # Prepare alert payload
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S UTC')
@@ -82,45 +82,15 @@ EOF
     return $?
 }
 
-# Function to send email notification
+# Function to send email notification via Laravel (Amazon SES)
 send_email() {
     if [ -z "$ALERT_EMAIL" ]; then
         return 1
     fi
     
-    SUBJECT="[$ALERT_LEVEL] TheTradeVisor Alert: $ALERT_MESSAGE"
-    
-    BODY=$(cat <<EOF
-TheTradeVisor System Alert
-
-Level: $ALERT_LEVEL
-Message: $ALERT_MESSAGE
-Server: $HOSTNAME
-Time: $TIMESTAMP
-
-Details:
-$ALERT_DETAILS
-
----
-This is an automated alert from TheTradeVisor system monitoring.
-To configure alerts, update SLACK_WEBHOOK_URL or ALERT_EMAIL in /www/.env
-EOF
-)
-    
-    # Try to send email using mail command
-    if command -v mail &> /dev/null; then
-        echo "$BODY" | mail -s "$SUBJECT" "$ALERT_EMAIL"
-        return $?
-    elif command -v sendmail &> /dev/null; then
-        echo -e "Subject: $SUBJECT\n\n$BODY" | sendmail "$ALERT_EMAIL"
-        return $?
-    else
-        # Fallback: log to file
-        echo "[$TIMESTAMP] EMAIL ALERT (no mail command): $SUBJECT" >> /var/log/thetradevisor/email_alerts.log
-        echo "$BODY" >> /var/log/thetradevisor/email_alerts.log
-        echo "---" >> /var/log/thetradevisor/email_alerts.log
-        return 1
-    fi
+    # Use Laravel's mail system with SES configuration
+    /www/scripts/send_email_alert.php "$ALERT_LEVEL" "$ALERT_MESSAGE" "$ALERT_DETAILS"
+    return $?
 }
 
 # Function to log alert locally

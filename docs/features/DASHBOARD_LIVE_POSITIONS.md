@@ -148,7 +148,7 @@ This enhancement significantly improves the trading experience by providing imme
 💼 LinkedIn: [linkedin.com/in/ruslanabuzant](https://linkedin.com/in/ruslanabuzant)
 
 For project support and inquiries:  
-📧 [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  
+📧 [your-email@example.com](mailto:your-email@example.com)  
 
 ---
 

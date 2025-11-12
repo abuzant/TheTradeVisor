@@ -321,7 +321,7 @@ Subscribe to events:
 ## 🆘 Support
 
 - **Documentation**: https://thetradevisor.com/docs
-- **Email**: hello@thetradevisor.com
+- **Email**: your-email@example.com
 - **GitHub**: https://github.com/abuzant/TheTradeVisor/issues
 
 ---
@@ -336,7 +336,7 @@ Subscribe to events:
 💼 LinkedIn: [linkedin.com/in/ruslanabuzant](https://linkedin.com/in/ruslanabuzant)
 
 For project support and inquiries:  
-📧 [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  
+📧 [your-email@example.com](mailto:your-email@example.com)  
 🌐 [https://thetradevisor.com](https://thetradevisor.com)
 
 ---

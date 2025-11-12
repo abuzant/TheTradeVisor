@@ -217,4 +217,4 @@ Get performance analytics for your accounts.
 
 ## Support
 
-For API support, contact us at [hello@thetradevisor.com](mailto:hello@thetradevisor.com)
+For API support, contact us at [your-email@example.com](mailto:your-email@example.com)

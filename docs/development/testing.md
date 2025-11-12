@@ -509,7 +509,7 @@ php artisan test
 
 - **Laravel Testing Docs**: https://laravel.com/docs/testing
 - **PHPUnit Docs**: https://phpunit.de/documentation.html
-- **Email**: hello@thetradevisor.com
+- **Email**: your-email@example.com
 
 ### Reporting Test Issues
 
@@ -532,7 +532,7 @@ Include:
 💼 LinkedIn: [linkedin.com/in/ruslanabuzant](https://linkedin.com/in/ruslanabuzant)
 
 For project support and inquiries:  
-📧 [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  
+📧 [your-email@example.com](mailto:your-email@example.com)  
 🌐 [https://thetradevisor.com](https://thetradevisor.com)
 
 ---

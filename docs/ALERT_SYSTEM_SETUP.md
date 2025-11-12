@@ -54,7 +54,7 @@ Edit `/www/.env` and add:
 ```env
 # System Monitoring & Alerts
 SLACK_WEBHOOK_URL=https://hooks.slack.com/services/YOUR/WEBHOOK/URL
-ALERT_EMAIL=hello@thetradevisor.com
+ALERT_EMAIL=your-email@example.com
 ```
 
 ### Step 2: Get Slack Webhook URL (Optional)
@@ -72,7 +72,7 @@ ALERT_EMAIL=hello@thetradevisor.com
 If you don't use Slack, configure email:
 
 ```env
-ALERT_EMAIL=hello@thetradevisor.com
+ALERT_EMAIL=your-email@example.com
 ```
 
 **Note**: Email requires `mail` or `sendmail` command to be installed on the server.
@@ -290,7 +290,7 @@ To configure alerts, update SLACK_WEBHOOK_URL or ALERT_EMAIL in /www/.env
 
 3. **Test email manually**:
    ```bash
-   echo "Test email" | mail -s "Test" hello@thetradevisor.com
+   echo "Test email" | mail -s "Test" your-email@example.com
    ```
 
 4. **Check email alert log**:

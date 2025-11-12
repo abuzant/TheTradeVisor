@@ -420,7 +420,7 @@ Planned features:
 
 ### Getting Help
 
-- **Email**: hello@thetradevisor.com
+- **Email**: your-email@example.com
 - **Documentation**: https://thetradevisor.com/docs
 - **GitHub**: https://github.com/abuzant/TheTradeVisor/issues
 
@@ -444,7 +444,7 @@ Include:
 💼 LinkedIn: [linkedin.com/in/ruslanabuzant](https://linkedin.com/in/ruslanabuzant)
 
 For project support and inquiries:  
-📧 [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  
+📧 [your-email@example.com](mailto:your-email@example.com)  
 🌐 [https://thetradevisor.com](https://thetradevisor.com)
 
 ---
