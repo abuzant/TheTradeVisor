@@ -514,5 +514,3 @@ tail -f /var/log/thetradevisor/health_monitor.log
 ---
 
 *This implementation protects TheTradeVisor from system overload while maintaining availability of core features. The circuit breaker pattern ensures graceful degradation under stress, preventing complete system failure.*
-
-**Built with ❤️ by Cascade AI for TheTradeVisor**
