@@ -88,7 +88,12 @@ class PublicController extends Controller
     {
         return view('public.features');
     }
-
+    
+    public function screenshots()
+    {
+        return view('public.screenshots');
+    }
+    
     public function pricing()
     {
         return view('public.pricing');

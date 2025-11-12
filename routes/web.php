@@ -18,6 +18,7 @@ Route::get('/healthcheck', function () {
 // Public pages
 Route::get('/', [App\Http\Controllers\PublicController::class, 'landing'])->name('landing');
 Route::get('/features', [App\Http\Controllers\PublicController::class, 'features'])->name('features');
+Route::get('/screenshots', [App\Http\Controllers\PublicController::class, 'screenshots'])->name('screenshots');
 Route::get('/pricing', [App\Http\Controllers\PublicController::class, 'pricing'])->name('pricing');
 Route::get('/about', [App\Http\Controllers\PublicController::class, 'about'])->name('about');
 Route::get('/faq', [App\Http\Controllers\PublicController::class, 'faq'])->name('faq');
