@@ -380,6 +380,8 @@ for port in 8081 8082 8083 8084; do nc -zv 127.0.0.1 $port; done
 
 ---
 
+---
+
 ## 👨‍💻 Author & Contact
 
 **Ruslan Abuzant**  
@@ -391,4 +393,3 @@ for port in 8081 8082 8083 8084; do nc -zv 127.0.0.1 $port; done
 For project support and inquiries:  
 📧 [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  
 🌐 [https://thetradevisor.com](https://thetradevisor.com)
-

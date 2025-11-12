@@ -352,6 +352,8 @@ This release addresses critical system stability issues and implements industry-
 
 ---
 
+---
+
 ## 👨‍💻 Author & Contact
 
 **Ruslan Abuzant**  

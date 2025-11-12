@@ -261,6 +261,8 @@ Configuration in `/etc/logrotate.d/thetradevisor`
 
 ---
 
+---
+
 ## 👨‍💻 Author & Contact
 
 **Ruslan Abuzant**  
@@ -272,4 +274,3 @@ Configuration in `/etc/logrotate.d/thetradevisor`
 For project support and inquiries:  
 📧 [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  
 🌐 [https://thetradevisor.com](https://thetradevisor.com)
-

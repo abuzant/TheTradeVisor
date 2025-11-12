@@ -413,6 +413,8 @@ Look for messages like:
 
 ---
 
+---
+
 ## 👨‍💻 Author & Contact
 
 **Ruslan Abuzant**  
@@ -424,9 +426,3 @@ Look for messages like:
 For project support and inquiries:  
 📧 [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  
 🌐 [https://thetradevisor.com](https://thetradevisor.com)
-
----
-
-**Version**: 1.0.0  
-**Last Updated**: November 8, 2025  
-**Status**: Production Ready ✅
