@@ -227,37 +227,37 @@
 
             <div class="grid md:grid-cols-3 gap-8">
                 <div class="p-6 border border-gray-200 rounded-lg">
-                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Real-Time Analytics</h3>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">📊 Real-Time Analytics</h3>
                     <p class="text-gray-600 mb-4">Track global trading activity in real-time with comprehensive metrics and insights from thousands of MT4/MT5 terminals.</p>
                     <a href="/features" class="text-blue-600 font-medium hover:text-blue-700">Learn more →</a>
                 </div>
 
                 <div class="p-6 border border-gray-200 rounded-lg">
-                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Performance Tracking</h3>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">📈 Performance Tracking</h3>
                     <p class="text-gray-600 mb-4">Detailed performance analytics with win rates, profit factors, risk metrics, and comprehensive trade history.</p>
                     <a href="/features" class="text-blue-600 font-medium hover:text-blue-700">Learn more →</a>
                 </div>
 
                 <div class="p-6 border border-gray-200 rounded-lg">
-                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Broker Comparison</h3>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">🏦 Broker Comparison</h3>
                     <p class="text-gray-600 mb-4">Compare broker performance, execution quality, and spreads across different platforms and regions.</p>
                     <a href="/features" class="text-blue-600 font-medium hover:text-blue-700">Learn more →</a>
                 </div>
 
                 <div class="p-6 border border-gray-200 rounded-lg">
-                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Geographic Insights</h3>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">🌍 Geographic Insights</h3>
                     <p class="text-gray-600 mb-4">Analyze trading patterns by country and region. See where the smart money is moving.</p>
                     <a href="/features" class="text-blue-600 font-medium hover:text-blue-700">Learn more →</a>
                 </div>
 
                 <div class="p-6 border border-gray-200 rounded-lg">
-                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Risk Analytics</h3>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">⚠️ Risk Analytics</h3>
                     <p class="text-gray-600 mb-4">Advanced risk management tools including volatility analysis, correlation matrices, and drawdown tracking.</p>
                     <a href="/features" class="text-blue-600 font-medium hover:text-blue-700">Learn more →</a>
                 </div>
 
                 <div class="p-6 border border-gray-200 rounded-lg">
-                    <h3 class="text-xl font-semibold text-gray-900 mb-3">Data Export</h3>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-3">📥 Data Export</h3>
                     <p class="text-gray-600 mb-4">Export your data in multiple formats (CSV, PDF) for further analysis and reporting.</p>
                     <a href="/features" class="text-blue-600 font-medium hover:text-blue-700">Learn more →</a>
                 </div>
