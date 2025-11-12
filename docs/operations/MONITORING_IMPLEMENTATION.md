@@ -421,8 +421,102 @@ curl -I https://thetradevisor.com | grep X-Cache-Status
 
 ---
 
-**Implementation Date:** November 8, 2025
+**Implementation Date:** November 8, 2025  
+**Last Updated:** November 12, 2025  
 **Status:** ✅ Complete and Tested
+
+---
+
+## 🆕 Additional Monitoring (November 12, 2025)
+
+### 7. 📊 Slow Query Logging
+
+**PostgreSQL Slow Queries:**
+- Threshold: 1000ms (1 second)
+- Log file: `/var/log/thetradevisor/postgresql_slow_queries.log`
+- Extracted every 5 minutes via cron
+- Viewable in admin panel
+
+**Laravel Slow Queries:**
+- Threshold: 1000ms (1 second)
+- Log file: `/var/log/thetradevisor/laravel_slow_queries.log`
+- Includes SQL, bindings, and duration
+- Viewable in admin panel
+
+**Configuration:**
+```sql
+-- PostgreSQL
+log_min_duration_statement = 1000
+
+-- Laravel (QueryLoggingServiceProvider)
+if ($query->time > 1000) {
+    $this->logSlowQuery($query);
+}
+```
+
+### 8. 🔔 Alert System
+
+**Slack/Email Notifications:**
+- Critical events sent to Slack webhook
+- Email alerts for system issues
+- Alert log: `/var/log/thetradevisor/alerts.log`
+
+**Alert Triggers:**
+- CPU usage > 80%
+- Memory usage > 85%
+- Disk I/O > 1500 IOPS
+- PostgreSQL long queries
+- PHP-FPM slow requests
+- Circuit breaker opens
+
+**Configuration:**
+```env
+SLACK_WEBHOOK_URL=your_slack_webhook_url
+MAIL_FROM_ADDRESS=alerts@thetradevisor.com
+```
+
+### 9. 🛡️ Circuit Breaker Monitoring
+
+**Automatic Protection:**
+- Opens when CPU > 80% or Memory > 85%
+- Disables expensive operations (analytics, exports)
+- Auto-closes after 5 minutes
+- Status: `redis-cli GET "circuit_breaker_state"`
+
+**Metrics Tracked:**
+```bash
+redis-cli GET "circuit_breaker_metrics"
+# Returns: {"cpu_usage":75,"memory_usage":70,"slow_queries":2}
+```
+
+### 10. 📈 Rate Limit Monitoring
+
+**Current Limits:**
+- Analytics: 10 requests/minute
+- Exports: 5 exports/minute
+- Broker Analytics: 20 requests/minute
+
+**Monitor Rate Limits:**
+```bash
+# Check 429 responses
+grep " 429 " /var/log/nginx/thetradevisor-access.log | wc -l
+
+# Find users hitting limits
+grep "rate limit exceeded" /www/storage/logs/laravel.log
+```
+
+### 11. 📁 Storage Permissions Monitoring
+
+**Group-Based Access:**
+- Owner: `www-data:www-data`
+- Permissions: `775` (rwxrwxr-x)
+- SGID bit enabled (new files inherit group)
+
+**Verify Permissions:**
+```bash
+ls -ld /www/storage/logs
+# Should show: drwxrwsr-x (note the 's')
+```
 
 ---
 
@@ -433,6 +527,8 @@ curl -I https://thetradevisor.com | grep X-Cache-Status
 🌐 Website: [https://abuzant.com](https://abuzant.com)  
 💼 LinkedIn: [linkedin.com/in/ruslanabuzant](https://linkedin.com/in/ruslanabuzant)
 
+❤️ From Palestine to the world with Love
+
 For project support and inquiries:  
-📧 [your-email@example.com](mailto:your-email@example.com)  
+📧 [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  
 🌐 [https://thetradevisor.com](https://thetradevisor.com)
