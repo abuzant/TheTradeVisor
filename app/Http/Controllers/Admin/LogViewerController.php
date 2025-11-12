@@ -19,6 +19,9 @@ class LogViewerController extends Controller
         'postgresql' => '/var/log/postgresql/postgresql-16-main.log',
         'redis' => '/var/log/redis/redis-server.log',
         'php_fpm' => '/var/log/php8.3-fpm.log',
+        'php_fpm_slow' => '/var/log/php8.3-fpm-slow.log',
+        'system_alerts' => '/var/log/thetradevisor/alerts.log',
+        'health_monitor' => '/var/log/thetradevisor/health_monitor.log',
     ];
     
     public function index(Request $request)
