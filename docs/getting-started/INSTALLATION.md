@@ -1,0 +1,688 @@
+# TheTradeVisor - Installation Guide
+
+Complete step-by-step installation guide for TheTradeVisor trading analytics platform.
+
+---
+
+## 📋 Table of Contents
+
+1. [System Requirements](#system-requirements)
+2. [Server Setup](#server-setup)
+3. [Database Setup](#database-setup)
+4. [Application Installation](#application-installation)
+5. [Web Server Configuration](#web-server-configuration)
+6. [SSL Certificate](#ssl-certificate)
+7. [Monitoring Setup](#monitoring-setup)
+8. [Verification](#verification)
+9. [Troubleshooting](#troubleshooting)
+
+---
+
+## System Requirements
+
+### Minimum Requirements
+
+- **OS**: Ubuntu 22.04 LTS or later
+- **CPU**: 2 cores
+- **RAM**: 4 GB
+- **Storage**: 20 GB SSD
+- **PHP**: 8.3 or later
+- **PostgreSQL**: 16 or later
+- **Redis**: 7.x or later
+- **Node.js**: 18.x or later
+
+### Recommended for Production
+
+- **OS**: Ubuntu 22.04 LTS
+- **CPU**: 4 cores (M6i.large or equivalent)
+- **RAM**: 8 GB
+- **Storage**: 50 GB SSD
+- **Swap**: 2 GB
+- **Network**: 1 Gbps
+
+### Required Software
+
+```bash
+- PHP 8.3+ with extensions:
+  - php8.3-fpm
+  - php8.3-pgsql
+  - php8.3-redis
+  - php8.3-mbstring
+  - php8.3-xml
+  - php8.3-curl
+  - php8.3-zip
+  - php8.3-gd
+  - php8.3-intl
+  - php8.3-bcmath
+
+- PostgreSQL 16
+- Redis 7.x
+- Nginx
+- Composer 2.x
+- Node.js 18+ & NPM
+- Git
+```
+
+---
+
+## Server Setup
+
+### 1. Update System
+
+```bash
+sudo apt update && sudo apt upgrade -y
+```
+
+### 2. Install PHP 8.3
+
+```bash
+# Add PHP repository
+sudo add-apt-repository ppa:ondrej/php -y
+sudo apt update
+
+# Install PHP and extensions
+sudo apt install -y php8.3-fpm php8.3-cli php8.3-pgsql php8.3-redis \
+  php8.3-mbstring php8.3-xml php8.3-curl php8.3-zip php8.3-gd \
+  php8.3-intl php8.3-bcmath
+
+# Verify installation
+php -v
+```
+
+### 3. Install PostgreSQL 16
+
+```bash
+# Add PostgreSQL repository
+sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+sudo apt update
+
+# Install PostgreSQL
+sudo apt install -y postgresql-16 postgresql-client-16
+
+# Verify installation
+sudo -u postgres psql --version
+```
+
+### 4. Install Redis
+
+```bash
+sudo apt install -y redis-server
+
+# Enable and start Redis
+sudo systemctl enable redis-server
+sudo systemctl start redis-server
+
+# Verify installation
+redis-cli ping
+# Should return: PONG
+```
+
+### 5. Install Nginx
+
+```bash
+sudo apt install -y nginx
+
+# Enable and start Nginx
+sudo systemctl enable nginx
+sudo systemctl start nginx
+```
+
+### 6. Install Composer
+
+```bash
+# Download and install Composer
+php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+php composer-setup.php
+sudo mv composer.phar /usr/local/bin/composer
+php -r "unlink('composer-setup.php');"
+
+# Verify installation
+composer --version
+```
+
+### 7. Install Node.js & NPM
+
+```bash
+# Install Node.js 18.x
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+sudo apt install -y nodejs
+
+# Verify installation
+node --version
+npm --version
+```
+
+---
+
+## Database Setup
+
+### 1. Create Database and User
+
+```bash
+# Switch to postgres user
+sudo -u postgres psql
+
+# Create database
+CREATE DATABASE thetradevisor;
+
+# Create user
+CREATE USER tradevisor_user WITH ENCRYPTED PASSWORD 'your_secure_password_here';
+
+# Grant privileges
+GRANT ALL PRIVILEGES ON DATABASE thetradevisor TO tradevisor_user;
+GRANT ALL ON SCHEMA public TO tradevisor_user;
+
+# Exit psql
+\q
+```
+
+### 2. Configure PostgreSQL
+
+Edit `/etc/postgresql/16/main/postgresql.conf`:
+
+```conf
+# Query timeout (kills queries running > 30 seconds)
+statement_timeout = 30000
+
+# Slow query logging
+log_min_duration_statement = 1000
+
+# Connection settings
+max_connections = 100
+shared_buffers = 256MB
+effective_cache_size = 1GB
+maintenance_work_mem = 64MB
+```
+
+Restart PostgreSQL:
+```bash
+sudo systemctl restart postgresql
+```
+
+### 3. Test Database Connection
+
+```bash
+psql -h localhost -U tradevisor_user -d thetradevisor
+# Enter password when prompted
+# Should connect successfully
+\q
+```
+
+---
+
+## Application Installation
+
+### 1. Clone Repository
+
+```bash
+# Create directory
+sudo mkdir -p /var/www
+cd /var/www
+
+# Clone repository
+sudo git clone https://github.com/abuzant/TheTradeVisor.git thetradevisor.com
+
+# Set ownership
+sudo chown -R www-data:www-data /var/www/thetradevisor.com
+```
+
+### 2. Install Dependencies
+
+```bash
+cd /var/www/thetradevisor.com
+
+# Install PHP dependencies
+sudo -u www-data composer install --no-dev --optimize-autoloader
+
+# Install Node dependencies
+sudo -u www-data npm install
+
+# Build assets
+sudo -u www-data npm run build
+```
+
+### 3. Configure Environment
+
+```bash
+# Copy environment file
+sudo -u www-data cp .env.example .env
+
+# Generate application key
+sudo -u www-data php artisan key:generate
+```
+
+Edit `.env` file:
+
+```env
+APP_NAME=TheTradeVisor
+APP_ENV=production
+APP_KEY=base64:... # Generated by artisan key:generate
+APP_DEBUG=false
+APP_URL=https://thetradevisor.com
+
+LOG_CHANNEL=single
+LOG_LEVEL=error
+
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=thetradevisor
+DB_USERNAME=tradevisor_user
+DB_PASSWORD=your_secure_password_here
+
+REDIS_HOST=127.0.0.1
+REDIS_PASSWORD=null
+REDIS_PORT=6379
+
+MAIL_MAILER=smtp
+MAIL_HOST=your_smtp_host
+MAIL_PORT=587
+MAIL_USERNAME=your_email
+MAIL_PASSWORD=your_password
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=noreply@thetradevisor.com
+MAIL_FROM_NAME="${APP_NAME}"
+
+# Circuit Breaker
+CIRCUIT_BREAKER_ENABLED=true
+
+# Slack Alerts (optional)
+SLACK_WEBHOOK_URL=your_slack_webhook_url
+```
+
+### 4. Run Migrations
+
+```bash
+cd /var/www/thetradevisor.com
+
+# Run database migrations
+sudo -u www-data php artisan migrate --force
+
+# Seed database (optional)
+sudo -u www-data php artisan db:seed --force
+```
+
+### 5. Set Permissions
+
+```bash
+cd /var/www/thetradevisor.com
+
+# Set ownership
+sudo chown -R www-data:www-data storage bootstrap/cache
+
+# Set permissions
+sudo chmod -R 775 storage bootstrap/cache
+
+# Enable SGID bit (new files inherit group)
+sudo find storage -type d -exec chmod g+s {} \;
+```
+
+### 6. Optimize Application
+
+```bash
+cd /var/www/thetradevisor.com
+
+# Cache configuration
+sudo -u www-data php artisan config:cache
+
+# Cache routes
+sudo -u www-data php artisan route:cache
+
+# Cache views
+sudo -u www-data php artisan view:cache
+```
+
+---
+
+## Web Server Configuration
+
+### 1. Configure PHP-FPM
+
+Edit `/etc/php/8.3/fpm/pool.d/www.conf`:
+
+```conf
+[www]
+user = www-data
+group = www-data
+listen = /run/php/php8.3-fpm.sock
+listen.owner = www-data
+listen.group = www-data
+pm = dynamic
+pm.max_children = 50
+pm.start_servers = 10
+pm.min_spare_servers = 5
+pm.max_spare_servers = 20
+pm.max_requests = 500
+
+# Slow request logging
+request_slowlog_timeout = 5s
+slowlog = /var/log/php8.3-fpm-slow.log
+```
+
+Restart PHP-FPM:
+```bash
+sudo systemctl restart php8.3-fpm
+```
+
+### 2. Configure Nginx
+
+Create `/etc/nginx/sites-available/thetradevisor.com`:
+
+```nginx
+server {
+    listen 80;
+    listen [::]:80;
+    server_name thetradevisor.com www.thetradevisor.com;
+    
+    # Redirect to HTTPS
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name thetradevisor.com www.thetradevisor.com;
+
+    root /var/www/thetradevisor.com/public;
+    index index.php index.html;
+
+    # SSL Configuration (update paths after obtaining certificates)
+    ssl_certificate /etc/letsencrypt/live/thetradevisor.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/thetradevisor.com/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+
+    # Security headers
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+
+    # Logging
+    access_log /var/log/nginx/thetradevisor-access.log;
+    error_log /var/log/nginx/thetradevisor-error.log;
+
+    # PHP handling
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+        fastcgi_read_timeout 300;
+    }
+
+    # Deny access to hidden files
+    location ~ /\. {
+        deny all;
+    }
+
+    # Static files caching
+    location ~* \.(jpg|jpeg|png|gif|ico|css|js|svg|woff|woff2|ttf|eot)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+}
+```
+
+Enable site:
+```bash
+sudo ln -s /etc/nginx/sites-available/thetradevisor.com /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+---
+
+## SSL Certificate
+
+### Using Let's Encrypt (Recommended)
+
+```bash
+# Install Certbot
+sudo apt install -y certbot python3-certbot-nginx
+
+# Obtain certificate
+sudo certbot --nginx -d thetradevisor.com -d www.thetradevisor.com
+
+# Auto-renewal is configured automatically
+# Test renewal
+sudo certbot renew --dry-run
+```
+
+---
+
+## Monitoring Setup
+
+### 1. Create Monitoring Scripts
+
+```bash
+# Create log directory
+sudo mkdir -p /var/log/thetradevisor
+sudo chown www-data:www-data /var/log/thetradevisor
+```
+
+### 2. Setup Cron Jobs
+
+```bash
+# Edit crontab
+crontab -e
+
+# Add these lines:
+*/2 * * * * /var/www/thetradevisor.com/scripts/monitor_system_health.sh >> /var/log/thetradevisor/cron.log 2>&1
+*/5 * * * * /var/www/thetradevisor.com/scripts/extract_slow_queries.sh >> /var/log/thetradevisor/slow_query_extraction.log 2>&1
+```
+
+### 3. Setup Laravel Scheduler
+
+```bash
+# Add to crontab
+* * * * * cd /var/www/thetradevisor.com && php artisan schedule:run >> /dev/null 2>&1
+```
+
+### 4. Setup Laravel Horizon (Queue Worker)
+
+```bash
+# Install supervisor
+sudo apt install -y supervisor
+
+# Create supervisor config
+sudo nano /etc/supervisor/conf.d/horizon.conf
+```
+
+Add:
+```conf
+[program:horizon]
+process_name=%(program_name)s
+command=php /var/www/thetradevisor.com/artisan horizon
+autostart=true
+autorestart=true
+user=www-data
+redirect_stderr=true
+stdout_logfile=/var/www/thetradevisor.com/storage/logs/horizon.log
+stopwaitsecs=3600
+```
+
+Start Horizon:
+```bash
+sudo supervisorctl reread
+sudo supervisorctl update
+sudo supervisorctl start horizon
+```
+
+---
+
+## Verification
+
+### 1. Check Services
+
+```bash
+# PHP-FPM
+sudo systemctl status php8.3-fpm
+
+# PostgreSQL
+sudo systemctl status postgresql
+
+# Redis
+sudo systemctl status redis-server
+
+# Nginx
+sudo systemctl status nginx
+
+# Horizon
+sudo supervisorctl status horizon
+```
+
+### 2. Test Application
+
+```bash
+# Visit your domain
+curl -I https://thetradevisor.com
+
+# Should return HTTP/2 200 or 302 (redirect to login)
+```
+
+### 3. Check Logs
+
+```bash
+# Laravel logs
+tail -f /var/www/thetradevisor.com/storage/logs/laravel.log
+
+# Nginx logs
+tail -f /var/log/nginx/thetradevisor-access.log
+tail -f /var/log/nginx/thetradevisor-error.log
+
+# PHP-FPM logs
+tail -f /var/log/php8.3-fpm.log
+```
+
+---
+
+## Troubleshooting
+
+### Common Issues
+
+**1. Permission Denied Errors**
+```bash
+sudo chown -R www-data:www-data /var/www/thetradevisor.com/storage
+sudo chmod -R 775 /var/www/thetradevisor.com/storage
+```
+
+**2. Database Connection Failed**
+```bash
+# Check PostgreSQL is running
+sudo systemctl status postgresql
+
+# Test connection
+psql -h localhost -U tradevisor_user -d thetradevisor
+```
+
+**3. 502 Bad Gateway**
+```bash
+# Check PHP-FPM is running
+sudo systemctl status php8.3-fpm
+
+# Check socket exists
+ls -la /run/php/php8.3-fpm.sock
+```
+
+**4. Composer Install Fails**
+```bash
+# Increase memory limit
+php -d memory_limit=-1 /usr/local/bin/composer install
+```
+
+**5. NPM Build Fails**
+```bash
+# Clear cache and retry
+npm cache clean --force
+rm -rf node_modules package-lock.json
+npm install
+npm run build
+```
+
+---
+
+## Post-Installation
+
+### 1. Create Admin User
+
+```bash
+cd /var/www/thetradevisor.com
+php artisan tinker
+
+# In tinker:
+$user = new App\Models\User();
+$user->name = 'Admin';
+$user->email = 'admin@thetradevisor.com';
+$user->password = bcrypt('secure_password');
+$user->is_admin = true;
+$user->email_verified_at = now();
+$user->save();
+exit
+```
+
+### 2. Configure Cloudflare (Optional)
+
+- Add domain to Cloudflare
+- Update nameservers
+- Enable SSL/TLS (Full mode)
+- Enable caching rules
+- Configure firewall rules
+
+### 3. Setup Backups
+
+```bash
+# Database backup script
+sudo nano /var/www/thetradevisor.com/scripts/backup_database.sh
+```
+
+Add:
+```bash
+#!/bin/bash
+BACKUP_DIR="/var/backups/thetradevisor"
+DATE=$(date +%Y%m%d_%H%M%S)
+mkdir -p $BACKUP_DIR
+pg_dump -U tradevisor_user thetradevisor | gzip > $BACKUP_DIR/backup_$DATE.sql.gz
+find $BACKUP_DIR -name "backup_*.sql.gz" -mtime +7 -delete
+```
+
+Make executable and add to cron:
+```bash
+chmod +x /var/www/thetradevisor.com/scripts/backup_database.sh
+# Add to crontab: 0 2 * * * /var/www/thetradevisor.com/scripts/backup_database.sh
+```
+
+---
+
+## Next Steps
+
+1. [Configure MT4/MT5 Expert Advisor](../guides/MT4_EA_INSTALLATION.md)
+2. [Setup Monitoring Dashboard](../operations/MONITORING_IMPLEMENTATION.md)
+3. [Review Security Best Practices](../security/BEST_PRACTICES.md)
+4. [Configure Alert System](../ALERT_SYSTEM_SETUP.md)
+
+---
+
+## Support
+
+For installation support:
+- 📧 Email: [hello@thetradevisor.com](mailto:hello@thetradevisor.com)
+- 📖 Documentation: [https://github.com/abuzant/TheTradeVisor/docs](https://github.com/abuzant/TheTradeVisor/docs)
+
+---
+
+## 👨‍💻 Author & Contact
+
+**Ruslan Abuzant**  
+📧 Email: [ruslan@abuzant.com](mailto:ruslan@abuzant.com)  
+🌐 Website: [https://abuzant.com](https://abuzant.com)  
+💼 LinkedIn: [linkedin.com/in/ruslanabuzant](https://linkedin.com/in/ruslanabuzant)  
+❤️ From Palestine to the world with Love
+
+For project support and inquiries:  
+📧 [hello@thetradevisor.com](mailto:hello@thetradevisor.com)  
+🌐 [https://thetradevisor.com](https://thetradevisor.com)
