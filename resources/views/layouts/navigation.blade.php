@@ -39,6 +39,10 @@
                                 <x-dropdown-link :href="route('broker.analytics')" :active="request()->routeIs('broker.analytics')">
                                     {{ __('Brokers') }}
                                 </x-dropdown-link>
+
+                                <x-dropdown-link :href="route('performance')" :active="request()->routeIs('performance')">
+                                    {{ __('Performance') }}
+                                </x-dropdown-link>
                             </x-slot>
                         </x-dropdown>
                     </div>
@@ -164,10 +168,6 @@
                             {{ __('Accounts') }}
                         </x-dropdown-link>
 
-                        <x-dropdown-link :href="route('performance')" :active="request()->routeIs('performance')">
-                            {{ __('Performance') }}
-                        </x-dropdown-link>
-
                         <x-dropdown-link :href="route('settings.api-key')" :active="request()->routeIs('settings.*')">
                             {{ __('API Key') }}
                         </x-dropdown-link>
@@ -224,6 +224,10 @@
                     <x-responsive-nav-link :href="route('broker.analytics')" :active="request()->routeIs('broker.analytics')">
                         {{ __('Brokers') }}
                     </x-responsive-nav-link>
+
+                    <x-responsive-nav-link :href="route('performance')" :active="request()->routeIs('performance')">
+                        {{ __('Performance') }}
+                    </x-responsive-nav-link>
                 </div>
             </div>
 
@@ -278,10 +282,6 @@
             <div class="mt-3 space-y-1">
                 <x-responsive-nav-link :href="route('accounts.index')" :active="request()->routeIs('accounts.*')">
                     {{ __('Accounts') }}
-                </x-responsive-nav-link>
-
-                <x-responsive-nav-link :href="route('performance')" :active="request()->routeIs('performance')">
-                    {{ __('Performance') }}
                 </x-responsive-nav-link>
 
                 <x-responsive-nav-link :href="route('settings.api-key')" :active="request()->routeIs('settings.*')">
