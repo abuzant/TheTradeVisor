@@ -187,25 +187,35 @@ class TradesController extends Controller
     $totalProfit = $aggregateStats->total_profit ?? 0;
     $totalVolume = $aggregateStats->total_volume ?? 0;
     
-    $grossProfit = $allDeals->where('profit', '>', 0)->sum('profit');
-    $grossLoss = abs($allDeals->where('profit', '<', 0)->sum('profit'));
+    // Convert all profits to USD for multi-account symbol view
+    $currencyService = app(\App\Services\CurrencyService::class);
+    $allProfitsUSD = [];
+    $buyProfitUSD = 0;
+    $sellProfitUSD = 0;
+    $buyCount = 0;
+    $sellCount = 0;
     
-    // Detect buy/sell trades using proper MT5 type code mapping
-    $buyTrades = $allDeals->filter(function($d) {
-        return $d->is_buy;
-    })->count();
+    foreach ($allDeals as $deal) {
+        $accountCurrency = $deal->tradingAccount->account_currency ?? 'USD';
+        $profitUSD = $currencyService->convert($deal->profit, $accountCurrency, 'USD');
+        $allProfitsUSD[] = $profitUSD;
+        
+        if ($deal->is_buy) {
+            $buyProfitUSD += $profitUSD;
+            $buyCount++;
+        } elseif ($deal->is_sell) {
+            $sellProfitUSD += $profitUSD;
+            $sellCount++;
+        }
+    }
     
-    $sellTrades = $allDeals->filter(function($d) {
-        return $d->is_sell;
-    })->count();
+    $grossProfit = collect($allProfitsUSD)->filter(fn($p) => $p > 0)->sum();
+    $grossLoss = abs(collect($allProfitsUSD)->filter(fn($p) => $p < 0)->sum());
     
-    $buyProfit = $allDeals->filter(function($d) {
-        return $d->is_buy;
-    })->sum('profit');
-    
-    $sellProfit = $allDeals->filter(function($d) {
-        return $d->is_sell;
-    })->sum('profit');
+    $buyTrades = $buyCount;
+    $sellTrades = $sellCount;
+    $buyProfit = $buyProfitUSD;
+    $sellProfit = $sellProfitUSD;
     
     // Streaks
     $maxWinStreak = 0;
@@ -294,8 +304,8 @@ class TradesController extends Controller
         'total_volume' => $totalVolume,
         'avg_volume' => $totalTrades > 0 ? $totalVolume / $totalTrades : 0,
         'avg_profit' => $totalTrades > 0 ? $totalProfit / $totalTrades : 0,
-        'best_trade' => $allDeals->max('profit') ?? 0,
-        'worst_trade' => $allDeals->min('profit') ?? 0,
+        'best_trade' => !empty($allProfitsUSD) ? max($allProfitsUSD) : 0,
+        'worst_trade' => !empty($allProfitsUSD) ? min($allProfitsUSD) : 0,
         'profit_factor' => $grossLoss > 0 ? round($grossProfit / $grossLoss, 2) : ($grossProfit > 0 ? 999 : 0),
         'risk_reward' => $grossLoss > 0 ? round($grossProfit / $grossLoss, 2) : 0,
         'avg_win' => $winningTrades > 0 ? $grossProfit / $winningTrades : 0,
