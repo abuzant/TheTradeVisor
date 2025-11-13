@@ -37,6 +37,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // Add to web middleware group
         $middleware->web(append: [
+            \App\Http\Middleware\PreventPageCaching::class, // CRITICAL: Prevent user data caching
             \App\Http\Middleware\ExtendedRememberMe::class,
             \App\Http\Middleware\TrackWebCountryMiddleware::class,
             \App\Http\Middleware\QueryOptimizationMiddleware::class,
