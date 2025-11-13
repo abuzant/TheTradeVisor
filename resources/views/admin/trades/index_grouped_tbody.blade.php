@@ -105,19 +105,19 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td class="px-2 py-1">{{ $group['in_deal']->ticket }}</td>
-                                    <td class="px-2 py-1">{{ $group['in_deal']->time->format('M d, H:i') }}</td>
-                                    <td class="px-2 py-1">
+                                    <td class="px-2 py-1 text-left">{{ $group['in_deal']->ticket }}</td>
+                                    <td class="px-2 py-1 text-left">{{ $group['in_deal']->time->format('M d, H:i') }}</td>
+                                    <td class="px-2 py-1 text-left">
                                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
                                             {{ str_contains(strtolower($group['in_deal']->type), 'buy') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                                             {{ strtoupper($group['in_deal']->type) }}
                                         </span>
                                     </td>
-                                    <td class="px-2 py-1 text-right">{{ number_format($group['in_deal']->volume, 2) }}</td>
-                                    <td class="px-2 py-1 text-right">{{ $group['in_deal']->formatted_price }}</td>
-                                    <td class="px-2 py-1 text-right">{{ number_format($group['in_deal']->commission ?? 0, 2) }}</td>
-                                    <td class="px-2 py-1 text-right">{{ number_format($group['in_deal']->swap ?? 0, 2) }}</td>
-                                    <td class="px-2 py-1 text-right">{{ number_format($group['in_deal']->fee ?? 0, 2) }}</td>
+                                    <td class="px-2 py-1 text-center">{{ number_format($group['in_deal']->volume, 2) }}</td>
+                                    <td class="px-2 py-1 text-center">{{ $group['in_deal']->formatted_price }}</td>
+                                    <td class="px-2 py-1 text-center">{{ number_format($group['in_deal']->commission ?? 0, 2) }}</td>
+                                    <td class="px-2 py-1 text-center">{{ number_format($group['in_deal']->swap ?? 0, 2) }}</td>
+                                    <td class="px-2 py-1 text-center">{{ number_format($group['in_deal']->fee ?? 0, 2) }}</td>
                                 </tr>
                             </tbody>
                         </table>
