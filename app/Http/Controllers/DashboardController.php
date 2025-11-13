@@ -34,11 +34,13 @@ class DashboardController extends Controller
         $sortBy = $request->get('sort_by', 'last_sync_at');
         $sortDirection = $request->get('sort_direction', 'desc');
 
+        // EMERGENCY: DISABLE CACHING TO DEBUG USER BLEEDING ISSUE
         // Cache key unique to user, currency, and sorting
-        $cacheKey = "dashboard.user.{$user->id}.{$displayCurrency}.{$sortBy}.{$sortDirection}";
+        // $cacheKey = "dashboard.user.{$user->id}.{$displayCurrency}.{$sortBy}.{$sortDirection}";
 
         // Cache for 2 minutes (balance changes frequently)
-        $dashboardData = Cache::remember($cacheKey, 120, function() use ($user, $displayCurrency, $request, $sortBy, $sortDirection) {
+        // $dashboardData = Cache::remember($cacheKey, 120, function() use ($user, $displayCurrency, $request, $sortBy, $sortDirection) {
+        $dashboardData = (function() use ($user, $displayCurrency, $request, $sortBy, $sortDirection) {
             // Define sortable columns for user's accounts
             $sortableColumns = [
                 'broker_name',
@@ -118,8 +120,9 @@ class DashboardController extends Controller
             ];
         });
 
-        // Recent positions (closed) - cache separately (1 minute, updates more frequently)
-        $recentPositions = Cache::remember("dashboard.positions.{$user->id}", 60, function() use ($user) {
+        // Recent positions (closed) - CACHING DISABLED FOR DEBUG
+        // $recentPositions = Cache::remember("dashboard.positions.{$user->id}", 60, function() use ($user) {
+        $recentPositions = (function() use ($user) {
             $accountIds = $user->tradingAccounts()->pluck('id');
             if ($accountIds->isEmpty()) {
                 return collect();
@@ -131,7 +134,7 @@ class DashboardController extends Controller
                 ->orderBy('update_time', 'desc')
                 ->limit(20)
                 ->get();
-        });
+        })(); // Execute immediately, no caching
 
         // Get account limit info (not cached, lightweight)
         $accountLimit = $user->getAccountLimitInfo();
@@ -162,11 +165,13 @@ class DashboardController extends Controller
         $sortBy = $request->get('sort_by', 'time');
         $sortDirection = $request->get('sort_direction', 'desc');
 
+        // EMERGENCY: DISABLE CACHING TO DEBUG USER BLEEDING ISSUE
         // Cache key for account details - MUST include user ID for security
-        $cacheKey = "account.{$user->id}.{$accountId}.details.{$sortBy}.{$sortDirection}";
+        // $cacheKey = "account.{$user->id}.{$accountId}.details.{$sortBy}.{$sortDirection}";
 
         // Cache for 2 minutes
-        $accountData = Cache::remember($cacheKey, 120, function() use ($accountId, $user, $request, $sortBy, $sortDirection) {
+        // $accountData = Cache::remember($cacheKey, 120, function() use ($accountId, $user, $request, $sortBy, $sortDirection) {
+        $accountData = (function() use ($accountId, $user, $request, $sortBy, $sortDirection) {
             // Get specific account (ensure it belongs to user)
             $account = TradingAccount::where('id', $accountId)
                 ->where('user_id', $user->id)
@@ -184,7 +189,7 @@ class DashboardController extends Controller
                 'stats' => $stats,
                 'chartData' => $chartData,
             ];
-        });
+        })(); // Execute immediately, no caching
 
         // Get account
         $account = $accountData['account'];
