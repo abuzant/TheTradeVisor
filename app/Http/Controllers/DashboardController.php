@@ -152,8 +152,8 @@ class DashboardController extends Controller
         $sortBy = $request->get('sort_by', 'time');
         $sortDirection = $request->get('sort_direction', 'desc');
 
-        // Cache key for account details
-        $cacheKey = "account.{$accountId}.details.{$sortBy}.{$sortDirection}";
+        // Cache key for account details - MUST include user ID for security
+        $cacheKey = "account.{$user->id}.{$accountId}.details.{$sortBy}.{$sortDirection}";
 
         // Cache for 2 minutes
         $accountData = Cache::remember($cacheKey, 120, function() use ($accountId, $user, $request, $sortBy, $sortDirection) {
