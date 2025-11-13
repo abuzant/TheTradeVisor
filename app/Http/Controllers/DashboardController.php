@@ -21,38 +21,19 @@ class DashboardController extends Controller
     {
         $user = $request->user();
         
-        // EMERGENCY DEBUG: Log who is accessing dashboard
-        \Log::emergency('DASHBOARD ACCESS', [
-            'user_id' => $user->id,
-            'user_email' => $user->email,
-            'user_name' => $user->name,
-            'session_id' => session()->getId(),
-            'ip' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-            'auth_id' => auth()->id(),
-            'auth_email' => auth()->user()->email ?? 'NULL',
-        ]);
-        
-        // Get accounts and log them
-        $userAccounts = $user->tradingAccounts()->get();
-        \Log::emergency('USER ACCOUNTS', [
-            'user_id' => $user->id,
-            'account_count' => $userAccounts->count(),
-            'account_ids' => $userAccounts->pluck('id')->toArray(),
-            'brokers' => $userAccounts->pluck('broker_name')->toArray(),
-        ]);
+        // Removed emergency logging - user bleeding issue resolved
         
         $displayCurrency = $user->display_currency;
         $sortBy = $request->get('sort_by', 'last_sync_at');
         $sortDirection = $request->get('sort_direction', 'desc');
 
-        // EMERGENCY: DISABLE CACHING TO DEBUG USER BLEEDING ISSUE
-        // Cache key unique to user, currency, and sorting
-        // $cacheKey = "dashboard.user.{$user->id}.{$displayCurrency}.{$sortBy}.{$sortDirection}";
+        // Cache key: user + session + IP for security (prevents cache poisoning)
+        $sessionId = session()->getId();
+        $userIp = $request->ip();
+        $cacheKey = "dashboard.user.{$user->id}.{$sessionId}.{$userIp}.{$displayCurrency}.{$sortBy}.{$sortDirection}";
 
-        // Cache for 2 minutes (balance changes frequently)
-        // $dashboardData = Cache::remember($cacheKey, 120, function() use ($user, $displayCurrency, $request, $sortBy, $sortDirection) {
-        $dashboardData = (function() use ($user, $displayCurrency, $request, $sortBy, $sortDirection) {
+        // Cache for 5 minutes (balance changes frequently)
+        $dashboardData = Cache::remember($cacheKey, 300, function() use ($user, $displayCurrency, $request, $sortBy, $sortDirection) {
             // Define sortable columns for user's accounts
             $sortableColumns = [
                 'broker_name',
@@ -130,11 +111,11 @@ class DashboardController extends Controller
                 'totals' => $totals,
                 'accountsChartData' => $accountsChartData,
             ];
-        })(); // Execute immediately, no caching
+        });
 
-        // Recent positions (closed) - CACHING DISABLED FOR DEBUG
-        // $recentPositions = Cache::remember("dashboard.positions.{$user->id}", 60, function() use ($user) {
-        $recentPositions = (function() use ($user) {
+        // Recent positions (closed) - Cache with user + session + IP
+        $positionsCacheKey = "dashboard.positions.{$user->id}.{$sessionId}.{$userIp}";
+        $recentPositions = Cache::remember($positionsCacheKey, 300, function() use ($user) {
             $accountIds = $user->tradingAccounts()->pluck('id');
             if ($accountIds->isEmpty()) {
                 return collect();
@@ -146,7 +127,7 @@ class DashboardController extends Controller
                 ->orderBy('update_time', 'desc')
                 ->limit(20)
                 ->get();
-        })(); // Execute immediately, no caching
+        });
 
         // Get account limit info (not cached, lightweight)
         $accountLimit = $user->getAccountLimitInfo();
@@ -161,19 +142,7 @@ class DashboardController extends Controller
             });
         });
 
-        // Log what we're passing to the view
-        \Log::emergency('PASSING TO VIEW', [
-            'user_id' => $user->id,
-            'accounts_count' => $dashboardData['accounts']->count(),
-            'accounts_data' => $dashboardData['accounts']->map(function($acc) {
-                return [
-                    'id' => $acc->id,
-                    'broker' => $acc->broker_name,
-                    'account_number' => $acc->account_number,
-                    'user_id' => $acc->user_id,
-                ];
-            })->toArray(),
-        ]);
+        // Emergency logging removed - issue resolved
         
         return view('dashboard', array_merge($dashboardData, [
             'user' => $user,
@@ -191,13 +160,13 @@ class DashboardController extends Controller
         $sortBy = $request->get('sort_by', 'time');
         $sortDirection = $request->get('sort_direction', 'desc');
 
-        // EMERGENCY: DISABLE CACHING TO DEBUG USER BLEEDING ISSUE
-        // Cache key for account details - MUST include user ID for security
-        // $cacheKey = "account.{$user->id}.{$accountId}.details.{$sortBy}.{$sortDirection}";
+        // Cache key for account details - user + session + IP for security
+        $sessionId = session()->getId();
+        $userIp = $request->ip();
+        $cacheKey = "account.{$user->id}.{$sessionId}.{$userIp}.{$accountId}.details.{$sortBy}.{$sortDirection}";
 
-        // Cache for 2 minutes
-        // $accountData = Cache::remember($cacheKey, 120, function() use ($accountId, $user, $request, $sortBy, $sortDirection) {
-        $accountData = (function() use ($accountId, $user, $request, $sortBy, $sortDirection) {
+        // Cache for 5 minutes
+        $accountData = Cache::remember($cacheKey, 300, function() use ($accountId, $user, $request, $sortBy, $sortDirection) {
             // Get specific account (ensure it belongs to user)
             $account = TradingAccount::where('id', $accountId)
                 ->where('user_id', $user->id)
@@ -215,7 +184,7 @@ class DashboardController extends Controller
                 'stats' => $stats,
                 'chartData' => $chartData,
             ];
-        })(); // Execute immediately, no caching
+        });
 
         // Get account
         $account = $accountData['account'];
