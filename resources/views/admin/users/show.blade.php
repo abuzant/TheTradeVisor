@@ -108,6 +108,15 @@
                                     </button>
                                 </form>
                             @endif
+                            @if($user->id !== auth()->id())
+                                <form method="POST" action="{{ route('admin.users.destroy', $user) }}" onsubmit="return confirm('Are you sure you want to DELETE this user? This action cannot be undone!')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="px-4 py-2 bg-red-800 text-white rounded-md hover:bg-red-900 text-sm font-medium">
+                                        Delete User
+                                    </button>
+                                </form>
+                            @endif
                         </div>
                     </div>
 
@@ -190,24 +199,6 @@
                     </div>
                 </div>
             </div>
-
-            {{-- Quick Actions --}}
-            @if($user->id !== auth()->id())
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Danger Zone</h3>
-                    <div class="flex flex-wrap gap-3">
-                        <form method="POST" action="{{ route('admin.users.destroy', $user) }}" onsubmit="return confirm('Are you sure you want to DELETE this user? This action cannot be undone!')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="px-4 py-2 bg-red-800 text-white rounded-md hover:bg-red-900 text-sm font-medium">
-                                Delete User
-                            </button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            @endif
 
             {{-- Trading Accounts --}}
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
