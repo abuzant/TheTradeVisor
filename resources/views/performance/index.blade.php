@@ -98,21 +98,33 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="border-2 border-green-200 rounded-lg p-4 bg-green-50">
                                 <h4 class="font-semibold text-green-800 mb-2">🏆 Most Profitable Trade</h4>
-                                <div class="text-sm space-y-1">
-                                    <div><span class="font-medium">Symbol:</span> {{ $metrics['trade_analysis']['most_profitable_trade']['symbol'] }}</div>
-                                    <div><span class="font-medium">Profit:</span> <span class="text-green-600 font-bold">{{ $displayCurrency }} {{ number_format($metrics['trade_analysis']['most_profitable_trade']['profit'], 2) }}</span></div>
-                                    <div><span class="font-medium">ROI:</span> {{ $metrics['trade_analysis']['most_profitable_trade']['roi'] }}%</div>
-                                    <div><span class="font-medium">Date:</span> {{ $metrics['trade_analysis']['most_profitable_trade']['date'] }}</div>
-                                </div>
+                                @if($metrics['trade_analysis']['most_profitable_trade']['profit'] > 0)
+                                    <div class="text-sm space-y-1">
+                                        <div><span class="font-medium">Symbol:</span> {{ $metrics['trade_analysis']['most_profitable_trade']['symbol'] }}</div>
+                                        <div><span class="font-medium">Profit:</span> <span class="text-green-600 font-bold">{{ $displayCurrency }} {{ number_format($metrics['trade_analysis']['most_profitable_trade']['profit'], 2) }}</span></div>
+                                        <div><span class="font-medium">ROI:</span> {{ $metrics['trade_analysis']['most_profitable_trade']['roi'] }}%</div>
+                                        <div><span class="font-medium">Date:</span> {{ $metrics['trade_analysis']['most_profitable_trade']['date'] }}</div>
+                                    </div>
+                                @else
+                                    <div class="text-sm text-gray-600 italic">
+                                        No profitable trades in this period
+                                    </div>
+                                @endif
                             </div>
 
                             <div class="border-2 border-red-200 rounded-lg p-4 bg-red-50">
                                 <h4 class="font-semibold text-red-800 mb-2">📉 Worst Trade</h4>
-                                <div class="text-sm space-y-1">
-                                    <div><span class="font-medium">Symbol:</span> {{ $metrics['trade_analysis']['worst_trade']['symbol'] }}</div>
-                                    <div><span class="font-medium">Loss:</span> <span class="text-red-600 font-bold">{{ $displayCurrency }} {{ number_format($metrics['trade_analysis']['worst_trade']['profit'], 2) }}</span></div>
-                                    <div><span class="font-medium">Date:</span> {{ $metrics['trade_analysis']['worst_trade']['date'] }}</div>
-                                </div>
+                                @if($metrics['trade_analysis']['worst_trade']['profit'] < 0)
+                                    <div class="text-sm space-y-1">
+                                        <div><span class="font-medium">Symbol:</span> {{ $metrics['trade_analysis']['worst_trade']['symbol'] }}</div>
+                                        <div><span class="font-medium">Loss:</span> <span class="text-red-600 font-bold">{{ $displayCurrency }} {{ number_format($metrics['trade_analysis']['worst_trade']['profit'], 2) }}</span></div>
+                                        <div><span class="font-medium">Date:</span> {{ $metrics['trade_analysis']['worst_trade']['date'] }}</div>
+                                    </div>
+                                @else
+                                    <div class="text-sm text-gray-600 italic">
+                                        No losing trades in this period
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </div>
