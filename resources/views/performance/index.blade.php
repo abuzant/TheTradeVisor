@@ -102,7 +102,7 @@
                                     <div class="text-sm space-y-1">
                                         <div><span class="font-medium">Symbol:</span> {{ $metrics['trade_analysis']['most_profitable_trade']['symbol'] }}</div>
                                         <div><span class="font-medium">Profit:</span> <span class="text-green-600 font-bold">{{ $displayCurrency }} {{ number_format($metrics['trade_analysis']['most_profitable_trade']['profit'], 2) }}</span></div>
-                                        <div><span class="font-medium">ROI:</span> {{ $metrics['trade_analysis']['most_profitable_trade']['roi'] }}%</div>
+                                        <div><span class="font-medium">Volume:</span> {{ number_format($metrics['trade_analysis']['most_profitable_trade']['volume'], 2) }}</div>
                                         <div><span class="font-medium">Date:</span> {{ $metrics['trade_analysis']['most_profitable_trade']['date'] }}</div>
                                     </div>
                                 @else

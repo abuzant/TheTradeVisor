@@ -103,9 +103,6 @@ class PerformanceMetricsService
                 'profit' => $mostProfitable->converted_profit,
                 'volume' => $mostProfitable->volume,
                 'date' => $mostProfitable->open_time->format('M d, Y'),
-                'roi' => $mostProfitable->volume > 0 && $mostProfitable->open_price > 0 
-                    ? round(($mostProfitable->converted_profit / ($mostProfitable->volume * $mostProfitable->open_price)) * 100, 2) 
-                    : 0,
             ],
             'worst_trade' => [
                 'symbol' => $worstTrade->normalized_symbol ?? $worstTrade->symbol,
@@ -496,7 +493,7 @@ class PerformanceMetricsService
             ->get();
 
         if ($positions->isEmpty()) {
-            return null;
+            return 'N/A';
         }
 
         // Calculate hold time in hours for each position
