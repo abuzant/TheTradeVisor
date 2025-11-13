@@ -49,12 +49,21 @@ class PerformanceMetricsService
 
     /**
      * Trade Analysis - Most successful trades, ROI, etc.
-     * Uses deals to get complete historical data
+     * 
+     * Uses Deal model with entry='out' for standardized approach across platforms:
+     * - MT5 (Position-based): OUT deal = position closed with final profit
+     * - MT4 (Order-based): OUT deal = order closed with final profit
+     * - Works for both Netting and Hedging modes
+     * 
+     * Why Deals not Positions:
+     * - Positions table only stores current/recent state (43 records)
+     * - Deals table has complete transaction history (313+ records)
+     * - Each closed position/order creates an OUT deal with final P/L
      */
     private function getTradeAnalysis($accountIds, $days, $displayCurrency)
     {
-        // Get deals (OUT entries represent closed positions with final profit)
-        // Group by position_id to get one entry per trade
+        // Get OUT deals (closed positions/orders with final profit)
+        // This works for MT4, MT5 Netting, and MT5 Hedging
         $deals = Deal::whereIn('trading_account_id', $accountIds)
             ->with('tradingAccount')
             ->where('entry', 'out')
