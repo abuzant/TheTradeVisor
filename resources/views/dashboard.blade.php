@@ -216,7 +216,7 @@
                                                 {{ $account->last_sync_at ? $account->last_sync_at->diffForHumans() : 'Never' }}
                                             </td>
                                             <td class="px-4 py-3 whitespace-nowrap">
-                                                <a href="{{ route('account.show', $account->id) }}" class="text-[9px] text-indigo-600 hover:text-indigo-900 hover:underline" style="font-size: 9px !important;">more»</a>
+                                                <a href="{{ route('account.show', $account->id) }}" class="text-[11px] text-indigo-600 hover:text-indigo-900 hover:underline" style="font-size: 11px !important;">more»</a>
                                             </td>
                                         </tr>
                                     @endforeach
@@ -259,6 +259,10 @@
                      positions: {{ $allOpenPositions->toJson() }},
                      sortColumn: 'open_time',
                      sortDirection: 'desc',
+                     trimBrokerName(name) {
+                         const words = name.split(' ');
+                         return words.length > 2 ? words.slice(0, 2).join(' ') + '...' : name;
+                     },
                      sortBy(column) {
                          if (this.sortColumn === column) {
                              this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
@@ -380,7 +384,8 @@
                                         <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
                                             <a :href="`/account/${position.trading_account_id}`" 
                                                class="text-indigo-600 hover:text-indigo-900 text-xs"
-                                               x-text="`${position.broker_name}-${position.account_number || 'Anonymous'}`"></a>
+                                               :title="`${position.broker_name}-${position.account_number || 'Anonymous'}`"
+                                               x-text="`${trimBrokerName(position.broker_name)}-${position.account_number || 'Anonymous'}`"></a>
                                         </td>
                                         <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500" x-text="position.sl ? Number(position.sl).toFixed(5).replace(/\.?0+$/, '') : '-'"></td>
                                         <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500" x-text="position.tp ? Number(position.tp).toFixed(5).replace(/\.?0+$/, '') : '-'"></td>
