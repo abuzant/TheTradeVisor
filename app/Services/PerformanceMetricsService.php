@@ -49,74 +49,67 @@ class PerformanceMetricsService
 
     /**
      * Trade Analysis - Most successful trades, ROI, etc.
-     * Includes positions opened OR closed within the time period
+     * Uses deals to get complete historical data
      */
     private function getTradeAnalysis($accountIds, $days, $displayCurrency)
     {
-        // Get positions that were opened OR closed within the time period
-        $positions = \App\Models\Position::whereIn('trading_account_id', $accountIds)
+        // Get deals (OUT entries represent closed positions with final profit)
+        // Group by position_id to get one entry per trade
+        $deals = Deal::whereIn('trading_account_id', $accountIds)
             ->with('tradingAccount')
-            ->where(function($query) use ($days) {
-                $query->where('open_time', '>=', now()->subDays($days))
-                      ->orWhere(function($q) use ($days) {
-                          $q->where('is_open', false)
-                            ->where('update_time', '>=', now()->subDays($days));
-                      });
-            })
+            ->where('entry', 'out')
+            ->where('time', '>=', now()->subDays($days))
             ->get();
 
-        if ($positions->isEmpty()) {
+        if ($deals->isEmpty()) {
             return null;
         }
 
-        // Convert all profits to display currency and use floating profit for open positions
-        $convertedPositions = $positions->map(function($position) use ($displayCurrency) {
-            // Use floating_profit for open positions, profit for closed
-            $profitValue = $position->is_open ? ($position->floating_profit ?? 0) : $position->profit;
-            
-            $position->converted_profit = $this->currencyService->convert(
-                $profitValue,
-                $position->tradingAccount->account_currency ?? 'USD',
+        // Convert all profits to display currency
+        $convertedDeals = $deals->map(function($deal) use ($displayCurrency) {
+            $deal->converted_profit = $this->currencyService->convert(
+                $deal->profit,
+                $deal->tradingAccount->account_currency ?? 'USD',
                 $displayCurrency
             );
-            return $position;
+            return $deal;
         });
 
         // Most profitable trade
-        $mostProfitable = $convertedPositions->sortByDesc('converted_profit')->first();
+        $mostProfitable = $convertedDeals->sortByDesc('converted_profit')->first();
         
         // Worst trade
-        $worstTrade = $convertedPositions->sortBy('converted_profit')->first();
+        $worstTrade = $convertedDeals->sortBy('converted_profit')->first();
         
-        // Calculate average hold time (only for closed positions)
+        // Calculate average hold time
         $avgHoldTime = $this->calculateAverageHoldTime($accountIds, $days);
 
         // Total stats
-        $totalProfit = $convertedPositions->sum('converted_profit');
-        $totalVolume = $convertedPositions->sum('volume');
-        $winningTrades = $convertedPositions->where('converted_profit', '>', 0);
-        $losingTrades = $convertedPositions->where('converted_profit', '<', 0);
+        $totalProfit = $convertedDeals->sum('converted_profit');
+        $totalVolume = $convertedDeals->sum('volume');
+        $winningTrades = $convertedDeals->where('converted_profit', '>', 0);
+        $losingTrades = $convertedDeals->where('converted_profit', '<', 0);
 
         return [
             'most_profitable_trade' => [
                 'symbol' => $mostProfitable->normalized_symbol ?? $mostProfitable->symbol,
                 'profit' => $mostProfitable->converted_profit,
                 'volume' => $mostProfitable->volume,
-                'date' => $mostProfitable->open_time->format('M d, Y'),
+                'date' => $mostProfitable->time->format('M d, Y'),
             ],
             'worst_trade' => [
                 'symbol' => $worstTrade->normalized_symbol ?? $worstTrade->symbol,
                 'profit' => $worstTrade->converted_profit,
                 'volume' => $worstTrade->volume,
-                'date' => $worstTrade->open_time->format('M d, Y'),
+                'date' => $worstTrade->time->format('M d, Y'),
             ],
-            'total_trades' => $convertedPositions->count(),
+            'total_trades' => $convertedDeals->count(),
             'winning_trades' => $winningTrades->count(),
             'losing_trades' => $losingTrades->count(),
-            'win_rate' => $convertedPositions->count() > 0 ? round(($winningTrades->count() / $convertedPositions->count()) * 100, 1) : 0,
+            'win_rate' => $convertedDeals->count() > 0 ? round(($winningTrades->count() / $convertedDeals->count()) * 100, 1) : 0,
             'avg_win' => $winningTrades->count() > 0 ? $winningTrades->avg('converted_profit') : 0,
             'avg_loss' => $losingTrades->count() > 0 ? abs($losingTrades->avg('converted_profit')) : 0,
-            'profit_factor' => $this->calculateProfitFactor($convertedPositions, 'converted_profit'),
+            'profit_factor' => $this->calculateProfitFactor($convertedDeals, 'converted_profit'),
             'avg_hold_time' => $avgHoldTime,
         ];
     }
