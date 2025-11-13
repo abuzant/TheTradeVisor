@@ -191,32 +191,32 @@
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     @foreach($accounts as $account)
                                         <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                            <td class="px-4 py-3 whitespace-nowrap text-xs font-medium text-gray-900">
                                                 <x-broker-name :broker="$account->broker_name" class="text-indigo-600 hover:text-indigo-900" />
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td class="px-4 py-3 whitespace-nowrap text-xs text-gray-500">
                                                 <div class="flex items-center space-x-2">
                                                     <span>{{ $account->account_number ?? 'Anonymous' }}</span>
                                                     <x-platform-badge :account="$account" />
                                                 </div>
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            <td class="px-4 py-3 whitespace-nowrap text-xs text-gray-900">
                                                 {{ $account->account_currency }} {{ number_format($account->balance, 2) }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            <td class="px-4 py-3 whitespace-nowrap text-xs text-gray-900">
                                                 {{ $account->account_currency }} {{ number_format($account->equity, 2) }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium {{ $account->profit >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                                            <td class="px-4 py-3 whitespace-nowrap text-xs font-medium {{ $account->profit >= 0 ? 'text-green-600' : 'text-red-600' }}">
                                                 {{ $account->account_currency }} {{ number_format($account->profit, 2) }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td class="px-4 py-3 whitespace-nowrap text-xs text-gray-500">
                                                 {{ $account->openPositions->count() }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            <td class="px-4 py-3 whitespace-nowrap text-xs text-gray-500">
                                                 {{ $account->last_sync_at ? $account->last_sync_at->diffForHumans() : 'Never' }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                <a href="{{ route('account.show', $account->id) }}" class="text-indigo-600 hover:text-indigo-900">View Details</a>
+                                            <td class="px-4 py-3 whitespace-nowrap">
+                                                <a href="{{ route('account.show', $account->id) }}" class="text-[10px] text-indigo-600 hover:text-indigo-900 hover:underline">more»</a>
                                             </td>
                                         </tr>
                                     @endforeach

@@ -1,7 +1,11 @@
 @props(['broker', 'class' => ''])
 
 @php
-    $displayName = strlen($broker) > 24 ? substr($broker, 0, 24) . '...' : $broker;
+    // Trim to first 2 words only to save vertical space
+    $words = explode(' ', $broker);
+    $displayName = count($words) > 2 
+        ? implode(' ', array_slice($words, 0, 2)) . '...' 
+        : $broker;
 @endphp
 
 <a href="{{ route('broker-details', ['broker' => urlencode($broker)]) }}"
