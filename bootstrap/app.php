@@ -16,6 +16,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // TEMPORARY: Disable CSRF on login/logout until we fix the intermittent 419 issue
+        $middleware->validateCsrfTokens(except: [
+            'login',
+            'logout',
+        ]);
+        
         $middleware->alias([
             'api.key' => \App\Http\Middleware\ValidateApiKey::class,
             'admin' => \App\Http\Middleware\IsAdmin::class,
