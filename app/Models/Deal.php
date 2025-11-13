@@ -177,10 +177,24 @@ class Deal extends Model
      * 2 = DEAL_TYPE_BALANCE
      * 3 = DEAL_TYPE_CREDIT
      * etc.
+     * 
+     * IMPORTANT: For OUT deals, MT5 sends the OPPOSITE type (closing a BUY sends SELL).
+     * We need to get the actual position type from the IN deal.
      */
     public function getDisplayTypeAttribute()
     {
         $type = $this->attributes['type'] ?? '';
+        $entry = $this->attributes['entry'] ?? '';
+        
+        // For OUT deals, get the position type from the IN deal
+        if (in_array($entry, ['out', 'inout']) && $this->position_id) {
+            $inDeal = static::where('position_id', $this->position_id)
+                ->where('entry', 'in')
+                ->first();
+            if ($inDeal) {
+                $type = $inDeal->attributes['type'] ?? $type;
+            }
+        }
         
         // If already a string (buy/sell), return as-is
         if (is_string($type) && (stripos($type, 'buy') !== false || stripos($type, 'sell') !== false)) {
@@ -204,10 +218,22 @@ class Deal extends Model
 
     /**
      * Check if this is a buy deal
+     * For OUT deals, checks the position type from IN deal
      */
     public function getIsBuyAttribute()
     {
         $type = $this->attributes['type'] ?? '';
+        $entry = $this->attributes['entry'] ?? '';
+        
+        // For OUT deals, get the position type from the IN deal
+        if (in_array($entry, ['out', 'inout']) && $this->position_id) {
+            $inDeal = static::where('position_id', $this->position_id)
+                ->where('entry', 'in')
+                ->first();
+            if ($inDeal) {
+                $type = $inDeal->attributes['type'] ?? $type;
+            }
+        }
         
         // Check numeric code
         if ($type === '0' || $type === 0) {
@@ -224,10 +250,22 @@ class Deal extends Model
 
     /**
      * Check if this is a sell deal
+     * For OUT deals, checks the position type from IN deal
      */
     public function getIsSellAttribute()
     {
         $type = $this->attributes['type'] ?? '';
+        $entry = $this->attributes['entry'] ?? '';
+        
+        // For OUT deals, get the position type from the IN deal
+        if (in_array($entry, ['out', 'inout']) && $this->position_id) {
+            $inDeal = static::where('position_id', $this->position_id)
+                ->where('entry', 'in')
+                ->first();
+            if ($inDeal) {
+                $type = $inDeal->attributes['type'] ?? $type;
+            }
+        }
         
         // Check numeric code
         if ($type === '1' || $type === 1) {
