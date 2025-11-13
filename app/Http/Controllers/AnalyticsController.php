@@ -416,23 +416,39 @@ class AnalyticsController extends Controller
     }
 
     /**
-     * Get trading costs analysis
+     * Get trading costs analysis (converted to USD for global multi-account view)
      */
     private function getTradingCosts($days = 30)
     {
         $deals = Deal::whereNotNull('symbol')
             ->where('symbol', '!=', '')
             ->where('time', '>=', now()->subDays($days))
-            ->select(DB::raw('SUM(commission) as total_commission'),
-                    DB::raw('SUM(swap) as total_swap'),
-                    DB::raw('COUNT(*) as total_trades'))
-            ->first();
+            ->with('tradingAccount')
+            ->get();
+
+        $currencyService = app(\App\Services\CurrencyService::class);
+        $totalCommissionUSD = 0;
+        $totalSwapUSD = 0;
+        
+        foreach ($deals as $deal) {
+            if ($deal->tradingAccount) {
+                $currency = $deal->tradingAccount->account_currency ?? 'USD';
+                $totalCommissionUSD += $currencyService->convert($deal->commission ?? 0, $currency, 'USD');
+                $totalSwapUSD += $currencyService->convert($deal->swap ?? 0, $currency, 'USD');
+            } else {
+                $totalCommissionUSD += $deal->commission ?? 0;
+                $totalSwapUSD += $deal->swap ?? 0;
+            }
+        }
+        
+        $totalTrades = $deals->count();
+        $totalCosts = $totalCommissionUSD + $totalSwapUSD;
 
         return [
-            'total_commission' => round($deals->total_commission ?? 0, 2),
-            'total_swap' => round($deals->total_swap ?? 0, 2),
-            'total_costs' => round(($deals->total_commission ?? 0) + ($deals->total_swap ?? 0), 2),
-            'avg_cost_per_trade' => $deals->total_trades > 0 ? round((($deals->total_commission ?? 0) + ($deals->total_swap ?? 0)) / $deals->total_trades, 2) : 0,
+            'total_commission' => round($totalCommissionUSD, 2),
+            'total_swap' => round($totalSwapUSD, 2),
+            'total_costs' => round($totalCosts, 2),
+            'avg_cost_per_trade' => $totalTrades > 0 ? round($totalCosts / $totalTrades, 2) : 0,
         ];
     }
 

@@ -89,27 +89,35 @@ class BrokerDetailsController extends Controller
             )
             ->first();
 
-        // Convert to USD for display
+        // Convert profit, commission, and swap to USD for display (multi-account public page)
         $totalProfitUSD = 0;
+        $totalCommissionUSD = 0;
+        $totalSwapUSD = 0;
+        
         $accounts = TradingAccount::whereIn('id', $accountIds)->get();
         foreach ($accounts as $account) {
-            $accountProfit = Deal::where('trading_account_id', $account->id)
+            $accountDeals = Deal::where('trading_account_id', $account->id)
                 ->where('time', '>=', now()->subDays($days))
                 ->where('entry', 'out')
-                ->sum('profit');
-            $totalProfitUSD += $this->currencyService->convert(
-                $accountProfit,
-                $account->account_currency ?? 'USD',
-                'USD'
-            );
+                ->select(
+                    DB::raw('SUM(profit) as profit'),
+                    DB::raw('SUM(commission) as commission'),
+                    DB::raw('SUM(swap) as swap')
+                )
+                ->first();
+                
+            $currency = $account->account_currency ?? 'USD';
+            $totalProfitUSD += $this->currencyService->convert($accountDeals->profit ?? 0, $currency, 'USD');
+            $totalCommissionUSD += $this->currencyService->convert($accountDeals->commission ?? 0, $currency, 'USD');
+            $totalSwapUSD += $this->currencyService->convert($accountDeals->swap ?? 0, $currency, 'USD');
         }
 
         return [
             'total_trades' => $stats->total_trades ?? 0,
             'total_profit' => $totalProfitUSD,
             'total_volume' => $stats->total_volume ?? 0,
-            'total_commission' => $stats->total_commission ?? 0,
-            'total_swap' => $stats->total_swap ?? 0,
+            'total_commission' => $totalCommissionUSD,
+            'total_swap' => $totalSwapUSD,
             'win_rate' => $stats->total_trades > 0 ? round(($stats->winning_trades / $stats->total_trades) * 100, 1) : 0,
             'avg_trade_size' => $stats->avg_trade_size ?? 0,
             'active_traders' => $stats->active_traders ?? 0,

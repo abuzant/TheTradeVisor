@@ -120,7 +120,7 @@ class TradesController extends Controller
     ')->first();
     
     // Get limited sample for detailed analysis (max 5000 recent trades) - use fresh query
-    $allDeals = (clone $baseQuery)->orderBy('time', 'desc')->limit(5000)->get();
+    $allDeals = (clone $baseQuery)->with('tradingAccount')->orderBy('time', 'desc')->limit(5000)->get();
     
     // If no deals found, return empty stats
     if ($allDeals->isEmpty()) {
@@ -190,20 +190,24 @@ class TradesController extends Controller
     $grossProfit = $allDeals->where('profit', '>', 0)->sum('profit');
     $grossLoss = abs($allDeals->where('profit', '<', 0)->sum('profit'));
     
+    // Detect buy/sell trades - check for 'buy' in type (case-insensitive)
+    // But exclude 'sell' matches when checking for 'buy' (e.g., 'sell' contains no 'buy')
     $buyTrades = $allDeals->filter(function($d) {
-        return stripos($d->type, 'buy') !== false;
+        $type = strtolower($d->type);
+        return str_contains($type, 'buy') && !str_contains($type, 'sell');
     })->count();
     
     $sellTrades = $allDeals->filter(function($d) {
-        return stripos($d->type, 'sell') !== false;
+        return str_contains(strtolower($d->type), 'sell');
     })->count();
     
     $buyProfit = $allDeals->filter(function($d) {
-        return stripos($d->type, 'buy') !== false;
+        $type = strtolower($d->type);
+        return str_contains($type, 'buy') && !str_contains($type, 'sell');
     })->sum('profit');
     
     $sellProfit = $allDeals->filter(function($d) {
-        return stripos($d->type, 'sell') !== false;
+        return str_contains(strtolower($d->type), 'sell');
     })->sum('profit');
     
     // Streaks
@@ -261,10 +265,28 @@ class TradesController extends Controller
     arsort($hours);
     $mostActiveHour = !empty($hours) ? sprintf('%02d:00', array_key_first($hours)) : 'N/A';
     
-    // Costs (from aggregated stats)
-    $totalCommission = $aggregateStats->total_commission ?? 0;
-    $totalSwap = $aggregateStats->total_swap ?? 0;
-    $totalFees = abs($totalCommission) + abs($aggregateStats->total_fee ?? 0);
+    // Costs - need to convert from native currency to USD (multi-account context)
+    $currencyService = app(\App\Services\CurrencyService::class);
+    $totalCommissionUSD = 0;
+    $totalSwapUSD = 0;
+    $totalFeesUSD = 0;
+    
+    foreach ($allDeals as $deal) {
+        if ($deal->tradingAccount) {
+            $accountCurrency = $deal->tradingAccount->account_currency ?? 'USD';
+            $totalCommissionUSD += $currencyService->convert($deal->commission, $accountCurrency, 'USD');
+            $totalSwapUSD += $currencyService->convert($deal->swap, $accountCurrency, 'USD');
+            $totalFeesUSD += $currencyService->convert($deal->fee, $accountCurrency, 'USD');
+        } else {
+            $totalCommissionUSD += $deal->commission;
+            $totalSwapUSD += $deal->swap;
+            $totalFeesUSD += $deal->fee;
+        }
+    }
+    
+    $totalCommission = $totalCommissionUSD;
+    $totalSwap = $totalSwapUSD;
+    $totalFees = abs($totalCommission) + abs($totalFeesUSD);
     
     $stats = [
         'total_trades' => $totalTrades,
