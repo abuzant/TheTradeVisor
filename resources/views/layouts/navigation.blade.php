@@ -32,16 +32,16 @@
                             </x-slot>
 
                             <x-slot name="content">
+                                <x-dropdown-link :href="route('performance')" :active="request()->routeIs('performance')">
+                                    {{ __('My Performance') }}
+                                </x-dropdown-link>
+
                                 <x-dropdown-link :href="route('analytics')" :active="request()->routeIs('analytics')">
                                     {{ __('Global Analytics') }}
                                 </x-dropdown-link>
 
                                 <x-dropdown-link :href="route('broker.analytics')" :active="request()->routeIs('broker.analytics')">
-                                    {{ __('Brokers') }}
-                                </x-dropdown-link>
-
-                                <x-dropdown-link :href="route('performance')" :active="request()->routeIs('performance')">
-                                    {{ __('Performance') }}
+                                    {{ __('Broker Analytics') }}
                                 </x-dropdown-link>
                             </x-slot>
                         </x-dropdown>
@@ -217,16 +217,16 @@
                     <div class="font-medium text-base text-gray-800">Statistics</div>
                 </div>
                 <div class="mt-3 space-y-1">
+                    <x-responsive-nav-link :href="route('performance')" :active="request()->routeIs('performance')">
+                        {{ __('My Performance') }}
+                    </x-responsive-nav-link>
+
                     <x-responsive-nav-link :href="route('analytics')" :active="request()->routeIs('analytics')">
                         {{ __('Global Analytics') }}
                     </x-responsive-nav-link>
 
                     <x-responsive-nav-link :href="route('broker.analytics')" :active="request()->routeIs('broker.analytics')">
-                        {{ __('Brokers') }}
-                    </x-responsive-nav-link>
-
-                    <x-responsive-nav-link :href="route('performance')" :active="request()->routeIs('performance')">
-                        {{ __('Performance') }}
+                        {{ __('Brokers Analytics') }}
                     </x-responsive-nav-link>
                 </div>
             </div>

@@ -164,7 +164,7 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                         @if($broker['costs'])
-                                            {{ $displayCurrency }} {{ number_format($broker['costs']['cost_per_trade'], 2) }}
+                                            USD {{ number_format($broker['costs']['cost_per_trade'], 2) }}
                                         @else
                                         <span class="text-gray-400">N/A</span>
                                         @endif
@@ -238,19 +238,19 @@
                             <div class="space-y-2 text-sm">
                                 <div class="flex justify-between">
                                     <span class="text-gray-600">Total Commission:</span>
-                                    <span class="font-semibold">{{ $displayCurrency }} {{ number_format($broker['costs']['total_commission'], 2) }}</span>
+                                    <span class="font-semibold">USD {{ number_format($broker['costs']['total_commission'], 2) }}</span>
                                 </div>
                                 <div class="flex justify-between">
                                     <span class="text-gray-600">Total Swap:</span>
-                                    <span class="font-semibold">{{ $displayCurrency }} {{ number_format($broker['costs']['total_swap'], 2) }}</span>
+                                    <span class="font-semibold">USD {{ number_format($broker['costs']['total_swap'], 2) }}</span>
                                 </div>
                                 <div class="flex justify-between">
                                     <span class="text-gray-600">Avg Cost/Trade:</span>
-                                    <span class="font-semibold text-orange-600">{{ $displayCurrency }} {{ number_format($broker['costs']['cost_per_trade'], 2) }}</span>
+                                    <span class="font-semibold text-orange-600">USD {{ number_format($broker['costs']['cost_per_trade'], 2) }}</span>
                                 </div>
                                 <div class="flex justify-between">
                                     <span class="text-gray-600">Avg Cost/Lot:</span>
-                                    <span class="font-semibold">{{ $displayCurrency }} {{ number_format($broker['costs']['avg_commission_per_lot'], 2) }}</span>
+                                    <span class="font-semibold">USD {{ number_format($broker['costs']['avg_commission_per_lot'], 2) }}</span>
                                 </div>
                             </div>
                         </div>
@@ -283,7 +283,7 @@
                                 <div class="flex justify-between">
                                     <span class="text-gray-600">Total Profit:</span>
                                     <span class="font-semibold {{ $broker['performance']['total_profit'] >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                        {{ $displayCurrency }} {{ number_format($broker['performance']['total_profit'], 2) }}
+                                        USD {{ number_format($broker['performance']['total_profit'], 2) }}
                                     </span>
                                 </div>
                             </div>

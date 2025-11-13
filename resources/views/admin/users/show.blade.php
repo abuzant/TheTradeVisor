@@ -63,14 +63,14 @@
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">
                         <div class="text-sm font-medium text-gray-500 mb-1">Total Balance</div>
-                        <div class="text-2xl font-bold text-gray-900">{{ $stats['display_currency'] }} {{ number_format($stats['total_balance'], 2) }}</div>
+                        <div class="text-2xl font-bold text-gray-900">USD {{ number_format($stats['total_balance'], 2) }}</div>
                     </div>
                 </div>
 
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">
                         <div class="text-sm font-medium text-gray-500 mb-1">Total Equity</div>
-                        <div class="text-2xl font-bold text-gray-900">{{ $stats['display_currency'] }} {{ number_format($stats['total_equity'], 2) }}</div>
+                        <div class="text-2xl font-bold text-gray-900">USD {{ number_format($stats['total_equity'], 2) }}</div>
                     </div>
                 </div>
 
