@@ -85,7 +85,7 @@ class TradesController extends Controller
         // For deals with entry='in', attach the corresponding open position to show floating profit
         foreach ($deals as $deal) {
             if ($deal->entry === 'in' && $deal->position_id) {
-                $deal->openPosition = \App\Models\Position::where('trading_account_id', $deal->trading_account_id)
+                $position = \App\Models\Position::where('trading_account_id', $deal->trading_account_id)
                     ->where(function($q) use ($deal) {
                         // MT5 uses position_identifier, MT4 uses ticket
                         if ($deal->platform_type === 'MT5') {
@@ -96,6 +96,23 @@ class TradesController extends Controller
                     })
                     ->where('is_open', true)
                     ->first();
+                
+                if ($position) {
+                    $deal->openPosition = $position;
+                    // Debug log
+                    \Log::info('Found open position', [
+                        'deal_id' => $deal->ticket,
+                        'position_id' => $deal->position_id,
+                        'position_profit' => $position->profit,
+                    ]);
+                } else {
+                    \Log::warning('Open position not found', [
+                        'deal_id' => $deal->ticket,
+                        'position_id' => $deal->position_id,
+                        'platform_type' => $deal->platform_type,
+                        'trading_account_id' => $deal->trading_account_id,
+                    ]);
+                }
             }
         }
 
