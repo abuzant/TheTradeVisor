@@ -16,10 +16,14 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Use custom TrustProxies with Cloudflare IPs
-        $middleware->use([
-            \App\Http\Middleware\TrustProxies::class,
-        ]);
+        // Trust all proxies (Cloudflare + Nginx)
+        $middleware->trustProxies(
+            at: '*',
+            headers: \Illuminate\Http\Request::HEADER_X_FORWARDED_FOR |
+                     \Illuminate\Http\Request::HEADER_X_FORWARDED_HOST |
+                     \Illuminate\Http\Request::HEADER_X_FORWARDED_PORT |
+                     \Illuminate\Http\Request::HEADER_X_FORWARDED_PROTO
+        );
         
         $middleware->alias([
             'api.key' => \App\Http\Middleware\ValidateApiKey::class,
