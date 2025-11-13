@@ -471,9 +471,37 @@ class PerformanceMetricsService
      */
     private function calculateAverageHoldTime($accountIds, $days)
     {
-        // This is complex - would need entry/exit time pairs
-        // For now, return a placeholder
-        return 'N/A';
+        // Get closed positions within the time period
+        $positions = \App\Models\Position::whereIn('trading_account_id', $accountIds)
+            ->where('is_open', false)
+            ->whereNotNull('open_time')
+            ->whereNotNull('update_time')
+            ->where('update_time', '>=', now()->subDays($days))
+            ->get();
+
+        if ($positions->isEmpty()) {
+            return null;
+        }
+
+        // Calculate hold time in hours for each position
+        $holdTimes = $positions->map(function($position) {
+            $openTime = \Carbon\Carbon::parse($position->open_time);
+            $closeTime = \Carbon\Carbon::parse($position->update_time);
+            return $openTime->diffInHours($closeTime);
+        });
+
+        $avgHoldTimeHours = $holdTimes->avg();
+
+        // Format as human readable
+        if ($avgHoldTimeHours < 1) {
+            return round($avgHoldTimeHours * 60) . ' min';
+        } elseif ($avgHoldTimeHours < 24) {
+            return round($avgHoldTimeHours, 1) . ' hrs';
+        } else {
+            $days = floor($avgHoldTimeHours / 24);
+            $hours = round($avgHoldTimeHours % 24);
+            return $days . 'd ' . $hours . 'h';
+        }
     }
 
     /**
