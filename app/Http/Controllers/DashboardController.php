@@ -25,9 +25,21 @@ class DashboardController extends Controller
         \Log::emergency('DASHBOARD ACCESS', [
             'user_id' => $user->id,
             'user_email' => $user->email,
+            'user_name' => $user->name,
             'session_id' => session()->getId(),
             'ip' => $request->ip(),
             'user_agent' => $request->userAgent(),
+            'auth_id' => auth()->id(),
+            'auth_email' => auth()->user()->email ?? 'NULL',
+        ]);
+        
+        // Get accounts and log them
+        $userAccounts = $user->tradingAccounts()->get();
+        \Log::emergency('USER ACCOUNTS', [
+            'user_id' => $user->id,
+            'account_count' => $userAccounts->count(),
+            'account_ids' => $userAccounts->pluck('id')->toArray(),
+            'brokers' => $userAccounts->pluck('broker_name')->toArray(),
         ]);
         
         $displayCurrency = $user->display_currency;
