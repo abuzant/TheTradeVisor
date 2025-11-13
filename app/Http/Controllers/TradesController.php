@@ -190,24 +190,21 @@ class TradesController extends Controller
     $grossProfit = $allDeals->where('profit', '>', 0)->sum('profit');
     $grossLoss = abs($allDeals->where('profit', '<', 0)->sum('profit'));
     
-    // Detect buy/sell trades - check for 'buy' in type (case-insensitive)
-    // But exclude 'sell' matches when checking for 'buy' (e.g., 'sell' contains no 'buy')
+    // Detect buy/sell trades using proper MT5 type code mapping
     $buyTrades = $allDeals->filter(function($d) {
-        $type = strtolower($d->type);
-        return str_contains($type, 'buy') && !str_contains($type, 'sell');
+        return $d->is_buy;
     })->count();
     
     $sellTrades = $allDeals->filter(function($d) {
-        return str_contains(strtolower($d->type), 'sell');
+        return $d->is_sell;
     })->count();
     
     $buyProfit = $allDeals->filter(function($d) {
-        $type = strtolower($d->type);
-        return str_contains($type, 'buy') && !str_contains($type, 'sell');
+        return $d->is_buy;
     })->sum('profit');
     
     $sellProfit = $allDeals->filter(function($d) {
-        return str_contains(strtolower($d->type), 'sell');
+        return $d->is_sell;
     })->sum('profit');
     
     // Streaks

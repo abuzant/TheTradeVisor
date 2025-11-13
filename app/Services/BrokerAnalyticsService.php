@@ -144,7 +144,7 @@ class BrokerAnalyticsService
         
         foreach ($allDeals as $deal) {
             $normalizedSymbol = $deal->normalized_symbol;
-            $isBuy = stripos($deal->type, 'buy') !== false;
+            $isBuy = $deal->is_buy;
             
             if (!isset($symbolData[$normalizedSymbol])) {
                 $symbolData[$normalizedSymbol] = [

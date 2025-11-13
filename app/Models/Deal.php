@@ -169,5 +169,78 @@ class Deal extends Model
         return number_format($this->price, $this->price_decimals);
     }
 
+    /**
+     * Get the correct deal type (MT5 sends numeric codes that need mapping)
+     * MT5 Deal Type Enum:
+     * 0 = DEAL_TYPE_BUY
+     * 1 = DEAL_TYPE_SELL  
+     * 2 = DEAL_TYPE_BALANCE
+     * 3 = DEAL_TYPE_CREDIT
+     * etc.
+     */
+    public function getDisplayTypeAttribute()
+    {
+        $type = $this->attributes['type'] ?? '';
+        
+        // If already a string (buy/sell), return as-is
+        if (is_string($type) && (stripos($type, 'buy') !== false || stripos($type, 'sell') !== false)) {
+            return strtoupper($type);
+        }
+        
+        // Map numeric MT5 codes to readable strings
+        $typeMap = [
+            '0' => 'BUY',
+            '1' => 'SELL',
+            '2' => 'BALANCE',
+            '3' => 'CREDIT',
+            '4' => 'CHARGE',
+            '5' => 'CORRECTION',
+            '6' => 'BONUS',
+            '7' => 'COMMISSION',
+        ];
+        
+        return $typeMap[$type] ?? strtoupper($type);
+    }
+
+    /**
+     * Check if this is a buy deal
+     */
+    public function getIsBuyAttribute()
+    {
+        $type = $this->attributes['type'] ?? '';
+        
+        // Check numeric code
+        if ($type === '0' || $type === 0) {
+            return true;
+        }
+        
+        // Check string
+        if (is_string($type) && stripos($type, 'buy') !== false && stripos($type, 'sell') === false) {
+            return true;
+        }
+        
+        return false;
+    }
+
+    /**
+     * Check if this is a sell deal
+     */
+    public function getIsSellAttribute()
+    {
+        $type = $this->attributes['type'] ?? '';
+        
+        // Check numeric code
+        if ($type === '1' || $type === 1) {
+            return true;
+        }
+        
+        // Check string
+        if (is_string($type) && stripos($type, 'sell') !== false) {
+            return true;
+        }
+        
+        return false;
+    }
+
 
 }
