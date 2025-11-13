@@ -22,7 +22,8 @@ class ExportController extends Controller
     public function exportTradesCsv(Request $request)
     {
         $user = $request->user();
-        $displayCurrency = $user->display_currency ?? 'USD';
+        // Multi-account context: Always export in USD
+        $displayCurrency = 'USD';
         
         $query = Deal::whereHas('tradingAccount', function($q) use ($user) {
             $q->where('user_id', $user->id);
@@ -80,7 +81,8 @@ class ExportController extends Controller
     public function exportTradesPdf(Request $request)
     {
         $user = $request->user();
-        $displayCurrency = $user->display_currency ?? 'USD';
+        // Multi-account context: Always export in USD
+        $displayCurrency = 'USD';
         
         $query = Deal::whereHas('tradingAccount', function($q) use ($user) {
             $q->where('user_id', $user->id);
@@ -132,7 +134,8 @@ class ExportController extends Controller
     public function exportSymbolCsv(Request $request, $symbol)
     {
         $user = $request->user();
-        $displayCurrency = $user->display_currency ?? 'USD';
+        // Multi-account context: Always export in USD
+        $displayCurrency = 'USD';
         
         $query = Deal::whereHas('tradingAccount', function($q) use ($user) {
             $q->where('user_id', $user->id);
@@ -178,7 +181,8 @@ class ExportController extends Controller
     public function exportDashboardCsv(Request $request)
     {
         $user = $request->user();
-        $displayCurrency = $user->display_currency ?? 'USD';
+        // Multi-account context: Always export in USD
+        $displayCurrency = 'USD';
         
         // SAFETY: Limit accounts and eager load with constraints
         $accounts = $user->tradingAccounts()

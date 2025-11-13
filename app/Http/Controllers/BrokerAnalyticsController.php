@@ -25,14 +25,14 @@ class BrokerAnalyticsController extends Controller
     {
         $user = $request->user();
         $days = $request->get('days', 30);
-        $displayCurrency = $user->display_currency ?? 'USD';
+        // Multi-account context: Always use USD for broker comparison
+        $displayCurrency = 'USD';
 
         $analytics = $this->brokerService->getBrokerComparison($days, $displayCurrency);
 
         return view('broker-analytics.index', [
             'analytics' => $analytics,
             'days' => $days,
-            'displayCurrency' => $displayCurrency,
         ]);
     }
 }

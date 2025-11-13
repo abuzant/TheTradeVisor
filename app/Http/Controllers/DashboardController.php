@@ -23,14 +23,15 @@ class DashboardController extends Controller
         
         // Removed emergency logging - user bleeding issue resolved
         
-        $displayCurrency = $user->display_currency;
+        // Multi-account context: Always use USD
+        $displayCurrency = 'USD';
         $sortBy = $request->get('sort_by', 'last_sync_at');
         $sortDirection = $request->get('sort_direction', 'desc');
 
         // Cache key: user + session + IP for security (prevents cache poisoning)
         $sessionId = session()->getId();
         $userIp = $request->ip();
-        $cacheKey = "dashboard.user.{$user->id}.{$sessionId}.{$userIp}.{$displayCurrency}.{$sortBy}.{$sortDirection}";
+        $cacheKey = "dashboard.user.{$user->id}.{$sessionId}.{$userIp}.usd.{$sortBy}.{$sortDirection}";
 
         // Cache for 5 minutes (balance changes frequently)
         $dashboardData = Cache::remember($cacheKey, 300, function() use ($user, $displayCurrency, $request, $sortBy, $sortDirection) {

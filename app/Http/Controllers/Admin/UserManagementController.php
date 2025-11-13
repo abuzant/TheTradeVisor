@@ -71,8 +71,8 @@ class UserManagementController extends Controller
             $query->orderBy('last_sync_at', 'desc');
         }]);
 
-        // Get user statistics
-        $displayCurrency = $user->display_currency ?? 'USD';
+        // Get user statistics (multi-account context: Always use USD)
+        $displayCurrency = 'USD';
 
         $stats = [
             'total_accounts' => $user->tradingAccounts()->count(),
@@ -85,7 +85,6 @@ class UserManagementController extends Controller
             }),
             'member_since' => $user->created_at->diffForHumans(),
             'last_login' => $user->last_login_at ? $user->last_login_at->diffForHumans() : 'Never',
-            'display_currency' => $displayCurrency,
         ];
 
         return view('admin.users.show', compact('user', 'stats'));

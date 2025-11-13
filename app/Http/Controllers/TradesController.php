@@ -59,10 +59,22 @@ class TradesController extends Controller
         $sortBy = $request->get('sort_by', 'time');
         $sortDirection = $request->get('sort_direction', 'desc');
         
-        // Get display currency
-        $display_currency = $user->display_currency ?? 'USD';
+        // Multi-account context: Always use USD, convert all deals
+        $currencyService = app(\App\Services\CurrencyService::class);
+        foreach ($deals as $deal) {
+            if ($deal->tradingAccount) {
+                $accountCurrency = $deal->tradingAccount->account_currency ?? 'USD';
+                $deal->profit_usd = $currencyService->convert($deal->profit, $accountCurrency, 'USD');
+                $deal->commission_usd = $currencyService->convert($deal->commission, $accountCurrency, 'USD');
+                $deal->swap_usd = $currencyService->convert($deal->swap, $accountCurrency, 'USD');
+            } else {
+                $deal->profit_usd = $deal->profit;
+                $deal->commission_usd = $deal->commission;
+                $deal->swap_usd = $deal->swap;
+            }
+        }
 
-        return view('trades.index', compact('deals', 'sortBy', 'sortDirection', 'display_currency'));
+        return view('trades.index', compact('deals', 'sortBy', 'sortDirection'));
     }
 
 
