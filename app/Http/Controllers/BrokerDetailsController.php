@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\TradingAccount;
 use App\Models\Deal;
 use App\Models\Position;
-use App\Services\CurrencyConversionService;
+use App\Services\CurrencyService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 
@@ -14,7 +14,7 @@ class BrokerDetailsController extends Controller
 {
     protected $currencyService;
 
-    public function __construct(CurrencyConversionService $currencyService)
+    public function __construct(CurrencyService $currencyService)
     {
         $this->currencyService = $currencyService;
     }
