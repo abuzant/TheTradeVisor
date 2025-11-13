@@ -246,7 +246,9 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             @if($deal->tradingAccount)
-                                                <x-broker-name :broker="$deal->tradingAccount->broker_name" class="text-indigo-600 hover:text-indigo-900" />
+                                                <span class="text-indigo-600 hover:text-indigo-900" title="{{ $deal->tradingAccount->broker_name }}">
+                                                    {{ explode(' ', $deal->tradingAccount->broker_name)[0] }}
+                                                </span>
                                             @else
                                                 N/A
                                             @endif
@@ -282,7 +284,11 @@
                                             {{ $deal->formatted_price }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium {{ $deal->profit >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                            ${{ number_format($deal->profit, 2) }}
+                                            @if($deal->tradingAccount)
+                                                {{ $deal->tradingAccount->account_currency }} {{ number_format($deal->profit, 2) }}
+                                            @else
+                                                ${{ number_format($deal->profit, 2) }}
+                                            @endif
                                         </td>
                                     </tr>
                                 @empty

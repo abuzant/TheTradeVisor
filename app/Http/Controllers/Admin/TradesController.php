@@ -23,7 +23,7 @@ class TradesController extends Controller
         $type      = $request->get('type', 'all');
         $dateFrom  = $request->get('date_from');
         $dateTo    = $request->get('date_to');
-        $perPage   = (int) $request->get('per_page', 50);
+        $perPage   = (int) $request->get('per_page', 25);
 
         $sortableColumns = [
             'time','symbol','type','volume','price','profit','commission','swap',
