@@ -29,6 +29,14 @@ Route::post('/contact', [App\Http\Controllers\PublicController::class, 'contactS
 Route::get('/docs', [App\Http\Controllers\PublicController::class, 'docs'])->name('docs');
 Route::get('/api-docs', [App\Http\Controllers\PublicController::class, 'apiDocs'])->name('api.docs');
 
+// Legal Pages
+Route::get('/terms', function () {
+    return view('legal.terms');
+})->name('terms');
+Route::get('/privacy', function () {
+    return view('legal.privacy');
+})->name('privacy');
+
 // Public Broker Analytics (SEO-friendly, aggregated data from all users)
 Route::get('/broker/{broker}', [App\Http\Controllers\BrokerDetailsController::class, 'show'])
     ->name('broker-details');
