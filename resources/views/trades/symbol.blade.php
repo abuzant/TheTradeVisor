@@ -58,8 +58,8 @@
                 <!-- Total P&L -->
                 <div style="background: linear-gradient(135deg, {{ $stats['total_profit'] >= 0 ? '#10B981, #059669' : '#EF4444, #DC2626' }});" class="overflow-hidden shadow-lg rounded-lg p-6 text-white">
                     <div class="text-xs font-semibold uppercase tracking-wide opacity-90">Total P&L</div>
-                    <div class="text-4xl font-extrabold mt-2">{{ $display_currency }} {{ number_format($stats['total_profit'], 2) }}</div>
-                    <div class="text-xs mt-2 opacity-90">Avg: {{ $display_currency }} {{ number_format($stats['avg_profit'], 2) }}/trade</div>
+                    <div class="text-4xl font-extrabold mt-2">USD {{ number_format($stats['total_profit'], 2) }}</div>
+                    <div class="text-xs mt-2 opacity-90">Avg: USD {{ number_format($stats['avg_profit'], 2) }}/trade</div>
                 </div>
 
                 <!-- Profit Factor -->
@@ -91,11 +91,11 @@
                     <div class="bg-gray-50 px-6 py-4 mt-4 rounded-b-lg border-t border-gray-200">
                         <div class="text-sm mb-2">
                             <span class="text-gray-600">Avg Win:</span>
-                            <span class="font-medium text-green-600 ml-2">{{ $display_currency }} {{ number_format($stats['avg_win'], 2) }}</span>
+                            <span class="font-medium text-green-600 ml-2">USD {{ number_format($stats['avg_win'], 2) }}</span>
                         </div>
                         <div class="text-sm">
                             <span class="text-gray-600">Avg Loss:</span>
-                            <span class="font-medium text-red-600 ml-2">{{ $display_currency }} {{ number_format($stats['avg_loss'], 2) }}</span>
+                            <span class="font-medium text-red-600 ml-2">USD {{ number_format($stats['avg_loss'], 2) }}</span>
                         </div>
                     </div>
                 </div>
@@ -112,7 +112,7 @@
                             <div class="ml-5 w-0 flex-1">
                                 <dl>
                                     <dt class="text-sm font-medium text-gray-500 truncate">Best Trade</dt>
-                                    <dd class="text-2xl font-bold text-green-600">{{ $display_currency }} {{ number_format($stats['best_trade'], 2) }}</dd>
+                                    <dd class="text-2xl font-bold text-green-600">USD {{ number_format($stats['best_trade'], 2) }}</dd>
                                 </dl>
                             </div>
                         </div>
@@ -120,11 +120,11 @@
                     <div class="bg-gray-50 px-6 py-4 mt-4 rounded-b-lg border-t border-gray-200">
                         <div class="text-sm mb-2">
                             <span class="text-gray-600">Worst Trade:</span>
-                            <span class="font-medium text-red-600 ml-2">{{ $display_currency }} {{ number_format($stats['worst_trade'], 2) }}</span>
+                            <span class="font-medium text-red-600 ml-2">USD {{ number_format($stats['worst_trade'], 2) }}</span>
                         </div>
                         <div class="text-sm">
                             <span class="text-gray-600">Range:</span>
-                            <span class="font-medium text-gray-900 ml-2">{{ $display_currency }} {{ number_format($stats['best_trade'] - $stats['worst_trade'], 2) }}</span>
+                            <span class="font-medium text-gray-900 ml-2">USD {{ number_format($stats['best_trade'] - $stats['worst_trade'], 2) }}</span>
                         </div>
                     </div>
                 </div>
@@ -257,24 +257,24 @@
                     <div class="space-y-3">
                         <div class="flex justify-between items-center py-2 border-b">
                             <span class="text-sm text-gray-600">Commission</span>
-                            <span class="text-lg font-bold text-red-600">{{ $display_currency }} {{ number_format(abs($stats['total_commission']), 2) }}</span>
+                            <span class="text-lg font-bold text-red-600">USD {{ number_format(abs($stats['total_commission']), 2) }}</span>
                         </div>
                         <div class="flex justify-between items-center py-2 border-b">
                             <span class="text-sm text-gray-600">Swap</span>
-                            <span class="text-lg font-bold text-{{ $stats['total_swap'] >= 0 ? 'green' : 'red' }}-600">{{ $display_currency }} {{ number_format($stats['total_swap'], 2) }}</span>
+                            <span class="text-lg font-bold text-{{ $stats['total_swap'] >= 0 ? 'green' : 'red' }}-600">USD {{ number_format($stats['total_swap'], 2) }}</span>
                         </div>
                         <div class="flex justify-between items-center py-2 border-b">
                             <span class="text-sm text-gray-600">Total Fees</span>
-                            <span class="text-lg font-bold text-red-600">{{ $display_currency }} {{ number_format($stats['total_fees'], 2) }}</span>
+                            <span class="text-lg font-bold text-red-600">USD {{ number_format($stats['total_fees'], 2) }}</span>
                         </div>
                         <div class="flex justify-between items-center py-2 bg-gray-50 -mx-6 px-6 mt-3">
                             <span class="text-sm font-medium text-gray-700">Net After Costs</span>
                             <span class="text-xl font-bold text-{{ ($stats['total_profit'] - $stats['total_fees']) >= 0 ? 'green' : 'red' }}-600">
-                                {{ $display_currency }} {{ number_format($stats['total_profit'] - $stats['total_fees'], 2) }}
+                                USD {{ number_format($stats['total_profit'] - $stats['total_fees'], 2) }}
                             </span>
                         </div>
                         <div class="text-xs text-gray-500 text-center mt-2">
-                            Avg cost per trade: {{ $display_currency }} {{ number_format($stats['avg_cost_per_trade'], 2) }}
+                            Avg cost per trade: USD {{ number_format($stats['avg_cost_per_trade'], 2) }}
                         </div>
                     </div>
                 </div>
