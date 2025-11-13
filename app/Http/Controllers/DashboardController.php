@@ -118,7 +118,7 @@ class DashboardController extends Controller
                 'totals' => $totals,
                 'accountsChartData' => $accountsChartData,
             ];
-        });
+        })(); // Execute immediately, no caching
 
         // Recent positions (closed) - CACHING DISABLED FOR DEBUG
         // $recentPositions = Cache::remember("dashboard.positions.{$user->id}", 60, function() use ($user) {
