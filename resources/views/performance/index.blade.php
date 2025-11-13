@@ -721,6 +721,22 @@
         const platformPerformanceCtx = document.getElementById('platformPerformanceChart');
         if (platformPerformanceCtx) {
             const platformData = @json($metrics['platform_performance']);
+            
+            // Normalize function: scales value to 0-100 based on min/max in dataset
+            const normalizePlatform = (value, values) => {
+                const min = Math.min(...values);
+                const max = Math.max(...values);
+                if (max === min) return 50; // If all same, put in middle
+                return ((value - min) / (max - min)) * 100;
+            };
+            
+            // Extract all values for each metric
+            const allWinRates = platformData.map(p => p.win_rate);
+            const allProfitFactors = platformData.map(p => p.profit_factor);
+            const allRiskRewards = platformData.map(p => p.risk_reward_ratio);
+            const allTotalProfits = platformData.map(p => p.total_profit);
+            const allAvgTrades = platformData.map(p => p.avg_profit);
+            
             new Chart(platformPerformanceCtx, {
                 type: 'radar',
                 data: {
@@ -728,11 +744,11 @@
                     datasets: platformData.map((platform, index) => ({
                         label: `${platform.platform_type} - ${platform.account_mode}`,
                         data: [
-                            platform.win_rate,
-                            Math.min(platform.profit_factor * 10, 100), // Scale profit factor
-                            Math.min(platform.risk_reward_ratio * 20, 100), // Scale risk/reward
-                            Math.min(Math.abs(platform.total_profit) / 100, 100), // Scale profit
-                            Math.min(Math.abs(platform.avg_profit) * 10, 100) // Scale avg trade
+                            normalizePlatform(platform.win_rate, allWinRates),
+                            normalizePlatform(platform.profit_factor, allProfitFactors),
+                            normalizePlatform(platform.risk_reward_ratio, allRiskRewards),
+                            normalizePlatform(platform.total_profit, allTotalProfits),
+                            normalizePlatform(platform.avg_profit, allAvgTrades)
                         ],
                         borderColor: index === 0 ? 'rgb(59, 130, 246)' : 'rgb(34, 197, 94)',
                         backgroundColor: index === 0 ? 'rgba(59, 130, 246, 0.2)' : 'rgba(34, 197, 94, 0.2)',
@@ -759,8 +775,15 @@
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
-                                    const labels = ['Win Rate (%)', 'Profit Factor (×10)', 'Risk/Reward (×20)', 'Profit (÷100)', 'Avg Trade (×10)'];
-                                    return `${context.dataset.label}: ${context.raw} (${labels[context.dataIndex]})`;
+                                    const platform = platformData[context.datasetIndex];
+                                    const actualValues = [
+                                        platform.win_rate + '%',
+                                        platform.profit_factor.toFixed(2),
+                                        platform.risk_reward_ratio.toFixed(2),
+                                        'USD ' + platform.total_profit.toFixed(2),
+                                        'USD ' + platform.avg_profit.toFixed(2)
+                                    ];
+                                    return `${context.dataset.label}: ${actualValues[context.dataIndex]} (normalized: ${context.raw.toFixed(1)})`;
                                 }
                             }
                         }

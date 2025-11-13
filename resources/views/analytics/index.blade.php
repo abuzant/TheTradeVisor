@@ -697,6 +697,22 @@
             const sessionCtx = document.getElementById('sessionComparisonChart');
             if (sessionCtx) {
                 const sessionData = {!! json_encode($analytics['trading_sessions']) !!};
+                
+                // Normalize function: scales value to 0-100 based on min/max in dataset
+                const normalize = (value, values) => {
+                    const min = Math.min(...values);
+                    const max = Math.max(...values);
+                    if (max === min) return 50; // If all same, put in middle
+                    return ((value - min) / (max - min)) * 100;
+                };
+                
+                // Extract all values for each metric
+                const allTrades = sessionData.map(s => s.total_trades);
+                const allProfits = sessionData.map(s => s.total_profit);
+                const allWinRates = sessionData.map(s => s.win_rate);
+                const allVolumes = sessionData.map(s => s.total_volume);
+                const allAvgProfits = sessionData.map(s => s.avg_profit);
+                
                 new Chart(sessionCtx.getContext('2d'), {
                     type: 'radar',
                     data: {
@@ -704,11 +720,11 @@
                         datasets: sessionData.map((session, index) => ({
                             label: session.session_name,
                             data: [
-                                session.total_trades / 10, // Scale down for radar chart
-                                Math.abs(session.total_profit) / 100, // Scale profit
-                                session.win_rate,
-                                session.total_volume / 100, // Scale volume
-                                Math.abs(session.avg_profit) * 10 // Scale avg profit
+                                normalize(session.total_trades, allTrades),
+                                normalize(session.total_profit, allProfits),
+                                normalize(session.win_rate, allWinRates),
+                                normalize(session.total_volume, allVolumes),
+                                normalize(session.avg_profit, allAvgProfits)
                             ],
                             backgroundColor: `rgba(${index === 0 ? '99, 102, 241' : (index === 1 ? '16, 185, 129' : (index === 2 ? '245, 158, 11' : '239, 68, 68'))}, 0.2)`,
                             borderColor: `rgba(${index === 0 ? '99, 102, 241' : (index === 1 ? '16, 185, 129' : (index === 2 ? '245, 158, 11' : '239, 68, 68'))}, 1)`,
