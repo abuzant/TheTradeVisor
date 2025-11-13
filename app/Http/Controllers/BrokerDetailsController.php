@@ -6,99 +6,307 @@ use Illuminate\Http\Request;
 use App\Models\TradingAccount;
 use App\Models\Deal;
 use App\Models\Position;
+use App\Services\CurrencyConversionService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 
 class BrokerDetailsController extends Controller
 {
+    protected $currencyService;
+
+    public function __construct(CurrencyConversionService $currencyService)
+    {
+        $this->currencyService = $currencyService;
+    }
+
     /**
-     * Show broker details page
+     * Show public broker analytics page
+     * Aggregated data from all users (last 180 days)
+     * Cached for 4 hours for performance
      */
     public function show(Request $request, $broker)
     {
-        $user = $request->user();
         $broker = urldecode($broker);
-        $days = $request->get('days', 30);
+        $days = 180; // Fixed to 180 days for public view
 
-        // Get user's accounts with this broker
-        $userAccounts = $user->tradingAccounts()
-            ->where('broker_name', $broker)
-            ->get();
-
-        if ($userAccounts->isEmpty()) {
-            abort(404, 'Broker not found in your accounts');
+        // Check if broker exists
+        $brokerExists = TradingAccount::where('broker_name', $broker)->exists();
+        if (!$brokerExists) {
+            abort(404, 'Broker not found');
         }
 
-        $accountIds = $userAccounts->pluck('id');
+        // Cache key for this broker
+        $cacheKey = "broker.public.{$broker}.180d";
+        
+        // Get cached data or compute (4 hour cache)
+        $data = Cache::remember($cacheKey, 14400, function() use ($broker, $days) {
+            // Get all account IDs for this broker
+            $accountIds = TradingAccount::where('broker_name', $broker)->pluck('id');
+            
+            if ($accountIds->isEmpty()) {
+                return null;
+            }
 
-        // Broker statistics (no aggregation - will show per account)
-        $stats = [
-            'total_accounts' => $userAccounts->count(),
-            'active_accounts' => $userAccounts->where('is_active', true)->count(),
-            'open_positions' => Position::whereIn('trading_account_id', $accountIds)
-                ->where('is_open', true)
-                ->count(),
-        ];
+            return [
+                'overview' => $this->getOverviewStats($accountIds, $days),
+                'top_countries' => $this->getTopCountries($accountIds, $days),
+                'most_profitable_pairs' => $this->getMostProfitablePairs($accountIds, $days),
+                'biggest_loss_pairs' => $this->getBiggestLossPairs($accountIds, $days),
+                'daily_profit_trend' => $this->getDailyProfitTrend($accountIds, $days),
+                'top_symbols' => $this->getTopSymbols($accountIds, $days),
+                'symbol_performance' => $this->getSymbolPerformance($accountIds, $days),
+                'avg_hold_time' => $this->getAverageHoldTime($accountIds, $days),
+            ];
+        });
 
-        // Trading activity (last N days)
-        $tradingActivity = Deal::whereIn('trading_account_id', $accountIds)
+        if (!$data) {
+            abort(404, 'No data available for this broker');
+        }
+
+        return view('broker-details.show', array_merge($data, [
+            'broker' => $broker,
+            'days' => $days,
+        ]));
+    }
+
+    /**
+     * Overview statistics
+     */
+    private function getOverviewStats($accountIds, $days)
+    {
+        $stats = Deal::whereIn('trading_account_id', $accountIds)
             ->where('time', '>=', now()->subDays($days))
+            ->where('entry', 'out')
             ->select(
                 DB::raw('COUNT(*) as total_trades'),
-                DB::raw('SUM(profit) as total_profit'),
+                DB::raw('SUM(profit) as total_profit_native'),
                 DB::raw('SUM(volume) as total_volume'),
                 DB::raw('SUM(commission) as total_commission'),
                 DB::raw('SUM(swap) as total_swap'),
-                DB::raw('SUM(CASE WHEN profit > 0 THEN 1 ELSE 0 END) as winning_trades')
+                DB::raw('SUM(CASE WHEN profit > 0 THEN 1 ELSE 0 END) as winning_trades'),
+                DB::raw('AVG(volume) as avg_trade_size'),
+                DB::raw('COUNT(DISTINCT trading_account_id) as active_traders')
             )
             ->first();
 
-        $stats['total_trades'] = $tradingActivity->total_trades ?? 0;
-        $stats['trading_profit'] = $tradingActivity->total_profit ?? 0;
-        $stats['total_volume'] = $tradingActivity->total_volume ?? 0;
-        $stats['total_commission'] = $tradingActivity->total_commission ?? 0;
-        $stats['total_swap'] = $tradingActivity->total_swap ?? 0;
-        $stats['win_rate'] = $stats['total_trades'] > 0
-            ? round(($tradingActivity->winning_trades / $stats['total_trades']) * 100, 1)
-            : 0;
+        // Convert to USD for display
+        $totalProfitUSD = 0;
+        $accounts = TradingAccount::whereIn('id', $accountIds)->get();
+        foreach ($accounts as $account) {
+            $accountProfit = Deal::where('trading_account_id', $account->id)
+                ->where('time', '>=', now()->subDays($days))
+                ->where('entry', 'out')
+                ->sum('profit');
+            $totalProfitUSD += $this->currencyService->convert(
+                $accountProfit,
+                $account->account_currency ?? 'USD',
+                'USD'
+            );
+        }
 
-        // Most traded symbols
-        $topSymbols = Deal::whereIn('trading_account_id', $accountIds)
-            ->where('time', '>=', now()->subDays($days))
-            ->whereNotNull('symbol')
-            ->where('symbol', '!=', '')
-            ->select('symbol',
+        return [
+            'total_trades' => $stats->total_trades ?? 0,
+            'total_profit' => $totalProfitUSD,
+            'total_volume' => $stats->total_volume ?? 0,
+            'total_commission' => $stats->total_commission ?? 0,
+            'total_swap' => $stats->total_swap ?? 0,
+            'win_rate' => $stats->total_trades > 0 ? round(($stats->winning_trades / $stats->total_trades) * 100, 1) : 0,
+            'avg_trade_size' => $stats->avg_trade_size ?? 0,
+            'active_traders' => $stats->active_traders ?? 0,
+        ];
+    }
+
+    /**
+     * Top trading countries
+     */
+    private function getTopCountries($accountIds, $days)
+    {
+        // Get deals with country info from trading accounts
+        return Deal::whereIn('trading_account_id', $accountIds)
+            ->join('trading_accounts', 'deals.trading_account_id', '=', 'trading_accounts.id')
+            ->where('deals.time', '>=', now()->subDays($days))
+            ->where('deals.entry', 'out')
+            ->whereNotNull('trading_accounts.country')
+            ->select(
+                'trading_accounts.country',
                 DB::raw('COUNT(*) as trades'),
-                DB::raw('SUM(profit) as profit'),
-                DB::raw('SUM(volume) as volume'))
+                DB::raw('SUM(deals.profit) as profit'),
+                DB::raw('SUM(deals.volume) as volume')
+            )
+            ->groupBy('trading_accounts.country')
+            ->orderByDesc('trades')
+            ->limit(10)
+            ->get();
+    }
+
+    /**
+     * Most profitable pairs
+     */
+    private function getMostProfitablePairs($accountIds, $days)
+    {
+        return Deal::whereIn('trading_account_id', $accountIds)
+            ->where('time', '>=', now()->subDays($days))
+            ->where('entry', 'out')
+            ->whereNotNull('symbol')
+            ->select(
+                'symbol',
+                DB::raw('SUM(profit) as total_profit'),
+                DB::raw('COUNT(*) as trades'),
+                DB::raw('AVG(volume) as avg_volume')
+            )
             ->groupBy('symbol')
-            ->havingRaw('COUNT(*) >= ?', [3])
-            ->orderByRaw('COUNT(*) DESC')
+            ->havingRaw('COUNT(*) >= 5')
+            ->orderByDesc('total_profit')
             ->limit(10)
             ->get()
             ->map(function($item) {
                 $item->normalized_symbol = \App\Models\SymbolMapping::normalize($item->symbol);
                 return $item;
             });
+    }
 
-        // Daily profit trend
-        $dailyProfitTrend = Deal::whereIn('trading_account_id', $accountIds)
+    /**
+     * Biggest loss pairs
+     */
+    private function getBiggestLossPairs($accountIds, $days)
+    {
+        return Deal::whereIn('trading_account_id', $accountIds)
             ->where('time', '>=', now()->subDays($days))
-            ->select(DB::raw('DATE(time) as date'), DB::raw('SUM(profit) as profit'))
+            ->where('entry', 'out')
+            ->whereNotNull('symbol')
+            ->select(
+                'symbol',
+                DB::raw('SUM(profit) as total_profit'),
+                DB::raw('COUNT(*) as trades'),
+                DB::raw('AVG(volume) as avg_volume')
+            )
+            ->groupBy('symbol')
+            ->havingRaw('COUNT(*) >= 5')
+            ->orderBy('total_profit', 'asc')
+            ->limit(10)
+            ->get()
+            ->map(function($item) {
+                $item->normalized_symbol = \App\Models\SymbolMapping::normalize($item->symbol);
+                return $item;
+            });
+    }
+
+    /**
+     * Daily profit trend
+     */
+    private function getDailyProfitTrend($accountIds, $days)
+    {
+        return Deal::whereIn('trading_account_id', $accountIds)
+            ->where('time', '>=', now()->subDays($days))
+            ->where('entry', 'out')
+            ->select(
+                DB::raw('DATE(time) as date'),
+                DB::raw('SUM(profit) as profit'),
+                DB::raw('COUNT(*) as trades')
+            )
             ->groupBy('date')
             ->orderBy('date')
             ->get();
+    }
 
-        // Account servers
-        $servers = $userAccounts->pluck('broker_server')->unique()->filter()->values();
+    /**
+     * Top traded symbols
+     */
+    private function getTopSymbols($accountIds, $days)
+    {
+        return Deal::whereIn('trading_account_id', $accountIds)
+            ->where('time', '>=', now()->subDays($days))
+            ->where('entry', 'out')
+            ->whereNotNull('symbol')
+            ->select(
+                'symbol',
+                DB::raw('COUNT(*) as trades'),
+                DB::raw('SUM(volume) as total_volume'),
+                DB::raw('AVG(volume) as avg_lot_size')
+            )
+            ->groupBy('symbol')
+            ->orderByDesc('trades')
+            ->limit(25)
+            ->get()
+            ->map(function($item) {
+                $item->normalized_symbol = \App\Models\SymbolMapping::normalize($item->symbol);
+                return $item;
+            });
+    }
 
-        return view('broker-details.show', compact(
-            'broker',
-            'stats',
-            'topSymbols',
-            'dailyProfitTrend',
-            'userAccounts',
-            'servers',
-            'days'
-        ));
+    /**
+     * Symbol performance (for top 25 symbols)
+     */
+    private function getSymbolPerformance($accountIds, $days)
+    {
+        // Get top 25 symbols first
+        $topSymbols = Deal::whereIn('trading_account_id', $accountIds)
+            ->where('time', '>=', now()->subDays($days))
+            ->where('entry', 'out')
+            ->select('symbol', DB::raw('COUNT(*) as trades'))
+            ->groupBy('symbol')
+            ->orderByDesc('trades')
+            ->limit(25)
+            ->pluck('symbol');
+
+        return Deal::whereIn('trading_account_id', $accountIds)
+            ->where('time', '>=', now()->subDays($days))
+            ->where('entry', 'out')
+            ->whereIn('symbol', $topSymbols)
+            ->select(
+                'symbol',
+                DB::raw('SUM(profit) as total_profit'),
+                DB::raw('SUM(CASE WHEN profit > 0 THEN 1 ELSE 0 END) as winning_trades'),
+                DB::raw('COUNT(*) as total_trades'),
+                DB::raw('AVG(volume) as avg_lot_size')
+            )
+            ->groupBy('symbol')
+            ->get()
+            ->map(function($item) {
+                $item->normalized_symbol = \App\Models\SymbolMapping::normalize($item->symbol);
+                $item->win_rate = $item->total_trades > 0 ? round(($item->winning_trades / $item->total_trades) * 100, 1) : 0;
+                return $item;
+            });
+    }
+
+    /**
+     * Average hold time
+     */
+    private function getAverageHoldTime($accountIds, $days)
+    {
+        $deals = Deal::whereIn('trading_account_id', $accountIds)
+            ->where('time', '>=', now()->subDays($days))
+            ->whereIn('entry', ['in', 'out'])
+            ->orderBy('time', 'asc')
+            ->get(['position_id', 'entry', 'time']);
+
+        $grouped = $deals->groupBy('position_id');
+        $holdTimes = [];
+
+        foreach ($grouped as $positionDeals) {
+            $inDeal = $positionDeals->where('entry', 'in')->first();
+            $outDeal = $positionDeals->where('entry', 'out')->first();
+            
+            if ($inDeal && $outDeal) {
+                $hours = \Carbon\Carbon::parse($inDeal->time)->diffInHours(\Carbon\Carbon::parse($outDeal->time));
+                $holdTimes[] = $hours;
+            }
+        }
+
+        if (empty($holdTimes)) {
+            return 'N/A';
+        }
+
+        $avgHours = array_sum($holdTimes) / count($holdTimes);
+
+        if ($avgHours < 1) {
+            return round($avgHours * 60) . ' min';
+        } elseif ($avgHours < 24) {
+            return round($avgHours, 1) . ' hrs';
+        } else {
+            $days = floor($avgHours / 24);
+            $hours = round($avgHours % 24);
+            return $days . 'd ' . $hours . 'h';
+        }
     }
 }

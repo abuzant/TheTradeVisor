@@ -29,6 +29,10 @@ Route::post('/contact', [App\Http\Controllers\PublicController::class, 'contactS
 Route::get('/docs', [App\Http\Controllers\PublicController::class, 'docs'])->name('docs');
 Route::get('/api-docs', [App\Http\Controllers\PublicController::class, 'apiDocs'])->name('api.docs');
 
+// Public Broker Analytics (SEO-friendly, aggregated data from all users)
+Route::get('/broker/{broker}', [App\Http\Controllers\BrokerDetailsController::class, 'show'])
+    ->name('broker-details');
+
 // Logged-in Users
 Route::middleware(['auth', 'verified'])->group(function () {
 
@@ -43,8 +47,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware(['rate.limit.broker', 'circuit.breaker:analytics'])->group(function () {
         Route::get('/broker-analytics', [App\Http\Controllers\BrokerAnalyticsController::class, 'index'])
             ->name('broker.analytics');
-        Route::get('/broker/{broker}', [App\Http\Controllers\BrokerDetailsController::class, 'show'])
-            ->name('broker-details');
     });
 
     // Global Analytics (with rate limiting and circuit breaker)
