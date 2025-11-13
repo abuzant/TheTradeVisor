@@ -161,6 +161,20 @@ class DashboardController extends Controller
             });
         });
 
+        // Log what we're passing to the view
+        \Log::emergency('PASSING TO VIEW', [
+            'user_id' => $user->id,
+            'accounts_count' => $dashboardData['accounts']->count(),
+            'accounts_data' => $dashboardData['accounts']->map(function($acc) {
+                return [
+                    'id' => $acc->id,
+                    'broker' => $acc->broker_name,
+                    'account_number' => $acc->account_number,
+                    'user_id' => $acc->user_id,
+                ];
+            })->toArray(),
+        ]);
+        
         return view('dashboard', array_merge($dashboardData, [
             'user' => $user,
             'recentPositions' => $recentPositions,
