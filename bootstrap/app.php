@@ -16,6 +16,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // Use custom TrustProxies with Cloudflare IPs
+        $middleware->use([
+            \App\Http\Middleware\TrustProxies::class,
+        ]);
+        
         $middleware->alias([
             'api.key' => \App\Http\Middleware\ValidateApiKey::class,
             'admin' => \App\Http\Middleware\IsAdmin::class,
