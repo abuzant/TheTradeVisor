@@ -82,17 +82,31 @@ class TradesController extends Controller
 
         $deals = $query->paginate($perPage)->appends($request->query());
         
-        // For deals with entry='in', attach the corresponding open position to show floating profit
+        // Group deals by position_id for better UX
+        $groupedDeals = [];
         foreach ($deals as $deal) {
-            if ($deal->entry === 'in' && $deal->position_id) {
-                // Try to find position by position_id (works for both MT4 and MT5)
-                // First try: position_identifier (MT5)
+            $posId = $deal->position_id ?? 'no_position_' . $deal->ticket;
+            
+            if (!isset($groupedDeals[$posId])) {
+                $groupedDeals[$posId] = [
+                    'position_id' => $deal->position_id,
+                    'in_deal' => null,
+                    'out_deal' => null,
+                    'total_profit' => 0,
+                    'is_open' => false,
+                ];
+            }
+            
+            if ($deal->entry === 'in') {
+                $groupedDeals[$posId]['in_deal'] = $deal;
+                $groupedDeals[$posId]['is_open'] = true;
+                
+                // Try to find open position for floating profit
                 $position = \App\Models\Position::where('trading_account_id', $deal->trading_account_id)
                     ->where('position_identifier', $deal->position_id)
                     ->where('is_open', true)
                     ->first();
                 
-                // Second try: ticket (MT4)
                 if (!$position) {
                     $position = \App\Models\Position::where('trading_account_id', $deal->trading_account_id)
                         ->where('ticket', $deal->position_id)
@@ -102,9 +116,17 @@ class TradesController extends Controller
                 
                 if ($position) {
                     $deal->openPosition = $position;
+                    $groupedDeals[$posId]['total_profit'] = $position->profit;
                 }
+            } elseif ($deal->entry === 'out') {
+                $groupedDeals[$posId]['out_deal'] = $deal;
+                $groupedDeals[$posId]['is_open'] = false;
+                $groupedDeals[$posId]['total_profit'] = $deal->profit;
             }
         }
+        
+        // Convert to collection for view
+        $groupedDeals = collect($groupedDeals)->values();
 
         $symbols = SymbolMapping::select('normalized_symbol')
             ->distinct()->orderBy('normalized_symbol')->pluck('normalized_symbol');
@@ -157,7 +179,7 @@ class TradesController extends Controller
         $sortDirection = $request->get('sort_direction', 'desc');
 
         return view('admin.trades.index', compact(
-            'deals','symbols','users','search','userId','accountId','symbol','type',
+            'deals','groupedDeals','symbols','users','search','userId','accountId','symbol','type',
             'dateFrom','dateTo','perPage','totals','stats','sortBy','sortDirection'
         ));
     }
