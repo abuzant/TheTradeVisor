@@ -166,6 +166,14 @@
             <!-- Trades Table -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
+                    <!-- Legend -->
+                    <div class="mb-4 flex items-center gap-6 text-xs text-gray-600 bg-gray-50 p-3 rounded">
+                        <span class="font-semibold">Legend:</span>
+                        <span><span class="text-blue-600 font-bold">📊</span> = Open Position</span>
+                        <span><span class="text-gray-600 font-bold">✅</span> = Closed Position</span>
+                        <span><span class="text-indigo-600 font-bold">▶</span> = Click to expand/collapse details</span>
+                    </div>
+                    
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">

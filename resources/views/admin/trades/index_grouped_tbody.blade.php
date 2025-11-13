@@ -62,13 +62,9 @@
                     {{ strtoupper($displayDeal->type) }}
                 </span>
                 @if($isOpen)
-                    <span class="ml-1 px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800" title="Open Position">
-                        📊 OPEN
-                    </span>
+                    <span class="ml-1 text-blue-600 font-bold" title="Open Position">📊</span>
                 @else
-                    <span class="ml-1 px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800" title="Closed Position">
-                        ✅ CLOSED
-                    </span>
+                    <span class="ml-1 text-gray-600 font-bold" title="Closed Position">✅</span>
                 @endif
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -93,44 +89,38 @@
             <tr id="details-position-{{ $group['position_id'] }}" class="hidden bg-gray-50">
                 <td colspan="9" class="px-6 py-4">
                     <div class="ml-8 border-l-2 border-indigo-200 pl-4">
-                        <div class="text-xs font-semibold text-gray-600 mb-2">Position Opening (IN):</div>
-                        <div class="grid grid-cols-8 gap-4 text-sm">
-                            <div>
-                                <span class="text-gray-500">Ticket:</span>
-                                <span class="font-medium">{{ $group['in_deal']->ticket }}</span>
-                            </div>
-                            <div>
-                                <span class="text-gray-500">Time:</span>
-                                <span class="font-medium">{{ $group['in_deal']->time->format('M d, H:i') }}</span>
-                            </div>
-                            <div>
-                                <span class="text-gray-500">Type:</span>
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                                    {{ str_contains(strtolower($group['in_deal']->type), 'buy') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                    {{ strtoupper($group['in_deal']->type) }}
-                                </span>
-                            </div>
-                            <div>
-                                <span class="text-gray-500">Volume:</span>
-                                <span class="font-medium">{{ number_format($group['in_deal']->volume, 2) }}</span>
-                            </div>
-                            <div>
-                                <span class="text-gray-500">Price:</span>
-                                <span class="font-medium">{{ $group['in_deal']->formatted_price }}</span>
-                            </div>
-                            <div>
-                                <span class="text-gray-500">Commission:</span>
-                                <span class="font-medium">{{ number_format($group['in_deal']->commission ?? 0, 2) }}</span>
-                            </div>
-                            <div>
-                                <span class="text-gray-500">Swap:</span>
-                                <span class="font-medium">{{ number_format($group['in_deal']->swap ?? 0, 2) }}</span>
-                            </div>
-                            <div>
-                                <span class="text-gray-500">Fee:</span>
-                                <span class="font-medium">{{ number_format($group['in_deal']->fee ?? 0, 2) }}</span>
-                            </div>
-                        </div>
+                        <div class="text-xs font-semibold text-gray-600 mb-2">Opening Trade Details:</div>
+                        <table class="min-w-full text-xs">
+                            <thead class="bg-gray-100">
+                                <tr>
+                                    <th class="px-2 py-1 text-left text-gray-600">Ticket</th>
+                                    <th class="px-2 py-1 text-left text-gray-600">Time</th>
+                                    <th class="px-2 py-1 text-left text-gray-600">Type</th>
+                                    <th class="px-2 py-1 text-right text-gray-600">Volume</th>
+                                    <th class="px-2 py-1 text-right text-gray-600">Price</th>
+                                    <th class="px-2 py-1 text-right text-gray-600">Commission</th>
+                                    <th class="px-2 py-1 text-right text-gray-600">Swap</th>
+                                    <th class="px-2 py-1 text-right text-gray-600">Fee</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="px-2 py-1">{{ $group['in_deal']->ticket }}</td>
+                                    <td class="px-2 py-1">{{ $group['in_deal']->time->format('M d, H:i') }}</td>
+                                    <td class="px-2 py-1">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                            {{ str_contains(strtolower($group['in_deal']->type), 'buy') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                            {{ strtoupper($group['in_deal']->type) }}
+                                        </span>
+                                    </td>
+                                    <td class="px-2 py-1 text-right">{{ number_format($group['in_deal']->volume, 2) }}</td>
+                                    <td class="px-2 py-1 text-right">{{ $group['in_deal']->formatted_price }}</td>
+                                    <td class="px-2 py-1 text-right">{{ number_format($group['in_deal']->commission ?? 0, 2) }}</td>
+                                    <td class="px-2 py-1 text-right">{{ number_format($group['in_deal']->swap ?? 0, 2) }}</td>
+                                    <td class="px-2 py-1 text-right">{{ number_format($group['in_deal']->fee ?? 0, 2) }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </td>
             </tr>
