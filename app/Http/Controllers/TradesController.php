@@ -150,8 +150,8 @@ class TradesController extends Controller
         $deals = Deal::whereHas('tradingAccount', function($q) use ($user) {
             $q->where('user_id', $user->id);
         })
-
         ->whereIn('symbol', $symbolMappings)
+        ->whereIn('entry', ['out', 'inout'])  // Only show closed trades with profit
         ->orderBy('time', 'desc')
         ->paginate(50);
         
@@ -282,11 +282,12 @@ class TradesController extends Controller
         'avg_cost_per_trade' => $totalTrades > 0 ? $totalFees / $totalTrades : 0,
     ];
     
-    // Paginate
+    // Paginate - only show closed trades with profit
     $deals = Deal::whereHas('tradingAccount', function($q) use ($user) {
         $q->where('user_id', $user->id);
     })
     ->whereIn('symbol', $symbolMappings)
+    ->whereIn('entry', ['out', 'inout'])  // Only show closed trades with profit
     ->orderBy('time', 'desc')
     ->paginate(50);
     
