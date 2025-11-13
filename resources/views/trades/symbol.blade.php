@@ -345,7 +345,7 @@
                                         {{ number_format($deal->volume, 2) }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-mono">
-                                        {{ number_format($deal->price, 5) }}
+                                        {{ $deal->formatted_price }}
                                     </td>
                                     <td x-show="showCommission" class="px-6 py-4 whitespace-nowrap text-sm text-red-600">
                                         {{ $display_currency }} {{ number_format(abs($deal->commission), 2) }}
