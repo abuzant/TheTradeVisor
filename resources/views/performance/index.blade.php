@@ -101,7 +101,7 @@
                                 @if($metrics['trade_analysis']['most_profitable_trade']['profit'] > 0)
                                     <div class="text-sm space-y-1">
                                         <div><span class="font-medium">Symbol:</span> {{ $metrics['trade_analysis']['most_profitable_trade']['symbol'] }}</div>
-                                        <div><span class="font-medium">Profit:</span> <span class="text-green-600 font-bold">{{ $displayCurrency }} {{ number_format($metrics['trade_analysis']['most_profitable_trade']['profit'], 2) }}</span></div>
+                                        <div><span class="font-medium">Profit:</span> <span class="text-green-600 font-bold">USD {{ number_format($metrics['trade_analysis']['most_profitable_trade']['profit'], 2) }}</span></div>
                                         <div><span class="font-medium">Volume:</span> {{ number_format($metrics['trade_analysis']['most_profitable_trade']['volume'], 2) }}</div>
                                         <div><span class="font-medium">Date:</span> {{ $metrics['trade_analysis']['most_profitable_trade']['date'] }}</div>
                                     </div>
@@ -117,7 +117,7 @@
                                 @if($metrics['trade_analysis']['worst_trade']['profit'] < 0)
                                     <div class="text-sm space-y-1">
                                         <div><span class="font-medium">Symbol:</span> {{ $metrics['trade_analysis']['worst_trade']['symbol'] }}</div>
-                                        <div><span class="font-medium">Loss:</span> <span class="text-red-600 font-bold">{{ $displayCurrency }} {{ number_format($metrics['trade_analysis']['worst_trade']['profit'], 2) }}</span></div>
+                                        <div><span class="font-medium">Loss:</span> <span class="text-red-600 font-bold">USD {{ number_format($metrics['trade_analysis']['worst_trade']['profit'], 2) }}</span></div>
                                         <div><span class="font-medium">Date:</span> {{ $metrics['trade_analysis']['worst_trade']['date'] }}</div>
                                     </div>
                                 @else
@@ -171,10 +171,10 @@
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium {{ $symbol['total_profit'] >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                            {{ $displayCurrency }} {{ number_format($symbol['total_profit'], 2) }}
+                                            USD {{ number_format($symbol['total_profit'], 2) }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm {{ $symbol['avg_profit'] >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                            {{ $displayCurrency }} {{ number_format($symbol['avg_profit'], 2) }}
+                                            USD {{ number_format($symbol['avg_profit'], 2) }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ number_format($symbol['total_volume'], 2) }}</td>
                                     </tr>
@@ -199,17 +199,17 @@
 
                             <div class="bg-green-50 rounded-lg p-4">
                                 <div class="text-sm text-gray-600">Avg Win</div>
-                                <div class="text-2xl font-bold text-green-600">{{ $displayCurrency }} {{ number_format($metrics['risk_metrics']['avg_win'], 2) }}</div>
+                                <div class="text-2xl font-bold text-green-600">USD {{ number_format($metrics['risk_metrics']['avg_win'], 2) }}</div>
                             </div>
 
                             <div class="bg-red-50 rounded-lg p-4">
                                 <div class="text-sm text-gray-600">Avg Loss</div>
-                                <div class="text-2xl font-bold text-red-600">{{ $displayCurrency }} {{ number_format($metrics['risk_metrics']['avg_loss'], 2) }}</div>
+                                <div class="text-2xl font-bold text-red-600">USD {{ number_format($metrics['risk_metrics']['avg_loss'], 2) }}</div>
                             </div>
 
                             <div class="bg-purple-50 rounded-lg p-4">
                                 <div class="text-sm text-gray-600">Largest Win</div>
-                                <div class="text-2xl font-bold text-purple-600">{{ $displayCurrency }} {{ number_format($metrics['risk_metrics']['largest_win'], 2) }}</div>
+                                <div class="text-2xl font-bold text-purple-600">USD {{ number_format($metrics['risk_metrics']['largest_win'], 2) }}</div>
                             </div>
                         </div>
                     </div>
@@ -257,13 +257,13 @@
                             <div class="bg-green-50 rounded-lg p-4">
                                 <div class="text-sm text-gray-600">Best Hour</div>
                                 <div class="text-2xl font-bold text-green-600">{{ $metrics['timing_analysis']['best_hour']['hour'] }}</div>
-                                <div class="text-sm text-gray-600">{{ $displayCurrency }} {{ number_format($metrics['timing_analysis']['best_hour']['profit'], 2) }} profit</div>
+                                <div class="text-sm text-gray-600">USD {{ number_format($metrics['timing_analysis']['best_hour']['profit'], 2) }} profit</div>
                             </div>
 
                             <div class="bg-red-50 rounded-lg p-4">
                                 <div class="text-sm text-gray-600">Worst Hour</div>
                                 <div class="text-2xl font-bold text-red-600">{{ $metrics['timing_analysis']['worst_hour']['hour'] }}</div>
-                                <div class="text-sm text-gray-600">{{ $displayCurrency }} {{ number_format($metrics['timing_analysis']['worst_hour']['profit'], 2) }} profit</div>
+                                <div class="text-sm text-gray-600">USD {{ number_format($metrics['timing_analysis']['worst_hour']['profit'], 2) }} profit</div>
                             </div>
                         </div>
                     </div>
@@ -281,13 +281,13 @@
                             <div class="bg-green-50 rounded-lg p-4">
                                 <div class="text-sm text-gray-600">Best Day</div>
                                 <div class="text-2xl font-bold text-green-600">{{ $metrics['timing_analysis']['best_day']['day'] }}</div>
-                                <div class="text-sm text-gray-600">{{ $displayCurrency }} {{ number_format($metrics['timing_analysis']['best_day']['profit'], 2) }} profit</div>
+                                <div class="text-sm text-gray-600">USD {{ number_format($metrics['timing_analysis']['best_day']['profit'], 2) }} profit</div>
                             </div>
 
                             <div class="bg-red-50 rounded-lg p-4">
                                 <div class="text-sm text-gray-600">Worst Day</div>
                                 <div class="text-2xl font-bold text-red-600">{{ $metrics['timing_analysis']['worst_day']['day'] }}</div>
-                                <div class="text-sm text-gray-600">{{ $displayCurrency }} {{ number_format($metrics['timing_analysis']['worst_day']['profit'], 2) }} profit</div>
+                                <div class="text-sm text-gray-600">USD {{ number_format($metrics['timing_analysis']['worst_day']['profit'], 2) }} profit</div>
                             </div>
                         </div>
                     </div>
@@ -382,7 +382,7 @@
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium {{ $country['total_profit'] >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                            {{ $displayCurrency }} {{ number_format($country['total_profit'], 2) }}
+                                            USD {{ number_format($country['total_profit'], 2) }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm">
                                             @if($country['sentiment'] === 'bullish')
@@ -447,7 +447,7 @@
                                     <div class="flex justify-between">
                                         <span class="text-gray-600">Total Profit:</span>
                                         <span class="font-bold {{ $platform['total_profit'] >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                            {{ $displayCurrency }} {{ number_format($platform['total_profit'], 2) }}
+                                            USD {{ number_format($platform['total_profit'], 2) }}
                                         </span>
                                     </div>
                                 </div>
@@ -491,10 +491,10 @@
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-blue-600">{{ $platform['profit_factor'] }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-purple-600">{{ $platform['risk_reward_ratio'] }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium {{ $platform['total_profit'] >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                            {{ $displayCurrency }} {{ number_format($platform['total_profit'], 2) }}
+                                            USD {{ number_format($platform['total_profit'], 2) }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium {{ $platform['avg_profit'] >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                            {{ $displayCurrency }} {{ number_format($platform['avg_profit'], 2) }}
+                                            USD {{ number_format($platform['avg_profit'], 2) }}
                                         </td>
                                     </tr>
                                     @endforeach
@@ -550,7 +550,7 @@
                         y: {
                             beginAtZero: false,
                             ticks: {
-                                callback: value => '{{ $displayCurrency }}' + value.toLocaleString()
+                                callback: value => 'USD' + value.toLocaleString()
                             }
                         }
                     }
@@ -704,7 +704,7 @@
                                     const country = countryData[context.dataIndex];
                                     return [
                                         `Win Rate: ${country.win_rate}%`,
-                                        `Total Profit: {{ $displayCurrency }} ${country.total_profit}`,
+                                        `Total Profit: USD ${country.total_profit}`,
                                         `Sentiment: ${country.sentiment}`
                                     ];
                                 }
