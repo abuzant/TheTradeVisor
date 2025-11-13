@@ -92,8 +92,9 @@ class TradesController extends Controller
     ->whereIn('symbol', $symbolMappings)
     ->whereIn('entry', ['out', 'inout']);  // Only count closed trades
     
-    // Get aggregated stats from database
-    $aggregateStats = $baseQuery->selectRaw('
+    // Get aggregated stats from database (clone query to avoid conflicts)
+    $aggregateStats = clone $baseQuery;
+    $aggregateStats = $aggregateStats->selectRaw('
         COUNT(*) as total_trades,
         SUM(CASE WHEN profit > 0 THEN 1 ELSE 0 END) as winning_trades,
         SUM(CASE WHEN profit < 0 THEN 1 ELSE 0 END) as losing_trades,
@@ -106,8 +107,8 @@ class TradesController extends Controller
         SUM(fee) as total_fee
     ')->first();
     
-    // Get limited sample for detailed analysis (max 5000 recent trades)
-    $allDeals = $baseQuery->orderBy('time', 'desc')->limit(5000)->get();
+    // Get limited sample for detailed analysis (max 5000 recent trades) - use fresh query
+    $allDeals = (clone $baseQuery)->orderBy('time', 'desc')->limit(5000)->get();
     
     // If no deals found, return empty stats
     if ($allDeals->isEmpty()) {
