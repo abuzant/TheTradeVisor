@@ -36,6 +36,9 @@
         </div>
         <div class="border-t border-gray-800 mt-8 pt-8 text-center text-sm">
             <p>&copy; {{ date('Y') }} TheTradeVisor. All rights reserved.</p>
+            <p class="mt-2 text-xs text-gray-500">
+                MetaTrader 4 and MetaTrader 5 are registered trademarks of MetaQuotes Ltd.
+            </p>
         </div>
     </div>
 </footer>

@@ -6,6 +6,7 @@
     <meta name="description" content="Privacy Policy for TheTradeVisor - How we collect, use, and protect your data">
     <title>Privacy Policy - TheTradeVisor</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <x-google-analytics />
 </head>
 <body class="bg-gray-50">
     <!-- Header -->
@@ -298,7 +299,7 @@
                     </p>
 
                     <p class="text-gray-700 mb-4 font-semibold">
-                        To exercise any of these rights, please contact us at <a href="mailto:privacy@thetradevisor.com" class="text-indigo-600 hover:text-indigo-800">privacy@thetradevisor.com</a>. We will respond within 30 days.
+                        To exercise any of these rights, please contact us at <a href="#" data-email="hello@thetradevisor.com" class="text-indigo-600 hover:text-indigo-800 email-link">our privacy email</a>. We will respond within 30 days.
                     </p>
                 </section>
 
@@ -371,11 +372,11 @@
                     <div class="bg-gray-50 p-6 rounded-lg">
                         <p class="text-gray-700 mb-2">
                             <strong>Data Protection Officer:</strong><br>
-                            Email: <a href="mailto:privacy@thetradevisor.com" class="text-indigo-600 hover:text-indigo-800">privacy@thetradevisor.com</a>
+                            Email: <a href="#" data-email="hello@thetradevisor.com" class="text-indigo-600 hover:text-indigo-800 email-link">Contact Us</a>
                         </p>
                         <p class="text-gray-700 mb-2">
                             <strong>General Inquiries:</strong><br>
-                            Email: <a href="mailto:support@thetradevisor.com" class="text-indigo-600 hover:text-indigo-800">support@thetradevisor.com</a>
+                            Email: <a href="#" data-email="hello@thetradevisor.com" class="text-indigo-600 hover:text-indigo-800 email-link">Contact Us</a>
                         </p>
                         <p class="text-gray-700">
                             <strong>Website:</strong><br>
@@ -394,18 +395,18 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-gray-900 text-gray-400 mt-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div class="text-center">
-                <p>&copy; {{ date('Y') }} TheTradeVisor. All rights reserved.</p>
-                <div class="mt-4 flex justify-center gap-6">
-                    <a href="/about" class="hover:text-white">About</a>
-                    <a href="/contact" class="hover:text-white">Contact</a>
-                    <a href="/terms" class="hover:text-white font-semibold">Terms of Service</a>
-                    <a href="/privacy" class="hover:text-white font-semibold">Privacy Policy</a>
-                </div>
-            </div>
-        </div>
-    </footer>
+    <x-public-footer />
+    <!-- Email Protection Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.email-link').forEach(function(link) {
+                const email = link.getAttribute('data-email');
+                if (email) {
+                    link.href = 'mailto:' + email;
+                    link.textContent = email;
+                }
+            });
+        });
+    </script>
 </body>
 </html>

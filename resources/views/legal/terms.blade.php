@@ -6,6 +6,7 @@
     <meta name="description" content="Terms of Service for TheTradeVisor - Trading analytics platform">
     <title>Terms of Service - TheTradeVisor</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <x-google-analytics />
 </head>
 <body class="bg-gray-50">
     <!-- Header -->
@@ -262,7 +263,7 @@
                         If you have any questions about these Terms of Service, please contact us at:
                     </p>
                     <p class="text-gray-700 mb-4">
-                        <strong>Email:</strong> <a href="mailto:legal@thetradevisor.com" class="text-indigo-600 hover:text-indigo-800">legal@thetradevisor.com</a><br>
+                        <strong>Email:</strong> <a href="#" data-email="hello@thetradevisor.com" class="text-indigo-600 hover:text-indigo-800 email-link">Contact Us</a><br>
                         <strong>Website:</strong> <a href="https://thetradevisor.com/contact" class="text-indigo-600 hover:text-indigo-800">https://thetradevisor.com/contact</a>
                     </p>
                 </section>
@@ -277,18 +278,18 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-gray-900 text-gray-400 mt-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div class="text-center">
-                <p>&copy; {{ date('Y') }} TheTradeVisor. All rights reserved.</p>
-                <div class="mt-4 flex justify-center gap-6">
-                    <a href="/about" class="hover:text-white">About</a>
-                    <a href="/contact" class="hover:text-white">Contact</a>
-                    <a href="/terms" class="hover:text-white font-semibold">Terms of Service</a>
-                    <a href="/privacy" class="hover:text-white font-semibold">Privacy Policy</a>
-                </div>
-            </div>
-        </div>
-    </footer>
+    <x-public-footer />
+    <!-- Email Protection Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.email-link').forEach(function(link) {
+                const email = link.getAttribute('data-email');
+                if (email) {
+                    link.href = 'mailto:' + email;
+                    link.textContent = email;
+                }
+            });
+        });
+    </script>
 </body>
 </html>
