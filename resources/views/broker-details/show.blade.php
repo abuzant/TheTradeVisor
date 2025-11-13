@@ -141,7 +141,7 @@
                             <div class="text-sm text-gray-600">{{ number_format($pair->trades) }} trades</div>
                         </div>
                         <div class="text-right">
-                            <div class="font-bold text-green-600">+{{ number_format($pair->total_profit, 2) }}</div>
+                            <div class="font-bold text-green-600">+${{ number_format($pair->total_profit, 2) }}</div>
                             <div class="text-xs text-gray-500">{{ number_format($pair->avg_volume, 2) }} avg lots</div>
                         </div>
                     </div>
@@ -165,7 +165,7 @@
                             <div class="text-sm text-gray-600">{{ number_format($pair->trades) }} trades</div>
                         </div>
                         <div class="text-right">
-                            <div class="font-bold text-red-600">{{ number_format($pair->total_profit, 2) }}</div>
+                            <div class="font-bold text-red-600">${{ number_format($pair->total_profit, 2) }}</div>
                             <div class="text-xs text-gray-500">{{ number_format($pair->avg_volume, 2) }} avg lots</div>
                         </div>
                     </div>
@@ -222,7 +222,7 @@
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right font-semibold {{ $perf->total_profit >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                {{ $perf->total_profit >= 0 ? '+' : '' }}{{ number_format($perf->total_profit, 2) }}
+                                {{ $perf->total_profit >= 0 ? '+' : '' }}${{ number_format($perf->total_profit, 2) }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-gray-600">{{ number_format($perf->avg_lot_size, 2) }}</td>
                         </tr>
