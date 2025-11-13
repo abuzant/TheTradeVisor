@@ -81,6 +81,23 @@ class TradesController extends Controller
         $query = $this->applySorting($query, $request, $sortableColumns, 'time', 'desc');
 
         $deals = $query->paginate($perPage)->appends($request->query());
+        
+        // For deals with entry='in', attach the corresponding open position to show floating profit
+        foreach ($deals as $deal) {
+            if ($deal->entry === 'in' && $deal->position_id) {
+                $deal->openPosition = \App\Models\Position::where('trading_account_id', $deal->trading_account_id)
+                    ->where(function($q) use ($deal) {
+                        // MT5 uses position_identifier, MT4 uses ticket
+                        if ($deal->platform_type === 'MT5') {
+                            $q->where('position_identifier', $deal->position_id);
+                        } else {
+                            $q->where('ticket', $deal->position_id);
+                        }
+                    })
+                    ->where('is_open', true)
+                    ->first();
+            }
+        }
 
         $symbols = SymbolMapping::select('normalized_symbol')
             ->distinct()->orderBy('normalized_symbol')->pluck('normalized_symbol');

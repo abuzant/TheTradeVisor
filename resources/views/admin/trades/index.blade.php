@@ -283,12 +283,21 @@
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                             {{ $deal->formatted_price }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium {{ $deal->profit >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                            @if($deal->tradingAccount)
-                                                {{ $deal->tradingAccount->account_currency }} {{ number_format($deal->profit, 2) }}
-                                            @else
-                                                ${{ number_format($deal->profit, 2) }}
-                                            @endif
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            @php
+                                                // For open positions (entry='in'), show floating profit from Position
+                                                $displayProfit = $deal->profit;
+                                                if ($deal->entry === 'in' && isset($deal->openPosition) && $deal->openPosition) {
+                                                    $displayProfit = $deal->openPosition->profit;
+                                                }
+                                            @endphp
+                                            <span class="{{ $displayProfit >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                                                @if($deal->tradingAccount)
+                                                    {{ $deal->tradingAccount->account_currency }} {{ number_format($displayProfit, 2) }}
+                                                @else
+                                                    ${{ number_format($displayProfit, 2) }}
+                                                @endif
+                                            </span>
                                         </td>
                                     </tr>
                                 @empty
