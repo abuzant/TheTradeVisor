@@ -5,38 +5,43 @@
 
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <div>
-                <h1 class="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                    {{ __('Performance Metrics') }}
-                </h1>
-                <p class="mt-1 text-sm text-gray-600">Comprehensive analysis of your trading performance</p>
-            </div>
-
-            {{-- Time Period Filter --}}
-            <div class="flex gap-2">
-                <a href="{{ route('performance', ['period' => 'today']) }}"
-                   class="px-4 py-2 rounded-lg font-medium transition-all duration-300 {{ $period == 'today' ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm' }}">
-                    Today
-                </a>
-                <a href="{{ route('performance', ['period' => '7d']) }}"
-                   class="px-4 py-2 rounded-lg font-medium transition-all duration-300 {{ $period == '7d' ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm' }}">
-                    7 Days
-                </a>
-                <a href="{{ route('performance', ['period' => '30d']) }}"
-                   class="px-4 py-2 rounded-lg font-medium transition-all duration-300 {{ $period == '30d' ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm' }}">
-                    30 Days
-                </a>
-                <a href="{{ route('performance', ['period' => 'all']) }}"
-                   class="px-4 py-2 rounded-lg font-medium transition-all duration-300 {{ $period == 'all' ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm' }}">
-                    All Time
-                </a>
-            </div>
-        </div>
+        <h1 class="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            {{ __('Performance Metrics') }}
+        </h1>
     </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
+
+            {{-- Time Period Selector --}}
+            <div class="bg-white/90 backdrop-blur-sm overflow-hidden shadow-card rounded-xl">
+                <div class="p-6">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-900">Performance Analytics</h2>
+                            <p class="text-sm text-gray-600">View performance metrics for different time ranges</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <a href="{{ route('performance', ['period' => 'today']) }}"
+                               class="px-4 py-2 rounded-lg font-medium transition-all duration-300 {{ $period == 'today' ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm border border-gray-200' }}">
+                                Today
+                            </a>
+                            <a href="{{ route('performance', ['period' => '7d']) }}"
+                               class="px-4 py-2 rounded-lg font-medium transition-all duration-300 {{ $period == '7d' ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm border border-gray-200' }}">
+                                7 Days
+                            </a>
+                            <a href="{{ route('performance', ['period' => '30d']) }}"
+                               class="px-4 py-2 rounded-lg font-medium transition-all duration-300 {{ $period == '30d' ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm border border-gray-200' }}">
+                                30 Days
+                            </a>
+                            <a href="{{ route('performance', ['period' => 'all']) }}"
+                               class="px-4 py-2 rounded-lg font-medium transition-all duration-300 {{ $period == 'all' ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm border border-gray-200' }}">
+                                All Time
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             @if(!$hasAccounts)
                 <div class="bg-white/90 backdrop-blur-sm overflow-hidden shadow-card rounded-xl">
