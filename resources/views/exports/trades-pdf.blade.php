@@ -96,7 +96,7 @@
                 <tr>
                     <td>{{ $deal->time ? \Carbon\Carbon::parse($deal->time)->format('Y-m-d H:i') : 'N/A' }}</td>
                     <td><strong>{{ $deal->symbol ?? 'N/A' }}</strong></td>
-                    <td>{{ $deal->type ?? 'N/A' }}</td>
+                    <td>{{ $deal->display_type ?? 'N/A' }}</td>
                     <td>{{ number_format($deal->volume ?? 0, 2) }}</td>
                     <td>{{ number_format($deal->price ?? 0, 5) }}</td>
                     <td class="{{ ($deal->profit ?? 0) >= 0 ? 'profit-positive' : 'profit-negative' }}">

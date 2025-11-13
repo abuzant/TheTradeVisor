@@ -453,8 +453,8 @@
                                         </td>
                                         
                                         <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                            <span class="px-2 py-1 text-xs font-semibold rounded {{ $position->type === 'buy' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                                {{ strtoupper($position->type) }}
+                                            <span class="px-2 py-1 text-xs font-semibold rounded {{ $position->is_buy ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                                {{ $position->display_type }}
                                             </span>
                                         </td>
                                         
@@ -515,8 +515,8 @@
                                                                         {{ $deal->ticket }}
                                                                     </td>
                                                                     <td class="px-4 py-2 whitespace-nowrap text-xs">
-                                                                        <span class="px-2 py-0.5 rounded {{ $deal->type === 'buy' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                                                            {{ strtoupper($deal->type) }}
+                                                                        <span class="px-2 py-0.5 rounded {{ $deal->is_buy ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                                                            {{ $deal->display_type }}
                                                                         </span>
                                                                     </td>
                                                                     <td class="px-4 py-2 whitespace-nowrap text-xs">

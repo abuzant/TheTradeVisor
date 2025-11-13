@@ -191,4 +191,61 @@ public function getUpdateTimeAttribute($value)
         return Carbon::now();
     }
 }
+
+    /**
+     * Get the correct position type (MT5 sends numeric codes)
+     */
+    public function getDisplayTypeAttribute()
+    {
+        $type = $this->attributes['type'] ?? '';
+        
+        // If already a string (buy/sell), return as-is
+        if (is_string($type) && (stripos($type, 'buy') !== false || stripos($type, 'sell') !== false)) {
+            return strtoupper($type);
+        }
+        
+        // Map numeric MT5 codes
+        $typeMap = [
+            '0' => 'BUY',
+            '1' => 'SELL',
+        ];
+        
+        return $typeMap[$type] ?? strtoupper($type);
+    }
+
+    /**
+     * Check if this is a buy position
+     */
+    public function getIsBuyAttribute()
+    {
+        $type = $this->attributes['type'] ?? '';
+        
+        if ($type === '0' || $type === 0) {
+            return true;
+        }
+        
+        if (is_string($type) && stripos($type, 'buy') !== false && stripos($type, 'sell') === false) {
+            return true;
+        }
+        
+        return false;
+    }
+
+    /**
+     * Check if this is a sell position
+     */
+    public function getIsSellAttribute()
+    {
+        $type = $this->attributes['type'] ?? '';
+        
+        if ($type === '1' || $type === 1) {
+            return true;
+        }
+        
+        if (is_string($type) && stripos($type, 'sell') !== false) {
+            return true;
+        }
+        
+        return false;
+    }
 }

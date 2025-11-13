@@ -33,8 +33,8 @@
     </td>
     
     <td class="px-6 py-4 whitespace-nowrap text-sm">
-        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $position->type == 'buy' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-            {{ strtoupper($position->type) }}
+        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $position->is_buy ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+            {{ $position->display_type }}
         </span>
     </td>
     
@@ -102,8 +102,8 @@
                             <td class="px-4 py-2 whitespace-nowrap text-gray-600">{{ $deal->time->format('M d, H:i:s') }}</td>
                             <td class="px-4 py-2 whitespace-nowrap text-gray-600">#{{ $deal->ticket }}</td>
                             <td class="px-4 py-2 whitespace-nowrap">
-                                <span class="px-2 py-0.5 text-xs font-semibold rounded {{ strtolower($deal->type) == 'buy' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
-                                    {{ strtoupper($deal->type) }}
+                                <span class="px-2 py-0.5 text-xs font-semibold rounded {{ $deal->is_buy ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
+                                    {{ $deal->display_type }}
                                 </span>
                             </td>
                             <td class="px-4 py-2 whitespace-nowrap">
