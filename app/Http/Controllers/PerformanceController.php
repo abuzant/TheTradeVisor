@@ -22,7 +22,8 @@ class PerformanceController extends Controller
     {
         $user = $request->user();
         $period = $request->get('period', '30d'); // Default to 30 days
-        $displayCurrency = $user->display_currency ?? 'USD';
+        // Multi-account context: Always use USD
+        $displayCurrency = 'USD';
 
         // Get all user's account IDs
         $accountIds = $user->tradingAccounts()->pluck('id')->toArray();
@@ -31,7 +32,6 @@ class PerformanceController extends Controller
             return view('performance.index', [
                 'hasAccounts' => false,
                 'period' => $period,
-                'displayCurrency' => $displayCurrency,
             ]);
         }
 
@@ -43,9 +43,9 @@ class PerformanceController extends Controller
         // Cache key: user + session + IP + period for security
         $sessionId = session()->getId();
         $userIp = $request->ip();
-        $cacheKey = "performance.{$user->id}.{$sessionId}.{$userIp}.{$period}.{$displayCurrency}";
+        $cacheKey = "performance.{$user->id}.{$sessionId}.{$userIp}.{$period}.usd";
 
-        // Get performance metrics with caching based on period
+        // Get performance metrics with caching based on period (always USD for multi-account)
         $metrics = Cache::remember($cacheKey, $cacheDuration, function() use ($accountIds, $days, $displayCurrency) {
             return $this->metricsService->getPerformanceMetrics($accountIds, $days, $displayCurrency);
         });
@@ -56,7 +56,6 @@ class PerformanceController extends Controller
             'period' => $period,
             'days' => $days,
             'user' => $user,
-            'displayCurrency' => $displayCurrency,
         ]);
     }
 
