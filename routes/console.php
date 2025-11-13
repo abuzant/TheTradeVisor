@@ -30,3 +30,15 @@ Schedule::command('geoip:update')
     ->onSuccess(function () {
         \Log::info('GeoIP database updated successfully');
     });
+
+// Cleanup inactive accounts daily at 3:00 AM
+Schedule::command('accounts:cleanup-inactive')
+    ->dailyAt('03:00')
+    ->name('cleanup-inactive-accounts')
+    ->withoutOverlapping()
+    ->onFailure(function () {
+        \Log::error('Inactive accounts cleanup failed');
+    })
+    ->onSuccess(function () {
+        \Log::info('Inactive accounts cleanup completed successfully');
+    });

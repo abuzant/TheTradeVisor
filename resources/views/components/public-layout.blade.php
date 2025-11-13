@@ -49,6 +49,10 @@
         .stat-card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
     </style>
     
+    @if(config('services.recaptcha.enabled'))
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    @endif
+    
     {{ $head ?? '' }}
 </head>
 <body class="bg-gray-50">

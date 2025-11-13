@@ -84,6 +84,18 @@
                                         {{ __('Circuit Breakers') }}
                                     </x-dropdown-link>
 
+                                    <!-- Admin Wiki -->
+                                    <div class="border-t border-gray-100"></div>
+                                    
+                                    <x-dropdown-link :href="route('admin.wiki')">
+                                        <span class="flex items-center">
+                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                            </svg>
+                                            {{ __('📚 Admin Wiki') }}
+                                        </span>
+                                    </x-dropdown-link>
+
                                     <!-- Monitoring & Debug Tools -->
                                     <div class="border-t border-gray-100"></div>
 
@@ -236,6 +248,10 @@
 
                         <x-responsive-nav-link :href="route('admin.services')">
                             {{ __('Service Management') }}
+                        </x-responsive-nav-link>
+                        
+                        <x-responsive-nav-link :href="route('admin.wiki')">
+                            {{ __('📚 Admin Wiki') }}
                         </x-responsive-nav-link>
 
                         <x-responsive-nav-link href="/horizon" target="_blank">

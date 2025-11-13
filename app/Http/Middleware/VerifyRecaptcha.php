@@ -33,12 +33,8 @@ class VerifyRecaptcha
                 ->withInput();
         }
 
-        // Check score for v3 (0.0 to 1.0, higher is better)
-        if ($response->getScore() < 0.5) {
-            return redirect()->back()
-                ->withErrors(['recaptcha' => 'Suspicious activity detected. Please try again.'])
-                ->withInput();
-        }
+        // Note: Score check is only for reCAPTCHA v3
+        // For v2 (checkbox), we only check isSuccess()
 
         return $next($request);
     }

@@ -80,10 +80,10 @@
                     </div>
                     <div class="mb-6">
                         <h3 class="text-2xl font-bold text-gray-900 mb-2">Pay Per Account</h3>
-                        <div class="flex items-baseline mb-4">
+                        <div class="flex items-baseline mb-2">
                             <span class="text-5xl font-bold text-gray-900">$2.99</span>
-                            <span class="text-gray-600 ml-2">/account/month</span>
                         </div>
+                        <p class="text-gray-600 text-sm mb-1">per account/month</p>
                         <p class="text-gray-600">Add accounts as you need</p>
                         <p class="text-sm text-gray-500 mt-2">or $24.99/account/year (save 30%)</p>
                     </div>
@@ -141,7 +141,7 @@
                             <span class="text-gray-600 ml-2">/month</span>
                         </div>
                         <p class="text-gray-600">For professional traders</p>
-                        <p class="text-sm text-gray-500 mt-2">or $239/year (save 20%)</p>
+                        <p class="text-sm text-gray-500 mt-2">or $219/year (save 27%)</p>
                     </div>
                     
                     <ul class="space-y-4 mb-8">
@@ -197,6 +197,7 @@
                             <span class="text-gray-600 ml-2">/month</span>
                         </div>
                         <p class="text-gray-600">For trading firms</p>
+                        <p class="text-sm text-gray-500 mt-2">$999/month paid yearly or $1,499/month paid monthly</p>
                     </div>
                     
                     <ul class="space-y-4 mb-8">
@@ -262,9 +263,14 @@
                     <p class="text-gray-600">Yes! The Free plan includes 1 account forever. No credit card required to start.</p>
                 </div>
                 
+                <div class="border-b border-gray-200 pb-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">What happens to inactive accounts?</h3>
+                    <p class="text-gray-600">Account data is automatically deleted after 180 days of inactivity for all account types. This helps us maintain optimal performance and security for active users.</p>
+                </div>
+                
                 <div>
                     <h3 class="text-lg font-semibold text-gray-900 mb-2">Do you offer refunds?</h3>
-                    <p class="text-gray-600">Yes, we offer a 30-day money-back guarantee on all paid plans.</p>
+                    <p class="text-gray-600">We encourage all users to start with our Free plan to fully explore the platform before upgrading. Since we offer a completely free tier with no credit card required, we do not provide refunds on paid subscriptions. This allows us to keep our pricing low and transparent for everyone.</p>
                 </div>
             </div>
         </div>

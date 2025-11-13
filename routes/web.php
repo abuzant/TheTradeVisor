@@ -23,7 +23,9 @@ Route::get('/pricing', [App\Http\Controllers\PublicController::class, 'pricing']
 Route::get('/about', [App\Http\Controllers\PublicController::class, 'about'])->name('about');
 Route::get('/faq', [App\Http\Controllers\PublicController::class, 'faq'])->name('faq');
 Route::get('/contact', [App\Http\Controllers\PublicController::class, 'contact'])->name('contact');
-Route::post('/contact', [App\Http\Controllers\PublicController::class, 'contactSubmit'])->name('contact.submit');
+Route::post('/contact', [App\Http\Controllers\PublicController::class, 'contactSubmit'])
+    ->middleware('recaptcha')
+    ->name('contact.submit');
 Route::get('/docs', [App\Http\Controllers\PublicController::class, 'docs'])->name('docs');
 Route::get('/api-docs', [App\Http\Controllers\PublicController::class, 'apiDocs'])->name('api.docs');
 
@@ -168,6 +170,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/circuit-breakers', [App\Http\Controllers\Admin\CircuitBreakerController::class, 'index'])->name('circuit-breakers.index');
     Route::post('/circuit-breakers/{service}/reset', [App\Http\Controllers\Admin\CircuitBreakerController::class, 'reset'])->name('circuit-breakers.reset');
     Route::post('/circuit-breakers/reset-all', [App\Http\Controllers\Admin\CircuitBreakerController::class, 'resetAll'])->name('circuit-breakers.reset-all');
+    
+    // Admin Wiki
+    Route::get('/wiki', [App\Http\Controllers\Admin\AdminWikiController::class, 'index'])->name('wiki');
 });
 
 // Legal pages (public)

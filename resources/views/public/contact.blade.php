@@ -34,6 +34,14 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">Message</label>
                             <textarea name="message" required rows="6" class="w-full px-4 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
                         </div>
+                        @if(config('services.recaptcha.enabled'))
+                        <div>
+                            <div class="g-recaptcha" data-sitekey="{{ config('services.recaptcha.site_key') }}"></div>
+                            @error('recaptcha')
+                                <span class="text-red-600 text-sm">{{ $message }}</span>
+                            @enderror
+                        </div>
+                        @endif
                         <button type="submit" class="w-full px-6 py-3 bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">
                             Send Message
                         </button>

@@ -30,6 +30,16 @@
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
 
+        @if(config('services.recaptcha.enabled'))
+        <!-- reCAPTCHA -->
+        <div class="mt-4">
+            <div class="g-recaptcha" data-sitekey="{{ config('services.recaptcha.site_key') }}"></div>
+            @error('recaptcha')
+                <span class="text-red-600 text-sm">{{ $message }}</span>
+            @enderror
+        </div>
+        @endif
+
         <div class="flex items-center justify-end mt-4">
             <x-primary-button>
                 {{ __('Reset Password') }}

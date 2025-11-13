@@ -445,7 +445,7 @@
                                         
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                             <div class="flex items-center space-x-2">
-                                                <span>{{ $position->symbol }}</span>
+                                                <span title="Raw: {{ $position->symbol }}">{{ $position->normalized_symbol }}</span>
                                                 @if($position->platform_type === 'MT5' && $position->position_identifier)
                                                     <span class="px-2 py-0.5 text-xs font-semibold rounded bg-purple-100 text-purple-800" title="MT5 Position">MT5</span>
                                                 @endif
