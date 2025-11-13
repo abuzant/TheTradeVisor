@@ -21,12 +21,6 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\TrustProxies::class,
         ]);
         
-        // TEMPORARY: Exclude login from CSRF for debugging
-        $middleware->validateCsrfTokens(except: [
-            'login',
-            'register',
-        ]);
-        
         $middleware->alias([
             'api.key' => \App\Http\Middleware\ValidateApiKey::class,
             'admin' => \App\Http\Middleware\IsAdmin::class,
