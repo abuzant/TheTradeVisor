@@ -348,14 +348,14 @@
                                         {{ $deal->formatted_price }}
                                     </td>
                                     <td x-show="showCommission" class="px-6 py-4 whitespace-nowrap text-sm text-red-600">
-                                        {{ $display_currency }} {{ number_format(abs($deal->commission), 2) }}
+                                        USD {{ number_format(abs($deal->commission_usd), 2) }}
                                     </td>
-                                    <td x-show="showSwap" class="px-6 py-4 whitespace-nowrap text-sm font-medium {{ $deal->swap >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                        {{ $display_currency }} {{ number_format($deal->swap, 2) }}
+                                    <td x-show="showSwap" class="px-6 py-4 whitespace-nowrap text-sm font-medium {{ $deal->swap_usd >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                                        USD {{ number_format($deal->swap_usd, 2) }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                        <span class="px-3 py-1 inline-flex text-sm font-bold rounded {{ $deal->profit >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                            {{ $display_currency }} {{ number_format($deal->profit, 2) }}
+                                        <span class="px-3 py-1 inline-flex text-sm font-bold rounded {{ $deal->profit_usd >= 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                            USD {{ number_format($deal->profit_usd, 2) }}
                                         </span>
                                     </td>
                                 </tr>

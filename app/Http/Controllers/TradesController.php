@@ -150,15 +150,22 @@ class TradesController extends Controller
         $deals = Deal::whereHas('tradingAccount', function($q) use ($user) {
             $q->where('user_id', $user->id);
         })
+        ->with('tradingAccount')  // Load account for currency conversion
         ->whereIn('symbol', $symbolMappings)
         ->whereIn('entry', ['out', 'inout'])  // Only show closed trades with profit
         ->orderBy('time', 'desc')
         ->paginate(50);
         
-        // Get display currency
-        $display_currency = $user->display_currency ?? 'USD';
+        // Convert all profits to USD (multi-account context)
+        $currencyService = app(\App\Services\CurrencyService::class);
+        foreach ($deals as $deal) {
+            $accountCurrency = $deal->tradingAccount->account_currency ?? 'USD';
+            $deal->profit_usd = $currencyService->convert($deal->profit, $accountCurrency, 'USD');
+            $deal->commission_usd = $currencyService->convert($deal->commission, $accountCurrency, 'USD');
+            $deal->swap_usd = $currencyService->convert($deal->swap, $accountCurrency, 'USD');
+        }
         
-        return view('trades.symbol', compact('deals', 'symbol', 'stats', 'display_currency'));
+        return view('trades.symbol', compact('deals', 'symbol', 'stats'));
     }
     
     // Use aggregated stats from database
@@ -286,15 +293,22 @@ class TradesController extends Controller
     $deals = Deal::whereHas('tradingAccount', function($q) use ($user) {
         $q->where('user_id', $user->id);
     })
+    ->with('tradingAccount')  // Load account for currency conversion
     ->whereIn('symbol', $symbolMappings)
     ->whereIn('entry', ['out', 'inout'])  // Only show closed trades with profit
     ->orderBy('time', 'desc')
     ->paginate(50);
     
-    // Get display currency
-    $display_currency = $user->display_currency ?? 'USD';
+    // Convert all profits to USD (multi-account context)
+    $currencyService = app(\App\Services\CurrencyService::class);
+    foreach ($deals as $deal) {
+        $accountCurrency = $deal->tradingAccount->account_currency ?? 'USD';
+        $deal->profit_usd = $currencyService->convert($deal->profit, $accountCurrency, 'USD');
+        $deal->commission_usd = $currencyService->convert($deal->commission, $accountCurrency, 'USD');
+        $deal->swap_usd = $currencyService->convert($deal->swap, $accountCurrency, 'USD');
+    }
     
-    return view('trades.symbol', compact('deals', 'symbol', 'stats', 'display_currency'));
+    return view('trades.symbol', compact('deals', 'symbol', 'stats'));
 }
 
 
