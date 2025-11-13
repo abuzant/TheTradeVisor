@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\Deal;
 use App\Models\User;
 use App\Models\SymbolMapping;
+use App\Services\CurrencyService;
 use Carbon\Carbon;
 
 class TradesController extends Controller
@@ -92,11 +93,31 @@ class TradesController extends Controller
 
         $users = User::orderBy('name')->limit(1000)->get();
 
+        // Calculate totals with currency conversion to USD
+        $currencyService = app(CurrencyService::class);
+        $dealsForTotals = $totalsQuery->with('tradingAccount')->get();
+        
+        $totalProfitUSD = 0;
+        $totalCommissionUSD = 0;
+        $totalFeesUSD = 0;
+        $totalSwapUSD = 0;
+        
+        foreach ($dealsForTotals as $deal) {
+            if ($deal->tradingAccount) {
+                $currency = $deal->tradingAccount->account_currency ?? 'USD';
+                
+                $totalProfitUSD += $currencyService->convert($deal->profit ?? 0, $currency, 'USD');
+                $totalCommissionUSD += $currencyService->convert($deal->commission ?? 0, $currency, 'USD');
+                $totalFeesUSD += $currencyService->convert($deal->fee ?? 0, $currency, 'USD');
+                $totalSwapUSD += $currencyService->convert($deal->swap ?? 0, $currency, 'USD');
+            }
+        }
+
         $totals = [
-            'totalProfit'     => (float) $totalsQuery->sum('profit'),
-            'totalCommission' => (float) $totalsQuery->sum('commission'),
-            'totalFees'       => (float) $totalsQuery->sum('fee'),
-            'totalSwap'       => (float) $totalsQuery->sum('swap'),
+            'totalProfit'     => $totalProfitUSD,
+            'totalCommission' => $totalCommissionUSD,
+            'totalFees'       => $totalFeesUSD,
+            'totalSwap'       => $totalSwapUSD,
             'totalVolume'     => (float) $totalsQuery->sum('volume'),
             'tradeCount'      => (int)   $totalsQuery->count(),
         ];

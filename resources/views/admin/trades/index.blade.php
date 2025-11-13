@@ -64,7 +64,7 @@
             <!-- Totals Summary -->
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
                 <div class="p-6">
-                    <h3 class="text-lg font-semibold mb-4">Filtered Results Summary</h3>
+                    <h3 class="text-lg font-semibold mb-4">Filtered Results Summary <span class="text-sm text-gray-500 font-normal">(converted to USD)</span></h3>
                     <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
                         <div>
                             <div class="text-xs text-gray-600">Trades</div>
@@ -77,21 +77,21 @@
                         <div>
                             <div class="text-xs text-gray-600">Total Profit</div>
                             <div class="text-lg font-bold {{ $totals['totalProfit'] >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                ${{ number_format($totals['totalProfit'], 2) }}
+                                USD ${{ number_format($totals['totalProfit'], 2) }}
                             </div>
                         </div>
                         <div>
                             <div class="text-xs text-gray-600">Commission</div>
-                            <div class="text-lg font-bold text-gray-700">${{ number_format($totals['totalCommission'], 2) }}</div>
+                            <div class="text-lg font-bold text-gray-700">USD ${{ number_format($totals['totalCommission'], 2) }}</div>
                         </div>
                         <div>
                             <div class="text-xs text-gray-600">Fees</div>
-                            <div class="text-lg font-bold text-gray-700">${{ number_format($totals['totalFees'], 2) }}</div>
+                            <div class="text-lg font-bold text-gray-700">USD ${{ number_format($totals['totalFees'], 2) }}</div>
                         </div>
                         <div>
                             <div class="text-xs text-gray-600">Swap</div>
                             <div class="text-lg font-bold {{ $totals['totalSwap'] >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                ${{ number_format($totals['totalSwap'], 2) }}
+                                USD ${{ number_format($totals['totalSwap'], 2) }}
                             </div>
                         </div>
                     </div>
