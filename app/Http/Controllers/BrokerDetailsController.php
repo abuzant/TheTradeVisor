@@ -122,18 +122,22 @@ class BrokerDetailsController extends Controller
     private function getTopCountries($accountIds, $days)
     {
         // Get deals with country info from trading accounts
+        // Use country_name or detected_country
         return Deal::whereIn('trading_account_id', $accountIds)
             ->join('trading_accounts', 'deals.trading_account_id', '=', 'trading_accounts.id')
             ->where('deals.time', '>=', now()->subDays($days))
             ->where('deals.entry', 'out')
-            ->whereNotNull('trading_accounts.country')
+            ->where(function($query) {
+                $query->whereNotNull('trading_accounts.country_name')
+                      ->orWhereNotNull('trading_accounts.detected_country');
+            })
             ->select(
-                'trading_accounts.country',
+                DB::raw('COALESCE(trading_accounts.country_name, trading_accounts.detected_country) as country'),
                 DB::raw('COUNT(*) as trades'),
                 DB::raw('SUM(deals.profit) as profit'),
                 DB::raw('SUM(deals.volume) as volume')
             )
-            ->groupBy('trading_accounts.country')
+            ->groupBy('country')
             ->orderByDesc('trades')
             ->limit(10)
             ->get();
