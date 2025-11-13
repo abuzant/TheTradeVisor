@@ -477,33 +477,42 @@ class PerformanceMetricsService
 
     /**
      * Helper: Calculate average hold time
-     * Only for closed positions that were opened OR closed within the period
+     * Uses deals to find actual open and close times
      */
     private function calculateAverageHoldTime($accountIds, $days)
     {
-        // Get closed positions that were opened OR closed within the time period
-        $positions = \App\Models\Position::whereIn('trading_account_id', $accountIds)
-            ->where('is_open', false)
-            ->whereNotNull('open_time')
-            ->whereNotNull('update_time')
-            ->where(function($query) use ($days) {
-                $query->where('open_time', '>=', now()->subDays($days))
-                      ->orWhere('update_time', '>=', now()->subDays($days));
-            })
-            ->get();
+        // Get deals with IN and OUT entries within the time period
+        $deals = Deal::whereIn('trading_account_id', $accountIds)
+            ->where('time', '>=', now()->subDays($days))
+            ->whereIn('entry', ['in', 'out'])
+            ->orderBy('time', 'asc')
+            ->get(['position_id', 'entry', 'time']);
 
-        if ($positions->isEmpty()) {
+        if ($deals->isEmpty()) {
             return 'N/A';
         }
 
-        // Calculate hold time in hours for each position
-        $holdTimes = $positions->map(function($position) {
-            $openTime = \Carbon\Carbon::parse($position->open_time);
-            $closeTime = \Carbon\Carbon::parse($position->update_time);
-            return $openTime->diffInHours($closeTime);
-        });
+        // Group by position_id to find matching IN/OUT pairs
+        $grouped = $deals->groupBy('position_id');
+        $holdTimes = [];
 
-        $avgHoldTimeHours = $holdTimes->avg();
+        foreach ($grouped as $positionDeals) {
+            $inDeal = $positionDeals->where('entry', 'in')->first();
+            $outDeal = $positionDeals->where('entry', 'out')->first();
+            
+            // Only calculate if we have both IN and OUT (closed position)
+            if ($inDeal && $outDeal) {
+                $openTime = \Carbon\Carbon::parse($inDeal->time);
+                $closeTime = \Carbon\Carbon::parse($outDeal->time);
+                $holdTimes[] = $openTime->diffInHours($closeTime);
+            }
+        }
+
+        if (empty($holdTimes)) {
+            return 'N/A';
+        }
+
+        $avgHoldTimeHours = array_sum($holdTimes) / count($holdTimes);
 
         // Format as human readable
         if ($avgHoldTimeHours < 1) {
