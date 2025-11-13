@@ -39,20 +39,20 @@
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
         </div>
 
+        @if(config('services.recaptcha.enabled'))
+        <!-- reCAPTCHA -->
+        <div class="mt-4">
+            <div class="g-recaptcha" data-sitekey="{{ config('services.recaptcha.site_key') }}"></div>
+            @error('recaptcha')
+                <span class="text-red-600 text-sm">{{ $message }}</span>
+            @enderror
+        </div>
+        @endif
+
         <div class="flex items-center justify-end mt-4">
             <a class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" href="{{ route('login') }}">
                 {{ __('Already registered?') }}
             </a>
-
-		@if(config('services.recaptcha.enabled'))
-		<!-- reCAPTCHA -->
-		<div class="mb-4">
-		    <div class="g-recaptcha" data-sitekey="{{ config('services.recaptcha.site_key') }}"></div>
-		    @error('recaptcha')
-		        <span class="text-red-600 text-sm">{{ $message }}</span>
-		    @enderror
-		</div>
-		@endif
 
             <x-primary-button class="ms-4">
                 {{ __('Register') }}
