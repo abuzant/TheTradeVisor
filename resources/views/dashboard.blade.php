@@ -215,8 +215,8 @@
                                             <td class="px-4 py-3 whitespace-nowrap text-xs text-gray-500">
                                                 {{ $account->last_sync_at ? $account->last_sync_at->diffForHumans() : 'Never' }}
                                             </td>
-                                            <td class="px-4 py-3 whitespace-nowrap">
-                                                <a href="{{ route('account.show', $account->id) }}" class="text-[10px] text-indigo-600 hover:text-indigo-900 hover:underline">more»</a>
+                                            <td class="px-4 py-3 whitespace-nowrap text-[9px]">
+                                                <a href="{{ route('account.show', $account->id) }}" class="text-indigo-600 hover:text-indigo-900 hover:underline">more»</a>
                                             </td>
                                         </tr>
                                     @endforeach
