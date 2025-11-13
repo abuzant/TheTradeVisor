@@ -20,6 +20,16 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
+        
+        // EMERGENCY DEBUG: Log who is accessing dashboard
+        \Log::emergency('DASHBOARD ACCESS', [
+            'user_id' => $user->id,
+            'user_email' => $user->email,
+            'session_id' => session()->getId(),
+            'ip' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+        
         $displayCurrency = $user->display_currency;
         $sortBy = $request->get('sort_by', 'last_sync_at');
         $sortDirection = $request->get('sort_direction', 'desc');
