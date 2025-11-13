@@ -49,65 +49,77 @@ class PerformanceMetricsService
 
     /**
      * Trade Analysis - Most successful trades, ROI, etc.
+     * Includes positions opened OR closed within the time period
      */
     private function getTradeAnalysis($accountIds, $days, $displayCurrency)
     {
-        $deals = Deal::whereIn('trading_account_id', $accountIds)
+        // Get positions that were opened OR closed within the time period
+        $positions = \App\Models\Position::whereIn('trading_account_id', $accountIds)
             ->with('tradingAccount')
-            ->tradesOnly()
-            ->where('time', '>=', now()->subDays($days))
+            ->where(function($query) use ($days) {
+                $query->where('open_time', '>=', now()->subDays($days))
+                      ->orWhere(function($q) use ($days) {
+                          $q->where('is_open', false)
+                            ->where('update_time', '>=', now()->subDays($days));
+                      });
+            })
             ->get();
 
-        if ($deals->isEmpty()) {
+        if ($positions->isEmpty()) {
             return null;
         }
 
-        // Convert all profits to display currency
-        $convertedDeals = $deals->map(function($deal) use ($displayCurrency) {
-            $deal->converted_profit = $this->currencyService->convert(
-                $deal->profit,
-                $deal->tradingAccount->account_currency ?? 'USD',
+        // Convert all profits to display currency and use floating profit for open positions
+        $convertedPositions = $positions->map(function($position) use ($displayCurrency) {
+            // Use floating_profit for open positions, profit for closed
+            $profitValue = $position->is_open ? ($position->floating_profit ?? 0) : $position->profit;
+            
+            $position->converted_profit = $this->currencyService->convert(
+                $profitValue,
+                $position->tradingAccount->account_currency ?? 'USD',
                 $displayCurrency
             );
-            return $deal;
+            return $position;
         });
 
         // Most profitable trade
-        $mostProfitable = $convertedDeals->sortByDesc('converted_profit')->first();
+        $mostProfitable = $convertedPositions->sortByDesc('converted_profit')->first();
         
         // Worst trade
-        $worstTrade = $convertedDeals->sortBy('converted_profit')->first();
+        $worstTrade = $convertedPositions->sortBy('converted_profit')->first();
         
-        // Calculate average hold time
+        // Calculate average hold time (only for closed positions)
         $avgHoldTime = $this->calculateAverageHoldTime($accountIds, $days);
 
         // Total stats
-        $totalProfit = $convertedDeals->sum('converted_profit');
-        $totalVolume = $convertedDeals->sum('volume');
-        $winningTrades = $convertedDeals->where('converted_profit', '>', 0);
-        $losingTrades = $convertedDeals->where('converted_profit', '<', 0);
+        $totalProfit = $convertedPositions->sum('converted_profit');
+        $totalVolume = $convertedPositions->sum('volume');
+        $winningTrades = $convertedPositions->where('converted_profit', '>', 0);
+        $losingTrades = $convertedPositions->where('converted_profit', '<', 0);
 
         return [
             'most_profitable_trade' => [
                 'symbol' => $mostProfitable->normalized_symbol ?? $mostProfitable->symbol,
                 'profit' => $mostProfitable->converted_profit,
                 'volume' => $mostProfitable->volume,
-                'date' => $mostProfitable->time->format('M d, Y'),
-                'roi' => $mostProfitable->volume > 0 ? round(($mostProfitable->converted_profit / ($mostProfitable->volume * $mostProfitable->price)) * 100, 2) : 0,
+                'date' => $mostProfitable->open_time->format('M d, Y'),
+                'roi' => $mostProfitable->volume > 0 && $mostProfitable->open_price > 0 
+                    ? round(($mostProfitable->converted_profit / ($mostProfitable->volume * $mostProfitable->open_price)) * 100, 2) 
+                    : 0,
             ],
             'worst_trade' => [
                 'symbol' => $worstTrade->normalized_symbol ?? $worstTrade->symbol,
                 'profit' => $worstTrade->converted_profit,
                 'volume' => $worstTrade->volume,
-                'date' => $worstTrade->time->format('M d, Y'),
+                'date' => $worstTrade->open_time->format('M d, Y'),
             ],
-            'total_trades' => $convertedDeals->count(),
+            'total_trades' => $convertedPositions->count(),
             'winning_trades' => $winningTrades->count(),
             'losing_trades' => $losingTrades->count(),
-            'win_rate' => $convertedDeals->count() > 0 ? round(($winningTrades->count() / $convertedDeals->count()) * 100, 1) : 0,
+            'win_rate' => $convertedPositions->count() > 0 ? round(($winningTrades->count() / $convertedPositions->count()) * 100, 1) : 0,
             'avg_win' => $winningTrades->count() > 0 ? $winningTrades->avg('converted_profit') : 0,
             'avg_loss' => $losingTrades->count() > 0 ? abs($losingTrades->avg('converted_profit')) : 0,
-            'profit_factor' => $this->calculateProfitFactor($convertedDeals, 'converted_profit'),
+            'profit_factor' => $this->calculateProfitFactor($convertedPositions, 'converted_profit'),
             'avg_hold_time' => $avgHoldTime,
         ];
     }
@@ -468,15 +480,19 @@ class PerformanceMetricsService
 
     /**
      * Helper: Calculate average hold time
+     * Only for closed positions that were opened OR closed within the period
      */
     private function calculateAverageHoldTime($accountIds, $days)
     {
-        // Get closed positions within the time period
+        // Get closed positions that were opened OR closed within the time period
         $positions = \App\Models\Position::whereIn('trading_account_id', $accountIds)
             ->where('is_open', false)
             ->whereNotNull('open_time')
             ->whereNotNull('update_time')
-            ->where('update_time', '>=', now()->subDays($days))
+            ->where(function($query) use ($days) {
+                $query->where('open_time', '>=', now()->subDays($days))
+                      ->orWhere('update_time', '>=', now()->subDays($days));
+            })
             ->get();
 
         if ($positions->isEmpty()) {
