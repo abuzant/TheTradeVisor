@@ -1,222 +1,307 @@
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <div>
-                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                    {{ $broker }}
-                </h2>
-                <p class="text-sm text-gray-600 mt-1">Broker Performance & Statistics</p>
-            </div>
-
-            {{-- Time Period Filter --}}
-            <div class="flex gap-2">
-                <a href="{{ route('broker-details', ['broker' => urlencode($broker), 'days' => 7]) }}"
-                   class="px-4 py-2 rounded-md text-sm {{ $days == 7 ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
-                    7 Days
-                </a>
-                <a href="{{ route('broker-details', ['broker' => urlencode($broker), 'days' => 30]) }}"
-                   class="px-4 py-2 rounded-md text-sm {{ $days == 30 ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
-                    30 Days
-                </a>
-                <a href="{{ route('broker-details', ['broker' => urlencode($broker), 'days' => 90]) }}"
-                   class="px-4 py-2 rounded-md text-sm {{ $days == 90 ? 'bg-indigo-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
-                    90 Days
-                </a>
-            </div>
-        </div>
-    </x-slot>
-
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-
-            {{-- Overview Stats --}}
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-
-                <div class="bg-white rounded-lg shadow p-6">
-                    <div class="text-sm text-gray-600">Your Accounts</div>
-                    <div class="text-3xl font-bold text-indigo-600 mt-2">{{ $stats['total_accounts'] }}</div>
-                    <div class="text-xs text-gray-500 mt-1">{{ $stats['active_accounts'] }} active</div>
-                </div>
-
-                <div class="bg-white rounded-lg shadow p-6">
-                    <div class="text-sm text-gray-600">Open Positions</div>
-                    <div class="text-3xl font-bold text-orange-600 mt-2">{{ $stats['open_positions'] }}</div>
-                    <div class="text-xs text-gray-500 mt-1">Currently active</div>
-                </div>
-
-                <div class="bg-white rounded-lg shadow p-6">
-                    <div class="text-sm text-gray-600">Total Trades</div>
-                    <div class="text-3xl font-bold text-purple-600 mt-2">{{ number_format($stats['total_trades']) }}</div>
-                    <div class="text-xs text-gray-500 mt-1">Last {{ $days }} days</div>
-                </div>
-
-                <div class="bg-white rounded-lg shadow p-6">
-                    <div class="text-sm text-gray-600">Win Rate</div>
-                    <div class="text-3xl font-bold {{ $stats['win_rate'] >= 50 ? 'text-green-600' : 'text-red-600' }} mt-2">
-                        {{ $stats['win_rate'] }}%
-                    </div>
-                    <div class="text-xs text-gray-500 mt-1">Success rate</div>
-                </div>
-
-            </div>
-
-            {{-- Per-Account Cards --}}
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                @foreach($userAccounts as $account)
-                <div class="bg-white rounded-lg shadow p-6 border-l-4 {{ $account->is_active ? 'border-green-500' : 'border-gray-300' }}">
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <div class="text-sm text-gray-600">Account</div>
-                            <a href="{{ route('account.show', $account->id) }}" class="text-lg font-bold text-indigo-600 hover:text-indigo-800">
-                                {{ $account->account_number }}
-                            </a>
-                        </div>
-                        <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $account->is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
-                            {{ $account->is_active ? 'Active' : 'Inactive' }}
-                        </span>
-                    </div>
-                    
-                    <div class="space-y-2">
-                        <div class="flex justify-between">
-                            <span class="text-sm text-gray-600">Balance:</span>
-                            <span class="text-sm font-semibold text-gray-900">{{ $account->account_currency }} {{ number_format($account->balance, 2) }}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-sm text-gray-600">Equity:</span>
-                            <span class="text-sm font-semibold text-gray-900">{{ $account->account_currency }} {{ number_format($account->equity, 2) }}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="text-sm text-gray-600">Profit:</span>
-                            <span class="text-sm font-semibold {{ $account->profit >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                {{ $account->account_currency }} {{ number_format($account->profit, 2) }}
-                            </span>
-                        </div>
-                        <div class="flex justify-between pt-2 border-t border-gray-200">
-                            <span class="text-sm text-gray-600">Positions:</span>
-                            <span class="text-sm font-semibold text-gray-900">{{ $account->openPositions->count() }}</span>
-                        </div>
-                    </div>
-                </div>
-                @endforeach
-
-                <div class="bg-white rounded-lg shadow p-6">
-                    <div class="text-sm text-gray-600">Total Volume</div>
-                    <div class="text-3xl font-bold text-gray-900 mt-2">{{ number_format($stats['total_volume'], 1) }}</div>
-                    <div class="text-xs text-gray-500 mt-1">Lots traded</div>
-                </div>
-
-            </div>
-
-            {{-- Servers Info --}}
-            @if($servers->count() > 0)
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-3">Connected Servers</h3>
-                    <div class="flex flex-wrap gap-2">
-                        @foreach($servers as $server)
-                        <span class="px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-sm font-medium">
-                            {{ $server }}
-                        </span>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-            @endif
-
-            {{-- Daily Profit Trend --}}
-            @if($dailyProfitTrend->count() > 0)
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Daily Profit Trend</h3>
-                    <div class="h-64">
-                        <canvas id="profitTrendChart"></canvas>
-                    </div>
-                </div>
-            </div>
-            @endif
-
-            {{-- Top Traded Symbols --}}
-            @if($topSymbols->count() > 0)
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Most Traded Symbols</h3>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Symbol</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trades</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Volume</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @foreach($topSymbols as $symbol)
-                                <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                        {{ $symbol->normalized_symbol }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {{ number_format($symbol->trades) }}
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        {{ number_format($symbol->volume, 2) }}
-                                    </td>
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            @endif
-
-
-        </div>
-    </div>
-
-    @push('scripts')
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{ $broker }} trading analytics - View real trading statistics, performance metrics, and insights from traders using {{ $broker }}. Last 180 days of aggregated data.">
+    <meta name="keywords" content="{{ $broker }}, forex broker, trading statistics, broker analytics, trading performance, {{ $broker }} review">
+    <meta property="og:title" content="{{ $broker }} - Trading Analytics & Statistics">
+    <meta property="og:description" content="Real trading data and performance metrics from {{ $broker }} traders. {{ $overview['total_trades'] }} trades analyzed over 180 days.">
+    <meta property="og:type" content="website">
+    <title>{{ $broker }} - Trading Analytics & Performance Statistics | TheTradeVisor</title>
+    
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        @if($dailyProfitTrend->count() > 0)
-        // Daily Profit Trend Chart
-        const profitCtx = document.getElementById('profitTrendChart').getContext('2d');
-        const profitData = {!! json_encode($dailyProfitTrend) !!};
+    
+    <!-- Structured Data for SEO -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FinancialService",
+        "name": "{{ $broker }}",
+        "description": "Trading analytics and statistics for {{ $broker }}",
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "{{ $overview['win_rate'] / 20 }}",
+            "bestRating": "5",
+            "worstRating": "1",
+            "ratingCount": "{{ $overview['active_traders'] }}"
+        }
+    }
+    </script>
+</head>
+<body class="bg-gray-50">
+    <!-- Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex justify-between items-center">
+                <div>
+                    <a href="/" class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                        TheTradeVisor
+                    </a>
+                </div>
+                <nav class="flex gap-6">
+                    <a href="/" class="text-gray-600 hover:text-indigo-600">Home</a>
+                    <a href="/features" class="text-gray-600 hover:text-indigo-600">Features</a>
+                    <a href="/pricing" class="text-gray-600 hover:text-indigo-600">Pricing</a>
+                    @auth
+                        <a href="/dashboard" class="text-indigo-600 font-medium">Dashboard</a>
+                    @else
+                        <a href="/login" class="text-indigo-600 font-medium">Login</a>
+                    @endauth
+                </nav>
+            </div>
+        </div>
+    </header>
 
-        new Chart(profitCtx, {
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Broker Header -->
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-2">{{ $broker }}</h1>
+            <p class="text-gray-600 text-lg">Real trading analytics from {{ $overview['active_traders'] }} active traders over the last {{ $days }} days</p>
+            <div class="mt-4 flex gap-4 text-sm text-gray-500">
+                <span>📊 {{ number_format($overview['total_trades']) }} trades analyzed</span>
+                <span>🌍 {{ $top_countries->count() }} countries</span>
+                <span>📈 {{ $top_symbols->count() }} symbols traded</span>
+            </div>
+        </div>
+
+        <!-- Overview Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="text-sm text-gray-600 mb-1">Total Trades</div>
+                <div class="text-3xl font-bold text-indigo-600">{{ number_format($overview['total_trades']) }}</div>
+                <div class="text-xs text-gray-500 mt-1">{{ $overview['active_traders'] }} traders</div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="text-sm text-gray-600 mb-1">Win Rate</div>
+                <div class="text-3xl font-bold {{ $overview['win_rate'] >= 50 ? 'text-green-600' : 'text-orange-600' }}">
+                    {{ $overview['win_rate'] }}%
+                </div>
+                <div class="text-xs text-gray-500 mt-1">Success ratio</div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="text-sm text-gray-600 mb-1">Avg Trade Size</div>
+                <div class="text-3xl font-bold text-purple-600">{{ number_format($overview['avg_trade_size'], 2) }}</div>
+                <div class="text-xs text-gray-500 mt-1">Lots</div>
+            </div>
+            
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="text-sm text-gray-600 mb-1">Avg Hold Time</div>
+                <div class="text-3xl font-bold text-blue-600">{{ $avg_hold_time }}</div>
+                <div class="text-xs text-gray-500 mt-1">Per position</div>
+            </div>
+        </div>
+
+        <!-- Daily Profit Trend Chart -->
+        @if($daily_profit_trend->isNotEmpty())
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">📈 Daily Trading Activity</h2>
+            <canvas id="dailyTrendChart" height="80"></canvas>
+        </div>
+        @endif
+
+        <!-- Two Column Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Top Countries -->
+            @if($top_countries->isNotEmpty())
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">🌍 Top Trading Countries</h2>
+                <div class="space-y-3">
+                    @foreach($top_countries as $country)
+                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                        <div>
+                            <div class="font-semibold text-gray-900">{{ $country->country }}</div>
+                            <div class="text-sm text-gray-600">{{ number_format($country->trades) }} trades</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-bold {{ $country->profit >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                                {{ $country->profit >= 0 ? '+' : '' }}{{ number_format($country->profit, 2) }}
+                            </div>
+                            <div class="text-xs text-gray-500">{{ number_format($country->volume, 2) }} lots</div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
+            <!-- Most Profitable Pairs -->
+            @if($most_profitable_pairs->isNotEmpty())
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">💰 Most Profitable Pairs</h2>
+                <div class="space-y-3">
+                    @foreach($most_profitable_pairs as $pair)
+                    <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                        <div>
+                            <div class="font-semibold text-gray-900">{{ $pair->normalized_symbol }}</div>
+                            <div class="text-sm text-gray-600">{{ number_format($pair->trades) }} trades</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-bold text-green-600">+{{ number_format($pair->total_profit, 2) }}</div>
+                            <div class="text-xs text-gray-500">{{ number_format($pair->avg_volume, 2) }} avg lots</div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+        </div>
+
+        <!-- Biggest Loss Pairs & Top Symbols -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Biggest Loss Pairs -->
+            @if($biggest_loss_pairs->isNotEmpty())
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">📉 Biggest Loss Pairs</h2>
+                <div class="space-y-3">
+                    @foreach($biggest_loss_pairs as $pair)
+                    <div class="flex justify-between items-center p-3 bg-red-50 rounded-lg">
+                        <div>
+                            <div class="font-semibold text-gray-900">{{ $pair->normalized_symbol }}</div>
+                            <div class="text-sm text-gray-600">{{ number_format($pair->trades) }} trades</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-bold text-red-600">{{ number_format($pair->total_profit, 2) }}</div>
+                            <div class="text-xs text-gray-500">{{ number_format($pair->avg_volume, 2) }} avg lots</div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
+            <!-- Top Traded Symbols -->
+            @if($top_symbols->isNotEmpty())
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-gray-900 mb-4">🔥 Most Traded Symbols</h2>
+                <div class="space-y-3">
+                    @foreach($top_symbols->take(10) as $symbol)
+                    <div class="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                        <div>
+                            <div class="font-semibold text-gray-900">{{ $symbol->normalized_symbol }}</div>
+                            <div class="text-sm text-gray-600">{{ number_format($symbol->trades) }} trades</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-bold text-blue-600">{{ number_format($symbol->total_volume, 2) }} lots</div>
+                            <div class="text-xs text-gray-500">{{ number_format($symbol->avg_lot_size, 2) }} avg</div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+        </div>
+
+        <!-- Symbol Performance Table -->
+        @if($symbol_performance->isNotEmpty())
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">📊 Symbol Performance (Top 25)</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Symbol</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Trades</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Win Rate</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total Profit</th>
+                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Avg Lot Size</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        @foreach($symbol_performance as $perf)
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{{ $perf->normalized_symbol }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-gray-600">{{ number_format($perf->total_trades) }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right">
+                                <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $perf->win_rate >= 50 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                    {{ $perf->win_rate }}%
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right font-semibold {{ $perf->total_profit >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                                {{ $perf->total_profit >= 0 ? '+' : '' }}{{ number_format($perf->total_profit, 2) }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-gray-600">{{ number_format($perf->avg_lot_size, 2) }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        @endif
+
+        <!-- CTA Section -->
+        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl shadow-lg p-8 text-center text-white">
+            <h2 class="text-3xl font-bold mb-4">Want to Track Your Own Trading Performance?</h2>
+            <p class="text-lg mb-6 opacity-90">Join TheTradeVisor and get detailed analytics for your trading accounts</p>
+            <div class="flex gap-4 justify-center">
+                @guest
+                    <a href="/register" class="bg-white text-indigo-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
+                        Get Started Free
+                    </a>
+                    <a href="/features" class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-indigo-600 transition">
+                        Learn More
+                    </a>
+                @else
+                    <a href="/dashboard" class="bg-white text-indigo-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
+                        Go to Dashboard
+                    </a>
+                @endguest
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-400 mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="text-center">
+                <p>&copy; {{ date('Y') }} TheTradeVisor. All rights reserved.</p>
+                <div class="mt-4 flex justify-center gap-6">
+                    <a href="/about" class="hover:text-white">About</a>
+                    <a href="/contact" class="hover:text-white">Contact</a>
+                    <a href="/faq" class="hover:text-white">FAQ</a>
+                    <a href="/pricing" class="hover:text-white">Pricing</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Chart Script -->
+    @if($daily_profit_trend->isNotEmpty())
+    <script>
+        const ctx = document.getElementById('dailyTrendChart').getContext('2d');
+        new Chart(ctx, {
             type: 'line',
             data: {
-                labels: profitData.map(d => d.date),
+                labels: {!! json_encode($daily_profit_trend->pluck('date')) !!},
                 datasets: [{
                     label: 'Daily Profit',
-                    data: profitData.map(d => parseFloat(d.profit)),
-                    borderColor: 'rgb(99, 102, 241)',
-                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                    data: {!! json_encode($daily_profit_trend->pluck('profit')) !!},
+                    borderColor: 'rgb(79, 70, 229)',
+                    backgroundColor: 'rgba(79, 70, 229, 0.1)',
                     tension: 0.4,
                     fill: true
                 }]
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false,
+                maintainAspectRatio: true,
                 plugins: {
                     legend: {
-                        display: true,
-                        position: 'top'
+                        display: false
                     }
                 },
                 scales: {
                     y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: function(value) {
-                                return value.toFixed(2);
-                            }
-                        }
+                        beginAtZero: true
                     }
                 }
             }
         });
-        @endif
     </script>
-    @endpush
-</x-app-layout>
+    @endif
+</body>
+</html>
