@@ -373,7 +373,7 @@
     </section>
 
     {{-- Footer --}}
-    <x-public-footer />
+    <x-footer />
 
 </body>
 </html>

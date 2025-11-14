@@ -104,44 +104,21 @@
         </div>
         @endif
 
-        <!-- Two Column Layout -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            <!-- Top Countries -->
-            @if($top_countries->isNotEmpty())
-            <div class="bg-white rounded-xl shadow-lg p-6">
-                <h2 class="text-2xl font-bold text-gray-900 mb-4">🌍 Top Trading Countries</h2>
-                <div class="space-y-3">
-                    @foreach($top_countries as $country)
-                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                        <div>
-                            <div class="font-semibold text-gray-900">{{ $country->country }}</div>
-                            <div class="text-sm text-gray-600">{{ number_format($country->trades) }} trades</div>
-                        </div>
-                        <div class="text-right">
-                            <div class="font-bold {{ $country->profit >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                {{ $country->profit >= 0 ? '+' : '' }}{{ number_format($country->profit, 2) }}
-                            </div>
-                            <div class="text-xs text-gray-500">{{ number_format($country->volume, 2) }} lots</div>
-                        </div>
-                    </div>
-                    @endforeach
-                </div>
-            </div>
-            @endif
-
+        <!-- Four Box Grid Layout -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <!-- Most Profitable Pairs -->
             @if($most_profitable_pairs->isNotEmpty())
             <div class="bg-white rounded-xl shadow-lg p-6">
-                <h2 class="text-2xl font-bold text-gray-900 mb-4">💰 Most Profitable Pairs</h2>
+                <h2 class="text-xl font-bold text-gray-900 mb-4">💰 Most Profitable Pairs</h2>
                 <div class="space-y-3">
-                    @foreach($most_profitable_pairs as $pair)
+                    @foreach($most_profitable_pairs->take(3) as $pair)
                     <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
                         <div>
-                            <div class="font-semibold text-gray-900">{{ $pair->normalized_symbol }}</div>
-                            <div class="text-sm text-gray-600">{{ number_format($pair->trades) }} trades</div>
+                            <div class="font-semibold text-gray-900 text-sm">{{ $pair->normalized_symbol }}</div>
+                            <div class="text-xs text-gray-600">{{ number_format($pair->trades) }} trades</div>
                         </div>
                         <div class="text-right">
-                            <div class="font-bold text-green-600">+${{ number_format($pair->total_profit, 2) }}</div>
+                            <div class="font-bold text-green-600 text-sm">+${{ number_format($pair->total_profit, 2) }}</div>
                             <div class="text-xs text-gray-500">{{ number_format($pair->avg_volume, 2) }} avg lots</div>
                         </div>
                     </div>
@@ -149,23 +126,41 @@
                 </div>
             </div>
             @endif
-        </div>
 
-        <!-- Biggest Loss Pairs & Top Symbols -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- Most Traded Symbols -->
+            @if($top_symbols->isNotEmpty())
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-xl font-bold text-gray-900 mb-4">🔥 Most Traded Symbols</h2>
+                <div class="space-y-3">
+                    @foreach($top_symbols->take(3) as $symbol)
+                    <div class="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                        <div>
+                            <div class="font-semibold text-gray-900 text-sm">{{ $symbol->normalized_symbol }}</div>
+                            <div class="text-xs text-gray-600">{{ number_format($symbol->trades) }} trades</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="font-bold text-blue-600 text-sm">{{ number_format($symbol->total_volume, 2) }} lots</div>
+                            <div class="text-xs text-gray-500">{{ number_format($symbol->avg_lot_size, 2) }} avg</div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
             <!-- Biggest Loss Pairs -->
             @if($biggest_loss_pairs->isNotEmpty())
             <div class="bg-white rounded-xl shadow-lg p-6">
-                <h2 class="text-2xl font-bold text-gray-900 mb-4">📉 Biggest Loss Pairs</h2>
+                <h2 class="text-xl font-bold text-gray-900 mb-4">📉 Biggest Loss Pairs</h2>
                 <div class="space-y-3">
-                    @foreach($biggest_loss_pairs as $pair)
+                    @foreach($biggest_loss_pairs->take(3) as $pair)
                     <div class="flex justify-between items-center p-3 bg-red-50 rounded-lg">
                         <div>
-                            <div class="font-semibold text-gray-900">{{ $pair->normalized_symbol }}</div>
-                            <div class="text-sm text-gray-600">{{ number_format($pair->trades) }} trades</div>
+                            <div class="font-semibold text-gray-900 text-sm">{{ $pair->normalized_symbol }}</div>
+                            <div class="text-xs text-gray-600">{{ number_format($pair->trades) }} trades</div>
                         </div>
                         <div class="text-right">
-                            <div class="font-bold text-red-600">${{ number_format($pair->total_profit, 2) }}</div>
+                            <div class="font-bold text-red-600 text-sm">${{ number_format($pair->total_profit, 2) }}</div>
                             <div class="text-xs text-gray-500">{{ number_format($pair->avg_volume, 2) }} avg lots</div>
                         </div>
                     </div>
@@ -174,20 +169,22 @@
             </div>
             @endif
 
-            <!-- Top Traded Symbols -->
-            @if($top_symbols->isNotEmpty())
+            <!-- Top Trading Countries -->
+            @if($top_countries->isNotEmpty())
             <div class="bg-white rounded-xl shadow-lg p-6">
-                <h2 class="text-2xl font-bold text-gray-900 mb-4">🔥 Most Traded Symbols</h2>
+                <h2 class="text-xl font-bold text-gray-900 mb-4">🌍 Top Countries</h2>
                 <div class="space-y-3">
-                    @foreach($top_symbols->take(10) as $symbol)
-                    <div class="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                    @foreach($top_countries->take(3) as $country)
+                    <div class="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
                         <div>
-                            <div class="font-semibold text-gray-900">{{ $symbol->normalized_symbol }}</div>
-                            <div class="text-sm text-gray-600">{{ number_format($symbol->trades) }} trades</div>
+                            <div class="font-semibold text-gray-900 text-sm">{{ $country->country }}</div>
+                            <div class="text-xs text-gray-600">{{ number_format($country->trades) }} trades</div>
                         </div>
                         <div class="text-right">
-                            <div class="font-bold text-blue-600">{{ number_format($symbol->total_volume, 2) }} lots</div>
-                            <div class="text-xs text-gray-500">{{ number_format($symbol->avg_lot_size, 2) }} avg</div>
+                            <div class="font-bold {{ $country->profit >= 0 ? 'text-green-600' : 'text-red-600' }} text-sm">
+                                {{ $country->profit >= 0 ? '+' : '' }}{{ number_format($country->profit, 2) }}
+                            </div>
+                            <div class="text-xs text-gray-500">{{ number_format($country->volume, 2) }} lots</div>
                         </div>
                     </div>
                     @endforeach
@@ -205,26 +202,26 @@
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Symbol</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Trades</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Win Rate</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total Profit</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Avg Lot Size</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Trades</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Win Rate</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total Profit</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Avg Lot Size</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
                         @foreach($symbol_performance as $perf)
                         <tr>
                             <td class="px-6 py-4 whitespace-nowrap font-medium text-gray-900">{{ $perf->normalized_symbol }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-gray-600">{{ number_format($perf->total_trades) }}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right">
+                            <td class="px-6 py-4 whitespace-nowrap text-left text-gray-600">{{ number_format($perf->total_trades) }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-left">
                                 <span class="px-2 py-1 text-xs font-semibold rounded-full {{ $perf->win_rate >= 50 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                                     {{ $perf->win_rate }}%
                                 </span>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right font-semibold {{ $perf->total_profit >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                            <td class="px-6 py-4 whitespace-nowrap text-left font-semibold {{ $perf->total_profit >= 0 ? 'text-green-600' : 'text-red-600' }}">
                                 {{ $perf->total_profit >= 0 ? '+' : '' }}${{ number_format($perf->total_profit, 2) }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-gray-600">{{ number_format($perf->avg_lot_size, 2) }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-left text-gray-600">{{ number_format($perf->avg_lot_size, 2) }}</td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -233,41 +230,25 @@
         </div>
         @endif
 
-        <!-- CTA Section -->
+        <!-- CTA Section - Only for guests -->
+        <!-- Debug: Auth check = {{ Auth::check() ? 'true' : 'false' }} -->
+        @if(!Auth::check())
         <div class="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl shadow-lg p-8 text-center text-white">
             <h2 class="text-3xl font-bold mb-4">Want to Track Your Own Trading Performance?</h2>
             <p class="text-lg mb-6 opacity-90">Join TheTradeVisor and get detailed analytics for your trading accounts</p>
             <div class="flex gap-4 justify-center">
-                @guest
-                    <a href="/register" class="bg-white text-indigo-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
-                        Get Started Free
-                    </a>
-                    <a href="/features" class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-indigo-600 transition">
-                        Learn More
-                    </a>
-                @else
-                    <a href="/dashboard" class="bg-white text-indigo-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
-                        Go to Dashboard
-                    </a>
-                @endguest
+                <a href="/register" class="bg-white text-indigo-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition">
+                    Get Started Free
+                </a>
+                <a href="/features" class="border-2 border-white text-white px-8 py-3 rounded-lg font-semibent hover:bg-white hover:text-indigo-600 transition">
+                    Learn More
+                </a>
             </div>
         </div>
+        @endif
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-gray-900 text-gray-400 mt-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div class="text-center">
-                <p>&copy; {{ date('Y') }} TheTradeVisor. All rights reserved.</p>
-                <div class="mt-4 flex justify-center gap-6">
-                    <a href="/about" class="hover:text-white">About</a>
-                    <a href="/contact" class="hover:text-white">Contact</a>
-                    <a href="/faq" class="hover:text-white">FAQ</a>
-                    <a href="/pricing" class="hover:text-white">Pricing</a>
-                </div>
-            </div>
-        </div>
-    </footer>
+    <x-footer />
 
     <!-- Chart Script -->
     @if($daily_profit_trend->isNotEmpty())

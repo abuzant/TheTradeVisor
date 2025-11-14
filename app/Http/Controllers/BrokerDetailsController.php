@@ -130,13 +130,14 @@ class BrokerDetailsController extends Controller
     private function getTopCountries($accountIds, $days)
     {
         // Get deals with country info from trading accounts
-        // Use country_name or detected_country
-        return Deal::closedTrades()
+        // Use country_name, country_code, or detected_country (fallback)
+        $result = Deal::closedTrades()
             ->whereIn('trading_account_id', $accountIds)
             ->join('trading_accounts', 'deals.trading_account_id', '=', 'trading_accounts.id')
             ->where('deals.time', '>=', now()->subDays($days))
             ->where(function($query) {
                 $query->whereNotNull('trading_accounts.country_name')
+                      ->orWhereNotNull('trading_accounts.country_code')
                       ->orWhereNotNull('trading_accounts.detected_country');
             })
             ->select(
@@ -149,6 +150,8 @@ class BrokerDetailsController extends Controller
             ->orderByDesc('trades')
             ->limit(10)
             ->get();
+
+        return $result;
     }
 
     /**
@@ -268,9 +271,9 @@ class BrokerDetailsController extends Controller
      */
     private function getDailyProfitTrend($accountIds, $days)
     {
-        return Deal::whereIn('trading_account_id', $accountIds)
+        return Deal::closedTrades()
+            ->whereIn('trading_account_id', $accountIds)
             ->where('time', '>=', now()->subDays($days))
-            ->where('entry', 'out')
             ->select(
                 DB::raw('DATE(time) as date'),
                 DB::raw('SUM(profit) as profit'),

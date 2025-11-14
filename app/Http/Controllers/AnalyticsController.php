@@ -383,7 +383,7 @@ class AnalyticsController extends Controller
      */
     private function getWinRateBySymbol($days = 30)
     {
-        return Deal::closedTrades()
+        $rawData = Deal::closedTrades()
             ->select('symbol',
                 DB::raw('COUNT(*) as total_trades'),
                 DB::raw('SUM(CASE WHEN profit > 0 THEN 1 ELSE 0 END) as winning_trades'),
@@ -393,14 +393,23 @@ class AnalyticsController extends Controller
             ->whereIn('entry', ['out', 'inout'])
             ->groupBy('symbol')
             ->havingRaw('COUNT(*) >= ?', [5])
-            ->get()
-            ->map(function($item) {
-                $winRate = $item->total_trades > 0 ? round(($item->winning_trades / $item->total_trades) * 100, 1) : 0;
+            ->get();
+
+        // Group by normalized symbol and aggregate
+        return $rawData->groupBy(function($item) {
+                return \App\Models\SymbolMapping::normalize($item->symbol);
+            })
+            ->map(function($group, $normalizedSymbol) {
+                $totalTrades = $group->sum('total_trades');
+                $winningTrades = $group->sum('winning_trades');
+                $totalProfit = $group->sum('total_profit');
+                $winRate = $totalTrades > 0 ? round(($winningTrades / $totalTrades) * 100, 1) : 0;
+                
                 return [
-                    'symbol' => \App\Models\SymbolMapping::normalize($item->symbol),
-                    'total_trades' => $item->total_trades,
+                    'symbol' => $normalizedSymbol,
+                    'total_trades' => $totalTrades,
                     'win_rate' => $winRate,
-                    'total_profit' => round($item->total_profit, 2),
+                    'total_profit' => round($totalProfit, 2),
                 ];
             })
             ->sortByDesc('win_rate')

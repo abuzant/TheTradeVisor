@@ -39,6 +39,7 @@ Route::get('/privacy', function () {
 
 // Public Broker Analytics (SEO-friendly, aggregated data from all users)
 Route::get('/broker/{broker}', [App\Http\Controllers\BrokerDetailsController::class, 'show'])
+    ->middleware('web')
     ->name('broker-details');
 
 // Logged-in Users
