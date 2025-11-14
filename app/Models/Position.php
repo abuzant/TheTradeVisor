@@ -39,6 +39,7 @@ class Position extends Model
         'total_volume_out',
         'deal_count',
         'platform_type',
+        'activity_type',
     ];
 
     protected $casts = [

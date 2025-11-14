@@ -185,6 +185,8 @@ class ProcessHistoricalData implements ShouldQueue
                     'time' => $this->parseDateTime($dealData['time']),
                     'time_msc' => $dealData['time_msc'] ?? null,
                     'magic' => $dealData['magic'] ?? 0,
+                    'platform_type' => $dealData['platform_type'] ?? null,
+                    'activity_type' => $dealData['activity_type'] ?? null,
                 ]);
 
                     $newDealsCount++;

@@ -25,11 +25,10 @@ class ExportController extends Controller
         // Multi-account context: Always export in USD
         $displayCurrency = 'USD';
         
-        $query = Deal::whereHas('tradingAccount', function($q) use ($user) {
+        $query = Deal::closedTrades()
+        ->whereHas('tradingAccount', function($q) use ($user) {
             $q->where('user_id', $user->id);
         })
-        ->whereNotNull('symbol')
-        ->where('symbol', '!=', '')
         ->where('symbol', '!=', 'UNKNOWN')
         ->with('tradingAccount');
         
@@ -84,11 +83,10 @@ class ExportController extends Controller
         // Multi-account context: Always export in USD
         $displayCurrency = 'USD';
         
-        $query = Deal::whereHas('tradingAccount', function($q) use ($user) {
+        $query = Deal::closedTrades()
+        ->whereHas('tradingAccount', function($q) use ($user) {
             $q->where('user_id', $user->id);
         })
-        ->whereNotNull('symbol')
-        ->where('symbol', '!=', '')
         ->where('symbol', '!=', 'UNKNOWN')
         ->with('tradingAccount');
         
@@ -137,7 +135,8 @@ class ExportController extends Controller
         // Multi-account context: Always export in USD
         $displayCurrency = 'USD';
         
-        $query = Deal::whereHas('tradingAccount', function($q) use ($user) {
+        $query = Deal::closedTrades()
+        ->whereHas('tradingAccount', function($q) use ($user) {
             $q->where('user_id', $user->id);
         })
         ->where('symbol', 'like', '%' . $symbol . '%')

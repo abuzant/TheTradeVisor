@@ -159,12 +159,12 @@ class TradesController extends Controller
             'avg_cost_per_trade' => 0,
         ];
         
-        $deals = Deal::whereHas('tradingAccount', function($q) use ($user) {
+        $deals = Deal::closedTrades()
+        ->whereHas('tradingAccount', function($q) use ($user) {
             $q->where('user_id', $user->id);
         })
         ->with('tradingAccount')  // Load account for currency conversion
         ->whereIn('symbol', $symbolMappings)
-        ->whereIn('entry', ['out', 'inout'])  // Only show closed trades with profit
         ->orderBy('time', 'desc')
         ->paginate(50);
         
@@ -180,25 +180,26 @@ class TradesController extends Controller
         return view('trades.symbol', compact('deals', 'symbol', 'stats'));
     }
     
-    // Use aggregated stats from database
+    // Use aggregated stats from database where safe (counts & volume)
     $totalTrades = $aggregateStats->total_trades ?? 0;
     $winningTrades = $aggregateStats->winning_trades ?? 0;
     $losingTrades = $aggregateStats->losing_trades ?? 0;
-    $totalProfit = $aggregateStats->total_profit ?? 0;
     $totalVolume = $aggregateStats->total_volume ?? 0;
     
-    // Convert all profits to USD for multi-account symbol view
+    // Convert all profits and costs to USD for multi-account symbol view
     $currencyService = app(\App\Services\CurrencyService::class);
     $allProfitsUSD = [];
     $buyProfitUSD = 0;
     $sellProfitUSD = 0;
     $buyCount = 0;
     $sellCount = 0;
+    $totalProfitUSD = 0;
     
     foreach ($allDeals as $deal) {
         $accountCurrency = $deal->tradingAccount->account_currency ?? 'USD';
         $profitUSD = $currencyService->convert($deal->profit, $accountCurrency, 'USD');
         $allProfitsUSD[] = $profitUSD;
+        $totalProfitUSD += $profitUSD;
         
         if ($deal->is_buy) {
             $buyProfitUSD += $profitUSD;
@@ -300,10 +301,11 @@ class TradesController extends Controller
         'winning_trades' => $winningTrades,
         'losing_trades' => $losingTrades,
         'win_rate' => $totalTrades > 0 ? round(($winningTrades / $totalTrades) * 100, 1) : 0,
-        'total_profit' => $totalProfit,
+        // IMPORTANT: use USD-converted profit for all USD displays
+        'total_profit' => $totalProfitUSD,
         'total_volume' => $totalVolume,
         'avg_volume' => $totalTrades > 0 ? $totalVolume / $totalTrades : 0,
-        'avg_profit' => $totalTrades > 0 ? $totalProfit / $totalTrades : 0,
+        'avg_profit' => $totalTrades > 0 ? $totalProfitUSD / $totalTrades : 0,
         'best_trade' => !empty($allProfitsUSD) ? max($allProfitsUSD) : 0,
         'worst_trade' => !empty($allProfitsUSD) ? min($allProfitsUSD) : 0,
         'profit_factor' => $grossLoss > 0 ? round($grossProfit / $grossLoss, 2) : ($grossProfit > 0 ? 999 : 0),

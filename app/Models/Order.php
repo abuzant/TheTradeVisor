@@ -35,6 +35,8 @@ class Order extends Model
         'position_by_id',
         'magic',
         'is_active',
+        'platform_type',
+        'activity_type',
     ];
 
     protected $casts = [

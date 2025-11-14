@@ -129,9 +129,9 @@ class BrokerAnalyticsService
             ->pluck('id');
 
         // Get all deals for this broker
-        $allDeals = Deal::whereIn('trading_account_id', $accountIds)
-            ->tradesOnly()
-            ->where('time', '>=', now()->subDays($days))
+        $allDeals = Deal::closedTrades()
+            ->whereIn('trading_account_id', $accountIds)
+            ->dateRange(now()->subDays($days))
             ->orderBy('time')
             ->get();
 
@@ -238,10 +238,10 @@ class BrokerAnalyticsService
         $accountIds = TradingAccount::where('broker_name', $brokerName)
             ->pluck('id');
 
-        $deals = Deal::whereIn('trading_account_id', $accountIds)
+        $deals = Deal::closedTrades()
+            ->whereIn('trading_account_id', $accountIds)
             ->with('tradingAccount')
-            ->tradesOnly()
-            ->where('time', '>=', now()->subDays($days))
+            ->dateRange(now()->subDays($days))
             ->get();
 
         if ($deals->isEmpty()) {
@@ -299,9 +299,9 @@ class BrokerAnalyticsService
         $accountIds = TradingAccount::where('broker_name', $brokerName)
             ->pluck('id');
 
-        $deals = Deal::whereIn('trading_account_id', $accountIds)
-            ->tradesOnly()
-            ->where('time', '>=', now()->subDays($days))
+        $deals = Deal::closedTrades()
+            ->whereIn('trading_account_id', $accountIds)
+            ->dateRange(now()->subDays($days))
             ->get();
 
         if ($deals->isEmpty()) {
@@ -373,10 +373,10 @@ class BrokerAnalyticsService
         $accountIds = TradingAccount::where('broker_name', $brokerName)
             ->pluck('id');
 
-        $deals = Deal::whereIn('trading_account_id', $accountIds)
+        $deals = Deal::closedTrades()
+            ->whereIn('trading_account_id', $accountIds)
             ->with('tradingAccount')
-            ->tradesOnly()
-            ->where('time', '>=', now()->subDays($days))
+            ->dateRange(now()->subDays($days))
             ->get();
 
         if ($deals->isEmpty()) {
@@ -464,8 +464,8 @@ class BrokerAnalyticsService
     private function getTopSymbols($days)
     {
         // Get all deals with their symbols
-        $deals = Deal::tradesOnly()
-            ->where('time', '>=', now()->subDays($days))
+        $deals = Deal::closedTrades()
+            ->dateRange(now()->subDays($days))
             ->select('symbol')
             ->get();
         

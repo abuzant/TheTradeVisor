@@ -419,18 +419,19 @@
                             </thead>
                             <tbody class="bg-white">
                                 @forelse($positions as $position)
-                                    <tr x-data="{ 
+                                    <tbody x-data="{ 
                                         expanded: false,
                                         position: {
                                             is_open: {{ $position->is_open ? 'true' : 'false' }},
                                             profit: {{ $position->profit }}
                                         }
-                                    }" 
-                                    x-show="filterPosition(position)"
+                                    }"
+                                    x-show="filterPosition(position)">
+                                    <tr 
                                     class="border-b border-gray-200 hover:bg-gray-50 transition-colors">
                                         {{-- Main Position Row --}}
                                         <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                            @if($position->deal_count > 1)
+                                            @if(!empty($position->deal_count) && $position->deal_count > 1)
                                                 <button @click="expanded = !expanded" class="text-indigo-600 hover:text-indigo-900 focus:outline-none">
                                                     <svg x-show="!expanded" class="w-4 h-4 inline" fill="currentColor" viewBox="0 0 20 20">
                                                         <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
@@ -440,7 +441,11 @@
                                                     </svg>
                                                 </button>
                                             @endif
-                                            {{ $position->open_time->format('M d, H:i') }}
+                                            @if($position->open_time)
+                                                {{ $position->open_time->format('M d, H:i') }}
+                                            @else
+                                                <span class="text-gray-400">N/A</span>
+                                            @endif
                                         </td>
                                         
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
@@ -509,15 +514,21 @@
                                                             @foreach($position->deals as $deal)
                                                                 <tr>
                                                                     <td class="px-4 py-2 whitespace-nowrap text-xs text-gray-500">
-                                                                        {{ $deal->time->format('M d, H:i:s') }}
+                                                                        @if($deal->time)
+                                                                            {{ $deal->time->format('M d, H:i:s') }}
+                                                                        @else
+                                                                            <span class="text-gray-400">N/A</span>
+                                                                        @endif
                                                                     </td>
                                                                     <td class="px-4 py-2 whitespace-nowrap text-xs text-gray-900">
                                                                         {{ $deal->ticket }}
                                                                     </td>
                                                                     <td class="px-4 py-2 whitespace-nowrap text-xs">
+                                                                        @if($deal->entry === 'in')
                                                                         <span class="px-2 py-0.5 rounded {{ $deal->is_buy ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                                                            {{ $deal->display_type }}
+                                                                                {{ $deal->display_type }}
                                                                         </span>
+                                                                        @endif
                                                                     </td>
                                                                     <td class="px-4 py-2 whitespace-nowrap text-xs">
                                                                         <span class="px-2 py-0.5 rounded {{ $deal->entry === 'in' ? 'bg-blue-100 text-blue-800' : 'bg-orange-100 text-orange-800' }}">
@@ -531,7 +542,11 @@
                                                                         {{ number_format($deal->price, 5) }}
                                                                     </td>
                                                                     <td class="px-4 py-2 whitespace-nowrap text-xs font-medium {{ $deal->profit >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                                                        {{ number_format($deal->profit, 2) }}
+                                                                        @if($deal->entry === 'in')
+                                                                            <span class="text-gray-400">-</span>
+                                                                        @else
+                                                                            {{ number_format($deal->profit, 2) }}
+                                                                        @endif
                                                                     </td>
                                                                 </tr>
                                                             @endforeach
@@ -541,6 +556,7 @@
                                             </td>
                                         </tr>
                                     @endif
+                                    </tbody>
                                 @empty
                                     <tr>
                                         <td colspan="8" class="px-6 py-8 text-center text-gray-500">

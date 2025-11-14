@@ -38,7 +38,7 @@ TheTradeVisor is an enterprise-grade trading analytics platform that aggregates,
 - 📊 **Real-time Analytics** - Live trading performance metrics and statistics
 - 🌍 **Global Market Data** - Aggregated analytics from traders worldwide
 - 🏦 **Broker Comparison** - Detailed broker performance analysis
-- 📈 **Performance Tracking** - Individual and portfolio-level tracking
+- 📈 **Performance Tracking** - Individual and portfolio-level tracking with equity curves, drawdown analysis, and symbol performance
 - 🔒 **Enterprise Security** - Multi-layer protection and monitoring
 - ⚡ **High Performance** - Redis caching, query optimization, circuit breakers
 - 🌐 **GeoIP Analytics** - Country-based trading insights
@@ -58,6 +58,8 @@ TheTradeVisor is an enterprise-grade trading analytics platform that aggregates,
 
 - [GeoIP Analytics](docs/features/geoip-analytics.md) - Geographic insights
 - [Trading Analytics](docs/README.md#-core-features) - Analytics system overview
+- [Performance Analytics](docs/features/performance.md) - Trade analysis, equity curves, and drawdown
+- [Dashboard Live Positions](docs/features/DASHBOARD_LIVE_POSITIONS.md) - Real-time open positions and recent closed positions
 - [Broker Comparison](docs/README.md#-core-features) - Broker analytics features
 
 ### System Architecture

@@ -114,20 +114,77 @@ class DashboardController extends Controller
             ];
         });
 
-        // Recent positions (closed) - Cache with user + session + IP
-        $positionsCacheKey = "dashboard.positions.{$user->id}.{$sessionId}.{$userIp}";
+        // Recent closed trades - Cache with user + session + IP
+        // Use Deal model with entry='out' and group by position_id to build
+        // position-like objects with expandable deal history (same UX as account page)
+        $positionsCacheKey = "dashboard.closed_trades.{$user->id}.{$sessionId}.{$userIp}";
         $recentPositions = Cache::remember($positionsCacheKey, 300, function() use ($user) {
-            $accountIds = $user->tradingAccounts()->pluck('id');
-            if ($accountIds->isEmpty()) {
+            $accountIds = $user->tradingAccounts()->pluck('id')->toArray();
+            if (empty($accountIds)) {
                 return collect();
             }
-            
-            return Position::whereIn('trading_account_id', $accountIds)
-                ->where('is_open', false)
+
+            // Get closed trades (OUT deals) for last 30 days across all accounts
+            $closedTrades = Deal::closedTrades()
+                ->forAccounts($accountIds)
                 ->with('tradingAccount')
-                ->orderBy('update_time', 'desc')
-                ->limit(20)
+                ->dateRange(now()->subDays(30))
+                ->recent()
+                ->limit(1000)
                 ->get();
+
+            if ($closedTrades->isEmpty()) {
+                return collect();
+            }
+
+            // Group by position_id to build position-level view with deals
+            $positions = $closedTrades->groupBy('position_id')->map(function($positionDeals, $positionId) {
+                $sampleDeal = $positionDeals->first();
+                $account = $sampleDeal->tradingAccount;
+
+                // Load all deals (IN + OUT) for this position on this account
+                $allDeals = Deal::forPosition($positionId)
+                    ->forAccount($sampleDeal->trading_account_id)
+                    ->orderBy('time', 'asc')
+                    ->limit(100)
+                    ->get();
+
+                $inDeal = $allDeals->where('entry', 'in')->first();
+                $outDeal = $allDeals->where('entry', 'out')->sortByDesc('time')->first();
+
+                // Determine position type from IN deal (not closing action)
+                $positionType = $inDeal ? $inDeal->display_type : ($outDeal ? $outDeal->display_type : null);
+                $isBuy = $inDeal ? $inDeal->is_buy : false;
+
+                return (object) [
+                    'position_id' => $positionId,
+                    'symbol' => $outDeal ? $outDeal->symbol : $sampleDeal->symbol,
+                    'normalized_symbol' => $outDeal ? $outDeal->normalized_symbol : $sampleDeal->normalized_symbol,
+                    'type' => $positionType,
+                    'display_type' => $positionType,
+                    'is_buy' => $isBuy,
+                    'is_open' => false,
+                    'volume' => $allDeals->where('entry', 'in')->sum('volume'),
+                    'open_price' => $inDeal ? $inDeal->price : 0,
+                    'close_price' => $outDeal ? $outDeal->price : 0,
+                    'profit' => $allDeals->where('entry', 'out')->sum('profit'),
+                    'commission' => $allDeals->sum('commission'),
+                    'swap' => $outDeal ? $outDeal->swap : 0,
+                    'open_time' => $inDeal ? $inDeal->time : null,
+                    'close_time' => $outDeal ? $outDeal->time : null,
+                    'deals' => $allDeals,
+                    'deal_count' => $allDeals->count(),
+                    'trading_account_id' => $sampleDeal->trading_account_id,
+                    'platform_type' => $account->platform_type ?? 'MT4',
+                    'position_identifier' => $positionId,
+                    'account_currency' => $account->account_currency ?? 'USD',
+                    'account_number' => $account->account_number,
+                    'broker_name' => $account->broker_name,
+                ];
+            })->values();
+
+            // Limit to most recent 20 positions by close_time
+            return $positions->sortByDesc('close_time')->take(20)->values();
         });
 
         // Get account limit info (not cached, lightweight)
@@ -190,30 +247,66 @@ class DashboardController extends Controller
         // Get account
         $account = $accountData['account'];
         
-        // Get all positions (filtering done client-side with Alpine.js)
-        $positions = Position::where('trading_account_id', $account->id)
-            ->where('open_time', '>=', now()->subDays(30))
-            ->orderBy('open_time', 'desc')
-            ->paginate(20);
+        // Get recent closed trades (last 30 days)
+        // FIXED: Use Deal model with entry='out' for complete trade history
+        $closedTrades = Deal::closedTrades()
+            ->forAccount($account->id)
+            ->dateRange(now()->subDays(30))
+            ->recent()
+            ->limit(1000)
+            ->get();
         
-        // Load deals for each position
-        foreach ($positions as $position) {
-            if ($position->platform_type === 'MT5' && $position->position_identifier) {
-                // For MT5 netting, get all deals with same position_identifier
-                $position->deals = Deal::where('trading_account_id', $account->id)
-                    ->where('position_id', $position->id)
-                    ->orderBy('time', 'asc')
-                    ->limit(100)
-                    ->get();
-            } else {
-                // For MT4/MT5 hedging, get deals with same ticket
-                $position->deals = Deal::where('trading_account_id', $account->id)
-                    ->where('ticket', $position->ticket)
-                    ->orderBy('time', 'asc')
-                    ->limit(100)
-                    ->get();
-            }
-        }
+        // Group by position_id to show position-level view
+        $positions = $closedTrades->groupBy('position_id')->map(function($positionDeals, $positionId) use ($account) {
+            // Get all deals for this position (IN and OUT)
+            $allDeals = Deal::forPosition($positionId)
+                ->forAccount($account->id)
+                ->orderBy('time', 'asc')
+                ->limit(100)
+                ->get();
+            
+            $inDeal = $allDeals->where('entry', 'in')->first();
+            $outDeal = $allDeals->where('entry', 'out')->sortByDesc('time')->first();
+            
+            // Determine position type from IN deal (not OUT deal)
+            $positionType = $inDeal ? $inDeal->display_type : $outDeal->display_type;
+            $isBuy = $inDeal ? $inDeal->is_buy : false;
+            
+            // Create a position-like object for display
+            return (object) [
+                'position_id' => $positionId,
+                'symbol' => $outDeal->symbol,
+                'normalized_symbol' => $outDeal->normalized_symbol,
+                'type' => $positionType, // Use position type, not closing action
+                'display_type' => $positionType,
+                'is_buy' => $isBuy,
+                'is_open' => false, // These are all closed positions
+                'volume' => $allDeals->where('entry', 'in')->sum('volume'),
+                'open_price' => $inDeal->price ?? 0,
+                'close_price' => $outDeal->price ?? 0,
+                'profit' => $allDeals->where('entry', 'out')->sum('profit'),
+                'commission' => $allDeals->sum('commission'),
+                'swap' => $outDeal->swap ?? 0,
+                'open_time' => $inDeal->time ?? null,
+                'close_time' => $outDeal->time ?? null,
+                'deals' => $allDeals,
+                'deal_count' => $allDeals->count(), // Number of deals for this position
+                'trading_account_id' => $account->id,
+                'platform_type' => $account->platform_type ?? 'MT4', // Platform type
+                'position_identifier' => $positionId, // Position identifier
+            ];
+        })->values();
+        
+        // Paginate manually
+        $currentPage = request()->get('page', 1);
+        $perPage = 20;
+        $positions = new \Illuminate\Pagination\LengthAwarePaginator(
+            $positions->forPage($currentPage, $perPage),
+            $positions->count(),
+            $perPage,
+            $currentPage,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
 
         return view('account.show', array_merge($accountData, [
             'positions' => $positions,

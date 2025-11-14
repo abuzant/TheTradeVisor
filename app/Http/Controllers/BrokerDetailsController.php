@@ -74,9 +74,9 @@ class BrokerDetailsController extends Controller
      */
     private function getOverviewStats($accountIds, $days)
     {
-        $stats = Deal::whereIn('trading_account_id', $accountIds)
-            ->where('time', '>=', now()->subDays($days))
-            ->where('entry', 'out')
+        $stats = Deal::closedTrades()
+            ->whereIn('trading_account_id', $accountIds)
+            ->dateRange(now()->subDays($days))
             ->select(
                 DB::raw('COUNT(*) as total_trades'),
                 DB::raw('SUM(profit) as total_profit_native'),
@@ -96,9 +96,9 @@ class BrokerDetailsController extends Controller
         
         $accounts = TradingAccount::whereIn('id', $accountIds)->get();
         foreach ($accounts as $account) {
-            $accountDeals = Deal::where('trading_account_id', $account->id)
-                ->where('time', '>=', now()->subDays($days))
-                ->where('entry', 'out')
+            $accountDeals = Deal::closedTrades()
+                ->where('trading_account_id', $account->id)
+                ->dateRange(now()->subDays($days))
                 ->select(
                     DB::raw('SUM(profit) as profit'),
                     DB::raw('SUM(commission) as commission'),
@@ -131,10 +131,10 @@ class BrokerDetailsController extends Controller
     {
         // Get deals with country info from trading accounts
         // Use country_name or detected_country
-        return Deal::whereIn('trading_account_id', $accountIds)
+        return Deal::closedTrades()
+            ->whereIn('trading_account_id', $accountIds)
             ->join('trading_accounts', 'deals.trading_account_id', '=', 'trading_accounts.id')
             ->where('deals.time', '>=', now()->subDays($days))
-            ->where('deals.entry', 'out')
             ->where(function($query) {
                 $query->whereNotNull('trading_accounts.country_name')
                       ->orWhereNotNull('trading_accounts.detected_country');

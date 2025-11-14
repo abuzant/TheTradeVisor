@@ -111,26 +111,43 @@ class ProcessTradingData implements ShouldQueue
             }
         }
 
-        // Generate unique account identifier
+        // Generate unique account identifier components
         $accountNumber = $accountData['account_number'] ?? null;
         $accountHash = $accountData['account_hash'] ?? null;
         $brokerServer = $accountData['server'];
 
-        // Find or create trading account
-        $tradingAccount = TradingAccount::firstOrCreate(
-            [
+        // Find existing trading account
+        // IMPORTANT:
+        // - Do NOT use nullable account_hash as part of a composite unique key with firstOrCreate.
+        //   This was causing duplicate accounts when account_hash was null.
+        // - For anonymized accounts (account_hash present, account_number possibly masked),
+        //   we match by user_id + broker_server + account_hash.
+        // - For normal accounts, we match by user_id + broker_server + account_number.
+
+        $query = TradingAccount::where('user_id', $userId)
+            ->where('broker_server', $brokerServer);
+
+        if (!empty($accountHash)) {
+            $query->where('account_hash', $accountHash);
+        } elseif (!empty($accountNumber)) {
+            $query->where('account_number', $accountNumber);
+        }
+
+        $tradingAccount = $query->first();
+
+        // Create trading account if it does not exist yet
+        if (!$tradingAccount) {
+            $tradingAccount = TradingAccount::create([
                 'user_id' => $userId,
                 'broker_server' => $brokerServer,
                 'account_number' => $accountNumber,
                 'account_hash' => $accountHash,
-            ],
-            [
                 'account_uuid' => (string) \Illuminate\Support\Str::uuid(),
                 'broker_name' => $accountData['broker'],
                 'account_currency' => $accountData['currency'],
                 'leverage' => $accountData['leverage'] ?? 1,
-            ]
-        );
+            ]);
+        }
 
         // Update account information
         $tradingAccount->update([
@@ -153,6 +170,10 @@ class ProcessTradingData implements ShouldQueue
             'detected_timezone' => $timezone,
             'last_sync_at' => now(),
             'is_active' => true,
+            'platform_type' => $accountData['platform_type'] ?? null,
+            'platform_build' => $accountData['platform_build'] ?? null,
+            'account_mode' => $accountData['account_mode'] ?? null,
+            'platform_detected_at' => isset($accountData['platform_type']) ? now() : null,
         ]);
 
         return $tradingAccount;
@@ -194,6 +215,8 @@ class ProcessTradingData implements ShouldQueue
                         'magic' => $posData['magic'] ?? 0,
                         'identifier' => $posData['identifier'] ?? $posData['ticket'],
                         'is_open' => true,
+                        'platform_type' => $posData['platform_type'] ?? null,
+                        'activity_type' => $posData['activity_type'] ?? null,
                     ]
                 );
             } catch (\Exception $e) {
@@ -250,6 +273,8 @@ class ProcessTradingData implements ShouldQueue
                         'position_by_id' => $orderData['position_by_id'] ?? null,
                         'magic' => $orderData['magic'] ?? 0,
                         'is_active' => true,
+                        'platform_type' => $orderData['platform_type'] ?? null,
+                        'activity_type' => $orderData['activity_type'] ?? null,
                     ]
                 );
             } catch (\Exception $e) {
@@ -309,6 +334,8 @@ class ProcessTradingData implements ShouldQueue
                         'time' => $this->parseDateTime($dealData['time'] ?? null),
                         'time_msc' => $dealData['time_msc'] ?? null,
                         'magic' => $dealData['magic'] ?? 0,
+                        'platform_type' => $dealData['platform_type'] ?? null,
+                        'activity_type' => $dealData['activity_type'] ?? null,
                     ]);
 
                     $newDealsCount++;

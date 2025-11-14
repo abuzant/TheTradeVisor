@@ -128,10 +128,10 @@ class PerformanceMetricsService
      */
     private function getSymbolPerformance($accountIds, $days, $displayCurrency)
     {
-        // Get all deals with trading account relationship
+        // Use closed trades (OUT deals) to represent completed positions/orders per symbol
         $deals = Deal::whereIn('trading_account_id', $accountIds)
             ->with('tradingAccount')
-            ->tradesOnly()
+            ->closedTrades()
             ->where('time', '>=', now()->subDays($days))
             ->get();
 
@@ -155,10 +155,30 @@ class PerformanceMetricsService
                 return $deal;
             });
 
-            $totalTrades = $convertedDeals->count();
-            $winningTrades = $convertedDeals->where('converted_profit', '>', 0)->count();
-            $totalProfit = $convertedDeals->sum('converted_profit');
-            $avgProfit = $convertedDeals->avg('converted_profit');
+            // Group by position_id so each position/order counts as ONE trade
+            $positions = $convertedDeals->groupBy('position_id');
+
+            $totalTrades = $positions->count();
+
+            // Determine win/loss per position based on total converted profit
+            $winningTrades = 0;
+            $losingTrades = 0;
+            $positionProfits = [];
+
+            foreach ($positions as $positionId => $positionDeals) {
+                $posProfit = $positionDeals->sum('converted_profit');
+                $positionProfits[] = $posProfit;
+                if ($posProfit > 0) {
+                    $winningTrades++;
+                } elseif ($posProfit < 0) {
+                    $losingTrades++;
+                }
+            }
+
+            $totalProfit = array_sum($positionProfits);
+            $avgProfit = $totalTrades > 0 ? $totalProfit / $totalTrades : 0;
+
+            // Volume: sum volume of OUT deals; this approximates traded size without double-counting IN+OUT
             $totalVolume = $convertedDeals->sum('volume');
 
             $winRate = $totalTrades > 0 ? round(($winningTrades / $totalTrades) * 100, 1) : 0;

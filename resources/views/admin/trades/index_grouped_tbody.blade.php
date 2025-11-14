@@ -1,13 +1,13 @@
 <tbody class="bg-white divide-y divide-gray-200">
     @forelse($groupedDeals as $group)
         @php
-            // Use OUT deal for display if exists, otherwise IN deal
-            $displayDeal = $group['out_deal'] ?? $group['in_deal'];
+            // FIXED: Use IN deal (position type) for display, not OUT deal (closing action)
+            $displayDeal = $group['in_deal'] ?? $group['out_deal'];
             $isOpen = $group['is_open'];
             $hasBoth = $group['out_deal'] && $group['in_deal'];
         @endphp
         
-        {{-- Main Row (shows OUT deal or IN if no OUT) --}}
+        {{-- Main Row (shows IN deal - position type, not closing action) --}}
         <tr class="hover:bg-gray-50 {{ $isOpen ? 'bg-blue-50' : '' }} {{ $hasBoth ? 'cursor-pointer' : '' }}" 
             @if($hasBoth) onclick="toggleDetails('position-{{ $group['position_id'] }}')" @endif>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -84,40 +84,49 @@
             </td>
         </tr>
         
-        {{-- Detail Row (hidden by default, shows IN deal if OUT exists) --}}
+        {{-- Detail Row (hidden by default, shows OUT deal - closing details) --}}
         @if($hasBoth)
             <tr id="details-position-{{ $group['position_id'] }}" class="hidden bg-gray-50">
                 <td colspan="9" class="px-6 py-4">
-                    <div class="ml-8 border-l-2 border-indigo-200 pl-4">
-                        <div class="text-xs font-semibold text-gray-600 mb-2">Opening Trade Details:</div>
+                    <div class="ml-8 border-l-2 border-red-200 pl-4">
+                        <div class="text-xs font-semibold text-gray-600 mb-2">Closing Trade Details:</div>
                         <table class="min-w-full text-xs">
                             <thead class="bg-gray-100">
                                 <tr>
                                     <th class="px-2 py-1 text-left text-gray-600">Ticket</th>
                                     <th class="px-2 py-1 text-left text-gray-600">Time</th>
-                                    <th class="px-2 py-1 text-left text-gray-600">Type</th>
+                                    <th class="px-2 py-1 text-left text-gray-600">Action</th>
                                     <th class="px-2 py-1 text-right text-gray-600">Volume</th>
                                     <th class="px-2 py-1 text-right text-gray-600">Price</th>
+                                    <th class="px-2 py-1 text-right text-gray-600">Profit</th>
                                     <th class="px-2 py-1 text-right text-gray-600">Commission</th>
                                     <th class="px-2 py-1 text-right text-gray-600">Swap</th>
-                                    <th class="px-2 py-1 text-right text-gray-600">Fee</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td class="px-2 py-1 text-left">{{ $group['in_deal']->ticket }}</td>
-                                    <td class="px-2 py-1 text-left">{{ $group['in_deal']->time->format('M d, H:i') }}</td>
+                                    <td class="px-2 py-1 text-left">{{ $group['out_deal']->ticket }}</td>
                                     <td class="px-2 py-1 text-left">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                                            {{ str_contains(strtolower($group['in_deal']->type), 'buy') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                            {{ strtoupper($group['in_deal']->type) }}
+                                        @if($group['out_deal']->time)
+                                            {{ $group['out_deal']->time->format('M d, H:i') }}
+                                        @else
+                                            <span class="text-gray-400">N/A</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-2 py-1 text-left">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                            {{ strtoupper($group['out_deal']->type) }} (Close)
                                         </span>
                                     </td>
-                                    <td class="px-2 py-1 text-center">{{ number_format($group['in_deal']->volume, 2) }}</td>
-                                    <td class="px-2 py-1 text-center">{{ $group['in_deal']->formatted_price }}</td>
-                                    <td class="px-2 py-1 text-center">{{ number_format($group['in_deal']->commission ?? 0, 2) }}</td>
-                                    <td class="px-2 py-1 text-center">{{ number_format($group['in_deal']->swap ?? 0, 2) }}</td>
-                                    <td class="px-2 py-1 text-center">{{ number_format($group['in_deal']->fee ?? 0, 2) }}</td>
+                                    <td class="px-2 py-1 text-center">{{ number_format($group['out_deal']->volume, 2) }}</td>
+                                    <td class="px-2 py-1 text-center">{{ $group['out_deal']->formatted_price }}</td>
+                                    <td class="px-2 py-1 text-center">
+                                        <span class="{{ $group['out_deal']->profit >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                                            {{ number_format($group['out_deal']->profit, 2) }}
+                                        </span>
+                                    </td>
+                                    <td class="px-2 py-1 text-center">{{ number_format($group['out_deal']->commission ?? 0, 2) }}</td>
+                                    <td class="px-2 py-1 text-center">{{ number_format($group['out_deal']->swap ?? 0, 2) }}</td>
                                 </tr>
                             </tbody>
                         </table>

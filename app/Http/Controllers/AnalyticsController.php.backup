@@ -127,9 +127,10 @@ class AnalyticsController extends Controller
      */
     private function getTradingByHour($days = 30)
     {
-        $data = Deal::closedTrades()
-            ->select(DB::raw('EXTRACT(HOUR FROM time) as hour'), DB::raw('COUNT(*) as count'))
-            ->dateRange(now()->subDays($days))
+        $data = Deal::select(DB::raw('EXTRACT(HOUR FROM time) as hour'), DB::raw('COUNT(*) as count'))
+            ->whereNotNull('symbol')
+            ->where('symbol', '!=', '')
+        ->where('time', '>=', now()->subDays($days))
             ->groupBy('hour')
             ->orderBy('hour')
             ->get()
@@ -370,9 +371,10 @@ class AnalyticsController extends Controller
      */
     private function getDailyVolumeTrend($days = 30)
     {
-        return Deal::closedTrades()
-            ->select(DB::raw('DATE(time) as date'), DB::raw('SUM(volume) as volume'), DB::raw('COUNT(*) as trades'))
-            ->dateRange(now()->subDays($days))
+        return Deal::select(DB::raw('DATE(time) as date'), DB::raw('SUM(volume) as volume'), DB::raw('COUNT(*) as trades'))
+            ->whereNotNull('symbol')
+            ->where('symbol', '!=', '')
+            ->where('time', '>=', now()->subDays($days))
             ->groupBy('date')
             ->orderBy('date')
             ->get();
@@ -383,13 +385,13 @@ class AnalyticsController extends Controller
      */
     private function getWinRateBySymbol($days = 30)
     {
-        return Deal::closedTrades()
-            ->select('symbol',
+        return Deal::select('symbol',
                 DB::raw('COUNT(*) as total_trades'),
                 DB::raw('SUM(CASE WHEN profit > 0 THEN 1 ELSE 0 END) as winning_trades'),
                 DB::raw('SUM(profit) as total_profit'))
-            ->where('symbol', '!=', 'UNKNOWN')
-            ->dateRange(now()->subDays($days))
+            ->whereNotNull('symbol')
+            ->where('symbol', '!=', '')
+            ->where('time', '>=', now()->subDays($days))
             ->whereIn('entry', ['out', 'inout'])
             ->groupBy('symbol')
             ->havingRaw('COUNT(*) >= ?', [5])
@@ -413,8 +415,9 @@ class AnalyticsController extends Controller
      */
     private function getTradingCosts($days = 30)
     {
-        $deals = Deal::closedTrades()
-            ->dateRange(now()->subDays($days))
+        $deals = Deal::whereNotNull('symbol')
+            ->where('symbol', '!=', '')
+            ->where('time', '>=', now()->subDays($days))
             ->with('tradingAccount')
             ->get();
 
@@ -449,8 +452,9 @@ class AnalyticsController extends Controller
      */
     private function getPositionSizeDistribution($days = 30)
     {
-        $sizes = Deal::closedTrades()
-            ->dateRange(now()->subDays($days))
+        $sizes = Deal::whereNotNull('symbol')
+            ->where('symbol', '!=', '')
+            ->where('time', '>=', now()->subDays($days))
             ->pluck('volume');
 
         return [
@@ -467,8 +471,10 @@ class AnalyticsController extends Controller
     private function getTradeDurationStats($days = 30)
     {
         // Get positions that were closed in the period
-        $closedPositions = Deal::closedTrades()
-            ->dateRange(now()->subDays($days))
+        $closedPositions = Deal::whereNotNull('symbol')
+            ->where('symbol', '!=', '')
+            ->where('time', '>=', now()->subDays($days))
+            ->where('entry', 'out')
             ->count();
 
         return [
