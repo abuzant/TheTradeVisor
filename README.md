@@ -236,7 +236,7 @@ All data is anonymized and aggregated for privacy.
 
 ## 📈 System Status
 
-### Current Version: 1.3.0
+### Current Version: 1.4.0
 
 **Production Status**: ✅ Stable
 
