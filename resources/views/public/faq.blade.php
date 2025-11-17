@@ -70,7 +70,7 @@
 
                         <div>
                             <h3 class="text-lg font-semibold text-gray-900 mb-2">How much does it cost to add more accounts?</h3>
-                            <p class="text-gray-600">Additional accounts cost $2.99/month each (or $24.99/year). Alternatively, our Pro plan includes up to 10 accounts for $24.99/month.</p>
+                            <p class="text-gray-600">Additional accounts cost $9.99 one-time payment for lifetime access. No monthly fees! For trading firms needing unlimited accounts, we offer an Enterprise plan.</p>
                         </div>
 
                         <div>

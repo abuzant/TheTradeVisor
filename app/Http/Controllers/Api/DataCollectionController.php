@@ -88,6 +88,32 @@ class DataCollectionController extends Controller
                 ], 403);
             }
 
+            // CHECK: Enforce account limit for new accounts
+            if (!$existingAccount) {
+                $currentAccountCount = $user->tradingAccounts()->count();
+                
+                if ($currentAccountCount >= $user->max_accounts) {
+                    Log::warning('Account limit exceeded - new account rejected', [
+                        'user_id' => $user->id,
+                        'current_accounts' => $currentAccountCount,
+                        'max_accounts' => $user->max_accounts,
+                        'subscription_tier' => $user->subscription_tier,
+                        'attempted_account' => $accountNum,
+                        'broker' => $broker ?? 'unknown',
+                    ]);
+
+                    return response()->json([
+                        'success' => false,
+                        'error' => 'ACCOUNT_LIMIT_EXCEEDED',
+                        'message' => "Account limit reached. You have {$currentAccountCount} account(s) but your {$user->subscription_tier} plan allows {$user->max_accounts}. Please upgrade at https://thetradevisor.com/pricing to add more accounts.",
+                        'current_accounts' => $currentAccountCount,
+                        'max_accounts' => $user->max_accounts,
+                        'subscription_tier' => $user->subscription_tier,
+                        'upgrade_url' => 'https://thetradevisor.com/pricing'
+                    ], 403);
+                }
+            }
+
             // Check if this is historical data or current data
             $isHistorical = $data['meta']['is_historical'] ?? false;
             

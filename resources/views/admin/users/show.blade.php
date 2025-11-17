@@ -137,7 +137,6 @@
                                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
                                             {{ $user->subscription_tier === 'free' ? 'bg-gray-100 text-gray-800' : '' }}
                                             {{ $user->subscription_tier === 'basic' ? 'bg-blue-100 text-blue-800' : '' }}
-                                            {{ $user->subscription_tier === 'pro' ? 'bg-purple-100 text-purple-800' : '' }}
                                             {{ $user->subscription_tier === 'enterprise' ? 'bg-indigo-100 text-indigo-800' : '' }}">
                                             {{ ucfirst($user->subscription_tier) }}
                                         </span>

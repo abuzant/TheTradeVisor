@@ -100,7 +100,7 @@ class UserManagementController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
-            'subscription_tier' => 'required|in:free,basic,pro,enterprise',
+            'subscription_tier' => 'required|in:free,basic,enterprise',
             'max_accounts' => 'required|integer|min:1|max:100',
             'is_active' => 'required|boolean',
             'is_admin' => 'required|boolean',

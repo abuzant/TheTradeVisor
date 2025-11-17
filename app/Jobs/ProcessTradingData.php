@@ -137,6 +137,26 @@ class ProcessTradingData implements ShouldQueue
 
         // Create trading account if it does not exist yet
         if (!$tradingAccount) {
+            // SAFETY NET: Double-check account limit (in case of race condition)
+            $user = \App\Models\User::find($userId);
+            $currentAccountCount = $user->tradingAccounts()->count();
+            
+            if ($currentAccountCount >= $user->max_accounts) {
+                Log::error('Account limit exceeded in job - should have been caught by controller', [
+                    'user_id' => $userId,
+                    'current_accounts' => $currentAccountCount,
+                    'max_accounts' => $user->max_accounts,
+                    'subscription_tier' => $user->subscription_tier,
+                    'account_number' => $accountNumber,
+                    'account_hash' => $accountHash,
+                ]);
+                
+                throw new \Exception(
+                    "Account limit exceeded. You have {$currentAccountCount} account(s) but your {$user->subscription_tier} plan allows {$user->max_accounts}. " .
+                    "Please upgrade your plan at https://thetradevisor.com/pricing to add more accounts."
+                );
+            }
+            
             $tradingAccount = TradingAccount::create([
                 'user_id' => $userId,
                 'broker_server' => $brokerServer,

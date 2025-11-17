@@ -43,6 +43,8 @@ TheTradeVisor is an enterprise-grade trading analytics platform that aggregates,
 - ⚡ **High Performance** - Redis caching, query optimization, circuit breakers
 - 🌐 **GeoIP Analytics** - Country-based trading insights
 - 📱 **Responsive Design** - Beautiful UI across all devices
+- 💰 **Flexible Pricing** - Free tier + pay-per-account model ($9.99 one-time)
+- 🔑 **API Key Management** - Secure MT4/MT5 integration with account limits
 
 ---
 
@@ -199,6 +201,25 @@ For detailed installation instructions, see the [Installation Guide](docs/gettin
 
 ---
 
+## 💰 Subscription Tiers
+
+TheTradeVisor offers flexible pricing to suit traders of all levels:
+
+| Tier | Price | Accounts | Features |
+|------|-------|----------|----------|
+| **Free** | $0 | 1 account | Full analytics, real-time data, global insights |
+| **Pay-Per-Account** | $9.99 one-time | Unlimited | Add accounts as needed, lifetime access per account |
+| **Enterprise** | Custom | Unlimited | Custom solutions, priority support, dedicated infrastructure |
+
+**Key Points:**
+- ✅ First account is **FREE** forever
+- ✅ Additional accounts: **$9.99 one-time payment** (no monthly fees!)
+- ✅ Account limits enforced to prevent abuse
+- ✅ All tiers include full platform features
+- ✅ Enterprise tier for trading firms and institutions
+
+---
+
 ## 🌍 Global Analytics
 
 TheTradeVisor aggregates trading data from users worldwide, providing:
@@ -215,11 +236,15 @@ All data is anonymized and aggregated for privacy.
 
 ## 📈 System Status
 
-### Current Version: 1.2.0
+### Current Version: 1.3.0
 
 **Production Status**: ✅ Stable
 
-**Recent Updates**:
+**Recent Updates** (November 2025):
+- ✅ Account limit enforcement (prevent abuse)
+- ✅ Redirect authenticated users from guest pages
+- ✅ Updated pricing model ($9.99 one-time per account)
+- ✅ Removed PRO tier from subscription system
 - ✅ Circuit breaker implementation
 - ✅ Comprehensive rate limiting
 - ✅ Slow query logging

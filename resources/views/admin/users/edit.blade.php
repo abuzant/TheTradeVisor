@@ -69,10 +69,7 @@
                                         Free (1 account)
                                     </option>
                                     <option value="basic" {{ old('subscription_tier', $user->subscription_tier) === 'basic' ? 'selected' : '' }}>
-                                        Basic (3 accounts) - $4.99/month
-                                    </option>
-                                    <option value="pro" {{ old('subscription_tier', $user->subscription_tier) === 'pro' ? 'selected' : '' }}>
-                                        Pro (10 accounts) - $9.99/month
+                                        Basic (Pay-per-account: $9.99 each)
                                     </option>
                                     <option value="enterprise" {{ old('subscription_tier', $user->subscription_tier) === 'enterprise' ? 'selected' : '' }}>
                                         Enterprise (Unlimited) - Custom

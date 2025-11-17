@@ -16,7 +16,7 @@
     {{-- Pricing Cards --}}
     <section class="py-16 bg-gray-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 
                 {{-- Free Plan --}}
                 <div class="bg-white rounded-lg border-2 border-gray-200 p-8">
@@ -73,75 +73,19 @@
                     @endguest
                 </div>
 
-                {{-- Pay Per Account --}}
-                <div class="bg-white rounded-lg border-2 border-blue-500 p-8 relative">
-                    <div class="absolute top-0 right-0 bg-blue-500 text-white px-3 py-1 text-sm font-semibold rounded-bl rounded-tr">
+                {{-- Pay Per Account Plan --}}
+                <div class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-lg border-2 border-indigo-300 p-8 relative">
+                    <div class="absolute top-4 right-4 bg-indigo-600 text-white text-xs font-bold px-3 py-1 rounded-full">
                         POPULAR
                     </div>
                     <div class="mb-6">
                         <h3 class="text-2xl font-bold text-gray-900 mb-2">Pay Per Account</h3>
-                        <div class="flex items-baseline mb-2">
-                            <span class="text-5xl font-bold text-gray-900">$2.99</span>
-                        </div>
-                        <p class="text-gray-600 text-sm mb-1">per account/month</p>
-                        <p class="text-gray-600">Add accounts as you need</p>
-                        <p class="text-sm text-gray-500 mt-2">or $24.99/account/year (save 30%)</p>
-                    </div>
-                    
-                    <ul class="space-y-4 mb-8">
-                        <li class="flex items-start">
-                            <svg class="w-5 h-5 text-green-500 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                            </svg>
-                            <span class="text-gray-700"><strong>Unlimited Accounts</strong></span>
-                        </li>
-                        <li class="flex items-start">
-                            <svg class="w-5 h-5 text-green-500 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                            </svg>
-                            <span class="text-gray-700">All Free Features</span>
-                        </li>
-                        <li class="flex items-start">
-                            <svg class="w-5 h-5 text-green-500 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                            </svg>
-                            <span class="text-gray-700">Advanced Analytics</span>
-                        </li>
-                        <li class="flex items-start">
-                            <svg class="w-5 h-5 text-green-500 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                            </svg>
-                            <span class="text-gray-700">Pay Only For What You Use</span>
-                        </li>
-                        <li class="flex items-start">
-                            <svg class="w-5 h-5 text-green-500 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                            </svg>
-                            <span class="text-gray-700">Cancel Anytime</span>
-                        </li>
-                    </ul>
-                    
-                    @guest
-                    <a href="{{ route('register') }}" class="block w-full py-3 px-6 text-center bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">
-                        Get Started
-                    </a>
-                    @else
-                    <a href="{{ route('accounts.index') }}" class="block w-full py-3 px-6 text-center bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">
-                        Add Accounts
-                    </a>
-                    @endguest
-                </div>
-
-                {{-- Pro Plan --}}
-                <div class="bg-white rounded-lg border-2 border-gray-200 p-8">
-                    <div class="mb-6">
-                        <h3 class="text-2xl font-bold text-gray-900 mb-2">Pro</h3>
                         <div class="flex items-baseline mb-4">
-                            <span class="text-5xl font-bold text-gray-900">$24.99</span>
-                            <span class="text-gray-600 ml-2">/month</span>
+                            <span class="text-5xl font-bold text-gray-900">$9.99</span>
+                            <span class="text-gray-600 ml-2">/account</span>
                         </div>
-                        <p class="text-gray-600">For professional traders</p>
-                        <p class="text-sm text-gray-500 mt-2">or $219/year (save 27%)</p>
+                        <p class="text-gray-600">One-time payment, lifetime access</p>
+                        <p class="text-sm text-indigo-600 font-semibold mt-2">Add as many accounts as you need!</p>
                     </div>
                     
                     <ul class="space-y-4 mb-8">
@@ -149,7 +93,13 @@
                             <svg class="w-5 h-5 text-green-500 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                             </svg>
-                            <span class="text-gray-700"><strong>Up to 10 Accounts</strong></span>
+                            <span class="text-gray-700"><strong>Unlimited Accounts</strong> (pay per account)</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-5 h-5 text-green-500 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                            </svg>
+                            <span class="text-gray-700">Unique API Key per account</span>
                         </li>
                         <li class="flex items-start">
                             <svg class="w-5 h-5 text-green-500 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
@@ -161,29 +111,23 @@
                             <svg class="w-5 h-5 text-green-500 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                             </svg>
-                            <span class="text-gray-700">Priority Support</span>
+                            <span class="text-gray-700">No monthly fees</span>
                         </li>
                         <li class="flex items-start">
                             <svg class="w-5 h-5 text-green-500 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                             </svg>
-                            <span class="text-gray-700">Advanced Risk Analytics</span>
-                        </li>
-                        <li class="flex items-start">
-                            <svg class="w-5 h-5 text-green-500 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                            </svg>
-                            <span class="text-gray-700">API Access</span>
+                            <span class="text-gray-700">Active as long as it sends data</span>
                         </li>
                     </ul>
                     
                     @guest
-                    <a href="{{ route('register') }}" class="block w-full py-3 px-6 text-center bg-gray-900 text-white rounded font-semibold hover:bg-gray-800">
+                    <a href="{{ route('register') }}" class="block w-full py-3 px-6 text-center bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded font-semibold hover:from-indigo-700 hover:to-purple-700 shadow-lg">
                         Get Started
                     </a>
                     @else
-                    <a href="{{ route('accounts.index') }}" class="block w-full py-3 px-6 text-center bg-gray-900 text-white rounded font-semibold hover:bg-gray-800">
-                        Upgrade to Pro
+                    <a href="{{ route('accounts.index') }}" class="block w-full py-3 px-6 text-center bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded font-semibold hover:from-indigo-700 hover:to-purple-700 shadow-lg">
+                        Manage Accounts
                     </a>
                     @endguest
                 </div>
@@ -211,7 +155,7 @@
                             <svg class="w-5 h-5 text-green-500 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                             </svg>
-                            <span class="text-gray-700">All Pro Features</span>
+                            <span class="text-gray-700">All Features Included</span>
                         </li>
                         <li class="flex items-start">
                             <svg class="w-5 h-5 text-green-500 mt-0.5 mr-3" fill="currentColor" viewBox="0 0 20 20">

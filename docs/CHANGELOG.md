@@ -7,7 +7,56 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [Unreleased] - 2025-11-13
+## [1.3.0] - 2025-11-17
+
+### 🚀 New Features
+
+#### Account Limit Enforcement
+- **Feature**: Prevent users from bypassing account limits with one API key
+- **Implementation**: 
+  - Controller-level check (DataCollectionController)
+  - Job-level safety net (ProcessTradingData)
+  - Clear error messages with upgrade URL
+  - Comprehensive logging for monitoring
+- **Impact**: Prevents abuse, enforces subscription tiers
+- **Documentation**: Account limits now properly enforced
+
+#### Redirect Authenticated Users
+- **Feature**: Auto-redirect logged-in users from guest pages to dashboard
+- **Implementation**: Custom RedirectIfAuthenticated middleware
+- **Protected Routes**: `/login`, `/register`, `/forgot-password`
+- **Impact**: Better UX, prevents confusion
+- **Documentation**: Middleware registered as 'guest' alias
+
+### 💰 Pricing Model Update
+
+#### Subscription Tier Changes
+- **Removed**: PRO tier completely eliminated
+- **Updated**: Basic tier now "Pay-Per-Account" model
+- **Pricing**: $9.99 one-time payment per additional account
+- **Free Tier**: First account remains free forever
+- **Files Updated**:
+  - Controller validation (removed 'pro' from allowed tiers)
+  - Admin views (removed PRO badge styling)
+  - Pricing page (updated to show $9.99 one-time)
+  - FAQ page (updated pricing information)
+  - API key settings page (clarified account management)
+
+### 🔧 Technical Improvements
+
+#### Code Quality
+- Comprehensive PHPUnit tests for account limits
+- Automated testing for pricing validation
+- Clean, maintainable middleware implementation
+
+#### Security
+- Account limit enforcement prevents abuse
+- Proper authentication checks
+- Clear error messages without exposing internals
+
+---
+
+## [1.2.0] - 2025-11-13
 
 ### 🔴 Critical Security Fixes
 

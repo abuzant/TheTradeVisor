@@ -29,9 +29,49 @@
                 </div>
             @endif
 
+            {{-- Account Management Info Box --}}
+            <div class="mb-6 bg-gradient-to-r from-indigo-50 to-purple-50 border-l-4 border-indigo-500 p-6 rounded-lg">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <svg class="h-6 w-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <h3 class="text-lg font-semibold text-gray-900">Managing Your Trading Accounts</h3>
+                        <p class="mt-2 text-sm text-gray-700">
+                            This API key is used by <strong>all your connected trading accounts</strong>. Each MT5 account you connect will use this same key.
+                        </p>
+                        <div class="mt-4">
+                            <a href="{{ route('accounts.index') }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm font-medium transition-colors">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                </svg>
+                                Manage Your Trading Accounts
+                            </a>
+                            <p class="mt-2 text-xs text-gray-600">
+                                View all connected accounts, add new accounts, or manage existing ones
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="bg-white/90 backdrop-blur-sm overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 rounded-xl">
                 <div class="p-6">
                     <h2 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">Your API Key</h2>
+                    
+                    <div class="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                        <div class="flex items-start">
+                            <svg class="h-5 w-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                            </svg>
+                            <div class="text-sm text-blue-800">
+                                <p class="font-semibold">Use this API key for all your MT5 accounts</p>
+                                <p class="mt-1">Configure each MT5 Expert Advisor with this same key. All your trading accounts will be automatically linked to your TheTradeVisor account.</p>
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="mb-6">
                         <label class="block text-sm font-medium text-gray-700 mb-2">API Key</label>
@@ -46,7 +86,7 @@
                                 Copy
                             </button>
                         </div>
-                        <p class="mt-2 text-sm text-gray-500">Use this API key in your MT5 Expert Advisor to connect your trading account.</p>
+                        <p class="mt-2 text-sm text-gray-500">Copy this key and paste it into your MT5 Expert Advisor configuration.</p>
                     </div>
 
                     <div class="mb-6">

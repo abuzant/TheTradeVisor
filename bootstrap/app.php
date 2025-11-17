@@ -33,6 +33,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'rate.limit.exports' => \App\Http\Middleware\RateLimitExports::class,
             'rate.limit.broker' => \App\Http\Middleware\RateLimitBrokerAnalytics::class,
             'circuit.breaker' => \App\Http\Middleware\CircuitBreakerMiddleware::class,
+            'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         ]);
 
         // Add to web middleware group
