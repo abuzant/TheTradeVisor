@@ -14,7 +14,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
 
             {{-- Info Banner --}}
-            <div class="bg-gradient-to-r from-purple-50 to-indigo-50 border-l-4 border-purple-500 rounded-r-lg p-4 shadow-sm">
+            <div class="bg-purple-50 border-l-4 border-purple-500 rounded-r-lg p-4 shadow-sm">
                 <div class="flex">
                     <div class="flex-shrink-0">
                         <svg class="h-5 w-5 text-purple-400" viewBox="0 0 20 20" fill="currentColor">
@@ -38,15 +38,15 @@
                     </div>
                     <div class="flex gap-2">
                         <a href="{{ route('analytics', ['days' => 1]) }}"
-                           class="px-4 py-2 rounded-lg font-medium transition-all duration-300 {{ $days == 1 ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm border border-gray-200' }}">
+                           class="px-4 py-2 rounded-lg font-medium transition-all duration-300 {{ $days == 1 ? 'bg-purple-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm border border-gray-200' }}">
                             Today
                         </a>
                         <a href="{{ route('analytics', ['days' => 7]) }}"
-                           class="px-4 py-2 rounded-lg font-medium transition-all duration-300 {{ $days == 7 ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm border border-gray-200' }}">
+                           class="px-4 py-2 rounded-lg font-medium transition-all duration-300 {{ $days == 7 ? 'bg-purple-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm border border-gray-200' }}">
                             7 Days
                         </a>
                         <a href="{{ route('analytics', ['days' => 30]) }}"
-                           class="px-4 py-2 rounded-lg font-medium transition-all duration-300 {{ $days == 30 ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm border border-gray-200' }}">
+                           class="px-4 py-2 rounded-lg font-medium transition-all duration-300 {{ $days == 30 ? 'bg-purple-600 text-white shadow-lg' : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm border border-gray-200' }}">
                             30 Days
                         </a>
                     </div>
@@ -149,8 +149,36 @@
                         <h2 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">🔥 Symbol-Country Heatmap</h2>
                         
                         @if($analytics['symbol_country_heatmap'] && $analytics['symbol_country_heatmap']->isNotEmpty())
+                        @php
+                            $groupedHeatmap = $analytics['symbol_country_heatmap']
+                                ->groupBy('symbol')
+                                ->map(function($group) {
+                                    // For now, keep country from the first entry (same as current UI)
+                                    $first = $group->first();
+                                    $totalTrades = $group->sum('total_trades');
+                                    $totalProfit = $group->sum('total_profit');
+                                    $winningTrades = $group->sum(function($item) {
+                                        return $item['total_trades'] * ($item['win_rate'] / 100);
+                                    });
+                                    $winRate = $totalTrades > 0 ? round(($winningTrades / $totalTrades) * 100, 1) : 0;
+
+                                    // Approximate performance_score using average of group
+                                    $performanceScore = $group->avg('performance_score');
+
+                                    return [
+                                        'symbol' => $first['symbol'],
+                                        'country' => $first['country'],
+                                        'total_trades' => $totalTrades,
+                                        'total_profit' => $totalProfit,
+                                        'win_rate' => $winRate,
+                                        'performance_score' => $performanceScore,
+                                    ];
+                                })
+                                ->sortByDesc('total_trades')
+                                ->values();
+                        @endphp
                         <div class="grid grid-cols-1 gap-2 max-h-96 overflow-y-auto">
-                            @foreach($analytics['symbol_country_heatmap']->take(15) as $item)
+                            @foreach($groupedHeatmap->take(15) as $item)
                             <div class="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50" 
                                  style="background: linear-gradient(90deg, rgba({{ $item['performance_score'] > 50 ? '34, 197, 94' : '239, 68, 68' }}, {{ $item['performance_score'] / 200 }}) 0%, transparent 100%);">
                                 <div class="flex items-center space-x-3">
@@ -237,13 +265,52 @@
                         <h2 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">⚠️ Risk Analytics Dashboard</h2>
                         
                         @if($analytics['risk_analytics'] && $analytics['risk_analytics']->isNotEmpty())
+                        @php
+                            $groupedRiskAnalytics = $analytics['risk_analytics']
+                                ->groupBy('symbol')
+                                ->map(function($group) {
+                                    $first = $group->first();
+                                    $totalTrades = $group->sum('total_trades');
+                                    $totalProfit = $group->sum('total_profit');
+                                    $winRate = $group->avg('win_rate');
+                                    $lossRate = $group->avg('loss_rate');
+                                    $avgWin = $group->avg('avg_win');
+                                    $avgLoss = $group->avg('avg_loss');
+                                    $maxWin = $group->max('max_win');
+                                    $maxLoss = $group->min('max_loss');
+                                    $profitFactor = $group->avg('profit_factor');
+                                    $riskReward = $group->avg('risk_reward_ratio');
+                                    $volatility = $group->avg('volatility');
+                                    $riskScore = $group->avg('risk_score');
+                                    $riskLevel = $group->sortByDesc('risk_score')->first()['risk_level'];
+
+                                    return [
+                                        'symbol' => $first['symbol'],
+                                        'total_trades' => $totalTrades,
+                                        'total_profit' => $totalProfit,
+                                        'win_rate' => round($winRate, 1),
+                                        'loss_rate' => round($lossRate, 1),
+                                        'avg_win' => $avgWin,
+                                        'avg_loss' => $avgLoss,
+                                        'max_win' => $maxWin,
+                                        'max_loss' => $maxLoss,
+                                        'profit_factor' => $profitFactor,
+                                        'risk_reward_ratio' => $riskReward,
+                                        'volatility' => $volatility,
+                                        'risk_score' => round($riskScore, 1),
+                                        'risk_level' => $riskLevel,
+                                    ];
+                                })
+                                ->sortByDesc('risk_score')
+                                ->values();
+                        @endphp
                         <div class="mb-4">
                             <div class="h-64">
                                 <canvas id="riskAnalyticsChart"></canvas>
                             </div>
                         </div>
                         <div class="space-y-3 max-h-96 overflow-y-auto">
-                            @foreach($analytics['risk_analytics']->take(10) as $item)
+                            @foreach($groupedRiskAnalytics->take(10) as $item)
                             <div class="border rounded-lg p-3 hover:shadow-md transition-shadow">
                                 <div class="flex justify-between items-center mb-2">
                                     <span class="font-medium text-gray-900">{{ $item['symbol'] }}</span>
@@ -319,8 +386,27 @@
                         <div>
                             <h3 class="text-lg font-semibold text-gray-900 mb-3">📈 Top Symbols by Win Rate</h3>
                             @if($analytics['performance_leaderboards']['top_symbols'] && $analytics['performance_leaderboards']['top_symbols']->isNotEmpty())
+                            @php
+                                $groupedTopSymbols = $analytics['performance_leaderboards']['top_symbols']
+                                    ->groupBy('symbol')
+                                    ->map(function($group) {
+                                        $totalTrades = $group->sum('total_trades');
+                                        $winningTrades = $group->sum('winning_trades');
+                                        $totalProfit = $group->sum('total_profit');
+                                        $winRate = $totalTrades > 0 ? round(($winningTrades / $totalTrades) * 100, 1) : 0;
+
+                                        return [
+                                            'symbol' => $group->first()['symbol'],
+                                            'win_rate' => $winRate,
+                                            'total_trades' => $totalTrades,
+                                            'total_profit' => $totalProfit,
+                                        ];
+                                    })
+                                    ->sortByDesc('win_rate')
+                                    ->values();
+                            @endphp
                             <div class="space-y-2">
-                                @foreach($analytics['performance_leaderboards']['top_symbols']->take(5) as $index => $symbol)
+                                @foreach($groupedTopSymbols->take(5) as $index => $symbol)
                                 <div class="flex items-center justify-between p-2 rounded-lg {{ $index === 0 ? 'bg-green-50 border border-green-200' : 'bg-gray-50' }}">
                                     <div class="flex items-center space-x-2">
                                         <span class="text-lg font-bold {{ $index === 0 ? 'text-green-600' : 'text-gray-600' }}">{{ $index + 1 }}</span>
@@ -522,6 +608,31 @@
                     </div>
                     
                     @if($analytics['correlation_matrix'] && $analytics['correlation_matrix']->isNotEmpty())
+                    @php
+                        $groupedCorrelation = $analytics['correlation_matrix']
+                            ->groupBy(function($item) {
+                                return $item['symbol1'].'|'.$item['symbol2'];
+                            })
+                            ->map(function($group) {
+                                $first = $group->first();
+                                $corr = $group->avg('correlation');
+                                // Keep the strongest strength label
+                                $strength = $group->sortByDesc(function($item) {
+                                    return abs($item['correlation']);
+                                })->first()['strength'];
+
+                                return [
+                                    'symbol1' => $first['symbol1'],
+                                    'symbol2' => $first['symbol2'],
+                                    'correlation' => round($corr, 3),
+                                    'strength' => $strength,
+                                ];
+                            })
+                            ->sortByDesc(function($item) {
+                                return abs($item['correlation']);
+                            })
+                            ->values();
+                    @endphp
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
@@ -533,7 +644,7 @@
                                 </tr>
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
-                                @foreach($analytics['correlation_matrix']->take(15) as $item)
+                                @foreach($groupedCorrelation->take(15) as $item)
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-4 py-2 text-sm font-medium text-gray-900">{{ $item['symbol1'] }}</td>
                                     <td class="px-4 py-2 text-sm font-medium text-gray-900">{{ $item['symbol2'] }}</td>
@@ -608,8 +719,30 @@
                             <div>
                                 <h3 class="text-sm font-semibold text-gray-900 mb-3">🎯 Position Patterns</h3>
                                 @if($analytics['trading_patterns']['position_patterns'] && $analytics['trading_patterns']['position_patterns']->isNotEmpty())
+                                @php
+                                    $groupedPositionPatterns = $analytics['trading_patterns']['position_patterns']
+                                        ->groupBy(function($item) {
+                                            return $item['symbol'].'|'.$item['type'];
+                                        })
+                                        ->map(function($group) {
+                                            $first = $group->first();
+                                            $totalCount = $group->sum('count');
+                                            $avgProfit = $totalCount > 0
+                                                ? $group->sum(function($item) { return $item['avg_profit'] * $item['count']; }) / $totalCount
+                                                : 0;
+
+                                            return [
+                                                'symbol' => $first['symbol'],
+                                                'type' => $first['type'],
+                                                'count' => $totalCount,
+                                                'avg_profit' => $avgProfit,
+                                            ];
+                                        })
+                                        ->sortByDesc('count')
+                                        ->values();
+                                @endphp
                                 <div class="space-y-2">
-                                    @foreach($analytics['trading_patterns']['position_patterns']->take(5) as $item)
+                                    @foreach($groupedPositionPatterns->take(5) as $item)
                                     <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
                                         <div class="flex items-center space-x-2">
                                             <span class="text-sm font-medium">{{ $item['symbol'] }}</span>
@@ -646,8 +779,36 @@
                         </div>
                         
                         @if($analytics['market_volatility'] && $analytics['market_volatility']->isNotEmpty())
+                        @php
+                            $groupedVolatility = $analytics['market_volatility']
+                                ->groupBy('symbol')
+                                ->map(function($group) {
+                                    $first = $group->first();
+                                    $totalTrades = $group->sum('total_trades');
+                                    $avgVol = $group->avg('avg_daily_volatility');
+                                    $maxVol = $group->max('max_daily_volatility');
+                                    $avgProfit = $group->avg('avg_profit');
+                                    $avgRisk = $group->avg(function($item) {
+                                        return $item['avg_daily_volatility'];
+                                    });
+                                    $riskLevel = $group->sortByDesc('avg_daily_volatility')->first()['risk_level'];
+                                    $trend = $group->sortByDesc('total_trades')->first()['volatility_trend'];
+
+                                    return [
+                                        'symbol' => $first['symbol'],
+                                        'avg_daily_volatility' => round($avgVol, 2),
+                                        'max_daily_volatility' => round($maxVol, 2),
+                                        'total_trades' => $totalTrades,
+                                        'avg_profit' => round($avgProfit, 2),
+                                        'risk_level' => $riskLevel,
+                                        'volatility_trend' => $trend,
+                                    ];
+                                })
+                                ->sortByDesc('avg_daily_volatility')
+                                ->values();
+                        @endphp
                         <div class="space-y-3 max-h-64 overflow-y-auto">
-                            @foreach($analytics['market_volatility']->take(8) as $item)
+                            @foreach($groupedVolatility->take(8) as $item)
                             <div class="border rounded-lg p-3 hover:shadow-md transition-shadow">
                                 <div class="flex justify-between items-center mb-2">
                                     <span class="font-medium text-gray-900">{{ $item['symbol'] }}</span>
@@ -759,7 +920,39 @@
             // Risk Analytics Bubble Chart
             const riskCtx = document.getElementById('riskAnalyticsChart');
             if (riskCtx) {
-                const riskData = {!! json_encode($analytics['risk_analytics']->take(15)) !!};
+                const riskData = {!! json_encode($groupedRiskAnalytics ?? $analytics['risk_analytics']->groupBy('symbol')->map(function($group) {
+                    $first = $group->first();
+                    $totalTrades = $group->sum('total_trades');
+                    $totalProfit = $group->sum('total_profit');
+                    $winRate = $group->avg('win_rate');
+                    $lossRate = $group->avg('loss_rate');
+                    $avgWin = $group->avg('avg_win');
+                    $avgLoss = $group->avg('avg_loss');
+                    $maxWin = $group->max('max_win');
+                    $maxLoss = $group->min('max_loss');
+                    $profitFactor = $group->avg('profit_factor');
+                    $riskReward = $group->avg('risk_reward_ratio');
+                    $volatility = $group->avg('volatility');
+                    $riskScore = $group->avg('risk_score');
+                    $riskLevel = $group->sortByDesc('risk_score')->first()['risk_level'];
+
+                    return [
+                        'symbol' => $first['symbol'],
+                        'total_trades' => $totalTrades,
+                        'total_profit' => $totalProfit,
+                        'win_rate' => round($winRate, 1),
+                        'loss_rate' => round($lossRate, 1),
+                        'avg_win' => $avgWin,
+                        'avg_loss' => $avgLoss,
+                        'max_win' => $maxWin,
+                        'max_loss' => $maxLoss,
+                        'profit_factor' => $profitFactor,
+                        'risk_reward_ratio' => $riskReward,
+                        'volatility' => $volatility,
+                        'risk_score' => round($riskScore, 1),
+                        'risk_level' => $riskLevel,
+                    ];
+                })->values()->take(15)) !!};
                 new Chart(riskCtx.getContext('2d'), {
                     type: 'bubble',
                     data: {

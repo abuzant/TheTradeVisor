@@ -43,6 +43,10 @@
                                 <x-dropdown-link :href="route('broker.analytics')" :active="request()->routeIs('broker.analytics')">
                                     {{ __('Broker Analytics') }}
                                 </x-dropdown-link>
+
+                                <x-dropdown-link :href="route('digest.show')" :active="request()->routeIs('digest.show')">
+                                    {{ __('My Digest') }}
+                                </x-dropdown-link>
                             </x-slot>
                         </x-dropdown>
                     </div>
@@ -86,6 +90,10 @@
 
                                     <x-dropdown-link :href="route('admin.circuit-breakers.index')">
                                         {{ __('Circuit Breakers') }}
+                                    </x-dropdown-link>
+
+                                    <x-dropdown-link :href="route('admin.digest-control.index')">
+                                        {{ __('Digest Control') }}
                                     </x-dropdown-link>
 
                                     <!-- Admin Wiki -->
@@ -227,6 +235,10 @@
 
                     <x-responsive-nav-link :href="route('broker.analytics')" :active="request()->routeIs('broker.analytics')">
                         {{ __('Brokers Analytics') }}
+                    </x-responsive-nav-link>
+
+                    <x-responsive-nav-link :href="route('digest.show')" :active="request()->routeIs('digest.show')">
+                        {{ __('My Digest') }}
                     </x-responsive-nav-link>
                 </div>
             </div>

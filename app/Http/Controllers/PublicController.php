@@ -123,9 +123,22 @@ class PublicController extends Controller
             'message' => 'required|string|max:2000',
         ]);
 
-        // TODO: Send email or store in database
-        
-        return back()->with('success', 'Thank you for contacting us! We will get back to you soon.');
+        try {
+            // Send email to support
+            \Mail::to(env('SUPPORT_EMAIL'))->send(
+                new \App\Mail\ContactFormSubmission(
+                    $validated['name'],
+                    $validated['email'],
+                    $validated['subject'],
+                    $validated['message']
+                )
+            );
+            
+            return back()->with('success', 'Thank you for contacting us! We will get back to you soon.');
+        } catch (\Exception $e) {
+            \Log::error('Contact form email failed: ' . $e->getMessage());
+            return back()->with('error', 'There was an error sending your message. Please try again later.');
+        }
     }
     
     public function docs()

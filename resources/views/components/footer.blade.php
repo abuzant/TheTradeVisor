@@ -5,6 +5,7 @@
                 <h4 class="text-white font-semibold mb-4">Product</h4>
                 <ul class="space-y-2 text-sm">
                     <li><a href="/features" class="hover:text-white">Features</a></li>
+                    <li><a href="/screenshots" class="hover:text-white">Screenshots</a></li>
                     <li><a href="/pricing" class="hover:text-white">Pricing</a></li>
                     <li><a href="{{ route('analytics') }}" class="hover:text-white">Analytics</a></li>
                 </ul>

@@ -3,6 +3,8 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ApiKeyController;
+use App\Http\Controllers\MyDigestController;
+use App\Http\Controllers\Admin\DigestControlController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\SymbolMappingController;
 
@@ -47,6 +49,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+    // My Digest (preview page for trading digest)
+    Route::get('/my-digest', [MyDigestController::class, 'show'])
+        ->name('digest.show');
 
     // Performance
     Route::get('/performance', [App\Http\Controllers\PerformanceController::class, 'index'])
@@ -106,6 +112,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Profile digest preferences
+    Route::post('/profile/digests', [\App\Http\Controllers\ProfileDigestController::class, 'update'])
+        ->name('profile.digests.update');
 
     // Currency Settings
     Route::get('/settings/currency', [App\Http\Controllers\Settings\CurrencyController::class, 'edit'])
@@ -167,6 +177,12 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::post('/symbols/bulk-normalize', [App\Http\Controllers\Admin\SymbolManagementController::class, 'bulkNormalize'])->name('symbols.bulk-normalize');
     Route::post('/symbols/auto-normalize', [App\Http\Controllers\Admin\SymbolManagementController::class, 'autoNormalize'])->name('symbols.auto-normalize');
     Route::post('/symbols/sync', [App\Http\Controllers\Admin\SymbolManagementController::class, 'syncSymbols'])->name('symbols.sync');
+
+    // Digest Control
+    Route::get('/digest-control', [DigestControlController::class, 'index'])->name('digest-control.index');
+    Route::post('/digest-control/toggle', [DigestControlController::class, 'toggle'])->name('digest-control.toggle');
+    Route::post('/digest-control/toggle-llm', [DigestControlController::class, 'toggleLlm'])->name('digest-control.toggle-llm');
+    Route::post('/digest-control/test', [DigestControlController::class, 'testGenerate'])->name('digest-control.test');
     
     // Rate Limit Management
     Route::get('/rate-limits', [App\Http\Controllers\Admin\RateLimitController::class, 'index'])->name('rate-limits.index');

@@ -103,23 +103,31 @@ class AnalyticsController extends Controller
      */
     private function getPopularPairs($days = 30)
     {
-        return Deal::closedTrades()
+        $rawData = Deal::closedTrades()
             ->select('symbol', DB::raw('COUNT(*) as trades'), DB::raw('SUM(volume) as total_volume'))
             ->where('symbol', '!=', 'UNKNOWN')
             ->dateRange(now()->subDays($days))
             ->groupBy('symbol')
             ->havingRaw('COUNT(*) >= ?', [3])
-            ->orderByRaw('COUNT(*) DESC')
-            ->limit(10)
-            ->get()
-            ->map(function($item) {
+            ->get();
+
+        // Group by normalized symbol and aggregate
+        return $rawData->groupBy(function($item) {
+                return \App\Models\SymbolMapping::normalize($item->symbol);
+            })
+            ->map(function($group, $normalizedSymbol) {
+                $totalTrades = $group->sum('trades');
+                $totalVolume = $group->sum('total_volume');
+                
                 return [
-                    'symbol' => \App\Models\SymbolMapping::normalize($item->symbol),
-                    'raw_symbol' => $item->symbol,
-                    'trades' => $item->trades,
-                    'volume' => round($item->total_volume, 2),
+                    'symbol' => $normalizedSymbol,
+                    'trades' => $totalTrades,
+                    'volume' => round($totalVolume, 2),
                 ];
-            });
+            })
+            ->sortByDesc('trades')
+            ->take(10)
+            ->values();
     }
 
     /**
@@ -802,15 +810,19 @@ class AnalyticsController extends Controller
         // Top Countries by Profit
         $topCountries = Deal::join('trading_accounts', 'deals.trading_account_id', '=', 'trading_accounts.id')
             ->select(
-                'trading_accounts.detected_country as country',
+                DB::raw("COALESCE(trading_accounts.country_name, trading_accounts.detected_country, trading_accounts.country_code) as country"),
                 DB::raw('SUM(deals.profit) as total_profit'),
                 DB::raw('COUNT(*) as total_trades'),
                 DB::raw('COUNT(DISTINCT trading_accounts.id) as unique_accounts')
             )
-            ->whereNotNull('trading_accounts.detected_country')
+            ->where(function($query) {
+                $query->whereNotNull('trading_accounts.country_name')
+                      ->orWhereNotNull('trading_accounts.detected_country')
+                      ->orWhereNotNull('trading_accounts.country_code');
+            })
             ->where('deals.time', '>=', now()->subDays($days))
-            ->groupBy('trading_accounts.detected_country')
-            ->havingRaw('COUNT(*) >= 10')
+            ->groupBy(DB::raw("COALESCE(trading_accounts.country_name, trading_accounts.detected_country, trading_accounts.country_code)"))
+            ->havingRaw('COUNT(*) >= 5')
             ->orderBy('total_profit', 'desc')
             ->limit(10)
             ->get();

@@ -68,6 +68,7 @@
                 <div class="flex items-center space-x-8">
                     <a href="/#analytics" class="text-gray-700 hover:text-gray-900 font-medium">Analytics</a>
                     <a href="/features" class="text-gray-700 hover:text-gray-900 font-medium">Features</a>
+                    <a href="/screenshots" class="text-gray-700 hover:text-gray-900 font-medium">Screenshots</a>
                     <a href="/pricing" class="text-gray-700 hover:text-gray-900 font-medium">Pricing</a>
                     <a href="/faq" class="text-gray-700 hover:text-gray-900 font-medium">FAQ</a>
                     @guest
@@ -82,7 +83,11 @@
     </nav>
 
     {{-- Main Content --}}
-    {{ $slot }}
+    @if(isset($slot))
+        {{ $slot }}
+    @else
+        @yield('content')
+    @endif
 
     <x-footer />
 

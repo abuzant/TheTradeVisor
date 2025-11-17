@@ -65,6 +65,11 @@ protected static function boot()
         return $this->hasMany(TradingAccount::class)->where('is_active', true);
     }
 
+    public function digestSubscriptions()
+    {
+        return $this->hasMany(DigestSubscription::class);
+    }
+
     // Helper methods
     public static function generateApiKey()
     {
