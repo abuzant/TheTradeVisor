@@ -518,7 +518,6 @@ class AnalyticsController extends Controller
             ->whereNotNull('trading_accounts.country_code')
             ->whereNotNull('trading_accounts.platform_type')
             ->where('deals.time', '>=', now()->subDays($days))
-            ->where('deals.symbol', '!=', '')
             ->groupBy('trading_accounts.country_code', 'trading_accounts.platform_type', 'trading_accounts.account_mode')
             ->havingRaw('COUNT(*) >= 1')
             ->orderBy('total_trades', 'desc')

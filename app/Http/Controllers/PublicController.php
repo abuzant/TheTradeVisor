@@ -150,4 +150,30 @@ class PublicController extends Controller
     {
         return view('public.api-docs');
     }
+    
+    public function download()
+    {
+        return view('public.download');
+    }
+    
+    public function downloadSetup()
+    {
+        $filePath = storage_path('setup.exe');
+        
+        if (!file_exists($filePath)) {
+            abort(404, 'Setup file not found');
+        }
+        
+        // Track download in logs
+        \Log::info('EA Setup downloaded', [
+            'ip' => request()->ip(),
+            'user_agent' => request()->userAgent(),
+            'user_id' => auth()->id() ?? 'guest'
+        ]);
+        
+        return response()->download($filePath, 'TradeVisor-Setup.exe', [
+            'Content-Type' => 'application/octet-stream',
+            'Content-Disposition' => 'attachment; filename="TradeVisor-Setup.exe"',
+        ]);
+    }
 }

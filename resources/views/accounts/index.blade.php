@@ -105,6 +105,7 @@
                                         </th>
                                         <x-sortable-header column="broker_name" label="Broker" :sortBy="$sortBy" :sortDirection="$sortDirection" />
                                         <x-sortable-header column="account_number" label="Account" :sortBy="$sortBy" :sortDirection="$sortDirection" />
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" title="Use this ID for API calls">API ID</th>
                                         <x-sortable-header column="account_currency" label="Currency" :sortBy="$sortBy" :sortDirection="$sortDirection" />
                                         <x-sortable-header column="balance" label="Balance" :sortBy="$sortBy" :sortDirection="$sortDirection" />
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
@@ -126,6 +127,18 @@
                                                 <div class="flex items-center space-x-2">
                                                     <span>{{ $account->account_number ?? 'Anonymous' }}</span>
                                                     <x-platform-badge :account="$account" />
+                                                </div>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                                <div class="flex items-center space-x-2">
+                                                    <code class="px-2 py-1 bg-gray-100 rounded text-xs font-mono text-gray-800">{{ $account->id }}</code>
+                                                    <button onclick="copyToClipboard('{{ $account->id }}', this)" 
+                                                            class="text-indigo-600 hover:text-indigo-900 text-xs"
+                                                            title="Copy API ID">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                                        </svg>
+                                                    </button>
                                                 </div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -154,23 +167,23 @@
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                                                 <a href="{{ route('account.show', $account->id) }}"
-                                                   class="text-indigo-600 hover:text-indigo-900">View</a>
+                                                   class="text-indigo-600 hover:text-indigo-900" title="View">🔍</a>
 
                                                 @if($account->is_paused)
                                                     <form method="POST" action="{{ route('accounts.unpause', $account) }}" class="inline">
                                                         @csrf
-                                                        <button type="submit" class="text-green-600 hover:text-green-900">Resume</button>
+                                                        <button type="submit" title="Resume" class="text-green-600 hover:text-green-900">⏯️</button>
                                                     </form>
                                                 @else
                                                     <button onclick="pauseAccount({{ $account->id }})"
-                                                            class="text-yellow-600 hover:text-yellow-900">Pause</button>
+                                                            class="text-yellow-600 hover:text-yellow-900" title="Pause">⏸️</button>
                                                 @endif
                                                 
                                                 <form method="POST" action="{{ route('accounts.destroy', $account) }}" class="inline" 
                                                       onsubmit="return confirm('Are you sure you want to delete this account? The data will be transferred to an anonymous user for global analytics.')">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="text-red-600 hover:text-red-900">Delete</button>
+                                                    <button type="submit" class="text-red-600 hover:text-red-900" title="Delete">🗑️</button>
                                                 </form>
                                             </td>
                                         </tr>
@@ -178,7 +191,7 @@
                                 </tbody>
                                 <tfoot class="bg-gray-50">
                                     <tr>
-                                        <td colspan="8" class="px-6 py-3">
+                                        <td colspan="9" class="px-6 py-3">
                                             <div class="flex items-center space-x-4 text-xs text-gray-600">
                                                 <span class="font-semibold">Platform Legend:</span>
                                                 <div class="flex items-center space-x-1">
@@ -244,6 +257,19 @@
 
     @push('scripts')
     <script>
+        function copyToClipboard(text, button) {
+            navigator.clipboard.writeText(text).then(function() {
+                // Show success feedback
+                const originalHTML = button.innerHTML;
+                button.innerHTML = '<svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+                setTimeout(() => {
+                    button.innerHTML = originalHTML;
+                }, 2000);
+            }).catch(function(err) {
+                alert('Failed to copy: ' + err);
+            });
+        }
+
         function pauseAccount(accountId) {
             document.getElementById('pauseForm').action = `/accounts/${accountId}/pause`;
             document.getElementById('pauseModal').classList.remove('hidden');

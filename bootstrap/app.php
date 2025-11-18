@@ -16,7 +16,10 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // TEMPORARY: Disable CSRF on login/logout until we fix the intermittent 419 issue
+        // SECURITY NOTE: CSRF disabled on login/logout due to Cloudflare cookie issues
+        // Mitigation: Rate limiting enabled on these routes (see routes/auth.php)
+        // TODO: Test CSRF re-enablement in staging with updated session config
+        // See: docs/CSRF_PROTECTION_ANALYSIS.md
         $middleware->validateCsrfTokens(except: [
             'login',
             'logout',
@@ -34,6 +37,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'rate.limit.broker' => \App\Http\Middleware\RateLimitBrokerAnalytics::class,
             'circuit.breaker' => \App\Http\Middleware\CircuitBreakerMiddleware::class,
             'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
+        ]);
+
+        // Global middleware (runs on every request)
+        $middleware->append([
+            \App\Http\Middleware\RedirectApiSubdomain::class, // Redirect non-EA traffic from api subdomain
         ]);
 
         // Add to web middleware group

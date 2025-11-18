@@ -65,5 +65,10 @@ TheTradeVisor_MT5.mq5
 *.ex4
 *.ex5
 
+# EA Installer - Keep Private
+/storage/app/downloads/*.exe
+TradeVisor-Setup.exe
+*-Setup.exe
+
 # Backups
 /backups/

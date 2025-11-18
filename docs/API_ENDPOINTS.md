@@ -160,6 +160,159 @@ Get performance analytics for your accounts.
 }
 ```
 
+---
+
+### Account Snapshots
+
+Account snapshots track your account metrics (balance, equity, margin, etc.) over time for historical analysis and trend visualization.
+
+> **Note:** The `{account}` parameter is the **Account ID**, not the account number. You can find your Account ID in the "API ID" column on the Accounts page.
+
+#### GET /accounts/{account}/snapshots
+
+Get historical snapshots for a specific account.
+
+**Path Parameters:**
+- `account` (required) - Account ID (visible in Accounts page as "API ID")
+
+**Query Parameters:**
+- `from` (optional) - Start date (YYYY-MM-DD)
+- `to` (optional) - End date (YYYY-MM-DD)
+- `interval` (optional) - Aggregation: `raw`, `hourly`, `daily` (default: raw)
+- `limit` (optional) - Max records (default: 1000, max: 10000)
+
+**Example:**
+```bash
+curl -X GET "https://api.thetradevisor.com/v1/accounts/2/snapshots?from=2025-11-01&to=2025-11-18&interval=daily&limit=100" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+**Response:**
+```json
+{
+  "account_id": 2,
+  "account_number": "1012306793",
+  "currency": "AED",
+  "count": 18,
+  "snapshots": [
+    {
+      "id": 7548,
+      "user_id": 22,
+      "trading_account_id": 2,
+      "balance": "197464.13",
+      "equity": "143903.53",
+      "margin": "11625.78",
+      "free_margin": "132277.75",
+      "margin_level": "1237.80",
+      "profit": "-53560.60",
+      "snapshot_time": "2025-11-18 15:11:22",
+      "is_historical": false,
+      "source": "api"
+    }
+  ]
+}
+```
+
+#### GET /accounts/{account}/snapshots/stats
+
+Get aggregated statistics for an account over a time period.
+
+**Path Parameters:**
+- `account` (required) - Account ID
+
+**Query Parameters:**
+- `days` (optional) - Time period in days (default: 30)
+
+**Example:**
+```bash
+curl -X GET "https://api.thetradevisor.com/v1/accounts/2/snapshots/stats?days=30" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+**Response:**
+```json
+{
+  "period_days": "30",
+  "total_snapshots": 7514,
+  "balance": {
+    "current": "197016.10",
+    "highest": "200511.12",
+    "lowest": "196660.43",
+    "average": 197446.33
+  },
+  "equity": {
+    "current": "142796.85",
+    "highest": "175580.26",
+    "lowest": "137879.70",
+    "average": 158035.09,
+    "max_drawdown": 21.47
+  },
+  "margin": {
+    "current": "11687.11",
+    "highest": "17624.14",
+    "average": 9573.77
+  },
+  "profit": {
+    "current": "-54219.25",
+    "highest": "-24041.04",
+    "lowest": "-59511.08"
+  }
+}
+```
+
+#### GET /accounts/{account}/snapshots/export
+
+Export account snapshots as CSV file.
+
+**Path Parameters:**
+- `account` (required) - Account ID
+
+**Query Parameters:**
+- `from` (optional) - Start date (YYYY-MM-DD)
+- `to` (optional) - End date (YYYY-MM-DD)
+
+**Example:**
+```bash
+curl -X GET "https://api.thetradevisor.com/v1/accounts/2/snapshots/export?from=2025-11-01&to=2025-11-18" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -o account_snapshots.csv
+```
+
+**Response:** CSV file download
+```csv
+Timestamp,Balance,Equity,Margin,Free_Margin,Margin_Level,Profit
+2025-11-18 15:11:22,197464.13,144804.67,11625.78,133178.89,1245.55,-52659.46
+2025-11-18 15:10:57,197464.13,144780.16,11625.78,133154.38,1245.34,-52683.97
+...
+```
+
+#### GET /users/me/snapshots
+
+Get snapshots for all accounts belonging to the authenticated user.
+
+**Query Parameters:**
+- `from` (optional) - Start date (YYYY-MM-DD)
+- `to` (optional) - End date (YYYY-MM-DD)
+- `interval` (optional) - Aggregation: `raw`, `hourly`, `daily`
+- `limit` (optional) - Max records (default: 1000, max: 10000)
+
+**Example:**
+```bash
+curl -X GET "https://api.thetradevisor.com/v1/users/me/snapshots?interval=daily&limit=100" \
+  -H "Authorization: Bearer YOUR_API_KEY"
+```
+
+**Response:**
+```json
+{
+  "user_id": 22,
+  "count": 100,
+  "snapshots": [...]
+}
+```
+
+---
+
 ## Error Responses
 
 ### 401 Unauthorized

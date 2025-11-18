@@ -14,6 +14,7 @@ use App\Models\TradingAccount;
 use App\Models\Position;
 use App\Models\Order;
 use App\Models\Deal;
+use App\Services\TradingDataValidationService;
 use Carbon\Carbon;
 
 class ProcessTradingData implements ShouldQueue
@@ -97,17 +98,25 @@ class ProcessTradingData implements ShouldQueue
 
         // Detect geolocation from IP if available
         $country = null;
+        $countryName = null;
         $city = null;
         $timezone = null;
 
-        if ($clientIp && function_exists('geoip')) {
+        if ($clientIp) {
             try {
-                $geoData = geoip($clientIp);
-                $country = $geoData->iso_code ?? null;
-                $city = $geoData->city ?? null;
-                $timezone = $geoData->timezone ?? null;
+                $geoService = app(\App\Services\GeoIPService::class);
+                $geoData = $geoService->getCountryFromIP($clientIp);
+                
+                if ($geoData) {
+                    $country = $geoData['country_code'] ?? null;
+                    $countryName = $geoData['country_name'] ?? null;
+                }
             } catch (\Exception $e) {
                 // Silently fail, geolocation is optional
+                \Log::debug('GeoIP lookup failed in ProcessTradingData', [
+                    'ip' => $clientIp,
+                    'error' => $e->getMessage()
+                ]);
             }
         }
 
@@ -116,57 +125,68 @@ class ProcessTradingData implements ShouldQueue
         $accountHash = $accountData['account_hash'] ?? null;
         $brokerServer = $accountData['server'];
 
-        // Find existing trading account
-        // IMPORTANT:
-        // - Do NOT use nullable account_hash as part of a composite unique key with firstOrCreate.
-        //   This was causing duplicate accounts when account_hash was null.
-        // - For anonymized accounts (account_hash present, account_number possibly masked),
-        //   we match by user_id + broker_server + account_hash.
-        // - For normal accounts, we match by user_id + broker_server + account_number.
+        // Build unique search criteria
+        // For non-anonymized accounts: user_id + broker_server + account_number
+        // For anonymized accounts: user_id + broker_server + account_hash
+        $searchCriteria = [
+            'user_id' => $userId,
+            'broker_server' => $brokerServer,
+        ];
 
-        $query = TradingAccount::where('user_id', $userId)
-            ->where('broker_server', $brokerServer);
-
-        if (!empty($accountHash)) {
-            $query->where('account_hash', $accountHash);
-        } elseif (!empty($accountNumber)) {
-            $query->where('account_number', $accountNumber);
+        if (!empty($accountNumber)) {
+            $searchCriteria['account_number'] = $accountNumber;
+        } elseif (!empty($accountHash)) {
+            $searchCriteria['account_hash'] = $accountHash;
         }
 
-        $tradingAccount = $query->first();
+        // Use firstOrCreate with database locking to prevent race conditions
+        // This will either find existing account or create new one atomically
+        try {
+            $tradingAccount = TradingAccount::lockForUpdate()
+                ->where($searchCriteria)
+                ->first();
 
-        // Create trading account if it does not exist yet
-        if (!$tradingAccount) {
-            // SAFETY NET: Double-check account limit (in case of race condition)
-            $user = \App\Models\User::find($userId);
-            $currentAccountCount = $user->tradingAccounts()->count();
-            
-            if ($currentAccountCount >= $user->max_accounts) {
-                Log::error('Account limit exceeded in job - should have been caught by controller', [
-                    'user_id' => $userId,
-                    'current_accounts' => $currentAccountCount,
-                    'max_accounts' => $user->max_accounts,
-                    'subscription_tier' => $user->subscription_tier,
-                    'account_number' => $accountNumber,
-                    'account_hash' => $accountHash,
-                ]);
+            if (!$tradingAccount) {
+                // SAFETY NET: Double-check account limit before creating
+                $user = \App\Models\User::find($userId);
+                $currentAccountCount = $user->tradingAccounts()->count();
                 
-                throw new \Exception(
-                    "Account limit exceeded. You have {$currentAccountCount} account(s) but your {$user->subscription_tier} plan allows {$user->max_accounts}. " .
-                    "Please upgrade your plan at https://thetradevisor.com/pricing to add more accounts."
-                );
+                if ($currentAccountCount >= $user->max_accounts) {
+                    Log::error('Account limit exceeded in job - should have been caught by controller', [
+                        'user_id' => $userId,
+                        'current_accounts' => $currentAccountCount,
+                        'max_accounts' => $user->max_accounts,
+                        'subscription_tier' => $user->subscription_tier,
+                        'account_number' => $accountNumber,
+                        'account_hash' => $accountHash,
+                    ]);
+                    
+                    throw new \Exception(
+                        "Account limit exceeded. You have {$currentAccountCount} account(s) but your {$user->subscription_tier} plan allows {$user->max_accounts}. " .
+                        "Please upgrade your plan at https://thetradevisor.com/pricing to add more accounts."
+                    );
+                }
+                
+                // Create new account with all required fields
+                $tradingAccount = TradingAccount::create(array_merge($searchCriteria, [
+                    'account_uuid' => (string) \Illuminate\Support\Str::uuid(),
+                    'broker_name' => $accountData['broker'],
+                    'account_currency' => $accountData['currency'],
+                    'leverage' => $accountData['leverage'] ?? 1,
+                ]));
             }
-            
-            $tradingAccount = TradingAccount::create([
-                'user_id' => $userId,
-                'broker_server' => $brokerServer,
-                'account_number' => $accountNumber,
-                'account_hash' => $accountHash,
-                'account_uuid' => (string) \Illuminate\Support\Str::uuid(),
-                'broker_name' => $accountData['broker'],
-                'account_currency' => $accountData['currency'],
-                'leverage' => $accountData['leverage'] ?? 1,
-            ]);
+        } catch (\Illuminate\Database\QueryException $e) {
+            // If we hit a unique constraint violation, it means another job created the account
+            // Just fetch it again
+            if (str_contains($e->getMessage(), 'unique_user_broker')) {
+                $tradingAccount = TradingAccount::where($searchCriteria)->first();
+                
+                if (!$tradingAccount) {
+                    throw $e; // Re-throw if we still can't find it
+                }
+            } else {
+                throw $e;
+            }
         }
 
         // Update account information
@@ -186,6 +206,8 @@ class ProcessTradingData implements ShouldQueue
             'trade_expert' => $accountData['trade_expert'] ?? true,
             'last_seen_ip' => $clientIp,
             'detected_country' => $country,
+            'country_code' => $country,
+            'country_name' => $countryName,
             'detected_city' => $city,
             'detected_timezone' => $timezone,
             'last_sync_at' => now(),
@@ -194,6 +216,21 @@ class ProcessTradingData implements ShouldQueue
             'platform_build' => $accountData['platform_build'] ?? null,
             'account_mode' => $accountData['account_mode'] ?? null,
             'platform_detected_at' => isset($accountData['platform_type']) ? now() : null,
+        ]);
+
+        // Record account snapshot for historical margin/free_margin tracking
+        \App\Models\AccountSnapshot::create([
+            'user_id' => $tradingAccount->user_id,
+            'trading_account_id' => $tradingAccount->id,
+            'balance' => $accountData['balance'],
+            'equity' => $accountData['equity'],
+            'margin' => $accountData['margin'],
+            'free_margin' => $accountData['free_margin'],
+            'margin_level' => $accountData['margin_level'],
+            'profit' => $accountData['profit'],
+            'snapshot_time' => now(),
+            'is_historical' => false,
+            'source' => 'api',
         ]);
 
         return $tradingAccount;
@@ -334,29 +371,14 @@ class ProcessTradingData implements ShouldQueue
 
             if (!$exists) {
                 try {
-                    Deal::create([
-                        'trading_account_id' => $tradingAccount->id,
-                        'ticket' => $dealData['ticket'],
-                        'order_id' => $dealData['order'] ?? $dealData['order_id'] ?? null,
-                        'position_id' => $dealData['position_id'] ?? null,
-                        'symbol' => $dealData['symbol'],
-                        'comment' => $dealData['comment'] ?? null,
-                        'external_id' => $dealData['external_id'] ?? null,
-                        'type' => $dealData['type'],
-                        'entry' => $dealData['entry'] ?? 'unknown',
-                        'reason' => $dealData['reason'] ?? 'unknown',
-                        'volume' => $dealData['volume'] ?? 0,
-                        'price' => $dealData['price'] ?? 0,
-                        'profit' => $dealData['profit'] ?? 0,
-                        'swap' => $dealData['swap'] ?? 0,
-                        'commission' => $dealData['commission'] ?? 0,
-                        'fee' => $dealData['fee'] ?? 0,
-                        'time' => $this->parseDateTime($dealData['time'] ?? null),
-                        'time_msc' => $dealData['time_msc'] ?? null,
-                        'magic' => $dealData['magic'] ?? 0,
-                        'platform_type' => $dealData['platform_type'] ?? null,
-                        'activity_type' => $dealData['activity_type'] ?? null,
-                    ]);
+                    // Validate and normalize deal data
+                    $validator = new TradingDataValidationService();
+                    $validatedData = $validator->validateDeal($dealData);
+                    
+                    Deal::create(array_merge(
+                        ['trading_account_id' => $tradingAccount->id],
+                        $validatedData
+                    ));
 
                     $newDealsCount++;
                 } catch (\Exception $e) {

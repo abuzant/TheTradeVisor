@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\DataCollectionController;
 use App\Http\Controllers\Api\AccountController;
 use App\Http\Controllers\Api\TradeController;
 use App\Http\Controllers\Api\AnalyticsController;
+use App\Http\Controllers\Api\AccountSnapshotController;
 
 // Public health check
 Route::get('/health', function () {
@@ -34,6 +35,12 @@ Route::middleware(['api.key', 'api.rate.limit'])->group(function () {
         
         // Analytics
         Route::get('/analytics/performance', [AnalyticsController::class, 'performance']);
+        
+        // Account Snapshots
+        Route::get('/accounts/{account}/snapshots', [AccountSnapshotController::class, 'accountSnapshots']);
+        Route::get('/accounts/{account}/snapshots/export', [AccountSnapshotController::class, 'export']);
+        Route::get('/accounts/{account}/snapshots/stats', [AccountSnapshotController::class, 'stats']);
+        Route::get('/users/me/snapshots', [AccountSnapshotController::class, 'userSnapshots']);
         
     });
     

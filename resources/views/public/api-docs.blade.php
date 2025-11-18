@@ -20,6 +20,7 @@
                         <a href="#rate-limits" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded">Rate Limits</a>
                         <a href="#accounts" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded">Accounts</a>
                         <a href="#trades" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded">Trades</a>
+                        <a href="#snapshots" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded">Account Snapshots</a>
                         <a href="#analytics" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded">Analytics</a>
                         <a href="#errors" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded">Error Codes</a>
                     </nav>
@@ -227,6 +228,112 @@
     "per_page": 10
   }
 }</code></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Account Snapshots --}}
+                    <div id="snapshots" class="mb-16">
+                        <h2 class="text-3xl font-bold text-gray-900 mb-4">Account Snapshots</h2>
+                        <p class="text-gray-700 mb-6">Track account metrics (balance, equity, margin) over time for historical analysis and trend visualization.</p>
+                        
+                        <div class="p-4 bg-blue-50 border-l-4 border-blue-600 rounded mb-8">
+                            <p class="text-blue-900 font-semibold">📝 Finding Your Account ID</p>
+                            <p class="text-blue-800 mt-1">The <code class="bg-blue-100 px-2 py-1 rounded">{account}</code> parameter is your <strong>Account ID</strong> (not account number). Find it in the <strong>"API ID"</strong> column on your <a href="/accounts" class="underline">Accounts page</a> with a copy button for easy access.</p>
+                        </div>
+
+                        {{-- Get Snapshots --}}
+                        <div class="mb-8">
+                            <div class="flex items-center mb-3">
+                                <span class="px-3 py-1 bg-green-100 text-green-800 rounded font-mono text-sm font-semibold mr-3">GET</span>
+                                <code class="text-lg font-mono">/api/v1/accounts/{account}/snapshots</code>
+                            </div>
+                            <p class="text-gray-700 mb-4">Get historical snapshots for a specific account.</p>
+                            
+                            <h4 class="font-bold text-gray-900 mb-2">Query Parameters:</h4>
+                            <ul class="list-disc list-inside space-y-1 text-gray-700 mb-4 ml-4">
+                                <li><code>from</code> - Start date YYYY-MM-DD (optional)</li>
+                                <li><code>to</code> - End date YYYY-MM-DD (optional)</li>
+                                <li><code>interval</code> - raw, hourly, daily (default: raw)</li>
+                                <li><code>limit</code> - Max records (default: 1000, max: 10000)</li>
+                            </ul>
+
+                            <h4 class="font-bold text-gray-900 mb-2">Example Request:</h4>
+                            <div class="bg-gray-900 text-gray-100 p-6 rounded-lg overflow-x-auto mb-4">
+                                <pre class="text-sm"><code>curl -X GET "https://api.thetradevisor.com/v1/accounts/2/snapshots?from=2025-11-01&to=2025-11-18&interval=daily" \
+  -H "Authorization: Bearer YOUR_API_KEY"</code></pre>
+                            </div>
+
+                            <h4 class="font-bold text-gray-900 mb-2">Response Example:</h4>
+                            <div class="bg-gray-900 text-gray-100 p-6 rounded-lg overflow-x-auto">
+                                <pre class="text-sm"><code>{
+  "account_id": 2,
+  "account_number": "1012306793",
+  "currency": "AED",
+  "count": 18,
+  "snapshots": [
+    {
+      "balance": "197464.13",
+      "equity": "143903.53",
+      "margin": "11625.78",
+      "free_margin": "132277.75",
+      "margin_level": "1237.80",
+      "profit": "-53560.60",
+      "snapshot_time": "2025-11-18 15:11:22"
+    }
+  ]
+}</code></pre>
+                            </div>
+                        </div>
+
+                        {{-- Get Statistics --}}
+                        <div class="mb-8">
+                            <div class="flex items-center mb-3">
+                                <span class="px-3 py-1 bg-green-100 text-green-800 rounded font-mono text-sm font-semibold mr-3">GET</span>
+                                <code class="text-lg font-mono">/api/v1/accounts/{account}/snapshots/stats</code>
+                            </div>
+                            <p class="text-gray-700 mb-4">Get aggregated statistics with max drawdown calculation.</p>
+                            
+                            <h4 class="font-bold text-gray-900 mb-2">Query Parameters:</h4>
+                            <ul class="list-disc list-inside space-y-1 text-gray-700 mb-4 ml-4">
+                                <li><code>days</code> - Time period in days (default: 30)</li>
+                            </ul>
+
+                            <h4 class="font-bold text-gray-900 mb-2">Response Example:</h4>
+                            <div class="bg-gray-900 text-gray-100 p-6 rounded-lg overflow-x-auto">
+                                <pre class="text-sm"><code>{
+  "period_days": "30",
+  "total_snapshots": 7514,
+  "balance": {
+    "current": "197016.10",
+    "highest": "200511.12",
+    "lowest": "196660.43",
+    "average": 197446.33
+  },
+  "equity": {
+    "current": "142796.85",
+    "highest": "175580.26",
+    "lowest": "137879.70",
+    "average": 158035.09,
+    "max_drawdown": 21.47
+  }
+}</code></pre>
+                            </div>
+                        </div>
+
+                        {{-- Export CSV --}}
+                        <div class="mb-8">
+                            <div class="flex items-center mb-3">
+                                <span class="px-3 py-1 bg-green-100 text-green-800 rounded font-mono text-sm font-semibold mr-3">GET</span>
+                                <code class="text-lg font-mono">/api/v1/accounts/{account}/snapshots/export</code>
+                            </div>
+                            <p class="text-gray-700 mb-4">Export snapshots as CSV file.</p>
+                            
+                            <h4 class="font-bold text-gray-900 mb-2">Example Request:</h4>
+                            <div class="bg-gray-900 text-gray-100 p-6 rounded-lg overflow-x-auto">
+                                <pre class="text-sm"><code>curl -X GET "https://api.thetradevisor.com/v1/accounts/2/snapshots/export" \
+  -H "Authorization: Bearer YOUR_API_KEY" \
+  -o account_snapshots.csv</code></pre>
                             </div>
                         </div>
                     </div>

@@ -615,6 +615,10 @@
                     @if($analytics['correlation_matrix'] && $analytics['correlation_matrix']->isNotEmpty())
                     @php
                         $groupedCorrelation = $analytics['correlation_matrix']
+                            ->filter(function($item) {
+                                // Filter out 1:1 correlations (self-correlations)
+                                return $item['symbol1'] !== $item['symbol2'];
+                            })
                             ->groupBy(function($item) {
                                 return $item['symbol1'].'|'.$item['symbol2'];
                             })
@@ -983,21 +987,30 @@
             if (correlationCtx) {
                 const correlationData = {!! json_encode($analytics['correlation_matrix']->take(20)) !!};
                 
+                // Filter out 1:1 correlations (self-correlations)
+                const filteredCorrelationData = correlationData.filter(d => d.symbol1 !== d.symbol2);
+                
                 // Create matrix data
-                const symbols = [...new Set(correlationData.flatMap(d => [d.symbol1, d.symbol2]))];
+                const symbols = [...new Set(filteredCorrelationData.flatMap(d => [d.symbol1, d.symbol2]))];
                 const matrix = [];
                 
                 symbols.forEach((symbol1, i) => {
                     symbols.forEach((symbol2, j) => {
-                        const correlation = correlationData.find(d => 
+                        // Skip diagonal (self-correlations)
+                        if (i === j) return;
+                        
+                        const correlation = filteredCorrelationData.find(d => 
                             (d.symbol1 === symbol1 && d.symbol2 === symbol2) ||
                             (d.symbol1 === symbol2 && d.symbol2 === symbol1)
                         );
-                        matrix.push({
-                            x: j,
-                            y: i,
-                            v: correlation ? Math.abs(correlation.correlation) : (i === j ? 1 : 0)
-                        });
+                        
+                        if (correlation) {
+                            matrix.push({
+                                x: j,
+                                y: i,
+                                v: Math.abs(correlation.correlation)
+                            });
+                        }
                     });
                 });
 

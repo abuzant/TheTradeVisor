@@ -13,6 +13,7 @@
             <div>
                 <h4 class="text-white font-semibold mb-4">Resources</h4>
                 <ul class="space-y-2 text-sm">
+                    <li><a href="/download" class="hover:text-white">Download EA</a></li>
                     <li><a href="/faq" class="hover:text-white">FAQ</a></li>
                     <li><a href="/docs" class="hover:text-white">Documentation</a></li>
                     <li><a href="/api-docs" class="hover:text-white">API</a></li>

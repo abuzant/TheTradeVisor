@@ -98,8 +98,8 @@ class DataCollectionController extends Controller
                         'current_accounts' => $currentAccountCount,
                         'max_accounts' => $user->max_accounts,
                         'subscription_tier' => $user->subscription_tier,
-                        'attempted_account' => $accountNum,
-                        'broker' => $broker ?? 'unknown',
+                        'attempted_account' => $accountInfo['account_number'] ?? $accountInfo['account_hash'] ?? 'unknown',
+                        'broker' => $accountInfo['broker'] ?? 'unknown',
                     ]);
 
                     return response()->json([

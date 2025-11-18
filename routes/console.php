@@ -42,3 +42,27 @@ Schedule::command('accounts:cleanup-inactive')
     ->onSuccess(function () {
         \Log::info('Inactive accounts cleanup completed successfully');
     });
+
+// Aggregate account snapshots daily at 2:00 AM
+Schedule::command('snapshots:aggregate')
+    ->dailyAt('02:00')
+    ->name('aggregate-account-snapshots')
+    ->withoutOverlapping()
+    ->onFailure(function () {
+        \Log::error('Account snapshots aggregation failed');
+    })
+    ->onSuccess(function () {
+        \Log::info('Account snapshots aggregation completed successfully');
+    });
+
+// Cleanup old account snapshots daily at 3:30 AM (after aggregation)
+Schedule::command('snapshots:cleanup --days=180')
+    ->dailyAt('03:30')
+    ->name('cleanup-old-snapshots')
+    ->withoutOverlapping()
+    ->onFailure(function () {
+        \Log::error('Old snapshots cleanup failed');
+    })
+    ->onSuccess(function () {
+        \Log::info('Old snapshots cleanup completed successfully');
+    });

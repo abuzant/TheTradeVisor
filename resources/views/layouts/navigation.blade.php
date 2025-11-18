@@ -180,6 +180,15 @@
                             {{ __('API Key') }}
                         </x-dropdown-link>
 
+                        <x-dropdown-link :href="route('download')" :active="request()->routeIs('download')">
+                            <span class="flex items-center">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                </svg>
+                                {{ __('Download EA') }}
+                            </span>
+                        </x-dropdown-link>
+
                         <div class="border-t border-gray-100"></div>
 
                         <x-dropdown-link :href="route('profile.edit')">
@@ -298,6 +307,10 @@
 
                 <x-responsive-nav-link :href="route('settings.api-key')" :active="request()->routeIs('settings.*')">
                     {{ __('API Key') }}
+                </x-responsive-nav-link>
+
+                <x-responsive-nav-link :href="route('download')" :active="request()->routeIs('download')">
+                    {{ __('📥 Download EA') }}
                 </x-responsive-nav-link>
 
                 <div class="border-t border-gray-200"></div>

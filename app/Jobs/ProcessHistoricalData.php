@@ -54,6 +54,28 @@ class ProcessHistoricalData implements ShouldQueue
                 throw new \Exception('Trading account not found or could not be created');
             }
 
+            // Record account snapshot from historical data
+            if (isset($this->data['account']) && $historyDate) {
+                $accountData = $this->data['account'];
+                // Convert date format from 2025.10.07 to 2025-10-07
+                $formattedDate = str_replace('.', '-', $historyDate);
+                $snapshotTime = Carbon::parse($formattedDate)->setTime(23, 59, 59); // End of day
+                
+                \App\Models\AccountSnapshot::create([
+                    'user_id' => $tradingAccount->user_id,
+                    'trading_account_id' => $tradingAccount->id,
+                    'balance' => $accountData['balance'] ?? 0,
+                    'equity' => $accountData['equity'] ?? 0,
+                    'margin' => $accountData['margin'] ?? 0,
+                    'free_margin' => $accountData['free_margin'] ?? 0,
+                    'margin_level' => $accountData['margin_level'] ?? null,
+                    'profit' => $accountData['profit'] ?? 0,
+                    'snapshot_time' => $snapshotTime,
+                    'is_historical' => true,
+                    'source' => 'backfill',
+                ]);
+            }
+
             // Process historical deals for this day
             if (isset($this->data['history']) && is_array($this->data['history'])) {
                 $this->processHistoricalDeals($tradingAccount, $this->data['history'], $historyDate);
@@ -100,43 +122,52 @@ class ProcessHistoricalData implements ShouldQueue
         $accountHash = $accountData['account_hash'] ?? null;
         $brokerServer = $accountData['server'];
 
-        // Try to find existing account first
-        $tradingAccount = TradingAccount::where('user_id', $userId)
-            ->where('broker_server', $brokerServer)
-            ->where(function($query) use ($accountNumber, $accountHash) {
-                if ($accountNumber) {
-                    $query->where('account_number', $accountNumber);
-                }
-                if ($accountHash) {
-                    $query->orWhere('account_hash', $accountHash);
-                }
-            })
-            ->first();
+        // Build unique search criteria
+        $searchCriteria = [
+            'user_id' => $userId,
+            'broker_server' => $brokerServer,
+        ];
 
-        // If not found, create it
-        if (!$tradingAccount) {
-            // Extract broker name from server if not provided
-            $brokerName = $accountData['broker'] ?? $accountData['broker_name'] ?? null;
-            if (!$brokerName && $brokerServer) {
-                // Try to extract from server name (e.g., "ICMarkets-Live" -> "ICMarkets")
-                $brokerName = explode('-', $brokerServer)[0];
-            }
-            
-            $tradingAccount = TradingAccount::firstOrCreate(
-                [
-                    'user_id' => $userId,
-                    'broker_server' => $brokerServer,
-                    'account_number' => $accountNumber,
-                    'account_hash' => $accountHash,
-                ],
-                [
+        if (!empty($accountNumber)) {
+            $searchCriteria['account_number'] = $accountNumber;
+        } elseif (!empty($accountHash)) {
+            $searchCriteria['account_hash'] = $accountHash;
+        }
+
+        // Try to find existing account first with locking
+        try {
+            $tradingAccount = TradingAccount::lockForUpdate()
+                ->where($searchCriteria)
+                ->first();
+
+            // If not found, create it
+            if (!$tradingAccount) {
+                // Extract broker name from server if not provided
+                $brokerName = $accountData['broker'] ?? $accountData['broker_name'] ?? null;
+                if (!$brokerName && $brokerServer) {
+                    // Try to extract from server name (e.g., "ICMarkets-Live" -> "ICMarkets")
+                    $brokerName = explode('-', $brokerServer)[0];
+                }
+                
+                $tradingAccount = TradingAccount::create(array_merge($searchCriteria, [
                     'account_uuid' => (string) \Illuminate\Support\Str::uuid(),
                     'broker_name' => $brokerName ?: 'Unknown Broker',
                     'account_name' => $accountData['name'] ?? $accountData['account_name'] ?? 'Trading Account',
                     'account_currency' => $accountData['currency'] ?? $accountData['account_currency'] ?? 'USD',
                     'leverage' => $accountData['leverage'] ?? 100,
-                ]
-            );
+                ]));
+            }
+        } catch (\Illuminate\Database\QueryException $e) {
+            // If we hit a unique constraint violation, fetch the existing account
+            if (str_contains($e->getMessage(), 'unique_user_broker')) {
+                $tradingAccount = TradingAccount::where($searchCriteria)->first();
+                
+                if (!$tradingAccount) {
+                    throw $e;
+                }
+            } else {
+                throw $e;
+            }
         }
 
         return $tradingAccount;
@@ -165,6 +196,23 @@ class ProcessHistoricalData implements ShouldQueue
 
             if (!$exists) {
                 try {
+                    // Parse time from either 'time' field or 'time_msc' field
+                    $parsedTime = $this->parseDateTime($dealData['time']);
+                    
+                    // If time is null but time_msc exists, convert milliseconds to datetime
+                    if (!$parsedTime && isset($dealData['time_msc']) && $dealData['time_msc'] > 0) {
+                        try {
+                            // Convert milliseconds to seconds and create Carbon instance
+                            $parsedTime = Carbon::createFromTimestampMs($dealData['time_msc']);
+                        } catch (\Exception $e) {
+                            Log::warning('Failed to parse time_msc', [
+                                'ticket' => $dealData['ticket'],
+                                'time_msc' => $dealData['time_msc'],
+                                'error' => $e->getMessage()
+                            ]);
+                        }
+                    }
+                    
                     Deal::create([
                     'trading_account_id' => $tradingAccount->id,
                     'ticket' => $dealData['ticket'],
@@ -182,7 +230,7 @@ class ProcessHistoricalData implements ShouldQueue
                     'swap' => $dealData['swap'] ?? 0,
                     'commission' => $dealData['commission'] ?? 0,
                     'fee' => $dealData['fee'] ?? 0,
-                    'time' => $this->parseDateTime($dealData['time']),
+                    'time' => $parsedTime,
                     'time_msc' => $dealData['time_msc'] ?? null,
                     'magic' => $dealData['magic'] ?? 0,
                     'platform_type' => $dealData['platform_type'] ?? null,

@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\Deal;
 use App\Models\Position;
 use App\Models\Order;
+use App\Models\AccountSnapshot;
 use App\Traits\Sortable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -156,6 +157,10 @@ class AccountManagementController extends Controller
             // Delete all orders
             Order::where('trading_account_id', $account->id)->delete();
 
+            // Delete all account snapshots
+            $snapshotsCount = AccountSnapshot::where('trading_account_id', $account->id)->count();
+            AccountSnapshot::where('trading_account_id', $account->id)->delete();
+
             // Delete raw data files for this account
             $userId = $account->user_id;
             $accountNumber = $account->account_number;
@@ -188,7 +193,7 @@ class AccountManagementController extends Controller
             DB::commit();
 
             return redirect()->back()->with('success', 
-                "Account reset successfully. Deleted: {$dealsCount} deals, {$positionsCount} positions, {$ordersCount} orders.");
+                "Account reset successfully. Deleted: {$dealsCount} deals, {$positionsCount} positions, {$ordersCount} orders, {$snapshotsCount} snapshots.");
 
         } catch (\Exception $e) {
             DB::rollBack();

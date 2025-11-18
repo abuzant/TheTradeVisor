@@ -59,5 +59,6 @@ Route::middleware('auth')->group(function () {
     Route::put('password', [PasswordController::class, 'update'])->name('password.update');
 
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
+        ->middleware('throttle:10,1') // 10 attempts per minute
         ->name('logout');
 });
