@@ -36,6 +36,8 @@ TheTradeVisor is an enterprise-grade trading analytics platform that aggregates,
 ### Key Features
 
 - 📊 **Real-time Analytics** - Live trading performance metrics and statistics
+- 📸 **Account Snapshots** - Historical account metrics with automated tracking and visualization
+- 💊 **Account Health Dashboard** - Interactive widgets showing balance, equity, margin, and drawdown trends
 - 🌍 **Global Market Data** - Aggregated analytics from traders worldwide
 - 🏦 **Broker Comparison** - Detailed broker performance analysis
 - 📈 **Performance Tracking** - Individual and portfolio-level tracking with equity curves, drawdown analysis, and symbol performance
@@ -58,6 +60,8 @@ TheTradeVisor is an enterprise-grade trading analytics platform that aggregates,
 
 ### Core Features
 
+- [Account Snapshots System](docs/ACCOUNT_SNAPSHOTS_SYSTEM.md) - Historical metrics tracking and analysis
+- [Account Health Dashboard](docs/ACCOUNT_SNAPSHOTS_WIDGETS.md) - Interactive widgets and visualizations
 - [GeoIP Analytics](docs/features/geoip-analytics.md) - Geographic insights
 - [Trading Analytics](docs/README.md#-core-features) - Analytics system overview
 - [Performance Analytics](docs/features/performance.md) - Trade analysis, equity curves, and drawdown
@@ -236,21 +240,28 @@ All data is anonymized and aggregated for privacy.
 
 ## 📈 System Status
 
-### Current Version: 1.4.0
+### Current Version: 1.5.0
 
 **Production Status**: ✅ Stable
 
-**Recent Updates** (November 2025):
+**Latest Updates** (November 18, 2025):
+- ✅ **Account Snapshots System** - Historical account metrics tracking
+- ✅ **Account Health Dashboard** - Interactive widgets with charts and gauges
+- ✅ **Max Drawdown Visualization** - Color-coded risk indicators
+- ✅ **Intelligent Caching** - 2h/24h TTLs for optimal performance
+- ✅ **Account Health Navigation** - Easy access from Statistics menu
+- ✅ **API Endpoints** - RESTful API for snapshots data
+- ✅ **CSV Export** - Download historical data
+- ✅ **Automated Data Management** - Aggregation and cleanup jobs
+
+**Previous Updates** (November 2025):
 - ✅ Account limit enforcement (prevent abuse)
 - ✅ Redirect authenticated users from guest pages
 - ✅ Updated pricing model ($9.99 one-time per account)
-- ✅ Removed PRO tier from subscription system
 - ✅ Circuit breaker implementation
 - ✅ Comprehensive rate limiting
 - ✅ Slow query logging
 - ✅ Alert system (Slack/Email)
-- ✅ Storage permissions optimization
-- ✅ Pagination everywhere
 - ✅ Redis caching optimization
 
 See [CHANGELOG.md](docs/CHANGELOG.md) for complete history.
