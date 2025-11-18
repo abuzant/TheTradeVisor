@@ -36,6 +36,10 @@
                                     {{ __('My Performance') }}
                                 </x-dropdown-link>
 
+                                <x-dropdown-link :href="route('account.health')" :active="request()->routeIs('account.health') || request()->routeIs('account.snapshots')">
+                                    {{ __('Account Health') }}
+                                </x-dropdown-link>
+
                                 <x-dropdown-link :href="route('analytics')" :active="request()->routeIs('analytics')">
                                     {{ __('Global Analytics') }}
                                 </x-dropdown-link>
@@ -236,6 +240,10 @@
                 <div class="mt-3 space-y-1">
                     <x-responsive-nav-link :href="route('performance')" :active="request()->routeIs('performance')">
                         {{ __('My Performance') }}
+                    </x-responsive-nav-link>
+
+                    <x-responsive-nav-link :href="route('account.health')" :active="request()->routeIs('account.health') || request()->routeIs('account.snapshots')">
+                        {{ __('Account Health') }}
                     </x-responsive-nav-link>
 
                     <x-responsive-nav-link :href="route('analytics')" :active="request()->routeIs('analytics')">

@@ -87,6 +87,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/account/{accountId}', [DashboardController::class, 'account'])->name('account.show');
     Route::get('/accounts/{account}/snapshots', [App\Http\Controllers\AccountSnapshotViewController::class, 'index'])
         ->name('account.snapshots');
+    Route::get('/account-health', [App\Http\Controllers\AccountSnapshotViewController::class, 'accountHealth'])
+        ->name('account.health');
 
     // API Key management
     Route::get('/settings/api-key', [ApiKeyController::class, 'index'])->name('settings.api-key');

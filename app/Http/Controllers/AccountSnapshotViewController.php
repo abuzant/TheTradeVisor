@@ -6,12 +6,40 @@ use App\Models\TradingAccount;
 use App\Models\AccountSnapshot;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 use Carbon\Carbon;
 
 class AccountSnapshotViewController extends Controller
 {
     /**
+     * Account Health overview - redirects to first account's snapshots
+     * or shows account selection if user has multiple accounts
+     */
+    public function accountHealth(Request $request)
+    {
+        $user = auth()->user();
+        $accounts = $user->tradingAccounts()->get();
+
+        if ($accounts->isEmpty()) {
+            return redirect()->route('accounts.index')
+                ->with('info', 'Please add a trading account to view account health.');
+        }
+
+        // If user has only one account, redirect directly to its snapshots (7 days default)
+        if ($accounts->count() === 1) {
+            return redirect()->route('account.snapshots', ['account' => $accounts->first()->id, 'days' => 7]);
+        }
+
+        // If user has multiple accounts, show selection page
+        return view('accounts.health-overview', compact('accounts'));
+    }
+
+    /**
      * Display the account snapshots page with widgets
+     * 
+     * Caching strategy:
+     * - 7 days: Cache for 2 hours (data changes frequently)
+     * - 30/90/180 days: Cache for 24 hours (historical data is stable)
      */
     public function index(Request $request, TradingAccount $account)
     {
@@ -21,8 +49,32 @@ class AccountSnapshotViewController extends Controller
         }
 
         // Get time range from request (default: 30 days)
+        // Only accept 7, 30, 90, 180 - anything else defaults to 30
         $days = $request->input('days', 30);
-        $days = in_array($days, [7, 30, 90, 180]) ? $days : 30;
+        $days = in_array((int)$days, [7, 30, 90, 180], true) ? (int)$days : 30;
+
+        // Determine cache TTL based on time range
+        $cacheTTL = $days === 7 ? 7200 : 86400; // 2 hours for 7d, 24 hours for others
+        
+        // Create unique cache key
+        $cacheKey = "account_snapshots_{$account->id}_days_{$days}";
+
+        // Cache the entire view data
+        $viewData = Cache::remember($cacheKey, $cacheTTL, function () use ($account, $days) {
+            return $this->getViewData($account, $days);
+        });
+
+        return view('accounts.snapshots', array_merge($viewData, [
+            'account' => $account,
+            'days' => $days,
+        ]));
+    }
+
+    /**
+     * Get all data needed for the view
+     */
+    private function getViewData(TradingAccount $account, int $days): array
+    {
 
         // Get current snapshot (latest)
         $currentSnapshot = AccountSnapshot::where('trading_account_id', $account->id)
@@ -44,14 +96,12 @@ class AccountSnapshotViewController extends Controller
         // Get statistics with max drawdown
         $statistics = $this->getStatistics($account->id, $days);
 
-        return view('accounts.snapshots', compact(
-            'account',
-            'currentSnapshot',
-            'changes',
-            'chartData',
-            'statistics',
-            'days'
-        ));
+        return [
+            'currentSnapshot' => $currentSnapshot,
+            'changes' => $changes,
+            'chartData' => $chartData,
+            'statistics' => $statistics,
+        ];
     }
 
     /**
