@@ -94,8 +94,9 @@
                             </div>
                         </div>
 
-                        {{-- Best and Worst Trades --}}
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {{-- Best Trade, Max Drawdown, and Worst Trade --}}
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {{-- Most Profitable Trade --}}
                             <div class="border-2 border-green-200 rounded-lg p-4 bg-green-50">
                                 <h4 class="font-semibold text-green-800 mb-2">🏆 Most Profitable Trade</h4>
                                 @if($metrics['trade_analysis']['most_profitable_trade']['profit'] > 0)
@@ -112,6 +113,98 @@
                                 @endif
                             </div>
 
+                            {{-- Max Drawdown Gauge --}}
+                            @if($metrics['drawdown'])
+                            @php
+                                $maxDrawdown = $metrics['drawdown']['max_drawdown'];
+                                $severity = 'green';
+                                $severityText = 'Excellent';
+                                $severityIcon = '✅';
+                                
+                                if ($maxDrawdown > 30) {
+                                    $severity = 'red';
+                                    $severityText = 'Critical';
+                                    $severityIcon = '🔴';
+                                } elseif ($maxDrawdown > 20) {
+                                    $severity = 'orange';
+                                    $severityText = 'High Risk';
+                                    $severityIcon = '🟠';
+                                } elseif ($maxDrawdown > 10) {
+                                    $severity = 'yellow';
+                                    $severityText = 'Moderate';
+                                    $severityIcon = '🟡';
+                                }
+                                
+                                $gaugeRotation = min($maxDrawdown * 1.8, 180);
+                                
+                                // Get first account for snapshots link
+                                $firstAccount = $user->tradingAccounts()->first();
+                            @endphp
+                            
+                            <a href="{{ $firstAccount ? route('account.snapshots', ['account' => $firstAccount->id, 'days' => $days]) : route('account.health') }}" 
+                               class="block border-2 border-purple-200 rounded-lg p-4 bg-purple-50 hover:bg-purple-100 hover:border-purple-300 transition-all duration-300 group">
+                                <h4 class="font-semibold text-purple-800 mb-2 group-hover:text-purple-900">📉 Max Drawdown</h4>
+                                
+                                <div class="flex flex-col items-center justify-center">
+                                    {{-- Gauge Visualization --}}
+                                    <div class="relative w-32 h-16 mb-2">
+                                        <svg class="w-full h-full" viewBox="0 0 200 100">
+                                            {{-- Green Zone (0-10%) --}}
+                                            <path d="M 20 80 A 80 80 0 0 1 56 20" 
+                                                  fill="none" 
+                                                  stroke="#10b981" 
+                                                  stroke-width="12" 
+                                                  stroke-linecap="round"/>
+                                            
+                                            {{-- Yellow Zone (10-20%) --}}
+                                            <path d="M 56 20 A 80 80 0 0 1 100 10" 
+                                                  fill="none" 
+                                                  stroke="#fbbf24" 
+                                                  stroke-width="12" 
+                                                  stroke-linecap="round"/>
+                                            
+                                            {{-- Orange Zone (20-30%) --}}
+                                            <path d="M 100 10 A 80 80 0 0 1 144 20" 
+                                                  fill="none" 
+                                                  stroke="#f97316" 
+                                                  stroke-width="12" 
+                                                  stroke-linecap="round"/>
+                                            
+                                            {{-- Red Zone (30%+) --}}
+                                            <path d="M 144 20 A 80 80 0 0 1 180 80" 
+                                                  fill="none" 
+                                                  stroke="#ef4444" 
+                                                  stroke-width="12" 
+                                                  stroke-linecap="round"/>
+                                            
+                                            {{-- Needle --}}
+                                            <g transform="translate(100, 80) rotate({{ $gaugeRotation - 90 }})">
+                                                <line x1="0" y1="0" x2="0" y2="-50" 
+                                                      stroke="#1f2937" 
+                                                      stroke-width="3" 
+                                                      stroke-linecap="round"/>
+                                                <circle cx="0" cy="0" r="4" fill="#1f2937"/>
+                                            </g>
+                                        </svg>
+                                    </div>
+
+                                    {{-- Percentage Display --}}
+                                    <div class="text-center">
+                                        <div class="text-3xl font-bold text-{{ $severity }}-600">
+                                            {{ number_format($maxDrawdown, 2) }}%
+                                        </div>
+                                        <div class="text-xs font-semibold text-{{ $severity }}-600 mt-1">
+                                            {{ $severityIcon }} {{ $severityText }}
+                                        </div>
+                                        <div class="text-xs text-purple-600 mt-2 group-hover:underline">
+                                            View Details →
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                            @endif
+
+                            {{-- Worst Trade --}}
                             <div class="border-2 border-red-200 rounded-lg p-4 bg-red-50">
                                 <h4 class="font-semibold text-red-800 mb-2">📉 Worst Trade</h4>
                                 @if($metrics['trade_analysis']['worst_trade']['profit'] < 0)
