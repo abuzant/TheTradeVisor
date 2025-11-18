@@ -85,6 +85,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('accounts.destroy');
 
     Route::get('/account/{accountId}', [DashboardController::class, 'account'])->name('account.show');
+    Route::get('/accounts/{account}/snapshots', [App\Http\Controllers\AccountSnapshotViewController::class, 'index'])
+        ->name('account.snapshots');
 
     // API Key management
     Route::get('/settings/api-key', [ApiKeyController::class, 'index'])->name('settings.api-key');

@@ -169,6 +169,9 @@
                                                 <a href="{{ route('account.show', $account->id) }}"
                                                    class="text-indigo-600 hover:text-indigo-900" title="View">🔍</a>
 
+                                                <a href="{{ route('account.snapshots', $account->id) }}"
+                                                   class="text-purple-600 hover:text-purple-900" title="Snapshots">📊</a>
+
                                                 @if($account->is_paused)
                                                     <form method="POST" action="{{ route('accounts.unpause', $account) }}" class="inline">
                                                         @csrf

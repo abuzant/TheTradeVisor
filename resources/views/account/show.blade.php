@@ -4,9 +4,15 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 <x-broker-name :broker="$account->broker_name" class="text-indigo-600 hover:text-indigo-900" /> - {{ $account->account_number ?? 'Account Details' }}
             </h2>
-            <a href="{{ route('dashboard') }}" class="text-sm text-indigo-600 hover:text-indigo-900">
-                ← Back to Dashboard
-            </a>
+            <div class="flex items-center space-x-3">
+                <a href="{{ route('account.snapshots', $account->id) }}" 
+                   class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition text-sm">
+                    📊 View Snapshots
+                </a>
+                <a href="{{ route('dashboard') }}" class="text-sm text-indigo-600 hover:text-indigo-900">
+                    ← Back to Dashboard
+                </a>
+            </div>
         </div>
     </x-slot>
 
