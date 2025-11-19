@@ -336,6 +336,59 @@
   -o account_snapshots.csv</code></pre>
                             </div>
                         </div>
+
+                        {{-- Get All User Snapshots --}}
+                        <div class="mb-8">
+                            <div class="flex items-center mb-3">
+                                <span class="px-3 py-1 bg-green-100 text-green-800 rounded font-mono text-sm font-semibold mr-3">GET</span>
+                                <code class="text-lg font-mono">/api/v1/users/me/snapshots</code>
+                            </div>
+                            <p class="text-gray-700 mb-4">Get snapshots for all accounts belonging to the authenticated user (multi-account support).</p>
+                            
+                            <h4 class="font-bold text-gray-900 mb-2">Query Parameters:</h4>
+                            <ul class="list-disc list-inside space-y-1 text-gray-700 mb-4 ml-4">
+                                <li><code>from</code> - Start date YYYY-MM-DD (optional)</li>
+                                <li><code>to</code> - End date YYYY-MM-DD (optional)</li>
+                                <li><code>interval</code> - raw, hourly, daily (default: raw)</li>
+                                <li><code>limit</code> - Max records (default: 1000, max: 10000)</li>
+                            </ul>
+
+                            <h4 class="font-bold text-gray-900 mb-2">Example Request:</h4>
+                            <div class="bg-gray-900 text-gray-100 p-6 rounded-lg overflow-x-auto mb-4">
+                                <pre class="text-sm"><code>curl -X GET "https://api.thetradevisor.com/v1/users/me/snapshots?interval=daily&limit=100" \
+  -H "Authorization: Bearer YOUR_API_KEY"</code></pre>
+                            </div>
+
+                            <h4 class="font-bold text-gray-900 mb-2">Response Example:</h4>
+                            <div class="bg-gray-900 text-gray-100 p-6 rounded-lg overflow-x-auto">
+                                <pre class="text-sm"><code>{
+  "user_id": 26,
+  "count": 45,
+  "snapshots": [
+    {
+      "trading_account_id": 1,
+      "balance": "197464.13",
+      "equity": "143903.53",
+      "margin": "11625.78",
+      "free_margin": "132277.75",
+      "margin_level": "1237.80",
+      "profit": "-53560.60",
+      "snapshot_time": "2025-11-18 15:11:22"
+    },
+    {
+      "trading_account_id": 2,
+      "balance": "50000.00",
+      "equity": "52340.15",
+      "margin": "1200.00",
+      "free_margin": "51140.15",
+      "margin_level": "4361.68",
+      "profit": "2340.15",
+      "snapshot_time": "2025-11-18 15:11:22"
+    }
+  ]
+}</code></pre>
+                            </div>
+                        </div>
                     </div>
 
                     {{-- Analytics Endpoint --}}
