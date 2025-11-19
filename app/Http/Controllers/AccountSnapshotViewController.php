@@ -12,26 +12,49 @@ use Carbon\Carbon;
 class AccountSnapshotViewController extends Controller
 {
     /**
-     * Account Health overview - redirects to first account's snapshots
-     * or shows account selection if user has multiple accounts
+     * Account Health overview - shows selected accounts with their health metrics side-by-side
      */
     public function accountHealth(Request $request)
     {
         $user = auth()->user();
-        $accounts = $user->tradingAccounts()->get();
+        $allAccounts = $user->tradingAccounts()->get();
 
-        if ($accounts->isEmpty()) {
+        if ($allAccounts->isEmpty()) {
             return redirect()->route('accounts.index')
                 ->with('info', 'Please add a trading account to view account health.');
         }
 
-        // If user has only one account, redirect directly to its snapshots (7 days default)
-        if ($accounts->count() === 1) {
-            return redirect()->route('account.snapshots', ['account' => $accounts->first()->id, 'days' => 7]);
+        // Get time range from request (default: 7 days)
+        $days = $request->input('days', 7);
+        $days = in_array((int)$days, [7, 30, 90, 180], true) ? (int)$days : 7;
+
+        // Get selected account IDs from request (default: first 2 accounts)
+        $selectedIds = $request->input('accounts', []);
+        if (empty($selectedIds)) {
+            $selectedIds = $allAccounts->take(2)->pluck('id')->toArray();
+        } else {
+            // Ensure it's an array and limit to 2
+            $selectedIds = is_array($selectedIds) ? array_slice($selectedIds, 0, 2) : [$selectedIds];
         }
 
-        // If user has multiple accounts, show selection page
-        return view('accounts.health-overview', compact('accounts'));
+        // Get selected accounts
+        $selectedAccounts = $allAccounts->whereIn('id', $selectedIds)->values();
+
+        // Get health data for selected accounts
+        $accountsData = [];
+        foreach ($selectedAccounts as $account) {
+            $accountsData[] = [
+                'account' => $account,
+                'data' => $this->getViewData($account, $days),
+            ];
+        }
+
+        return view('accounts.health-overview', [
+            'accountsData' => $accountsData,
+            'allAccounts' => $allAccounts,
+            'selectedIds' => $selectedIds,
+            'days' => $days,
+        ]);
     }
 
     /**

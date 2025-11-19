@@ -13,8 +13,8 @@
             </div>
         </div>
         @if($current)
-            <div class="text-2xl font-bold text-gray-900 mb-1">
-                {{ number_format($current->balance, 2) }}
+            <div class="text-xl font-bold text-gray-900 mb-1">
+                {{ \App\Helpers\NumberHelper::formatShort($current->balance) }}
             </div>
             <div class="text-xs text-gray-500 mb-2">{{ $currency }}</div>
             <div class="flex items-center text-sm {{ $changes['balance'] >= 0 ? 'text-green-600' : 'text-red-600' }}">
@@ -46,8 +46,8 @@
             </div>
         </div>
         @if($current)
-            <div class="text-2xl font-bold text-gray-900 mb-1">
-                {{ number_format($current->equity, 2) }}
+            <div class="text-xl font-bold text-gray-900 mb-1">
+                {{ \App\Helpers\NumberHelper::formatShort($current->equity) }}
             </div>
             <div class="text-xs text-gray-500 mb-2">
                 {{ $currency }} 
@@ -84,7 +84,7 @@
             </div>
         </div>
         @if($current && $current->margin_level)
-            <div class="text-2xl font-bold text-gray-900 mb-1">
+            <div class="text-xl font-bold text-gray-900 mb-1">
                 {{ number_format($current->margin_level, 2) }}%
             </div>
             <div class="text-xs mb-2 {{ $current->margin_level < 200 ? 'text-red-600 font-semibold' : 'text-gray-500' }}">
@@ -127,8 +127,8 @@
             </div>
         </div>
         @if($current)
-            <div class="text-2xl font-bold {{ $current->profit >= 0 ? 'text-green-600' : 'text-red-600' }} mb-1">
-                {{ $current->profit >= 0 ? '+' : '' }}{{ number_format($current->profit, 2) }}
+            <div class="text-xl font-bold {{ $current->profit >= 0 ? 'text-green-600' : 'text-red-600' }} mb-1">
+                {{ $current->profit >= 0 ? '+' : '' }}{{ \App\Helpers\NumberHelper::formatShort($current->profit) }}
             </div>
             <div class="text-xs text-gray-500 mb-2">{{ $currency }}</div>
             <div class="flex items-center text-sm text-gray-600">

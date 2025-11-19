@@ -37,14 +37,15 @@ TheTradeVisor is an enterprise-grade trading analytics platform that aggregates,
 
 - 📊 **Real-time Analytics** - Live trading performance metrics and statistics
 - 📸 **Account Snapshots** - Historical account metrics with automated tracking and visualization
-- 💊 **Account Health Dashboard** - Interactive widgets showing balance, equity, margin, and drawdown trends
+- 💊 **Account Health Dashboard** - Side-by-side account comparison with interactive widgets showing balance, equity, margin, and drawdown trends
+- 🔄 **MT4/MT5 Full Support** - Unified data handling for both platforms with automatic deal entry mapping
 - 🌍 **Global Market Data** - Aggregated analytics from traders worldwide
 - 🏦 **Broker Comparison** - Detailed broker performance analysis
 - 📈 **Performance Tracking** - Individual and portfolio-level tracking with equity curves, drawdown analysis, and symbol performance
 - 🔒 **Enterprise Security** - Multi-layer protection and monitoring
 - ⚡ **High Performance** - Redis caching, query optimization, circuit breakers
 - 🌐 **GeoIP Analytics** - Country-based trading insights
-- 📱 **Responsive Design** - Beautiful UI across all devices
+- 📱 **Responsive Design** - Beautiful UI across all devices with smart number formatting
 - 💰 **Flexible Pricing** - Free tier + pay-per-account model ($9.99 one-time)
 - 🔑 **API Key Management** - Secure MT4/MT5 integration with account limits
 

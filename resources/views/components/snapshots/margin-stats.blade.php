@@ -1,5 +1,9 @@
 @props(['chartData', 'margin', 'currency'])
 
+@php
+    $chartId = 'marginChart_' . uniqid();
+@endphp
+
 <div class="bg-white/90 backdrop-blur-sm rounded-xl shadow-card p-6">
     <div class="mb-4">
         <h3 class="text-lg font-bold text-gray-900">📊 Margin Usage</h3>
@@ -7,7 +11,7 @@
     </div>
 
     <div class="relative" style="height: 200px;">
-        <canvas id="marginChart"></canvas>
+        <canvas id="{{ $chartId }}"></canvas>
     </div>
 
     <div class="mt-6 grid grid-cols-2 gap-4">
@@ -38,7 +42,7 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const ctx = document.getElementById('marginChart');
+    const ctx = document.getElementById('{{ $chartId }}');
     if (!ctx) return;
 
     const chartData = @json($chartData);

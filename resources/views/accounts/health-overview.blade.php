@@ -1,5 +1,5 @@
 @section('title', 'Account Health Overview')
-@section('description', 'View health metrics and snapshots for your trading accounts')
+@section('description', 'Compare health metrics and performance across all your trading accounts')
 
 <x-app-layout>
     <x-slot name="header">
@@ -7,76 +7,153 @@
             Account Health Overview
         </h1>
         <p class="mt-1 text-sm text-gray-600">
-            Select an account to view detailed health metrics and snapshots
+            Compare performance metrics across all your accounts
         </p>
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
             
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                @foreach($accounts as $account)
-                    <a href="{{ route('account.snapshots', ['account' => $account->id, 'days' => 7]) }}" 
-                       class="block bg-white/90 backdrop-blur-sm rounded-xl shadow-card hover:shadow-card-hover transition-all duration-300 p-6 group">
-                        
-                        {{-- Account Header --}}
-                        <div class="flex items-center justify-between mb-4">
-                            <div>
-                                <h3 class="text-lg font-bold text-gray-900 group-hover:text-indigo-600 transition">
-                                    <x-broker-name :broker="$account->broker_name" />
-                                </h3>
-                                <p class="text-sm text-gray-500">#{{ $account->account_number }}</p>
+            {{-- Account Selectors & Time Range --}}
+            <div class="bg-white/90 backdrop-blur-sm rounded-xl shadow-card p-4">
+                <form method="GET" action="{{ route('account.health') }}" id="accountHealthForm" class="space-y-4">
+                    {{-- Account Selectors --}}
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Account 1</label>
+                            <select name="accounts[]" onchange="document.getElementById('accountHealthForm').submit()" 
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                @foreach($allAccounts as $acc)
+                                    <option value="{{ $acc->id }}" {{ in_array($acc->id, $selectedIds) && $loop->index == array_search($acc->id, $selectedIds) ? 'selected' : '' }}>
+                                        {{ $acc->broker_name }} #{{ $acc->account_number }} ({{ $acc->platform_type }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Account 2</label>
+                            <select name="accounts[]" onchange="document.getElementById('accountHealthForm').submit()" 
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                @foreach($allAccounts as $acc)
+                                    <option value="{{ $acc->id }}" {{ isset($selectedIds[1]) && $acc->id == $selectedIds[1] ? 'selected' : (!isset($selectedIds[1]) && $loop->index == 1 ? 'selected' : '') }}>
+                                        {{ $acc->broker_name }} #{{ $acc->account_number }} ({{ $acc->platform_type }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    {{-- Time Range Selector --}}
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-sm font-medium text-gray-700">Time Range:</span>
+                            <div class="flex space-x-2">
+                                @foreach([7, 30, 90, 180] as $period)
+                                    <button type="submit" name="days" value="{{ $period }}"
+                                       class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $days == $period ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
+                                        {{ $period }}d
+                                    </button>
+                                @endforeach
                             </div>
-                            <div class="p-3 bg-indigo-100 rounded-lg group-hover:bg-indigo-200 transition">
-                                <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                                </svg>
+                        </div>
+                        <div class="text-sm text-gray-600">
+                            Comparing <span class="font-semibold">{{ count($accountsData) }}</span> account{{ count($accountsData) > 1 ? 's' : '' }}
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            {{-- Accounts Grid --}}
+            <div class="grid grid-cols-1 {{ count($accountsData) > 1 ? 'lg:grid-cols-2' : '' }} gap-6">
+                @foreach($accountsData as $accountData)
+                    @php
+                        $account = $accountData['account'];
+                        $data = $accountData['data'];
+                        $currentSnapshot = $data['currentSnapshot'];
+                        $changes = $data['changes'];
+                        $chartData = $data['chartData'];
+                        $statistics = $data['statistics'];
+                    @endphp
+
+                    <div class="space-y-6">
+                        {{-- Account Header Card --}}
+                        <div class="bg-white/90 backdrop-blur-sm rounded-xl shadow-card p-6">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h3 class="text-xl font-bold text-gray-900">
+                                        <x-broker-name :broker="$account->broker_name" />
+                                    </h3>
+                                    <p class="text-sm text-gray-500">
+                                        #{{ $account->account_number }} 
+                                        <x-platform-badge :account="$account" />
+                                    </p>
+                                </div>
+                                <a href="{{ route('account.snapshots', ['account' => $account->id, 'days' => $days]) }}" 
+                                   class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition text-sm">
+                                    View Details →
+                                </a>
                             </div>
                         </div>
 
-                        {{-- Quick Metrics --}}
-                        <div class="space-y-3">
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm text-gray-500">Balance</span>
-                                <span class="text-sm font-semibold text-gray-900">
-                                    {{ number_format($account->balance, 2) }} {{ $account->account_currency }}
-                                </span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm text-gray-500">Equity</span>
-                                <span class="text-sm font-semibold text-gray-900">
-                                    {{ number_format($account->equity, 2) }} {{ $account->account_currency }}
-                                </span>
-                            </div>
-                            <div class="flex justify-between items-center">
-                                <span class="text-sm text-gray-500">Status</span>
-                                @if($account->is_active)
-                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                                        Active
-                                    </span>
-                                @else
-                                    <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
-                                        Inactive
-                                    </span>
-                                @endif
-                            </div>
+                        {{-- Health Metrics Cards --}}
+                        <x-snapshots.health-metrics 
+                            :current="$currentSnapshot" 
+                            :changes="$changes" 
+                            :currency="$account->account_currency" 
+                        />
+
+                        {{-- Balance & Equity Chart --}}
+                        <x-snapshots.balance-equity-chart 
+                            :chartData="$chartData" 
+                            :currency="$account->account_currency"
+                            :days="$days"
+                        />
+
+                        {{-- Bottom Row: Max Drawdown & Margin Timeline --}}
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {{-- Max Drawdown Gauge --}}
+                            <x-snapshots.max-drawdown-gauge 
+                                :maxDrawdown="$statistics['max_drawdown']"
+                                :equity="$statistics['equity']"
+                                :currency="$account->account_currency"
+                            />
+
+                            {{-- Margin Usage Stats --}}
+                            <x-snapshots.margin-stats
+                                :chartData="$chartData"
+                                :margin="$statistics['margin']"
+                                :currency="$account->account_currency"
+                            />
                         </div>
 
-                        {{-- View Button --}}
-                        <div class="mt-4 pt-4 border-t border-gray-200">
-                            <div class="flex items-center justify-between text-indigo-600 group-hover:text-indigo-700">
-                                <span class="text-sm font-medium">View 7-Day Health</span>
-                                <svg class="w-5 h-5 transform group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                </svg>
+                        {{-- Statistics Summary --}}
+                        <div class="bg-white/90 backdrop-blur-sm rounded-xl shadow-card p-6">
+                            <h3 class="text-lg font-bold text-gray-900 mb-4">📊 Period Statistics ({{ $days }} days)</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <div class="text-sm text-gray-500">Peak Balance</div>
+                                    <div class="text-lg font-bold text-gray-900">{{ number_format($statistics['balance']['max'], 2) }} {{ $account->account_currency }}</div>
+                                </div>
+                                <div>
+                                    <div class="text-sm text-gray-500">Lowest Balance</div>
+                                    <div class="text-lg font-bold text-gray-900">{{ number_format($statistics['balance']['min'], 2) }} {{ $account->account_currency }}</div>
+                                </div>
+                                <div>
+                                    <div class="text-sm text-gray-500">Peak Equity</div>
+                                    <div class="text-lg font-bold text-green-600">{{ number_format($statistics['equity']['max'], 2) }} {{ $account->account_currency }}</div>
+                                </div>
+                                <div>
+                                    <div class="text-sm text-gray-500">Lowest Equity</div>
+                                    <div class="text-lg font-bold text-red-600">{{ number_format($statistics['equity']['min'], 2) }} {{ $account->account_currency }}</div>
+                                </div>
                             </div>
                         </div>
-                    </a>
+                    </div>
                 @endforeach
             </div>
 
             {{-- Info Box --}}
-            <div class="mt-8 bg-blue-50 border-l-4 border-blue-600 p-4 rounded">
+            <div class="bg-blue-50 border-l-4 border-blue-600 p-4 rounded">
                 <div class="flex">
                     <div class="flex-shrink-0">
                         <svg class="h-5 w-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
@@ -85,9 +162,9 @@
                     </div>
                     <div class="ml-3">
                         <p class="text-sm text-blue-800">
-                            <strong>Account Health</strong> shows you a 7-day snapshot of your account's performance, 
+                            <strong>Account Health</strong> shows side-by-side comparison of all your accounts' performance metrics, 
                             including balance trends, equity changes, margin levels, and maximum drawdown. 
-                            Click on any account to view detailed metrics.
+                            Click "View Details" on any account to see the full snapshot history.
                         </p>
                     </div>
                 </div>

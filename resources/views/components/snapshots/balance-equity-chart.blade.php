@@ -1,5 +1,9 @@
 @props(['chartData', 'currency', 'days'])
 
+@php
+    $chartId = 'balanceEquityChart_' . uniqid();
+@endphp
+
 <div class="bg-white/90 backdrop-blur-sm rounded-xl shadow-card p-6">
     <div class="mb-4">
         <h3 class="text-lg font-bold text-gray-900">📈 Balance & Equity Trend</h3>
@@ -7,7 +11,7 @@
     </div>
 
     <div class="relative" style="height: 400px;">
-        <canvas id="balanceEquityChart"></canvas>
+        <canvas id="{{ $chartId }}"></canvas>
     </div>
 
     <div class="mt-4 flex items-center justify-center space-x-6 text-sm">
@@ -26,7 +30,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const ctx = document.getElementById('balanceEquityChart');
+    const ctx = document.getElementById('{{ $chartId }}');
     if (!ctx) return;
 
     const chartData = @json($chartData);
