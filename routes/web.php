@@ -32,6 +32,7 @@ Route::get('/docs', [App\Http\Controllers\PublicController::class, 'docs'])->nam
 Route::get('/api-docs', [App\Http\Controllers\PublicController::class, 'apiDocs'])->name('api.docs');
 Route::get('/download', [App\Http\Controllers\PublicController::class, 'download'])->name('download');
 Route::get('/download/setup', [App\Http\Controllers\PublicController::class, 'downloadSetup'])->name('download.setup');
+Route::get('/for-brokers', [App\Http\Controllers\PublicController::class, 'forBrokers'])->name('for-brokers');
 
 // Legal Pages
 Route::get('/terms', function () {

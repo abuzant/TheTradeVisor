@@ -53,6 +53,21 @@
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     @endif
     
+    {{-- Cloudflare Email Protection --}}
+    <script data-cfasync="false">
+        // Email obfuscation to prevent scraping
+        document.addEventListener('DOMContentLoaded', function() {
+            const emailElements = document.querySelectorAll('[data-cfemail]');
+            emailElements.forEach(function(element) {
+                const encoded = element.getAttribute('data-cfemail');
+                if (encoded && encoded !== element.textContent) {
+                    // Email is already visible, just protect the attribute
+                    element.removeAttribute('data-cfemail');
+                }
+            });
+        });
+    </script>
+    
     {{ $head ?? '' }}
 </head>
 <body class="bg-gray-50">

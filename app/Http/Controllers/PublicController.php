@@ -176,4 +176,9 @@ class PublicController extends Controller
             'Content-Disposition' => 'attachment; filename="TradeVisor-Setup.exe"',
         ]);
     }
+
+    public function forBrokers()
+    {
+        return view('public.for-brokers');
+    }
 }

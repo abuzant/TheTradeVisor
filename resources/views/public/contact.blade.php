@@ -53,7 +53,7 @@
                     <div class="space-y-6">
                         <div>
                             <h3 class="font-semibold text-gray-900 mb-2">Email</h3>
-                            <p class="text-gray-600"><a href="mailto:hello@thetradevisor.com" class="text-blue-600 hover:text-blue-700">hello@thetradevisor.com</a></p>
+                            <p class="text-gray-600"><a href="mailto:hello@thetradevisor.com" class="text-blue-600 hover:text-blue-700"><span data-cfemail="[email protected]">hello@thetradevisor.com</span></a></p>
                         </div>
                         <div>
                             <h3 class="font-semibold text-gray-900 mb-2">Support Hours</h3>

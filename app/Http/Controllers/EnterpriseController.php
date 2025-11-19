@@ -15,13 +15,21 @@ class EnterpriseController extends Controller
     /**
      * Show comprehensive enterprise dashboard with all analytics
      */
-    public function dashboard()
+    public function dashboard(Request $request)
     {
         $user = Auth::user();
         $broker = $user->enterpriseBroker;
 
         if (!$broker) {
             return redirect()->route('dashboard')->with('error', 'Enterprise account not found');
+        }
+
+        // Get timeframe from request (default: 30 days)
+        // Only accept 7, 30, 90, 180 - default to 30 for any other value
+        $days = (int) $request->input('days', 30);
+        $validDays = [7, 30, 90, 180];
+        if (!in_array($days, $validDays, true)) {
+            $days = 30;
         }
 
         // Get all trading accounts for this broker
@@ -32,33 +40,133 @@ class EnterpriseController extends Controller
         $accountIds = $tradingAccounts->pluck('id')->toArray();
         $userIds = $tradingAccounts->pluck('user_id')->unique()->toArray();
 
-        // Basic stats
+        // Basic stats - CONVERT ALL TO USD for aggregated view
+        $totalBalanceUSD = 0;
+        $totalEquityUSD = 0;
+        $totalProfitUSD = 0;
+
+        foreach ($tradingAccounts as $account) {
+            $totalBalanceUSD += $account->getBalanceInCurrency('USD');
+            $totalEquityUSD += $account->getEquityInCurrency('USD');
+            $totalProfitUSD += $account->getProfitInCurrency('USD');
+        }
+
         $stats = [
             'total_users' => count($userIds),
             'total_accounts' => $tradingAccounts->count(),
             'active_last_7_days' => $tradingAccounts->where('last_data_received_at', '>=', now()->subDays(7))->count(),
-            'total_balance' => $tradingAccounts->sum('balance'),
-            'total_equity' => $tradingAccounts->sum('equity'),
-            'total_profit' => $tradingAccounts->sum('profit'),
+            'total_balance' => $totalBalanceUSD,
+            'total_equity' => $totalEquityUSD,
+            'total_profit' => $totalProfitUSD,
         ];
 
-        // Trading performance (last 30 days)
+        // Trading performance - CONVERT PROFITS TO USD (with 24h caching)
         $performance = [];
         if (!empty($accountIds)) {
-            $deals = Deal::whereIn('trading_account_id', $accountIds)
-                ->where('time', '>=', now()->subDays(30))
-                ->where('entry', 'out')
-                ->whereIn('type', ['buy', 'sell'])
-                ->get();
+            $cacheKey = "enterprise.performance.{$broker->id}.{$days}d";
+            $performance = \Cache::remember($cacheKey, 86400, function () use ($accountIds, $days) {
+                $deals = Deal::whereIn('trading_account_id', $accountIds)
+                    ->where('time', '>=', now()->subDays($days))
+                    ->where('entry', 'out')
+                    ->whereIn('type', ['buy', 'sell'])
+                    ->with('tradingAccount')
+                    ->get();
 
-            $performance = [
-                'total_trades' => $deals->count(),
-                'winning_trades' => $deals->where('profit', '>', 0)->count(),
-                'losing_trades' => $deals->where('profit', '<', 0)->count(),
-                'total_volume' => $deals->sum('volume'),
-                'total_profit' => $deals->sum('profit'),
-                'win_rate' => $deals->count() > 0 ? round(($deals->where('profit', '>', 0)->count() / $deals->count()) * 100, 2) : 0,
-            ];
+                $totalProfitUSD = 0;
+                $currencyService = app(\App\Services\CurrencyService::class);
+                
+                foreach ($deals as $deal) {
+                    if ($deal->tradingAccount) {
+                        $profitUSD = $currencyService->convert(
+                            (float) $deal->profit,
+                            $deal->tradingAccount->account_currency,
+                            'USD'
+                        );
+                        $totalProfitUSD += $profitUSD;
+                    }
+                }
+
+                $winningTrades = $deals->where('profit', '>', 0);
+                $losingTrades = $deals->where('profit', '<', 0);
+                $totalWinProfit = 0;
+                $totalLossProfit = 0;
+                
+                foreach ($winningTrades as $trade) {
+                    if ($trade->tradingAccount) {
+                        $totalWinProfit += $currencyService->convert(
+                            (float) $trade->profit,
+                            $trade->tradingAccount->account_currency,
+                            'USD'
+                        );
+                    }
+                }
+                
+                foreach ($losingTrades as $trade) {
+                    if ($trade->tradingAccount) {
+                        $totalLossProfit += abs($currencyService->convert(
+                            (float) $trade->profit,
+                            $trade->tradingAccount->account_currency,
+                            'USD'
+                        ));
+                    }
+                }
+                
+                $profitFactor = $totalLossProfit > 0 ? round($totalWinProfit / $totalLossProfit, 2) : 0;
+                
+                // Find best and worst trades
+                $bestTrade = null;
+                $worstTrade = null;
+                $bestProfit = 0;
+                $worstProfit = 0;
+                
+                foreach ($deals as $deal) {
+                    if ($deal->tradingAccount) {
+                        $profitUSD = $currencyService->convert(
+                            (float) $deal->profit,
+                            $deal->tradingAccount->account_currency,
+                            'USD'
+                        );
+                        
+                        if ($profitUSD > $bestProfit) {
+                            $bestProfit = $profitUSD;
+                            $bestTrade = $deal;
+                        }
+                        
+                        if ($profitUSD < $worstProfit) {
+                            $worstProfit = $profitUSD;
+                            $worstTrade = $deal;
+                        }
+                    }
+                }
+
+                return [
+                    'total_trades' => $deals->count(),
+                    'winning_trades' => $winningTrades->count(),
+                    'losing_trades' => $losingTrades->count(),
+                    'total_volume' => $deals->sum('volume'),
+                    'total_profit' => $totalProfitUSD,
+                    'win_rate' => $deals->count() > 0 ? round(($winningTrades->count() / $deals->count()) * 100, 2) : 0,
+                    'profit_factor' => $profitFactor,
+                    'best_trade' => $bestTrade ? [
+                        'symbol' => $bestTrade->symbol,
+                        'profit' => $bestProfit,
+                        'volume' => $bestTrade->volume,
+                        'date' => $bestTrade->time->format('M d, Y'),
+                        'account_number' => $bestTrade->tradingAccount->account_number,
+                        'account_currency' => $bestTrade->tradingAccount->account_currency,
+                        'platform_type' => $bestTrade->tradingAccount->platform_type,
+                    ] : null,
+                    'worst_trade' => $worstTrade ? [
+                        'symbol' => $worstTrade->symbol,
+                        'profit' => $worstProfit,
+                        'volume' => $worstTrade->volume,
+                        'date' => $worstTrade->time->format('M d, Y'),
+                        'account_number' => $worstTrade->tradingAccount->account_number,
+                        'account_currency' => $worstTrade->tradingAccount->account_currency,
+                        'platform_type' => $worstTrade->tradingAccount->platform_type,
+                    ] : null,
+                ];
+            });
         }
 
         // Top performing accounts
@@ -67,40 +175,110 @@ class EnterpriseController extends Controller
         // Recent activity
         $recentAccounts = $tradingAccounts->sortByDesc('last_data_received_at')->take(20);
 
-        // Symbol performance (last 30 days)
-        $symbolStats = [];
+        // Symbol performance - CONVERT PROFITS TO USD (with 24h caching)
+        $symbolStats = collect();
         if (!empty($accountIds)) {
-            $symbolStats = Deal::whereIn('trading_account_id', $accountIds)
-                ->where('time', '>=', now()->subDays(30))
-                ->where('entry', 'out')
-                ->whereIn('type', ['buy', 'sell'])
-                ->select('symbol', 
-                    DB::raw('COUNT(*) as trade_count'),
-                    DB::raw('SUM(profit) as total_profit'),
-                    DB::raw('SUM(volume) as total_volume'),
-                    DB::raw('COUNT(CASE WHEN profit > 0 THEN 1 END) as winning_trades')
-                )
-                ->groupBy('symbol')
-                ->orderByDesc('total_profit')
-                ->limit(10)
-                ->get();
+            $cacheKey = "enterprise.symbols.{$broker->id}.{$days}d";
+            $symbolStats = \Cache::remember($cacheKey, 86400, function () use ($accountIds, $days) {
+                $symbolDeals = Deal::whereIn('trading_account_id', $accountIds)
+                    ->where('time', '>=', now()->subDays($days))
+                    ->where('entry', 'out')
+                    ->whereIn('type', ['buy', 'sell'])
+                    ->with('tradingAccount')
+                    ->get();
+
+                $currencyService = app(\App\Services\CurrencyService::class);
+                
+                // Group by symbol and convert profits to USD
+                $symbolGroups = $symbolDeals->groupBy('symbol');
+                $symbolData = [];
+                
+                foreach ($symbolGroups as $symbol => $deals) {
+                    $totalProfitUSD = 0;
+                    foreach ($deals as $deal) {
+                        if ($deal->tradingAccount) {
+                            $profitUSD = $currencyService->convert(
+                                (float) $deal->profit,
+                                $deal->tradingAccount->account_currency,
+                                'USD'
+                            );
+                            $totalProfitUSD += $profitUSD;
+                        }
+                    }
+                    
+                    $symbolData[] = (object)[
+                        'symbol' => $symbol,
+                        'normalized_symbol' => \App\Models\SymbolMapping::normalize($symbol),
+                        'trade_count' => $deals->count(),
+                        'total_profit' => $totalProfitUSD,
+                        'total_volume' => $deals->sum('volume'),
+                        'winning_trades' => $deals->where('profit', '>', 0)->count(),
+                    ];
+                }
+                
+                // Sort by profit and take top 10
+                return collect($symbolData)->sortByDesc('total_profit')->take(10);
+            });
         }
 
-        // Daily profit chart data (last 30 days)
-        $dailyProfits = [];
+        // Balance & Equity chart data - CONVERT TO USD (with 24h caching)
+        $chartData = [];
         if (!empty($accountIds)) {
-            $dailyProfits = Deal::whereIn('trading_account_id', $accountIds)
-                ->where('time', '>=', now()->subDays(30))
-                ->where('entry', 'out')
-                ->whereIn('type', ['buy', 'sell'])
-                ->select(
-                    DB::raw('DATE(time) as date'),
-                    DB::raw('SUM(profit) as profit'),
-                    DB::raw('COUNT(*) as trades')
-                )
-                ->groupBy('date')
-                ->orderBy('date')
-                ->get();
+            $cacheKey = "enterprise.chart.{$broker->id}.{$days}d";
+            $chartData = \Cache::remember($cacheKey, 86400, function () use ($accountIds, $days, $tradingAccounts) {
+                $currencyService = app(\App\Services\CurrencyService::class);
+                
+                // Get unique dates
+                $dates = \App\Models\AccountSnapshot::whereIn('trading_account_id', $accountIds)
+                    ->where('snapshot_time', '>=', now()->subDays($days))
+                    ->selectRaw('DATE(snapshot_time) as date')
+                    ->distinct()
+                    ->orderBy('date')
+                    ->pluck('date');
+                
+                // For each date, get the LATEST snapshot per account and aggregate
+                $dailyData = [];
+                foreach ($dates as $date) {
+                    $totalBalanceUSD = 0;
+                    $totalEquityUSD = 0;
+                    
+                    foreach ($accountIds as $accountId) {
+                        // Get the LATEST snapshot for this account on this date
+                        $snapshot = \App\Models\AccountSnapshot::where('trading_account_id', $accountId)
+                            ->whereDate('snapshot_time', $date)
+                            ->orderBy('snapshot_time', 'desc')
+                            ->first();
+                        
+                        if ($snapshot) {
+                            $account = $tradingAccounts->firstWhere('id', $accountId);
+                            if ($account) {
+                                // Convert to USD
+                                $balanceUSD = $currencyService->convert(
+                                    (float) $snapshot->balance,
+                                    $account->account_currency,
+                                    'USD'
+                                );
+                                $equityUSD = $currencyService->convert(
+                                    (float) $snapshot->equity,
+                                    $account->account_currency,
+                                    'USD'
+                                );
+                                
+                                $totalBalanceUSD += $balanceUSD;
+                                $totalEquityUSD += $equityUSD;
+                            }
+                        }
+                    }
+                    
+                    $dailyData[] = [
+                        'date' => $date,
+                        'balance' => round($totalBalanceUSD, 2),
+                        'equity' => round($totalEquityUSD, 2),
+                    ];
+                }
+                
+                return $dailyData;
+            });
         }
 
         return view('enterprise.dashboard', compact(
@@ -110,8 +288,9 @@ class EnterpriseController extends Controller
             'topAccounts', 
             'recentAccounts',
             'symbolStats',
-            'dailyProfits',
-            'tradingAccounts'
+            'chartData',
+            'tradingAccounts',
+            'days'
         ));
     }
 
