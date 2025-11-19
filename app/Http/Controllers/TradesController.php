@@ -19,8 +19,8 @@ class TradesController extends Controller
             $q->where('user_id', $user->id);
         })
         ->whereNotNull('symbol')
-        ->where('symbol', '!=', '')
-        ->where('symbol', '!=', 'UNKNOWN')
+        ->where('symbol', '<>', '')
+        ->where('symbol', '<>', 'UNKNOWN')
         ->with('tradingAccount');
 
         // Search filter
@@ -100,7 +100,7 @@ class TradesController extends Controller
         $q->where('user_id', $user->id);
     })
     ->whereNotNull('symbol')
-    ->where('symbol', '!=', '')
+    ->where('symbol', '<>', '')
     ->whereIn('symbol', $symbolMappings)
     ->whereIn('entry', ['out', 'inout']);  // Only count closed trades
     

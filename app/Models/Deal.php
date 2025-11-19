@@ -111,7 +111,7 @@ class Deal extends Model
                        ->orWhere('deal_category', 'trade');
                  })
                  ->whereNotNull('symbol')
-                 ->where('symbol', '!=', '');
+                 ->where('symbol', '<>', '');
     }
 
     /**

@@ -106,6 +106,11 @@ class UserManagementController extends Controller
             'is_admin' => 'required|boolean',
         ]);
 
+        // Auto-set max_accounts for enterprise users
+        if ($validated['subscription_tier'] === 'enterprise') {
+            $validated['max_accounts'] = 999999;
+        }
+
         $user->update($validated);
 
         return redirect()

@@ -142,6 +142,37 @@ class DashboardController extends Controller
                 $sampleDeal = $positionDeals->first();
                 $account = $sampleDeal->tradingAccount;
 
+                // Skip deals with null position_id (MT4 standalone deals)
+                if ($positionId === null || $positionId === '') {
+                    // For MT4 deals without position_id, use the deal itself
+                    $outDeal = $positionDeals->first();
+                    return (object) [
+                        'position_id' => null,
+                        'symbol' => $outDeal->symbol,
+                        'normalized_symbol' => $outDeal->normalized_symbol,
+                        'type' => $outDeal->display_type,
+                        'display_type' => $outDeal->display_type,
+                        'is_buy' => $outDeal->is_buy,
+                        'is_open' => false,
+                        'volume' => $outDeal->volume,
+                        'open_price' => $outDeal->price ?? 0,
+                        'close_price' => $outDeal->price ?? 0,
+                        'profit' => $outDeal->profit,
+                        'commission' => $outDeal->commission ?? 0,
+                        'swap' => $outDeal->swap ?? 0,
+                        'open_time' => $outDeal->time,
+                        'close_time' => $outDeal->time,
+                        'deals' => collect([$outDeal]),
+                        'deal_count' => 1,
+                        'trading_account_id' => $sampleDeal->trading_account_id,
+                        'platform_type' => $account->platform_type ?? 'MT4',
+                        'position_identifier' => null,
+                        'account_currency' => $account->account_currency ?? 'USD',
+                        'account_number' => $account->account_number ?? null,
+                        'broker_name' => $account->broker_name ?? 'Unknown',
+                    ];
+                }
+
                 // Load all deals (IN + OUT) for this position on this account
                 $allDeals = Deal::forPosition($positionId)
                     ->forAccount($sampleDeal->trading_account_id)
@@ -258,6 +289,34 @@ class DashboardController extends Controller
         
         // Group by position_id to show position-level view
         $positions = $closedTrades->groupBy('position_id')->map(function($positionDeals, $positionId) use ($account) {
+            // Skip deals with null position_id (MT4 standalone deals)
+            if ($positionId === null || $positionId === '') {
+                // For MT4 deals without position_id, use the deal itself
+                $outDeal = $positionDeals->first();
+                return (object) [
+                    'position_id' => null,
+                    'symbol' => $outDeal->symbol,
+                    'normalized_symbol' => $outDeal->normalized_symbol,
+                    'type' => $outDeal->display_type,
+                    'display_type' => $outDeal->display_type,
+                    'is_buy' => $outDeal->is_buy,
+                    'is_open' => false,
+                    'volume' => $outDeal->volume,
+                    'open_price' => $outDeal->price ?? 0,
+                    'close_price' => $outDeal->price ?? 0,
+                    'profit' => $outDeal->profit,
+                    'commission' => $outDeal->commission ?? 0,
+                    'swap' => $outDeal->swap ?? 0,
+                    'open_time' => $outDeal->time,
+                    'close_time' => $outDeal->time,
+                    'deals' => collect([$outDeal]),
+                    'deal_count' => 1,
+                    'trading_account_id' => $account->id,
+                    'platform_type' => $account->platform_type ?? 'MT4',
+                    'position_identifier' => null,
+                ];
+            }
+            
             // Get all deals for this position (IN and OUT)
             $allDeals = Deal::forPosition($positionId)
                 ->forAccount($account->id)

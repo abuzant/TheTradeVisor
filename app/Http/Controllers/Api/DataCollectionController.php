@@ -7,8 +7,11 @@ use Illuminate\Http\Request;
 use App\Jobs\ProcessTradingData;
 use App\Jobs\ProcessHistoricalData;
 use App\Models\TradingAccount;
+use App\Models\EnterpriseBroker;
+use App\Models\WhitelistedBrokerUsage;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class DataCollectionController extends Controller
 {
@@ -88,8 +91,37 @@ class DataCollectionController extends Controller
                 ], 403);
             }
 
-            // CHECK: Enforce account limit for new accounts
-            if (!$existingAccount) {
+            // CHECK: Check if broker is whitelisted (enterprise)
+            $brokerName = $accountInfo['broker'] ?? 'unknown';
+            $whitelistedBroker = EnterpriseBroker::where('official_broker_name', $brokerName)->first();
+            
+            $bypassLimits = false;
+            $gracePeriodMessage = null;
+            
+            if ($whitelistedBroker) {
+                if ($whitelistedBroker->is_active) {
+                    // Active subscription - bypass limits
+                    $bypassLimits = true;
+                    Log::info('Whitelisted broker detected - bypassing account limits', [
+                        'user_id' => $user->id,
+                        'broker' => $brokerName,
+                        'enterprise_broker_id' => $whitelistedBroker->id,
+                    ]);
+                } elseif ($whitelistedBroker->grace_period_ends_at && $whitelistedBroker->grace_period_ends_at > now()) {
+                    // In grace period - still works but with warning
+                    $bypassLimits = true;
+                    $gracePeriodMessage = "Broker's enterprise plan expired. Grace period ends: " . 
+                                         $whitelistedBroker->grace_period_ends_at->format('Y-m-d');
+                    Log::warning('Whitelisted broker in grace period', [
+                        'user_id' => $user->id,
+                        'broker' => $brokerName,
+                        'grace_period_ends' => $whitelistedBroker->grace_period_ends_at,
+                    ]);
+                }
+            }
+
+            // CHECK: Enforce account limit for new accounts (unless broker is whitelisted)
+            if (!$existingAccount && !$bypassLimits) {
                 $currentAccountCount = $user->tradingAccounts()->count();
                 
                 if ($currentAccountCount >= $user->max_accounts) {
@@ -99,7 +131,7 @@ class DataCollectionController extends Controller
                         'max_accounts' => $user->max_accounts,
                         'subscription_tier' => $user->subscription_tier,
                         'attempted_account' => $accountInfo['account_number'] ?? $accountInfo['account_hash'] ?? 'unknown',
-                        'broker' => $accountInfo['broker'] ?? 'unknown',
+                        'broker' => $brokerName,
                     ]);
 
                     return response()->json([
@@ -163,13 +195,25 @@ class DataCollectionController extends Controller
                 ]);
             }
 
-            return response()->json([
+            // Track whitelisted broker usage (for broker analytics)
+            if ($whitelistedBroker && $bypassLimits) {
+                $this->trackWhitelistedUsage($user, $whitelistedBroker, $accountInfo);
+            }
+
+            $response = [
                 'success' => true,
                 'message' => 'Data received successfully',
                 'data_type' => $isHistorical ? 'historical' : 'current',
                 'timestamp' => now()->toIso8601String(),
                 'queued' => true,
-            ], 200);
+                'whitelisted_broker' => $bypassLimits,
+            ];
+
+            if ($gracePeriodMessage) {
+                $response['grace_period_warning'] = $gracePeriodMessage;
+            }
+
+            return response()->json($response, 200);
 
         } catch (\Exception $e) {
             Log::error('Error receiving MT5 data', [
@@ -208,6 +252,44 @@ class DataCollectionController extends Controller
                 return 'contest';
             default:
                 return 'unknown';
+        }
+    }
+
+    /**
+     * Track whitelisted broker usage for analytics
+     */
+    private function trackWhitelistedUsage($user, $whitelistedBroker, $accountInfo)
+    {
+        try {
+            $accountHash = $accountInfo['account_hash'] ?? hash('sha256', ($accountInfo['account_number'] ?? '') . ($accountInfo['server'] ?? ''));
+            
+            // Find or create trading account
+            $tradingAccount = TradingAccount::where('user_id', $user->id)
+                ->where('account_hash', $accountHash)
+                ->first();
+            
+            if ($tradingAccount) {
+                // Update or create usage record
+                WhitelistedBrokerUsage::updateOrCreate(
+                    [
+                        'user_id' => $user->id,
+                        'trading_account_id' => $tradingAccount->id,
+                    ],
+                    [
+                        'enterprise_broker_id' => $whitelistedBroker->id,
+                        'account_number' => $accountInfo['account_number'] ?? 0,
+                        'last_seen_at' => now(),
+                        'first_seen_at' => DB::raw('COALESCE(first_seen_at, NOW())'),
+                    ]
+                );
+            }
+        } catch (\Exception $e) {
+            // Don't fail the request if tracking fails
+            Log::warning('Failed to track whitelisted broker usage', [
+                'error' => $e->getMessage(),
+                'user_id' => $user->id,
+                'broker_id' => $whitelistedBroker->id,
+            ]);
         }
     }
 }

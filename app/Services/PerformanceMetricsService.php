@@ -729,7 +729,7 @@ class PerformanceMetricsService
             ];
         })
         ->filter(function($platform) {
-            return $platform['total_trades'] >= 3; // Only show platforms with at least 3 trades
+            return $platform['total_trades'] >= 1; // Show all platforms with at least 1 trade
         })
         ->sortByDesc('total_profit')
         ->values();

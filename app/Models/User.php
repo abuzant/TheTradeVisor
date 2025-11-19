@@ -51,6 +51,18 @@ protected static function boot()
         if (empty($user->api_key)) {
             $user->api_key = self::generateApiKey();
         }
+        
+        // Auto-set max_accounts for enterprise users
+        if ($user->subscription_tier === 'enterprise' && empty($user->max_accounts)) {
+            $user->max_accounts = 999999;
+        }
+    });
+    
+    // Auto-update max_accounts when subscription tier changes to enterprise
+    static::updating(function ($user) {
+        if ($user->isDirty('subscription_tier') && $user->subscription_tier === 'enterprise') {
+            $user->max_accounts = 999999;
+        }
     });
 }
 
@@ -68,6 +80,16 @@ protected static function boot()
     public function digestSubscriptions()
     {
         return $this->hasMany(DigestSubscription::class);
+    }
+
+    public function enterpriseBroker()
+    {
+        return $this->hasOne(EnterpriseBroker::class);
+    }
+
+    public function whitelistedBrokerUsage()
+    {
+        return $this->hasMany(WhitelistedBrokerUsage::class);
     }
 
     // Helper methods

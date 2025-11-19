@@ -102,6 +102,11 @@ class TradingAccount extends Model
         return $this->hasMany(Deal::class);
     }
 
+    public function whitelistedBrokerUsage()
+    {
+        return $this->hasOne(WhitelistedBrokerUsage::class);
+    }
+
     // Helper methods
     public static function generateUuid()
     {

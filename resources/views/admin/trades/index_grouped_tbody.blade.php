@@ -5,6 +5,11 @@
             $displayDeal = $group['in_deal'] ?? $group['out_deal'];
             $isOpen = $group['is_open'];
             $hasBoth = $group['out_deal'] && $group['in_deal'];
+            
+            // Skip if no valid deal to display
+            if (!$displayDeal) {
+                continue;
+            }
         @endphp
         
         {{-- Main Row (shows IN deal - position type, not closing action) --}}

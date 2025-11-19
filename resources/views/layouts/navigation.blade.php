@@ -55,6 +55,35 @@
                         </x-dropdown>
                     </div>
 
+                    @if(Auth::user()->enterpriseBroker)
+                        <!-- Enterprise Dropdown -->
+                        <div class="hidden sm:flex sm:items-center sm:ms-6">
+                            <x-dropdown align="left" width="48">
+                                <x-slot name="trigger">
+                                    <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-purple-600 bg-purple-50 hover:bg-purple-100 focus:outline-none transition ease-in-out duration-150">
+                                        <div>🏢 Enterprise</div>
+
+                                        <div class="ms-1">
+                                            <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                            </svg>
+                                        </div>
+                                    </button>
+                                </x-slot>
+
+                                <x-slot name="content">
+                                    <x-dropdown-link :href="route('enterprise.dashboard')">
+                                        {{ __('📊 Dashboard & Analytics') }}
+                                    </x-dropdown-link>
+
+                                    <x-dropdown-link :href="route('enterprise.settings')">
+                                        {{ __('⚙️ Broker Settings') }}
+                                    </x-dropdown-link>
+                                </x-slot>
+                            </x-dropdown>
+                        </div>
+                    @endif
+
                     @if(Auth::user()->is_admin)
                         <!-- Admin Dropdown -->
                         <div class="hidden sm:flex sm:items-center sm:ms-6">
@@ -184,6 +213,8 @@
                             {{ __('API Key') }}
                         </x-dropdown-link>
 
+                        <div class="border-t border-gray-100"></div>
+                        
                         <x-dropdown-link :href="route('download')" :active="request()->routeIs('download')">
                             <span class="flex items-center">
                                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -259,6 +290,24 @@
                     </x-responsive-nav-link>
                 </div>
             </div>
+
+            @if(Auth::user()->enterpriseBroker)
+                <div class="pt-4 pb-1 border-t border-gray-200">
+                    <div class="px-4">
+                        <div class="font-medium text-base text-gray-800">🏢 Enterprise</div>
+                    </div>
+
+                    <div class="mt-3 space-y-1">
+                        <x-responsive-nav-link :href="route('enterprise.dashboard')">
+                            {{ __('📊 Dashboard & Analytics') }}
+                        </x-responsive-nav-link>
+
+                        <x-responsive-nav-link :href="route('enterprise.settings')">
+                            {{ __('⚙️ Broker Settings') }}
+                        </x-responsive-nav-link>
+                    </div>
+                </div>
+            @endif
 
             @if(Auth::user()->is_admin)
                 <div class="pt-4 pb-1 border-t border-gray-200">
