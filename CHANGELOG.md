@@ -73,4 +73,5 @@ All notable changes to TheTradeVisor will be documented in this file.
 
 ---
 
-**Full Changelog**: https://github.com/yourusername/thetradevisor/compare/v2.0.0...v2.0.1
+**Developed by**: [@abuzant](https://github.com/abuzant)  
+**Full Changelog**: https://github.com/abuzant/TheTradeVisor/compare/v2.0.0...v2.0.1

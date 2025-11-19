@@ -206,8 +206,8 @@
                                             <td class="px-4 py-3 whitespace-nowrap text-xs text-gray-900">
                                                 {{ $account->account_currency }} {{ number_format($account->equity, 2) }}
                                             </td>
-                                            <td class="px-4 py-3 whitespace-nowrap text-xs font-medium {{ $account->profit >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                                {{ $account->account_currency }} {{ number_format($account->profit, 2) }}
+                                            <td class="px-4 py-3 whitespace-nowrap text-xs font-medium {{ $account->openPositions->sum('profit') >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                                                {{ $account->account_currency }} {{ number_format($account->openPositions->sum('profit'), 2) }}
                                             </td>
                                             <td class="px-4 py-3 whitespace-nowrap text-xs text-gray-500">
                                                 {{ $account->openPositions->count() }}

@@ -83,8 +83,11 @@ class DashboardController extends Controller
                     'USD'
                 );
                 
+                // Calculate profit from open positions (not stored profit field)
+                // The stored profit field can be 0 when there are no open positions
+                $accountProfit = $account->openPositions->sum('profit');
                 $totalProfit += $currencyService->convert(
-                    $account->profit ?? 0,
+                    $accountProfit,
                     $account->account_currency ?? 'USD',
                     'USD'
                 );
