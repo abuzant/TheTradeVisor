@@ -133,6 +133,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     // Global Analytics
     Route::get('/analytics/{days?}', [App\Http\Controllers\AnalyticsController::class, 'index'])->name('analytics')->where('days', '[0-9]+');
+
+    // Enterprise Broker Routes
+    Route::prefix('enterprise')->name('enterprise.')->group(function () {
+        Route::get('/dashboard', [App\Http\Controllers\EnterpriseController::class, 'dashboard'])->name('dashboard');
+        Route::get('/settings', [App\Http\Controllers\EnterpriseController::class, 'settings'])->name('settings');
+        Route::post('/settings', [App\Http\Controllers\EnterpriseController::class, 'updateSettings'])->name('settings.update');
+    });
 });
 
 // Admin routes

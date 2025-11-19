@@ -70,6 +70,16 @@ protected static function boot()
         return $this->hasMany(DigestSubscription::class);
     }
 
+    public function enterpriseBroker()
+    {
+        return $this->hasOne(EnterpriseBroker::class);
+    }
+
+    public function whitelistedBrokerUsage()
+    {
+        return $this->hasMany(WhitelistedBrokerUsage::class);
+    }
+
     // Helper methods
     public static function generateApiKey()
     {

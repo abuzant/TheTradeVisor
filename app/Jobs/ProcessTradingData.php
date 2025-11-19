@@ -61,9 +61,10 @@ class ProcessTradingData implements ShouldQueue
                 $this->processOrders($tradingAccount, $this->data['orders']);
             }
 
-            // 4. Process Recent History/Deals
-            if (isset($this->data['history']) && is_array($this->data['history'])) {
-                $this->processDeals($tradingAccount, $this->data['history']);
+            // 4. Process Recent History/Deals (MT4 sends 'deals', MT5 sends 'history')
+            $dealsData = $this->data['deals'] ?? $this->data['history'] ?? [];
+            if (!empty($dealsData) && is_array($dealsData)) {
+                $this->processDeals($tradingAccount, $dealsData);
             }
 
             DB::commit();
@@ -189,6 +190,13 @@ class ProcessTradingData implements ShouldQueue
             }
         }
 
+        // Calculate margin_level if not provided (MT4 doesn't always send it)
+        $marginLevel = $accountData['margin_level'] ?? null;
+        if ($marginLevel === null && isset($accountData['margin']) && $accountData['margin'] > 0) {
+            // Margin Level = (Equity / Margin) * 100
+            $marginLevel = ($accountData['equity'] / $accountData['margin']) * 100;
+        }
+
         // Update account information
         $tradingAccount->update([
             'broker_name' => $accountData['broker'],
@@ -199,9 +207,9 @@ class ProcessTradingData implements ShouldQueue
             'equity' => $accountData['equity'],
             'margin' => $accountData['margin'],
             'free_margin' => $accountData['free_margin'],
-            'margin_level' => $accountData['margin_level'],
-            'profit' => $accountData['profit'],
-            'credit' => $accountData['credit'],
+            'margin_level' => $marginLevel,
+            'profit' => $accountData['profit'] ?? 0,
+            'credit' => $accountData['credit'] ?? 0,
             'trade_allowed' => $accountData['trade_allowed'] ?? true,
             'trade_expert' => $accountData['trade_expert'] ?? true,
             'last_seen_ip' => $clientIp,
@@ -226,8 +234,8 @@ class ProcessTradingData implements ShouldQueue
             'equity' => $accountData['equity'],
             'margin' => $accountData['margin'],
             'free_margin' => $accountData['free_margin'],
-            'margin_level' => $accountData['margin_level'],
-            'profit' => $accountData['profit'],
+            'margin_level' => $marginLevel,
+            'profit' => $accountData['profit'] ?? 0,
             'snapshot_time' => now(),
             'is_historical' => false,
             'source' => 'api',
@@ -248,6 +256,12 @@ class ProcessTradingData implements ShouldQueue
 
         foreach ($positions as $posData) {
             try {
+                // Auto-detect and create symbol mapping if needed
+                $this->ensureSymbolMapping($posData['symbol']);
+
+                // Convert MT4 numeric type to string (0=buy, 1=sell)
+                $type = $this->normalizePositionType($posData['type']);
+
                 Position::updateOrCreate(
                     [
                         'trading_account_id' => $tradingAccount->id,
@@ -257,7 +271,7 @@ class ProcessTradingData implements ShouldQueue
                         'symbol' => $posData['symbol'],
                         'comment' => $posData['comment'] ?? null,
                         'external_id' => $posData['external_id'] ?? null,
-                        'type' => $posData['type'],
+                        'type' => $type,
                         'reason' => $posData['reason'] ?? 'unknown',
                         'volume' => $posData['volume'] ?? 0,
                         'open_price' => $posData['price_open'] ?? $posData['open_price'] ?? 0,
@@ -364,6 +378,9 @@ class ProcessTradingData implements ShouldQueue
                 continue;
             }
 
+            // Auto-detect and create symbol mapping if needed
+            $this->ensureSymbolMapping($dealData['symbol']);
+
             // Check if deal already exists (avoid duplicates)
             $exists = Deal::where('trading_account_id', $tradingAccount->id)
                 ->where('ticket', $dealData['ticket'])
@@ -371,9 +388,12 @@ class ProcessTradingData implements ShouldQueue
 
             if (!$exists) {
                 try {
+                    // Normalize MT4 deal data to match validator expectations
+                    $normalizedDeal = $this->normalizeMT4Deal($dealData);
+                    
                     // Validate and normalize deal data
                     $validator = new TradingDataValidationService();
-                    $validatedData = $validator->validateDeal($dealData);
+                    $validatedData = $validator->validateDeal($normalizedDeal);
                     
                     Deal::create(array_merge(
                         ['trading_account_id' => $tradingAccount->id],
@@ -421,6 +441,100 @@ class ProcessTradingData implements ShouldQueue
                 'error' => $e->getMessage()
             ]);
             return null;
+        }
+    }
+
+    /**
+     * Normalize MT4 position type (numeric to string)
+     */
+    protected function normalizePositionType($type)
+    {
+        // MT4 sends numeric types: 0=buy, 1=sell
+        $typeMap = [
+            0 => 'buy',
+            1 => 'sell',
+            '0' => 'buy',
+            '1' => 'sell',
+        ];
+
+        return $typeMap[$type] ?? (is_numeric($type) ? ($type == 0 ? 'buy' : 'sell') : $type);
+    }
+
+    /**
+     * Normalize MT4 deal data to match validator expectations
+     */
+    protected function normalizeMT4Deal($dealData)
+    {
+        // MT4 sends time_open/time_close, validator expects 'time'
+        if (isset($dealData['time_close']) && !isset($dealData['time'])) {
+            $dealData['time'] = $this->normalizeDateTime($dealData['time_close']);
+        } elseif (isset($dealData['time_open']) && !isset($dealData['time'])) {
+            $dealData['time'] = $this->normalizeDateTime($dealData['time_open']);
+        }
+
+        // MT4 sends price_open/price_close, validator expects 'price'
+        if (isset($dealData['price_close']) && !isset($dealData['price'])) {
+            $dealData['price'] = $dealData['price_close'];
+        } elseif (isset($dealData['price_open']) && !isset($dealData['price'])) {
+            $dealData['price'] = $dealData['price_open'];
+        }
+
+        return $dealData;
+    }
+
+    /**
+     * Normalize MT4 datetime format (dots to dashes)
+     */
+    protected function normalizeDateTime($dateTime)
+    {
+        if (empty($dateTime)) {
+            return null;
+        }
+
+        // MT4 uses dots: "2025.11.19 12:30:29"
+        // Convert to standard: "2025-11-19 12:30:29"
+        return str_replace('.', '-', $dateTime);
+    }
+
+    /**
+     * Ensure symbol mapping exists, create if missing
+     */
+    protected function ensureSymbolMapping($rawSymbol)
+    {
+        if (empty($rawSymbol)) {
+            return;
+        }
+
+        // Check if mapping already exists
+        $exists = DB::table('symbol_mappings')
+            ->where('raw_symbol', $rawSymbol)
+            ->exists();
+
+        if (!$exists) {
+            // Extract broker suffix (e.g., .sd, .lv, etc.)
+            $brokerSuffix = null;
+            $normalizedSymbol = $rawSymbol;
+
+            if (preg_match('/^([A-Z0-9]+)(\.[a-z]+)$/i', $rawSymbol, $matches)) {
+                $normalizedSymbol = $matches[1];
+                $brokerSuffix = $matches[2];
+            }
+
+            // Create new symbol mapping
+            DB::table('symbol_mappings')->insert([
+                'raw_symbol' => $rawSymbol,
+                'normalized_symbol' => $normalizedSymbol,
+                'broker_suffix' => $brokerSuffix,
+                'is_verified' => false, // Auto-detected symbols need manual verification
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            Log::info('Auto-created symbol mapping', [
+                'raw_symbol' => $rawSymbol,
+                'normalized_symbol' => $normalizedSymbol,
+                'broker_suffix' => $brokerSuffix,
+            ]);
         }
     }
 
