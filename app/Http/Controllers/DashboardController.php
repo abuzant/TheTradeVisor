@@ -591,9 +591,13 @@ class DashboardController extends Controller
         $colorIndex = $account->id % count($colors);
         $color = $colors[$colorIndex];
 
+        // Shorten broker name to first two words for chart legend
+        $brokerWords = explode(' ', $account->broker_name);
+        $shortBrokerName = implode(' ', array_slice($brokerWords, 0, 2));
+        
         $chartData[] = [
             'account_id' => $account->id,
-            'account_name' => $account->broker_name . ' - ' . ($account->account_number ?? 'Account'),
+            'account_name' => $shortBrokerName . ' - ' . ($account->account_number ?? 'Account'),
             'currency' => $account->account_currency,
             'display_currency' => $displayCurrency, // Always USD for multi-account
             'color' => $color['rgb'],

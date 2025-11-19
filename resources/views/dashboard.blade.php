@@ -107,14 +107,14 @@
 	@if($accounts->isNotEmpty())
 	<div class="bg-white/90 backdrop-blur-sm overflow-hidden shadow-card hover:shadow-card-hover transition-all duration-300 rounded-xl mb-6">
 	    <div class="p-6">
-	        <div class="flex justify-between items-center mb-4">
+	        <div class=" justify-between items-center mb-4">
 	            <div>
 	                <h2 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">Account Performance</h2>
-	                <p class="text-sm text-gray-600 mt-1">Balance and Equity trends across your accounts (Last 30 Days)</p>
-	            </div>
+	                <p class="text-sm text-gray-600 mt-1">Balance & Equity (All accounts/30 Days)</p>
+	            </div><br />
 
 	            {{-- Legend / Account Toggles --}}
-	            <div class="flex flex-wrap gap-2">
+	            <div class=" flex-wrap gap-2">
 	                @foreach($accountsChartData as $index => $accountData)
 	                    <label class="inline-flex items-center cursor-pointer px-3 py-2 rounded-md border-2 transition-all hover:bg-gray-50"
 	                           style="border-color: rgb({{ $accountData['color'] }});"
