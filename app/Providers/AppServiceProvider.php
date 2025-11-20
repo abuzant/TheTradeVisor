@@ -28,10 +28,5 @@ class AppServiceProvider extends ServiceProvider
     {
         Deal::observe(DealObserver::class);
         Paginator::useTailwind();
-        
-        // Affiliate click rate limiting
-        RateLimiter::for('affiliate_clicks', function (Request $request) {
-            return Limit::perMinute(10)->by($request->ip());
-        });
     }
 }

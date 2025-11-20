@@ -6,7 +6,6 @@ use App\Http\Controllers\Api\AccountController;
 use App\Http\Controllers\Api\TradeController;
 use App\Http\Controllers\Api\AnalyticsController;
 use App\Http\Controllers\Api\AccountSnapshotController;
-use App\Http\Controllers\Api\AffiliateApiController;
 
 // Public health check
 Route::get('/health', function () {
@@ -45,16 +44,4 @@ Route::middleware(['api.key', 'api.rate.limit'])->group(function () {
         
     });
     
-});
-
-// Affiliate API endpoints (requires affiliate authentication)
-Route::prefix('v1/affiliate')->middleware('auth:affiliate')->group(function () {
-    Route::get('/profile', [AffiliateApiController::class, 'profile']);
-    Route::get('/stats', [AffiliateApiController::class, 'stats']);
-    Route::get('/performance', [AffiliateApiController::class, 'performance']);
-    Route::get('/campaigns', [AffiliateApiController::class, 'campaigns']);
-    Route::get('/geo', [AffiliateApiController::class, 'geographic']);
-    Route::get('/clicks', [AffiliateApiController::class, 'clicks']);
-    Route::get('/conversions', [AffiliateApiController::class, 'conversions']);
-    Route::get('/payouts', [AffiliateApiController::class, 'payouts']);
 });
