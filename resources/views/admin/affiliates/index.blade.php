@@ -8,6 +8,9 @@
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold text-gray-900">Affiliate Management</h2>
             <div class="flex space-x-2">
+                <a href="{{ route('admin.affiliates.settings') }}" class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700">
+                    ⚙️ Settings
+                </a>
                 <a href="{{ route('admin.affiliates.conversions') }}" class="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700">
                     Conversions
                 </a>

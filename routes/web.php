@@ -228,6 +228,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/payouts/list', [App\Http\Controllers\Admin\AffiliateManagementController::class, 'payouts'])->name('payouts');
         Route::post('/payouts/{payout}/process', [App\Http\Controllers\Admin\AffiliateManagementController::class, 'processPayout'])->name('payouts.process');
         Route::post('/payouts/{payout}/reject', [App\Http\Controllers\Admin\AffiliateManagementController::class, 'rejectPayout'])->name('payouts.reject');
+        
+        Route::get('/settings', [App\Http\Controllers\Admin\AffiliateSettingsController::class, 'index'])->name('settings');
+        Route::put('/settings', [App\Http\Controllers\Admin\AffiliateSettingsController::class, 'update'])->name('settings.update');
     });
 });
 
