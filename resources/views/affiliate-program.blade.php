@@ -169,16 +169,6 @@
     </div>
 
     <!-- Footer -->
-    <div class="bg-gray-800 text-gray-300 py-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <p>&copy; 2025 TheTradeVisor. All rights reserved.</p>
-            <div class="mt-4 space-x-6">
-                <a href="/" class="hover:text-white">Home</a>
-                <a href="{{ route('terms') }}" class="hover:text-white">Terms</a>
-                <a href="{{ route('privacy') }}" class="hover:text-white">Privacy</a>
-                <a href="{{ route('affiliate.login') }}" class="hover:text-white">Affiliate Login</a>
-            </div>
-        </div>
-    </div>
+    @include('components.unified-footer')
 </body>
 </html>
