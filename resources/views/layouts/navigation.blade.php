@@ -117,10 +117,6 @@
                                         {{ __('Accounts Management') }}
                                     </x-dropdown-link>
 
-                                    <x-dropdown-link :href="route('admin.affiliates.index')">
-                                        {{ __('Affiliate Management') }}
-                                    </x-dropdown-link>
-
                                     <x-dropdown-link :href="route('admin.rate-limits.index')">
                                         {{ __('Rate Limits') }}
                                     </x-dropdown-link>
@@ -324,12 +320,8 @@
                             {{ __('Admin Dashboard') }}
                         </x-responsive-nav-link>
 
-			    <x-responsive-nav-link :href="route('admin.users.index')">
-			        {{ __('User Management') }}
-			    </x-responsive-nav-link>
-
-                        <x-responsive-nav-link :href="route('admin.affiliates.index')">
-                            {{ __('Affiliate Management') }}
+                        <x-responsive-nav-link :href="route('admin.accounts.index')">
+                            {{ __('Accounts Management') }}
                         </x-responsive-nav-link>
 
                         <x-responsive-nav-link :href="route('admin.logs')">

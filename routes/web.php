@@ -214,33 +214,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     
     // Admin Wiki
     Route::get('/wiki', [App\Http\Controllers\Admin\AdminWikiController::class, 'index'])->name('wiki');
-    
-    // Affiliate Management
-    Route::prefix('affiliates')->name('affiliates.')->group(function () {
-        Route::get('/', [App\Http\Controllers\Admin\AffiliateManagementController::class, 'index'])->name('index');
-        
-        // Settings must come before {affiliate} to avoid route conflict
-        Route::get('/settings', [App\Http\Controllers\Admin\AffiliateSettingsController::class, 'index'])->name('settings');
-        Route::put('/settings', [App\Http\Controllers\Admin\AffiliateSettingsController::class, 'update'])->name('settings.update');
-        
-        Route::get('/conversions/list', [App\Http\Controllers\Admin\AffiliateManagementController::class, 'conversions'])->name('conversions');
-        Route::post('/conversions/{conversion}/approve', [App\Http\Controllers\Admin\AffiliateManagementController::class, 'approveConversion'])->name('conversions.approve');
-        Route::post('/conversions/{conversion}/reject', [App\Http\Controllers\Admin\AffiliateManagementController::class, 'rejectConversion'])->name('conversions.reject');
-        
-        Route::get('/payouts/list', [App\Http\Controllers\Admin\AffiliateManagementController::class, 'payouts'])->name('payouts');
-        Route::post('/payouts/{payout}/process', [App\Http\Controllers\Admin\AffiliateManagementController::class, 'processPayout'])->name('payouts.process');
-        Route::post('/payouts/{payout}/reject', [App\Http\Controllers\Admin\AffiliateManagementController::class, 'rejectPayout'])->name('payouts.reject');
-        
-        // {affiliate} must be last to avoid catching other routes
-        Route::get('/{affiliate}', [App\Http\Controllers\Admin\AffiliateManagementController::class, 'show'])->name('show');
-        Route::post('/{affiliate}/toggle-status', [App\Http\Controllers\Admin\AffiliateManagementController::class, 'toggleStatus'])->name('toggle-status');
-    });
 });
-
-// Affiliate Program Landing Page (public)
-Route::get('/affiliate-program', function () {
-    return view('affiliate-program');
-})->name('affiliate-program');
 
 // Legal pages (public)
 Route::get('/terms', [App\Http\Controllers\LegalController::class, 'termsOfService'])->name('terms');

@@ -61,7 +61,6 @@
                     <a href="/screenshots" class="text-gray-700 hover:text-gray-900 font-medium">Screenshots</a>
                     <a href="/pricing" class="text-gray-700 hover:text-gray-900 font-medium">Pricing</a>
                     <a href="/faq" class="text-gray-700 hover:text-gray-900 font-medium">FAQ</a>
-                    <a href="{{ route('affiliate-program') }}" class="text-green-600 hover:text-green-700 font-semibold">💰 Earn Money</a>
                     @guest
                         <a href="{{ route('login') }}" class="text-gray-700 hover:text-gray-900 font-medium">Login</a>
                         <a href="{{ route('register') }}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 font-medium">Get Started</a>

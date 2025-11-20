@@ -15,22 +15,8 @@ return Application::configure(basePath: dirname(__DIR__))
         api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
-        then: function () {
-            Route::middleware('web')
-                ->group(base_path('routes/affiliate.php'));
-        },
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // Configure authentication redirects for different guards
-        $middleware->redirectGuestsTo(function ($request) {
-            // Affiliate routes redirect to affiliate login
-            if ($request->is('affiliate/*')) {
-                return route('affiliate.login');
-            }
-            // Default redirect to main login
-            return route('login');
-        });
-        
         // SECURITY NOTE: CSRF disabled on login/logout due to Cloudflare cookie issues
         // Mitigation: Rate limiting enabled on these routes (see routes/auth.php)
         // TODO: Test CSRF re-enablement in staging with updated session config
