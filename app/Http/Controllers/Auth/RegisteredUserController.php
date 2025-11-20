@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\Affiliate;
+use App\Services\AffiliateTrackingService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -27,7 +29,7 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request, AffiliateTrackingService $trackingService): RedirectResponse
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
@@ -35,11 +37,31 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
+        // Check for affiliate referral
+        $affiliate = null;
+        if ($request->has('ref')) {
+            $affiliate = Affiliate::where('slug', $request->ref)->where('is_active', true)->first();
+        } else {
+            $affiliate = $trackingService->getAffiliateFromCookie($request);
+        }
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'referred_by_affiliate_id' => $affiliate?->id,
         ]);
+        
+        // Link click to user if affiliate exists
+        if ($affiliate) {
+            $affiliate->clicks()
+                ->where('session_id', $request->session()->getId())
+                ->update([
+                    'converted' => true,
+                    'converted_at' => now(),
+                    'conversion_user_id' => $user->id,
+                ]);
+        }
 
         event(new Registered($user));
 

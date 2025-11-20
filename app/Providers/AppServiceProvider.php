@@ -6,6 +6,9 @@ use Illuminate\Support\ServiceProvider;
 use App\Models\Deal;
 use App\Observers\DealObserver;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Http\Request;
 
 
 class AppServiceProvider extends ServiceProvider
@@ -24,6 +27,11 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Deal::observe(DealObserver::class);
-    Paginator::useTailwind();
+        Paginator::useTailwind();
+        
+        // Affiliate click rate limiting
+        RateLimiter::for('affiliate_clicks', function (Request $request) {
+            return Limit::perMinute(10)->by($request->ip());
+        });
     }
 }

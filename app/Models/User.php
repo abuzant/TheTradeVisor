@@ -23,6 +23,8 @@ class User extends Authenticatable
     'is_admin',
     'last_login_at',
     'display_currency',
+    'affiliate_id',
+    'referred_by_affiliate_id',
     ];
 
     protected $hidden = [
@@ -58,6 +60,20 @@ protected static function boot()
         }
     });
     
+    // Auto-create affiliate account for new users
+    static::created(function ($user) {
+        $affiliate = Affiliate::create([
+            'user_id' => $user->id,
+            'username' => $user->name,
+            'email' => $user->email,
+            'password' => $user->password,
+            'is_verified' => $user->email_verified_at ? true : false,
+        ]);
+        
+        $user->affiliate_id = $affiliate->id;
+        $user->saveQuietly();
+    });
+    
     // Auto-update max_accounts when subscription tier changes to enterprise
     static::updating(function ($user) {
         if ($user->isDirty('subscription_tier') && $user->subscription_tier === 'enterprise') {
@@ -90,6 +106,16 @@ protected static function boot()
     public function whitelistedBrokerUsage()
     {
         return $this->hasMany(WhitelistedBrokerUsage::class);
+    }
+    
+    public function affiliate()
+    {
+        return $this->belongsTo(Affiliate::class);
+    }
+    
+    public function referredByAffiliate()
+    {
+        return $this->belongsTo(Affiliate::class, 'referred_by_affiliate_id');
     }
 
     // Helper methods
