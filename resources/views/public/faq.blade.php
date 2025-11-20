@@ -134,6 +134,33 @@
                     </div>
                 </div>
 
+                {{-- Affiliate Program --}}
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6 pb-2 border-b-2 border-green-600">💰 Affiliate Program</h2>
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">How can I earn money with TheTradeVisor?</h3>
+                            <p class="text-gray-600">Join our <a href="{{ route('affiliate-program') }}" class="text-green-600 hover:text-green-700 font-semibold">Affiliate Program</a> and earn $1.99 for every user who signs up through your referral link and upgrades to a paid plan. It's completely free to join!</p>
+                        </div>
+
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">How do I get paid?</h3>
+                            <p class="text-gray-600">Payouts are processed in USDT (TRC20/ERC20) once you reach the $50 minimum threshold. Payments are typically processed within 1-3 business days after approval.</p>
+                        </div>
+
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Is there a limit to how much I can earn?</h3>
+                            <p class="text-gray-600">No! There's no limit to your earnings. The more referrals you bring, the more you earn. Some of our top affiliates earn thousands of dollars per month.</p>
+                        </div>
+
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">How do I track my affiliate performance?</h3>
+                            <p class="text-gray-600">You get access to a comprehensive affiliate dashboard with real-time analytics, click tracking, conversion rates, and earnings reports. <a href="{{ route('affiliate-program') }}" class="text-green-600 hover:text-green-700 font-semibold">Learn more →</a></p>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
             {{-- Still have questions --}}

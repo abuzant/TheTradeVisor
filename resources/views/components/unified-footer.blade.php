@@ -30,6 +30,7 @@
                     <li><a href="/about" class="hover:text-white transition-colors">About</a></li>
                     <li><a href="/contact" class="hover:text-white transition-colors">Contact</a></li>
                     <li><a href="{{ route('for-brokers') }}" class="hover:text-white transition-colors font-medium text-indigo-400">For Brokers</a></li>
+                    <li><a href="{{ route('affiliate-program') }}" class="hover:text-white transition-colors font-medium text-green-400">💰 Affiliate Program</a></li>
                 </ul>
             </div>
 
