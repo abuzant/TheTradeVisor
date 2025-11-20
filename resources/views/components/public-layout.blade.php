@@ -72,7 +72,7 @@
 </head>
 <body class="bg-gray-50">
 
-    {{-- Navigation --}}
+    {{-- Unified Public Navigation --}}
     <nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
@@ -81,18 +81,18 @@
                     <span class="ml-3 px-2 py-1 text-xs font-semibold text-blue-700 bg-blue-100 rounded">PROFESSIONAL</span>
                 </div>
                 <div class="flex items-center space-x-8">
-                    <a href="/#analytics" class="text-gray-700 hover:text-gray-900 font-medium">Analytics</a>
+                    <a href="/analytics" class="text-gray-700 hover:text-gray-900 font-medium">Analytics</a>
                     <a href="/features" class="text-gray-700 hover:text-gray-900 font-medium">Features</a>
                     <a href="/screenshots" class="text-gray-700 hover:text-gray-900 font-medium">Screenshots</a>
                     <a href="/download" class="text-gray-700 hover:text-gray-900 font-medium">Download</a>
                     <a href="/pricing" class="text-gray-700 hover:text-gray-900 font-medium">Pricing</a>
                     <a href="/faq" class="text-gray-700 hover:text-gray-900 font-medium">FAQ</a>
-                    @guest
+                    @auth
+                        <a href="{{ route('dashboard') }}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 font-medium">Dashboard</a>
+                    @else
                         <a href="{{ route('login') }}" class="text-gray-700 hover:text-gray-900 font-medium">Login</a>
                         <a href="{{ route('register') }}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 font-medium">Get Started</a>
-                    @else
-                        <a href="{{ route('dashboard') }}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 font-medium">Dashboard</a>
-                    @endguest
+                    @endauth
                 </div>
             </div>
         </div>

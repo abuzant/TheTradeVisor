@@ -1,38 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Privacy Policy for TheTradeVisor - How we collect, use, and protect your data">
-    <title>Privacy Policy - TheTradeVisor</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <x-google-analytics />
-</head>
-<body class="bg-gray-50">
-    <!-- Header -->
-    <header class="bg-white shadow-sm border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div class="flex justify-between items-center">
-                <div>
-                    <a href="/" class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                        TheTradeVisor
-                    </a>
-                </div>
-                <nav class="flex gap-6">
-                    <a href="/" class="text-gray-600 hover:text-indigo-600">Home</a>
-                    <a href="/features" class="text-gray-600 hover:text-indigo-600">Features</a>
-                    <a href="/pricing" class="text-gray-600 hover:text-indigo-600">Pricing</a>
-                    @auth
-                        <a href="/dashboard" class="text-indigo-600 font-medium">Dashboard</a>
-                    @else
-                        <a href="/login" class="text-indigo-600 font-medium">Login</a>
-                    @endauth
-                </nav>
-            </div>
-        </div>
-    </header>
+<x-public-layout>
+    <x-slot name="title">Privacy Policy - TheTradeVisor</x-slot>
+    <x-slot name="description">Privacy Policy for TheTradeVisor - How we collect, use, and protect your data</x-slot>
 
-    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <section class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div class="bg-white rounded-xl shadow-lg p-8 md:p-12">
             <h1 class="text-4xl font-bold text-gray-900 mb-2">Privacy Policy</h1>
             <p class="text-sm text-gray-500 mb-8">Last Updated: {{ date('F d, Y') }}</p>
@@ -392,21 +362,20 @@
                 </div>
             </div>
         </div>
-    </main>
+    </section>
 
-    <!-- Footer -->
-    <x-public-footer />
-    <!-- Email Protection Script -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            document.querySelectorAll('.email-link').forEach(function(link) {
-                const email = link.getAttribute('data-email');
-                if (email) {
-                    link.href = 'mailto:' + email;
-                    link.textContent = email;
-                }
+    <x-slot name="head">
+        <!-- Email Protection Script -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                document.querySelectorAll('.email-link').forEach(function(link) {
+                    const email = link.getAttribute('data-email');
+                    if (email) {
+                        link.href = 'mailto:' + email;
+                        link.textContent = email;
+                    }
+                });
             });
-        });
-    </script>
-</body>
-</html>
+        </script>
+    </x-slot>
+</x-public-layout>

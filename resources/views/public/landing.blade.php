@@ -1,76 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>TheTradeVisor - Professional MT4/MT5 Trading Analytics Platform</title>
-    <meta name="description" content="Enterprise-grade trading analytics platform. Real-time data from MT4/MT5 terminals worldwide. Trusted by professional traders and institutions.">
-    <meta name="keywords" content="MT4 analytics, MT5 analytics, forex trading analytics, trading performance tracker, broker comparison, global trading data">
-    
-    {{-- Open Graph --}}
-    <meta property="og:title" content="TheTradeVisor - Professional MT4/MT5 Trading Analytics">
-    <meta property="og:description" content="Enterprise-grade trading analytics platform. Real-time data from MT4/MT5 terminals worldwide.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="{{ url()->current() }}">
-    <meta property="og:site_name" content="TheTradeVisor">
-    
-    {{-- Twitter Card --}}
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="TheTradeVisor - Professional MT4/MT5 Trading Analytics">
-    <meta name="twitter:description" content="Enterprise-grade trading analytics platform. Real-time data from MT4/MT5 terminals worldwide.">
-    
-    <link rel="canonical" href="{{ url()->current() }}">
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    {{-- Google Analytics --}}
-    @if(config('services.google_analytics.enabled'))
-    <script async src="https://www.googletagmanager.com/gtag/js?id={{ config('services.google_analytics.tracking_id') }}"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', '{{ config('services.google_analytics.tracking_id') }}', {
-            'anonymize_ip': true,
-            'page_title': 'TheTradeVisor - Professional MT4/MT5 Trading Analytics Platform',
-            'page_path': '/'
-        });
-    </script>
-    @endif
-    
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        .stat-card { transition: all 0.3s ease; }
-        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-    </style>
-</head>
-<body class="bg-gray-50">
+<x-public-layout>
+    <x-slot name="title">TheTradeVisor - Professional MT4/MT5 Trading Analytics Platform</x-slot>
+    <x-slot name="description">Enterprise-grade trading analytics platform. Real-time data from MT4/MT5 terminals worldwide. Trusted by professional traders and institutions.</x-slot>
+    <x-slot name="keywords">MT4 analytics, MT5 analytics, forex trading analytics, trading performance tracker, broker comparison, global trading data</x-slot>
+    <x-slot name="ogTitle">TheTradeVisor - Professional MT4/MT5 Trading Analytics</x-slot>
+    <x-slot name="ogDescription">Enterprise-grade trading analytics platform. Real-time data from MT4/MT5 terminals worldwide.</x-slot>
 
-    {{-- Navigation --}}
-    <nav class="bg-white border-b border-gray-200 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <span class="text-2xl font-bold text-gray-900">TheTradeVisor</span>
-                    <span class="ml-3 px-2 py-1 text-xs font-semibold text-blue-700 bg-blue-100 rounded">PROFESSIONAL</span>
-                </div>
-                <div class="flex items-center space-x-8">
-                    <a href="/analytics" class="text-gray-700 hover:text-gray-900 font-medium">Analytics</a>
-                    <a href="/features" class="text-gray-700 hover:text-gray-900 font-medium">Features</a>
-                    <a href="/screenshots" class="text-gray-700 hover:text-gray-900 font-medium">Screenshots</a>
-                    <a href="/pricing" class="text-gray-700 hover:text-gray-900 font-medium">Pricing</a>
-                    <a href="/faq" class="text-gray-700 hover:text-gray-900 font-medium">FAQ</a>
-                    @guest
-                        <a href="{{ route('login') }}" class="text-gray-700 hover:text-gray-900 font-medium">Login</a>
-                        <a href="{{ route('register') }}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 font-medium">Get Started</a>
-                    @else
-                        <a href="{{ route('dashboard') }}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 font-medium">Dashboard</a>
-                    @endguest
-                </div>
-            </div>
-        </div>
-    </nav>
+    <x-slot name="head">
+        <style>
+            .stat-card { transition: all 0.3s ease; }
+            .stat-card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        </style>
+    </x-slot>
 
     {{-- Hero Section --}}
     <section class="bg-white py-20">
@@ -373,8 +313,4 @@
         </div>
     </section>
 
-    {{-- Footer --}}
-    <x-footer />
-
-</body>
-</html>
+</x-public-layout>
