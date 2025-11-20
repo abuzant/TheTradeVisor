@@ -76,7 +76,11 @@
 
             <!-- Page Content -->
             <main>
-                @yield('content')
+                @isset($slot)
+                    {{ $slot }}
+                @else
+                    @yield('content')
+                @endisset
             </main>
 
             <!-- Footer -->
