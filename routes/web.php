@@ -17,6 +17,51 @@ Route::get('/healthcheck', function () {
     ], 200);
 })->middleware('throttle:60,1');
 
+/*
+|--------------------------------------------------------------------------
+| ENTERPRISE SUBDOMAIN ROUTES (enterprise.thetradevisor.com)
+|--------------------------------------------------------------------------
+| Enterprise broker portal - Login only, no registration, no public pages
+*/
+Route::domain('enterprise.thetradevisor.com')->group(function () {
+    
+    // Health check for enterprise subdomain
+    Route::get('/healthcheck', function () {
+        return response()->json([
+            'status' => 'ok',
+            'timestamp' => now()->toIso8601String(),
+            'service' => 'TheTradeVisor Enterprise Portal'
+        ], 200);
+    })->middleware('throttle:60,1');
+    
+    // Enterprise login (custom page, no registration)
+    Route::get('/login', [App\Http\Controllers\Auth\EnterpriseLoginController::class, 'showLoginForm'])->name('enterprise.login');
+    Route::post('/login', [App\Http\Controllers\Auth\EnterpriseLoginController::class, 'login'])->name('enterprise.login.submit');
+    Route::post('/logout', [App\Http\Controllers\Auth\EnterpriseLoginController::class, 'logout'])->name('enterprise.logout');
+    
+    // Enterprise authenticated routes
+    Route::middleware(['auth', 'enterprise.admin'])->prefix('enterprise')->name('enterprise.')->group(function () {
+        Route::get('/dashboard', [App\Http\Controllers\EnterpriseController::class, 'dashboard'])->name('dashboard');
+        Route::get('/analytics', [App\Http\Controllers\EnterpriseController::class, 'analytics'])->name('analytics');
+        Route::get('/accounts', [App\Http\Controllers\EnterpriseController::class, 'accounts'])->name('accounts');
+        Route::get('/settings', [App\Http\Controllers\EnterpriseController::class, 'settings'])->name('settings');
+        Route::post('/settings', [App\Http\Controllers\EnterpriseController::class, 'updateSettings'])->name('settings.update');
+    });
+    
+    // Redirect all other requests to login
+    Route::fallback(function () {
+        return redirect()->route('enterprise.login');
+    });
+});
+
+/*
+|--------------------------------------------------------------------------
+| MAIN DOMAIN ROUTES (thetradevisor.com)
+|--------------------------------------------------------------------------
+| Public pages, user registration, trader portal
+*/
+Route::domain('{domain}')->where(['domain' => '(thetradevisor\.com|www\.thetradevisor\.com|localhost)'])->group(function () {
+
 // Public pages
 Route::get('/', [App\Http\Controllers\PublicController::class, 'landing'])->name('landing');
 Route::get('/features', [App\Http\Controllers\PublicController::class, 'features'])->name('features');
@@ -134,15 +179,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     // Global Analytics
     Route::get('/analytics/{days?}', [App\Http\Controllers\AnalyticsController::class, 'index'])->name('analytics')->where('days', '[0-9]+');
-
-    // Enterprise Broker Routes (for enterprise admins only)
-    Route::prefix('enterprise')->name('enterprise.')->middleware('enterprise.admin')->group(function () {
-        Route::get('/dashboard', [App\Http\Controllers\EnterpriseController::class, 'dashboard'])->name('dashboard');
-        Route::get('/analytics', [App\Http\Controllers\EnterpriseController::class, 'analytics'])->name('analytics');
-        Route::get('/accounts', [App\Http\Controllers\EnterpriseController::class, 'accounts'])->name('accounts');
-        Route::get('/settings', [App\Http\Controllers\EnterpriseController::class, 'settings'])->name('settings');
-        Route::post('/settings', [App\Http\Controllers\EnterpriseController::class, 'updateSettings'])->name('settings.update');
-    });
 });
 
 // Admin routes
@@ -249,3 +285,5 @@ Route::get('/debug-session', function() {
         'cookies' => request()->cookies->all(),
     ];
 })->middleware('web');
+
+}); // End of main domain group
