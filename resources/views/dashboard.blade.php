@@ -446,20 +446,22 @@
 
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                                                     <div class="flex items-center space-x-2">
+                                                        @if($position->platform_type === 'MT5' && $position->position_identifier)
+                                                            <span class="px-2 py-0.5 text-xs font-semibold rounded bg-purple-100 text-purple-800" title="MT5 Position">MT5</span>
+                                                        @else
+                                                            <span class="px-2 py-0.5 text-xs font-semibold rounded bg-blue-100 text-blue-800" title="MT4 Position">MT4</span>
+                                                        @endif
                                                         <a href="{{ route('trades.symbol', $position->normalized_symbol) }}"
                                                            class="text-indigo-600 hover:text-indigo-900"
                                                            title="Raw: {{ $position->symbol }}">
                                                             {{ $position->normalized_symbol }}
                                                         </a>
-                                                        @if($position->platform_type === 'MT5' && $position->position_identifier)
-                                                            <span class="px-2 py-0.5 text-xs font-semibold rounded bg-purple-100 text-purple-800" title="MT5 Position">MT5</span>
-                                                        @endif
                                                     </div>
                                                 </td>
 
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm">
                                                     <span class="px-2 py-1 text-xs font-semibold rounded {{ $position->is_buy ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                                        {{ $position->display_type }}
+                                                        {{ $position->is_buy ? '⭷' : '⭸' }} {{ $position->display_type }}
                                                     </span>
                                                 </td>
 
@@ -522,7 +524,7 @@
                                                                             <td class="px-4 py-2 whitespace-nowrap text-xs">
                                                                                 @if($deal->entry === 'in')
                                                                                     <span class="px-2 py-0.5 rounded {{ $deal->is_buy ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                                                                        {{ $deal->display_type }}
+                                                                                        {{ $position->is_buy ? '⭷' : '⭸' }} {{ $deal->display_type }}
                                                                                     </span>
                                                                                 @endif
                                                                             </td>

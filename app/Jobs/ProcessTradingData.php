@@ -249,9 +249,13 @@ class ProcessTradingData implements ShouldQueue
      */
     protected function processPositions($tradingAccount, $positions)
     {
-        // Mark all positions as closed first
+        // Get list of incoming position tickets
+        $incomingTickets = collect($positions)->pluck('ticket')->toArray();
+        
+        // Mark positions as closed ONLY if they're not in the incoming data
         Position::where('trading_account_id', $tradingAccount->id)
             ->where('is_open', true)
+            ->whereNotIn('ticket', $incomingTickets)
             ->update(['is_open' => false]);
 
         foreach ($positions as $posData) {
@@ -262,33 +266,44 @@ class ProcessTradingData implements ShouldQueue
                 // Convert MT4 numeric type to string (0=buy, 1=sell)
                 $type = $this->normalizePositionType($posData['type']);
 
+                // Check if position already exists (before any updates)
+                $existingPosition = Position::where('trading_account_id', $tradingAccount->id)
+                    ->where('ticket', $posData['ticket'])
+                    ->first();
+
+                $updateData = [
+                    'symbol' => $posData['symbol'],
+                    'comment' => $posData['comment'] ?? null,
+                    'external_id' => $posData['external_id'] ?? null,
+                    'type' => $type,
+                    'reason' => $posData['reason'] ?? 'unknown',
+                    'volume' => $posData['volume'] ?? 0,
+                    'open_price' => $posData['price_open'] ?? $posData['open_price'] ?? 0,
+                    'current_price' => $posData['price_current'] ?? $posData['current_price'] ?? 0,
+                    'sl' => $posData['sl'] ?? null,
+                    'tp' => $posData['tp'] ?? null,
+                    'profit' => $posData['profit'] ?? 0,
+                    'swap' => $posData['swap'] ?? 0,
+                    'commission' => $posData['commission'] ?? 0,
+                    'update_time' => $this->parseDateTime($posData['update_time'] ?? now()),
+                    'magic' => $posData['magic'] ?? 0,
+                    'identifier' => $posData['identifier'] ?? $posData['ticket'],
+                    'is_open' => true,
+                    'platform_type' => $posData['platform_type'] ?? null,
+                    'activity_type' => $posData['activity_type'] ?? null,
+                ];
+
+                // Only set open_time for NEW positions
+                if (!$existingPosition) {
+                    $updateData['open_time'] = $this->parseDateTime($posData['time'] ?? $posData['open_time'] ?? $posData['time_open'] ?? now());
+                }
+
                 Position::updateOrCreate(
                     [
                         'trading_account_id' => $tradingAccount->id,
                         'ticket' => $posData['ticket'],
                     ],
-                    [
-                        'symbol' => $posData['symbol'],
-                        'comment' => $posData['comment'] ?? null,
-                        'external_id' => $posData['external_id'] ?? null,
-                        'type' => $type,
-                        'reason' => $posData['reason'] ?? 'unknown',
-                        'volume' => $posData['volume'] ?? 0,
-                        'open_price' => $posData['price_open'] ?? $posData['open_price'] ?? 0,
-                        'current_price' => $posData['price_current'] ?? $posData['current_price'] ?? 0,
-                        'sl' => $posData['sl'] ?? null,
-                        'tp' => $posData['tp'] ?? null,
-                        'profit' => $posData['profit'] ?? 0,
-                        'swap' => $posData['swap'] ?? 0,
-                        'commission' => $posData['commission'] ?? 0,
-                        'open_time' => $this->parseDateTime($posData['time'] ?? $posData['open_time'] ?? now()),
-                        'update_time' => $this->parseDateTime($posData['update_time'] ?? now()),
-                        'magic' => $posData['magic'] ?? 0,
-                        'identifier' => $posData['identifier'] ?? $posData['ticket'],
-                        'is_open' => true,
-                        'platform_type' => $posData['platform_type'] ?? null,
-                        'activity_type' => $posData['activity_type'] ?? null,
-                    ]
+                    $updateData
                 );
             } catch (\Exception $e) {
                 Log::error('Failed to process position', [

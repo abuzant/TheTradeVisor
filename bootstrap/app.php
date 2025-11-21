@@ -27,6 +27,8 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         
         $middleware->alias([
+            // Override Laravel's default guest middleware with our custom one
+            'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
             'api.key' => \App\Http\Middleware\ValidateApiKey::class,
             'admin' => \App\Http\Middleware\IsAdmin::class,
             'recaptcha' => \App\Http\Middleware\VerifyRecaptcha::class,
@@ -37,7 +39,6 @@ return Application::configure(basePath: dirname(__DIR__))
             'rate.limit.exports' => \App\Http\Middleware\RateLimitExports::class,
             'rate.limit.broker' => \App\Http\Middleware\RateLimitBrokerAnalytics::class,
             'circuit.breaker' => \App\Http\Middleware\CircuitBreakerMiddleware::class,
-            'guest' => \App\Http\Middleware\RedirectIfAuthenticated::class,
         ]);
 
         // Global middleware (runs on every request)
