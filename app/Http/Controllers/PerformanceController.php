@@ -91,12 +91,20 @@ class PerformanceController extends Controller
                 'days' => 30,
                 'cache_duration' => 14400, // 4 hours
             ],
+            '90d' => [
+                'days' => 90,
+                'cache_duration' => 21600, // 6 hours
+            ],
+            '180d' => [
+                'days' => 180,
+                'cache_duration' => 43200, // 12 hours
+            ],
             'all' => [
                 'days' => 36500, // 100 years (effectively all time)
                 'cache_duration' => 86400, // 1 day
             ],
         ];
 
-        return $configs[$period] ?? $configs['30d'];
+        return $configs[$period] ?? $configs['7d'];
     }
 }
