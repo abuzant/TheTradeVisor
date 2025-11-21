@@ -28,9 +28,9 @@
 [![Enterprise Portal](https://img.shields.io/badge/Enterprise-Portal-9333EA.svg)](https://enterprise.thetradevisor.com)
 [![GeoIP Analytics](https://img.shields.io/badge/GeoIP-Analytics-0EA5E9.svg)](docs/features/geoip-analytics.md)
 [![MaxMind](https://img.shields.io/badge/MaxMind-GeoIP2-FF6600.svg)](https://www.maxmind.com)
-[![Circuit Breaker](https://img.shields.io/badge/Circuit%20Breaker-Active-22C55E.svg)](docs/CIRCUIT_BREAKER_IMPLEMENTATION.md)
-[![Rate Limiting](https://img.shields.io/badge/Rate%20Limiting-Active-22C55E.svg)](docs/RATE_LIMITING_COMPLETE.md)
-[![Redis Cache](https://img.shields.io/badge/Redis%20Cache-90%25%20Hit-DC382D.svg)](docs/REDIS_CACHING_OPTIMIZATION.md)
+[![Circuit Breaker](https://img.shields.io/badge/Circuit%20Breaker-Active-22C55E.svg)](docs/technical/CIRCUIT_BREAKER_IMPLEMENTATION.md)
+[![Rate Limiting](https://img.shields.io/badge/Rate%20Limiting-Active-22C55E.svg)](docs/technical/RATE_LIMITING_COMPLETE.md)
+[![Redis Cache](https://img.shields.io/badge/Redis%20Cache-90%25%20Hit-DC382D.svg)](docs/technical/REDIS_CACHING_OPTIMIZATION.md)
 [![Health Monitoring](https://img.shields.io/badge/Health-Monitoring-22C55E.svg)](docs/operations/MONITORING_IMPLEMENTATION.md)
 [![reCAPTCHA](https://img.shields.io/badge/reCAPTCHA-v2-4285F4.svg?logo=google&logoColor=white)](https://www.google.com/recaptcha)
 [![PHPUnit](https://img.shields.io/badge/PHPUnit-Testing-3776AB.svg?logo=php&logoColor=white)](https://phpunit.de)
@@ -116,27 +116,27 @@ TheTradeVisor is an enterprise-grade trading analytics platform that aggregates,
 
 - [Architecture Overview](docs/development/architecture.md) - System design and components
 - [API Documentation](docs/reference/API_DOCUMENTATION.md) - REST API reference
-- [Caching Strategy](docs/REDIS_CACHING_OPTIMIZATION.md) - Redis implementation
+- [Caching Strategy](docs/technical/REDIS_CACHING_OPTIMIZATION.md) - Redis implementation
 
 ### Operations & Monitoring
 
 - [System Monitoring](docs/operations/MONITORING_IMPLEMENTATION.md) - Health checks and alerts
-- [Performance Optimization](docs/REDIS_CACHING_OPTIMIZATION.md) - Caching and optimization
+- [Performance Optimization](docs/technical/REDIS_CACHING_OPTIMIZATION.md) - Caching and optimization
 - [Deployment Guide](docs/operations/DEPLOYMENT.md) - Production deployment
 - [Scaling Guide](docs/operations/SCALING_ANALYSIS.md) - Horizontal and vertical scaling
 
 ### Security & Protection
 
-- [Rate Limiting](docs/RATE_LIMITING_COMPLETE.md) - Request rate limiting
-- [Circuit Breakers](docs/CIRCUIT_BREAKER_IMPLEMENTATION.md) - System overload protection
-- [Query Optimization](docs/SLOW_QUERY_LOGGING.md) - Database performance
-- [Alert System](docs/ALERT_SYSTEM_SETUP.md) - Slack/Email notifications
+- [Rate Limiting](docs/technical/RATE_LIMITING_COMPLETE.md) - Request rate limiting
+- [Circuit Breakers](docs/technical/CIRCUIT_BREAKER_IMPLEMENTATION.md) - System overload protection
+- [Query Optimization](docs/technical/SLOW_QUERY_LOGGING.md) - Database performance
+- [Alert System](docs/operations/ALERT_SYSTEM_SETUP.md) - Slack/Email notifications
 
 ### Troubleshooting
 
-- [Troubleshooting](docs/CLOUDFLARE_521_TROUBLESHOOTING.md) - Common issues and solutions
-- [Cloudflare 521 Errors](docs/CLOUDFLARE_521_TROUBLESHOOTING.md) - Connection issues
-- [System Crash Postmortem](docs/SYSTEM_CRASH_POSTMORTEM.md) - Incident analysis
+- [Troubleshooting](docs/operations/CLOUDFLARE_521_TROUBLESHOOTING.md) - Common issues and solutions
+- [Cloudflare 521 Errors](docs/operations/CLOUDFLARE_521_TROUBLESHOOTING.md) - Connection issues
+- [System Crash Postmortem](docs/operations/SYSTEM_CRASH_POSTMORTEM.md) - Incident analysis
 
 ### Development
 
