@@ -87,10 +87,10 @@ TheTradeVisor is an enterprise-grade trading analytics platform that aggregates,
 - 📥 **Export Functionality** - CSV and PDF exports
 
 #### Pricing & Billing
-- 💰 **Pay-Per-Account Model** - $9.99 one-time per additional account
-- 🎁 **First Account FREE** - Forever, no credit card required
-- 🏢 **Enterprise Plans** - Custom solutions for brokers
-- 🚫 **No Monthly Fees** - One-time payment per account
+- 🎁 **Completely FREE** - Unlimited accounts, no payment ever
+- 🚫 **No Subscriptions** - No credit card, no hidden fees
+- 📊 **Time-Based Access** - Feature access based on broker whitelist status
+- 🏢 **Enterprise Broker Program** - Brokers unlock full features for their clients
 
 ---
 
@@ -263,50 +263,58 @@ For detailed installation instructions, see the [Installation Guide](docs/gettin
 
 ## 💰 Pricing Model
 
-TheTradeVisor uses a **broker-based billing model**:
+TheTradeVisor is **FREE for all traders** with a broker-based feature model:
 
-### For Traders
+### For All Traders
 
-**If your broker is whitelisted:**
-- ✅ **UNLIMITED FREE ACCOUNTS** - No payment required, ever
-- ✅ Full analytics, real-time data, all features
-- ✅ No credit card needed
+**✅ COMPLETELY FREE:**
+- **UNLIMITED ACCOUNTS** - Add as many trading accounts as you want
+- **NO PAYMENT REQUIRED** - Ever. No credit card, no subscriptions, no hidden fees
+- **Full Analytics** - Real-time data, performance tracking, all features included
+- **Time Period Access** - View data based on your broker's whitelist status
+
+### Time Period Access
+
+**If your broker is whitelisted (Enterprise Broker):**
+- ✅ **Full time span access:** 7 days, 30 days, 90 days, 180 days
+- ✅ Historical data and long-term performance analysis
+- ✅ All features unlocked
 
 **If your broker is NOT whitelisted:**
-- ✅ **First Account: FREE Forever**
-- 💳 **Additional Accounts: $9.99 one-time** per account
-- ✅ Lifetime access, no recurring fees
+- 📊 **Limited time span:** 1-7 days view only
+- ✅ Still unlimited accounts, still completely free
+- ✅ All other features work normally
 
-**Example Pricing (Non-Whitelisted Brokers Only):**
-- 1 account: **$0** (FREE)
-- 3 accounts: **$19.98** ($0 + $9.99 × 2)
-- 5 accounts: **$39.96** ($0 + $9.99 × 4)
-- 10 accounts: **$89.91** ($0 + $9.99 × 9)
+**Important:** Individual traders cannot pay to unlock longer time periods. The only way to access extended time spans is if your broker subscribes to the enterprise whitelist program.
 
 ### For Brokers
 
 **Enterprise Broker Whitelist Program**
 
+Give your clients the best analytics experience:
+
 | Feature | Benefit |
 |---------|--------|
-| **Whitelisted Server** | All your clients get unlimited free accounts automatically |
+| **Whitelisted Server** | Your clients get full time span access (7d, 30d, 90d, 180d) |
 | **Enterprise Portal** | Dedicated subdomain at `enterprise.thetradevisor.com` |
 | **Aggregated Analytics** | View all client accounts and performance metrics |
 | **Usage Tracking** | Monitor client adoption and engagement |
 | **30-Day Grace Period** | Service continues after subscription expires |
+| **Competitive Advantage** | Stand out by offering premium analytics to your traders |
 
 **How It Works:**
 1. Broker subscribes to enterprise whitelist program
 2. Broker's MT4/MT5 server name is whitelisted in our system
-3. Any trader using that broker server gets **unlimited free accounts** automatically
+3. All traders using that broker server get **full time span access** automatically
 4. Broker gets access to enterprise portal with aggregated client analytics
-5. Traders don't pay anything - broker covers the cost
+5. Traders enjoy premium features at no cost to them
 
-**Key Benefits:**
-- ✅ **Attract more clients** - Offer unlimited free analytics
+**Key Benefits for Brokers:**
+- ✅ **Attract more clients** - Offer premium analytics as a value-add
 - ✅ **Competitive advantage** - Stand out from other brokers
-- ✅ **Client insights** - Understand your traders better
-- ✅ **No client billing** - We handle everything
+- ✅ **Client retention** - Better tools = happier traders
+- ✅ **Client insights** - Understand your traders' performance
+- ✅ **No client billing** - Your traders never see a paywall
 
 ---
 
