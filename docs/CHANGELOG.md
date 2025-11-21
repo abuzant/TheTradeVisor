@@ -29,12 +29,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 💰 Billing System Overhaul
 
-#### Pay-Per-Account Model
-- **Changed**: Removed subscription tiers (Free/Basic/Pro/Enterprise)
-- **New Model**: First account FREE, additional accounts $9.99 one-time
+#### Free-for-All with Time-Based Access
+- **Changed**: Removed subscription tiers and account limits completely
+- **New Model**: Unlimited free accounts for all users, no payment ever
+- **Access Control**: Time period access based on broker whitelist status
+  - Whitelisted broker users: Full time spans (7d, 30d, 90d, 180d)
+  - Non-whitelisted broker users: Limited time spans (1-7d only)
 - **Database**: Removed `subscription_tier` and `max_accounts` from users table
 - **Migration**: `2025_11_21_064434_remove_subscription_fields_from_users.php`
-- **Impact**: Simpler pricing, no monthly fees, lifetime access per account
+- **Impact**: Completely free platform, broker-based feature access
 - **Updated**: Pricing page, FAQ, API key settings
 
 ### 🚀 Infrastructure Upgrade
@@ -142,17 +145,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 💰 Pricing Model Update
 
-#### Subscription Tier Changes
-- **Removed**: PRO tier completely eliminated
-- **Updated**: Basic tier now "Pay-Per-Account" model
-- **Pricing**: $9.99 one-time payment per additional account
-- **Free Tier**: First account remains free forever
+#### Transition to Free Model
+- **Removed**: All subscription tiers (Free/Basic/Pro/Enterprise)
+- **Updated**: Platform now completely free for all users
+- **Access Model**: Time-based access depending on broker whitelist status
+- **Account Limits**: Removed - unlimited accounts for everyone
 - **Files Updated**:
-  - Controller validation (removed 'pro' from allowed tiers)
-  - Admin views (removed PRO badge styling)
-  - Pricing page (updated to show $9.99 one-time)
+  - Controller validation (removed tier checks)
+  - Admin views (removed subscription tier displays)
+  - Pricing page (updated to show free model)
   - FAQ page (updated pricing information)
-  - API key settings page (clarified account management)
+  - API key settings page (clarified unlimited accounts)
 
 ### 🔧 Technical Improvements
 

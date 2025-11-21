@@ -9,7 +9,7 @@
 
 ## 🎯 Executive Summary
 
-This major release introduces a complete enterprise broker solution with a dedicated subdomain portal, implements a revolutionary pay-per-account billing model, upgrades infrastructure to AWS EC2 M5.large for consistent performance, and enhances the admin panel with comprehensive broker management tools. This release represents a significant milestone in TheTradeVisor's evolution from a trader-focused platform to a comprehensive B2B2C solution.
+This major release introduces a complete enterprise broker solution with a dedicated subdomain portal, implements a completely free platform with broker-based time-period access control, upgrades infrastructure to AWS EC2 M5.large for consistent performance, and enhances the admin panel with comprehensive broker management tools. This release represents a significant milestone in TheTradeVisor's evolution from a trader-focused platform to a comprehensive B2B2C solution.
 
 ---
 
@@ -156,17 +156,21 @@ routes/web.php
 
 ## 💰 Billing System Overhaul
 
-### Pay-Per-Account Model
+### Free-for-All with Time-Based Access
 **Old System:**
 - Subscription tiers: Free (1), Basic (3), Pro (10), Enterprise (unlimited)
+- Account limits per tier
 - Monthly recurring fees
 - Complex tier management
 
 **New System:**
-- First account: **FREE forever**
-- Additional accounts: **$9.99 one-time payment**
-- No monthly subscriptions
-- Unlimited accounts with one-time payments
+- **Unlimited FREE accounts** for all users
+- **No payment required** - ever
+- **Time-based access control:**
+  - Whitelisted broker users: Full time spans (7d, 30d, 90d, 180d)
+  - Non-whitelisted broker users: Limited time spans (1-7d only)
+- **No payment option** for individual traders
+- Brokers pay for whitelist to unlock full features for their clients
 
 **Database Changes:**
 ```sql
@@ -176,18 +180,18 @@ ALTER TABLE users
     DROP COLUMN max_accounts;
 ```
 
-**Pricing Examples:**
-- 1 account: $0 (FREE)
-- 3 accounts: $19.98 ($0 + $9.99 × 2)
-- 5 accounts: $39.96 ($0 + $9.99 × 4)
-- 10 accounts: $89.91 ($0 + $9.99 × 9)
+**Access Model:**
+- All users: Unlimited accounts, no cost
+- Whitelisted brokers: Clients get full time period access
+- Non-whitelisted brokers: Clients get 1-7 day view only
+- No individual payment options
 
 **Benefits:**
-- ✅ Simpler pricing structure
-- ✅ No recurring billing complexity
-- ✅ Lower barrier to entry
-- ✅ Predictable costs for users
-- ✅ Lifetime access per account
+- ✅ Completely free for all traders
+- ✅ No billing complexity
+- ✅ Zero barrier to entry
+- ✅ Broker-driven premium features
+- ✅ No paywalls for individual users
 
 **Files Modified:**
 ```
@@ -857,11 +861,11 @@ sudo systemctl status redis
 ## 🎯 Next Release (v1.8.0)
 
 ### Planned Features
-1. **Payment Integration**
-   - Stripe integration for pay-per-account
-   - Payment history page
-   - Invoice generation
-   - Automated account activation
+1. **Broker Payment Integration**
+   - Stripe integration for broker subscriptions
+   - Broker invoice generation
+   - Automated whitelist activation
+   - Subscription management portal
 
 2. **Enhanced Analytics**
    - Advanced broker comparison
