@@ -30,7 +30,7 @@ Route::get('/enterprise-login', [App\Http\Controllers\Auth\EnterpriseLoginContro
     ->middleware('enterprise.subdomain')
     ->name('enterprise.login');
 Route::post('/enterprise-login', [App\Http\Controllers\Auth\EnterpriseLoginController::class, 'login'])
-    ->middleware('enterprise.subdomain')
+    ->middleware(['enterprise.subdomain', 'recaptcha'])
     ->name('enterprise.login.submit');
 Route::post('/enterprise-logout', [App\Http\Controllers\Auth\EnterpriseLoginController::class, 'logout'])
     ->middleware('enterprise.subdomain')

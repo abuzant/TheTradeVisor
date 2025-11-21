@@ -6,6 +6,14 @@
     <title>Enterprise Broker Portal - TheTradeVisor</title>
     <link rel="icon" type="image/png" href="{{ asset('favicon-32x32.png') }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    
+    <!-- Google Analytics -->
+    <x-google-analytics />
+    
+    @if(config('services.recaptcha.enabled'))
+    <!-- reCAPTCHA -->
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    @endif
 </head>
 <body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen flex flex-col">
     
@@ -100,6 +108,16 @@
                             Remember me
                         </label>
                     </div>
+
+                    @if(config('services.recaptcha.enabled'))
+                    <!-- reCAPTCHA -->
+                    <div class="mb-6">
+                        <div class="g-recaptcha" data-sitekey="{{ config('services.recaptcha.site_key') }}"></div>
+                        @error('recaptcha')
+                            <span class="text-red-600 text-sm mt-2 block">{{ $message }}</span>
+                        @enderror
+                    </div>
+                    @endif
 
                     <!-- Login Button -->
                     <button 
