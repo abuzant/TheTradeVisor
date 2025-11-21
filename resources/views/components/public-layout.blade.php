@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
     {{-- SEO Meta Tags --}}
-    <title>{{ $title ?? 'TheTradeVisor - Professional MT4/MT5 Trading Analytics Platform' }}</title>
+    <title>{{ $title ?? 'TheTradeVisor - Professional MT4/MT5 Trading Analytics & Research Platform' }}</title>
     <meta name="description" content="{{ $description ?? 'Enterprise-grade trading analytics platform. Real-time data from MT4/MT5 terminals worldwide. Trusted by professional traders and institutions.' }}">
-    <meta name="keywords" content="{{ $keywords ?? 'MT4, MT5, trading analytics, forex analytics, trading statistics, broker comparison, professional trading, trading platform' }}">
+    <meta name="keywords" content="{{ $keywords ?? 'MT4, MT5, trading analytics, forex analytics, trading statistics, broker comparison, professional trading, trading platform, mt4 analytics, mt5 analytics, analytics for traders' }}">
     
     {{-- Open Graph --}}
     <meta property="og:title" content="{{ $ogTitle ?? $title ?? 'TheTradeVisor - Professional Trading Analytics' }}">

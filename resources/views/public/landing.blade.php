@@ -1,8 +1,8 @@
 <x-public-layout>
-    <x-slot name="title">TheTradeVisor - Professional MT4/MT5 Trading Analytics Platform</x-slot>
+    <x-slot name="title">TheTradeVisor - Professional MT4/MT5 Trading Analytics & Research Platform</x-slot>
     <x-slot name="description">Enterprise-grade trading analytics platform. Real-time data from MT4/MT5 terminals worldwide. Trusted by professional traders and institutions.</x-slot>
-    <x-slot name="keywords">MT4 analytics, MT5 analytics, forex trading analytics, trading performance tracker, broker comparison, global trading data</x-slot>
-    <x-slot name="ogTitle">TheTradeVisor - Professional MT4/MT5 Trading Analytics</x-slot>
+    <x-slot name="keywords">MT4 analytics, MT5 analytics, forex trading analytics, trading performance tracker, broker comparison, global trading data, mt4 analytics, mt5 analytics</x-slot>
+    <x-slot name="ogTitle">TheTradeVisor - Professional MT4/MT5 Trading Analytics & Research Platform</x-slot>
     <x-slot name="ogDescription">Enterprise-grade trading analytics platform. Real-time data from MT4/MT5 terminals worldwide.</x-slot>
 
     <x-slot name="head">

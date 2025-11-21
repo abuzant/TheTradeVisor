@@ -47,12 +47,38 @@
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-2">
                             <span class="text-sm font-medium text-gray-700">Time Range:</span>
-                            <div class="flex space-x-2">
-                                @foreach([7, 30, 90, 180] as $period)
-                                    <button type="submit" name="days" value="{{ $period }}"
-                                       class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $days == $period ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
-                                        {{ $period }}d
-                                    </button>
+                            <div class="inline-flex rounded-lg border border-gray-200 bg-white p-1 shadow-sm">
+                                @foreach($timePeriods as $key => $period)
+                                    @php
+                                        $isActive = $days == $period['days'];
+                                        $isLocked = $period['locked'];
+                                    @endphp
+                                    
+                                    @if($isLocked)
+                                        <!-- Locked Period -->
+                                        <button 
+                                            type="button"
+                                            onclick="showUpgradeModal('{{ $period['label'] }}')"
+                                            class="relative px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 text-gray-400 hover:text-gray-600 hover:bg-gray-50"
+                                            title="Upgrade required for {{ $period['label'] }} view"
+                                        >
+                                            <!-- PRO Badge -->
+                                            <span class="absolute -top-1 -right-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">
+                                                PRO
+                                            </span>
+                                            <span>{{ $period['label'] }}</span>
+                                        </button>
+                                    @else
+                                        <!-- Unlocked Period -->
+                                        <button 
+                                            type="submit" 
+                                            name="days" 
+                                            value="{{ $period['days'] }}"
+                                            class="relative px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 {{ $isActive ? 'bg-blue-600 text-white shadow-md' : 'text-gray-700 hover:bg-gray-100' }}"
+                                        >
+                                            {{ $period['label'] }}
+                                        </button>
+                                    @endif
                                 @endforeach
                             </div>
                         </div>
@@ -172,5 +198,67 @@
 
         </div>
     </div>
+
+    {{-- Upgrade Modal (for locked time periods) --}}
+    <div id="upgradeModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 transform transition-all">
+            <div class="text-center">
+                <!-- Lock Icon -->
+                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-amber-100 mb-4">
+                    <svg class="h-8 w-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                    </svg>
+                </div>
+                
+                <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                    Unlock Extended History
+                </h3>
+                
+                <p class="text-gray-600 mb-6">
+                    Ask your broker about enterprise access to unlock <strong id="modalPeriod"></strong> of historical data.
+                </p>
+                
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <button 
+                        onclick="closeUpgradeModal()"
+                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                    >
+                        Cancel
+                    </button>
+                    <a 
+                        href="mailto:hello@thetradevisor.com?subject=Enterprise%20Access%20Inquiry"
+                        class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                        Learn More
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function showUpgradeModal(period) {
+        document.getElementById('modalPeriod').textContent = period;
+        document.getElementById('upgradeModal').classList.remove('hidden');
+    }
+
+    function closeUpgradeModal() {
+        document.getElementById('upgradeModal').classList.add('hidden');
+    }
+
+    // Close modal on outside click
+    document.getElementById('upgradeModal')?.addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeUpgradeModal();
+        }
+    });
+
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeUpgradeModal();
+        }
+    });
+    </script>
 
 </x-app-layout>

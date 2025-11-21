@@ -17,11 +17,12 @@
                 class="relative px-4 py-2 text-sm font-medium rounded-md transition-all duration-200 text-gray-400 hover:text-gray-600 hover:bg-gray-50 group"
                 title="Upgrade required for {{ $period['label'] }} view"
             >
+                <!-- PRO Badge -->
+                <span class="absolute -top-1 -right-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-sm">
+                    PRO
+                </span>
                 <span class="flex items-center">
                     {{ $period['label'] }}
-                    <svg class="w-3 h-3 ml-1 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
-                    </svg>
                 </span>
             </button>
         @else

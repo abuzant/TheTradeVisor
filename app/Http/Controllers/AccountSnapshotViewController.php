@@ -28,6 +28,9 @@ class AccountSnapshotViewController extends Controller
         // Get time range from request (default: 7 days)
         $days = $request->input('days', 7);
         $days = in_array((int)$days, [7, 30, 90, 180], true) ? (int)$days : 7;
+        
+        // Get available time periods (use first account for data access check)
+        $timePeriods = TimeFilterHelper::getPeriodsForAccount($allAccounts->first());
 
         // Get selected account IDs from request (default: first 2 accounts)
         $selectedIds = $request->input('accounts', []);
@@ -55,6 +58,7 @@ class AccountSnapshotViewController extends Controller
             'allAccounts' => $allAccounts,
             'selectedIds' => $selectedIds,
             'days' => $days,
+            'timePeriods' => $timePeriods,
         ]);
     }
 
