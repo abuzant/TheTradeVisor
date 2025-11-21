@@ -1,46 +1,42 @@
 # TheTradeVisor
 
-<!-- Core Technology Stack -->
 [![Laravel](https://img.shields.io/badge/Laravel-11-red.svg?logo=laravel&logoColor=white)](https://laravel.com)
 [![PHP](https://img.shields.io/badge/PHP-8.3-777BB4.svg?logo=php&logoColor=white)](https://php.net)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791.svg?logo=postgresql&logoColor=white)](https://www.postgresql.org)
 [![Redis](https://img.shields.io/badge/Redis-7-DC382D.svg?logo=redis&logoColor=white)](https://redis.io)
 [![Nginx](https://img.shields.io/badge/Nginx-1.24-009639.svg?logo=nginx&logoColor=white)](https://nginx.org)
-
-<!-- Frontend Stack -->
+[![Composer](https://img.shields.io/badge/Composer-2.x-885630.svg?logo=composer&logoColor=white)](https://getcomposer.org)
+[![npm](https://img.shields.io/badge/npm-10.x-CB3837.svg?logo=npm&logoColor=white)](https://npmjs.com)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-3.x-38B2AC.svg?logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
 [![Alpine.js](https://img.shields.io/badge/Alpine.js-3.x-8BC0D0.svg?logo=alpine.js&logoColor=white)](https://alpinejs.dev)
 [![Chart.js](https://img.shields.io/badge/Chart.js-4.x-FF6384.svg?logo=chart.js&logoColor=white)](https://chartjs.org)
 [![Vite](https://img.shields.io/badge/Vite-6.x-646CFF.svg?logo=vite&logoColor=white)](https://vitejs.dev)
-
-<!-- Laravel Ecosystem -->
+[![Flowbite](https://img.shields.io/badge/Flowbite-2.x-1C64F2.svg)](https://flowbite.com)
+[![PostCSS](https://img.shields.io/badge/PostCSS-8.x-DD3A0A.svg?logo=postcss&logoColor=white)](https://postcss.org)
 [![Horizon](https://img.shields.io/badge/Laravel-Horizon-FF2D20.svg?logo=laravel&logoColor=white)](https://laravel.com/docs/horizon)
 [![Telescope](https://img.shields.io/badge/Laravel-Telescope-FF2D20.svg?logo=laravel&logoColor=white)](https://laravel.com/docs/telescope)
 [![Breeze](https://img.shields.io/badge/Laravel-Breeze-FF2D20.svg?logo=laravel&logoColor=white)](https://laravel.com/docs/breeze)
 [![Passport](https://img.shields.io/badge/Laravel-Passport-FF2D20.svg?logo=laravel&logoColor=white)](https://laravel.com/docs/passport)
-
-<!-- Infrastructure & Deployment -->
+[![Dompdf](https://img.shields.io/badge/Dompdf-PDF%20Export-E74C3C.svg)](https://github.com/barryvdh/laravel-dompdf)
 [![AWS EC2](https://img.shields.io/badge/AWS-EC2%20M5.large-FF9900.svg?logo=amazon-aws&logoColor=white)](https://aws.amazon.com)
 [![Cloudflare](https://img.shields.io/badge/Cloudflare-CDN-F38020.svg?logo=cloudflare&logoColor=white)](https://cloudflare.com)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker&logoColor=white)](https://www.docker.com)
 [![Let's Encrypt](https://img.shields.io/badge/SSL-Let's%20Encrypt-003A70.svg?logo=letsencrypt&logoColor=white)](https://letsencrypt.org)
-
-<!-- Features & Capabilities -->
+[![New Relic](https://img.shields.io/badge/New%20Relic-Monitoring-008C99.svg?logo=newrelic&logoColor=white)](https://newrelic.com)
 [![MT4/MT5](https://img.shields.io/badge/MT4%2FMT5-Full%20Support-4CAF50.svg)](docs/reference/API_DOCUMENTATION.md)
 [![Real-time Analytics](https://img.shields.io/badge/Analytics-Real--time-FF6B6B.svg)](https://thetradevisor.com/analytics)
 [![Enterprise Portal](https://img.shields.io/badge/Enterprise-Portal-9333EA.svg)](https://enterprise.thetradevisor.com)
 [![GeoIP Analytics](https://img.shields.io/badge/GeoIP-Analytics-0EA5E9.svg)](docs/features/geoip-analytics.md)
-
-<!-- Security & Performance -->
+[![MaxMind](https://img.shields.io/badge/MaxMind-GeoIP2-FF6600.svg)](https://www.maxmind.com)
 [![Circuit Breaker](https://img.shields.io/badge/Circuit%20Breaker-Active-22C55E.svg)](docs/CIRCUIT_BREAKER_IMPLEMENTATION.md)
 [![Rate Limiting](https://img.shields.io/badge/Rate%20Limiting-Active-22C55E.svg)](docs/RATE_LIMITING_COMPLETE.md)
 [![Redis Cache](https://img.shields.io/badge/Redis%20Cache-90%25%20Hit-DC382D.svg)](docs/REDIS_CACHING_OPTIMIZATION.md)
 [![Health Monitoring](https://img.shields.io/badge/Health-Monitoring-22C55E.svg)](docs/operations/MONITORING_IMPLEMENTATION.md)
 [![reCAPTCHA](https://img.shields.io/badge/reCAPTCHA-v2-4285F4.svg?logo=google&logoColor=white)](https://www.google.com/recaptcha)
-
-<!-- Status & Metrics -->
+[![PHPUnit](https://img.shields.io/badge/PHPUnit-Testing-3776AB.svg?logo=php&logoColor=white)](https://phpunit.de)
+[![Slack](https://img.shields.io/badge/Slack-Alerts-4A154B.svg?logo=slack&logoColor=white)](https://slack.com)
 [![Production Ready](https://img.shields.io/badge/Status-Production%20Ready-22C55E.svg)](https://thetradevisor.com)
-[![Version](https://img.shields.io/badge/Version-1.6.0-blue.svg)](docs/CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-1.7.0-blue.svg)](docs/CHANGELOG.md)
 [![Uptime](https://img.shields.io/badge/Uptime-99.9%25-22C55E.svg)](https://thetradevisor.com)
 [![License](https://img.shields.io/badge/License-Proprietary-yellow.svg)](LICENSE)
 
