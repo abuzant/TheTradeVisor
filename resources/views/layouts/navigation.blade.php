@@ -117,6 +117,10 @@
                                         {{ __('Accounts Management') }}
                                     </x-dropdown-link>
 
+                                    <x-dropdown-link :href="route('admin.brokers.index')">
+                                        {{ __('Broker Management') }}
+                                    </x-dropdown-link>
+
                                     <x-dropdown-link :href="route('admin.rate-limits.index')">
                                         {{ __('Rate Limits') }}
                                     </x-dropdown-link>
@@ -322,6 +326,10 @@
 
                         <x-responsive-nav-link :href="route('admin.accounts.index')">
                             {{ __('Accounts Management') }}
+                        </x-responsive-nav-link>
+
+                        <x-responsive-nav-link :href="route('admin.brokers.index')">
+                            {{ __('Broker Management') }}
                         </x-responsive-nav-link>
 
                         <x-responsive-nav-link :href="route('admin.logs')">

@@ -241,8 +241,9 @@ class BrokerManagementController extends Controller
             'months' => 'required|integer|min:1|max:24',
         ]);
 
+        $months = (int) $request->months;
         $currentEnd = $broker->subscription_ends_at ?? now();
-        $newEnd = $currentEnd->addMonths($request->months);
+        $newEnd = $currentEnd->copy()->addMonths($months);
 
         $broker->update([
             'subscription_ends_at' => $newEnd,
@@ -250,7 +251,7 @@ class BrokerManagementController extends Controller
             'grace_period_ends_at' => null,
         ]);
 
-        return back()->with('success', "Subscription extended by {$request->months} month(s)");
+        return back()->with('success', "Subscription extended by {$months} month(s)");
     }
 
     /**

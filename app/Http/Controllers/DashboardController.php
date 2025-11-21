@@ -221,8 +221,12 @@ class DashboardController extends Controller
             return $positions->sortByDesc('close_time')->take(20)->values();
         });
 
-        // Get account limit info (not cached, lightweight)
-        $accountLimit = $user->getAccountLimitInfo();
+        // Get account count (unlimited accounts now)
+        $accountLimit = [
+            'current' => $user->tradingAccounts()->count(),
+            'max' => null, // Unlimited
+            'can_add' => true,
+        ];
 
         // Collect all open positions from all accounts (for dashboard display)
         $allOpenPositions = $dashboardData['accounts']->flatMap(function($account) {
