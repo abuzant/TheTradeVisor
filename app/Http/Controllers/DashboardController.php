@@ -380,10 +380,12 @@ class DashboardController extends Controller
 
     private function getClosedTrades($account, $days = 30)
     {
-        $platformType = $account->platform_type ?? 'MT4';
+        // Check which table has data (some MT4 accounts store data as Deals)
+        $hasOrders = \App\Models\Order::where('trading_account_id', $account->id)->exists();
+        $hasDeals = \App\Models\Deal::where('trading_account_id', $account->id)->exists();
         
-        if ($platformType === 'MT4') {
-            // MT4: Get closed orders from Orders table
+        if ($hasOrders && !$hasDeals) {
+            // Pure MT4: Get closed orders from Orders table
             $closedOrders = \App\Models\Order::where('trading_account_id', $account->id)
                 ->whereNotNull('time_done')
                 ->whereIn('type', [0, 1]) // OP_BUY (0) and OP_SELL (1) only
@@ -405,9 +407,9 @@ class DashboardController extends Controller
                     'volume' => $order->volume_initial,
                     'open_price' => $order->price_open,
                     'close_price' => $order->price_current,
-                    'profit' => $order->profit ?? 0,
-                    'commission' => $order->commission ?? 0,
-                    'swap' => $order->swap ?? 0,
+                    'profit' => 0, // Orders table doesn't have profit
+                    'commission' => 0,
+                    'swap' => 0,
                     'open_time' => $order->time_setup,
                     'close_time' => $order->time_done,
                     'deals' => collect([]), // MT4 doesn't have deals
@@ -418,7 +420,7 @@ class DashboardController extends Controller
                 ];
             })->values();
         } else {
-            // MT5: Get closed deals and group by position
+            // MT5 or MT4 with Deal storage: Get closed deals and group by position
             $closedTrades = \App\Models\Deal::closedTrades()
                 ->forAccount($account->id)
                 ->dateRange(now()->subDays($days))
@@ -450,7 +452,7 @@ class DashboardController extends Controller
                         'deals' => collect([$outDeal]),
                         'deal_count' => 1,
                         'trading_account_id' => $account->id,
-                        'platform_type' => 'MT5',
+                        'platform_type' => $account->platform_type ?? 'MT4',
                         'position_identifier' => null,
                     ];
                 }
@@ -487,7 +489,7 @@ class DashboardController extends Controller
                     'deals' => $allDeals,
                     'deal_count' => $allDeals->count(),
                     'trading_account_id' => $account->id,
-                    'platform_type' => 'MT5',
+                    'platform_type' => $account->platform_type ?? 'MT5',
                     'position_identifier' => $positionId,
                 ];
             })->values();
@@ -497,25 +499,22 @@ class DashboardController extends Controller
     private function calculateAccountStats($account)
     {
         $accountId = $account->id;
-        $platformType = $account->platform_type ?? 'MT4';
 
-        if ($platformType === 'MT4') {
-            // MT4: Use Orders table (closed orders have time_done set)
+        // Check which table has data (some MT4 accounts store data as Deals)
+        $hasOrders = \App\Models\Order::where('trading_account_id', $accountId)->exists();
+        $hasDeals = \App\Models\Deal::where('trading_account_id', $accountId)->exists();
+
+        if ($hasOrders && !$hasDeals) {
+            // Pure MT4: Use Orders table (closed orders have time_done set)
+            // NOTE: Orders table doesn't have profit column, so we can't filter by it
             $totalTrades = \App\Models\Order::where('trading_account_id', $accountId)
                 ->whereNotNull('time_done')
                 ->whereIn('type', [0, 1]) // OP_BUY and OP_SELL only
                 ->count();
 
-            $winningTrades = \App\Models\Order::where('trading_account_id', $accountId)
-                ->whereNotNull('time_done')
-                ->whereIn('type', [0, 1])
-                ->where('profit', '>', 0)
-                ->count();
-
-            $totalProfit = \App\Models\Order::where('trading_account_id', $accountId)
-                ->whereNotNull('time_done')
-                ->whereIn('type', [0, 1])
-                ->sum('profit');
+            // Can't calculate winning trades without profit column
+            $winningTrades = 0;
+            $totalProfit = 0;
 
             $mostTradedSymbol = \App\Models\Order::select('symbol', DB::raw('count(*) as count'))
                 ->where('trading_account_id', $accountId)
@@ -525,7 +524,7 @@ class DashboardController extends Controller
                 ->orderBy('count', 'desc')
                 ->first();
         } else {
-            // MT5: Use Deals table
+            // MT5 or MT4 with Deal storage: Use Deals table
             $totalTrades = \App\Models\Deal::where('trading_account_id', $accountId)
                 ->whereIn('entry', ['out', 'inout'])
                 ->count();
