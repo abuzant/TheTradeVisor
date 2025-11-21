@@ -1,29 +1,48 @@
 # TheTradeVisor
 
-[![Laravel](https://img.shields.io/badge/Laravel-11-red.svg?logo=laravel)](https://laravel.com)
-[![PHP](https://img.shields.io/badge/PHP-8.3-blue.svg?logo=php)](https://php.net)
-[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker)](https://www.docker.com)
-[![Docker Compose](https://img.shields.io/badge/Docker%20Compose-Ready-2496ED.svg?logo=docker)](https://docs.docker.com/compose)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791.svg?logo=postgresql)](https://www.postgresql.org)
-[![Redis](https://img.shields.io/badge/Redis-7-DC382D.svg?logo=redis)](https://redis.io)
-[![Nginx](https://img.shields.io/badge/Nginx-1.24-009639.svg?logo=nginx)](https://nginx.org)
-[![License](https://img.shields.io/badge/License-Proprietary-green.svg)](LICENSE)
-[![Production Ready](https://img.shields.io/badge/Status-Production%20Ready-brightgreen.svg)](https://thetradevisor.com)
-[![One-Click Deploy](https://img.shields.io/badge/One%20Click%20Deploy-00A8E1.svg)](#-docker-deployment)
-[![Analytics](https://img.shields.io/badge/Analytics-Real--time-FF6B6B.svg)](https://thetradevisor.com/analytics)
-[![MT4/MT5](https://img.shields.io/badge/MT4%2FMT5-Integration-4CAF50.svg)](docs/reference/API_DOCUMENTATION.md)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-3.x-38B2AC.svg?logo=tailwind-css)](https://tailwindcss.com)
-[![Alpine.js](https://img.shields.io/badge/Alpine.js-3.x-8BC0D0.svg?logo=alpine.js)](https://alpinejs.dev)
-[![Chart.js](https://img.shields.io/badge/Chart.js-4.x-FF6384.svg?logo=chart.js)](https://chartjs.org)
-[![Horizon](https://img.shields.io/badge/Laravel-Horizon-FF2D20.svg?logo=laravel)](https://laravel.com/docs/horizon)
-[![Telescope](https://img.shields.io/badge/Laravel-Telescope-FF2D20.svg?logo=laravel)](https://laravel.com/docs/telescope)
-[![Circuit Breaker](https://img.shields.io/badge/Circuit%20Breaker-Active-success.svg)]()
-[![Rate Limiting](https://img.shields.io/badge/Rate%20Limiting-Active-success.svg)]()
-[![Caching](https://img.shields.io/badge/Redis%20Cache-90%25%20Hit%20Rate-DC382D.svg)]()
-[![Monitoring](https://img.shields.io/badge/Health%20Monitoring-Active-success.svg)]()
-[![GeoIP](https://img.shields.io/badge/GeoIP-Analytics-blue.svg)]()
-[![Cloudflare](https://img.shields.io/badge/Cloudflare-CDN-F38020.svg?logo=cloudflare)](https://cloudflare.com)
-[![AWS](https://img.shields.io/badge/AWS-EC2-FF9900.svg?logo=amazon-aws)](https://aws.amazon.com)
+<!-- Core Technology Stack -->
+[![Laravel](https://img.shields.io/badge/Laravel-11-red.svg?logo=laravel&logoColor=white)](https://laravel.com)
+[![PHP](https://img.shields.io/badge/PHP-8.3-777BB4.svg?logo=php&logoColor=white)](https://php.net)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791.svg?logo=postgresql&logoColor=white)](https://www.postgresql.org)
+[![Redis](https://img.shields.io/badge/Redis-7-DC382D.svg?logo=redis&logoColor=white)](https://redis.io)
+[![Nginx](https://img.shields.io/badge/Nginx-1.24-009639.svg?logo=nginx&logoColor=white)](https://nginx.org)
+
+<!-- Frontend Stack -->
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-3.x-38B2AC.svg?logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
+[![Alpine.js](https://img.shields.io/badge/Alpine.js-3.x-8BC0D0.svg?logo=alpine.js&logoColor=white)](https://alpinejs.dev)
+[![Chart.js](https://img.shields.io/badge/Chart.js-4.x-FF6384.svg?logo=chart.js&logoColor=white)](https://chartjs.org)
+[![Vite](https://img.shields.io/badge/Vite-6.x-646CFF.svg?logo=vite&logoColor=white)](https://vitejs.dev)
+
+<!-- Laravel Ecosystem -->
+[![Horizon](https://img.shields.io/badge/Laravel-Horizon-FF2D20.svg?logo=laravel&logoColor=white)](https://laravel.com/docs/horizon)
+[![Telescope](https://img.shields.io/badge/Laravel-Telescope-FF2D20.svg?logo=laravel&logoColor=white)](https://laravel.com/docs/telescope)
+[![Breeze](https://img.shields.io/badge/Laravel-Breeze-FF2D20.svg?logo=laravel&logoColor=white)](https://laravel.com/docs/breeze)
+[![Passport](https://img.shields.io/badge/Laravel-Passport-FF2D20.svg?logo=laravel&logoColor=white)](https://laravel.com/docs/passport)
+
+<!-- Infrastructure & Deployment -->
+[![AWS EC2](https://img.shields.io/badge/AWS-EC2%20M5.large-FF9900.svg?logo=amazon-aws&logoColor=white)](https://aws.amazon.com)
+[![Cloudflare](https://img.shields.io/badge/Cloudflare-CDN-F38020.svg?logo=cloudflare&logoColor=white)](https://cloudflare.com)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker&logoColor=white)](https://www.docker.com)
+[![Let's Encrypt](https://img.shields.io/badge/SSL-Let's%20Encrypt-003A70.svg?logo=letsencrypt&logoColor=white)](https://letsencrypt.org)
+
+<!-- Features & Capabilities -->
+[![MT4/MT5](https://img.shields.io/badge/MT4%2FMT5-Full%20Support-4CAF50.svg)](docs/reference/API_DOCUMENTATION.md)
+[![Real-time Analytics](https://img.shields.io/badge/Analytics-Real--time-FF6B6B.svg)](https://thetradevisor.com/analytics)
+[![Enterprise Portal](https://img.shields.io/badge/Enterprise-Portal-9333EA.svg)](https://enterprise.thetradevisor.com)
+[![GeoIP Analytics](https://img.shields.io/badge/GeoIP-Analytics-0EA5E9.svg)](docs/features/geoip-analytics.md)
+
+<!-- Security & Performance -->
+[![Circuit Breaker](https://img.shields.io/badge/Circuit%20Breaker-Active-22C55E.svg)](docs/CIRCUIT_BREAKER_IMPLEMENTATION.md)
+[![Rate Limiting](https://img.shields.io/badge/Rate%20Limiting-Active-22C55E.svg)](docs/RATE_LIMITING_COMPLETE.md)
+[![Redis Cache](https://img.shields.io/badge/Redis%20Cache-90%25%20Hit-DC382D.svg)](docs/REDIS_CACHING_OPTIMIZATION.md)
+[![Health Monitoring](https://img.shields.io/badge/Health-Monitoring-22C55E.svg)](docs/operations/MONITORING_IMPLEMENTATION.md)
+[![reCAPTCHA](https://img.shields.io/badge/reCAPTCHA-v2-4285F4.svg?logo=google&logoColor=white)](https://www.google.com/recaptcha)
+
+<!-- Status & Metrics -->
+[![Production Ready](https://img.shields.io/badge/Status-Production%20Ready-22C55E.svg)](https://thetradevisor.com)
+[![Version](https://img.shields.io/badge/Version-1.6.0-blue.svg)](docs/CHANGELOG.md)
+[![Uptime](https://img.shields.io/badge/Uptime-99.9%25-22C55E.svg)](https://thetradevisor.com)
+[![License](https://img.shields.io/badge/License-Proprietary-yellow.svg)](LICENSE)
 
 **Professional Trading Analytics Platform** - Comprehensive MT4/MT5 trading data analysis, performance tracking, and broker comparison system.
 
@@ -35,19 +54,47 @@ TheTradeVisor is an enterprise-grade trading analytics platform that aggregates,
 
 ### Key Features
 
+#### Core Analytics
 - 📊 **Real-time Analytics** - Live trading performance metrics and statistics
 - 📸 **Account Snapshots** - Historical account metrics with automated tracking and visualization
-- 💊 **Account Health Dashboard** - Side-by-side account comparison with interactive widgets showing balance, equity, margin, and drawdown trends
-- 🔄 **MT4/MT5 Full Support** - Unified data handling for both platforms with automatic deal entry mapping
+- 💊 **Account Health Dashboard** - Side-by-side account comparison with interactive widgets
+- 📈 **Performance Tracking** - Equity curves, drawdown analysis, and symbol performance
 - 🌍 **Global Market Data** - Aggregated analytics from traders worldwide
-- 🏦 **Broker Comparison** - Detailed broker performance analysis
-- 📈 **Performance Tracking** - Individual and portfolio-level tracking with equity curves, drawdown analysis, and symbol performance
-- 🔒 **Enterprise Security** - Multi-layer protection and monitoring
-- ⚡ **High Performance** - Redis caching, query optimization, circuit breakers
-- 🌐 **GeoIP Analytics** - Country-based trading insights
-- 📱 **Responsive Design** - Beautiful UI across all devices with smart number formatting
-- 💰 **Flexible Pricing** - Free tier + pay-per-account model ($9.99 one-time)
-- 🔑 **API Key Management** - Secure MT4/MT5 integration with account limits
+- 🏦 **Broker Comparison** - Detailed broker performance analysis and rankings
+- 🌐 **GeoIP Analytics** - Country-based trading insights and patterns
+
+#### Platform Support
+- 🔄 **MT4/MT5 Full Support** - Unified data handling for both platforms
+- 🤖 **Expert Advisor Integration** - Automated data collection via EA
+- 🔌 **REST API** - Comprehensive API for data ingestion and retrieval
+- 📡 **Real-time Sync** - Live position updates and trade tracking
+
+#### Enterprise Features
+- 🏢 **Enterprise Portal** - Dedicated subdomain for broker admins
+- ⭐ **Broker Whitelist** - Unlimited free accounts for whitelisted brokers
+- 📊 **Broker Analytics** - Aggregated client performance metrics
+- 🔐 **Enterprise Admin** - Separate authentication and access control
+- 📈 **Usage Tracking** - Monitor client adoption and engagement
+
+#### Security & Performance
+- 🔒 **Multi-layer Security** - Rate limiting, circuit breakers, CSRF protection
+- ⚡ **High Performance** - Redis caching (90% hit rate), query optimization
+- 🛡️ **reCAPTCHA Protection** - Bot prevention on all forms
+- 🔐 **API Key Authentication** - Secure token-based access
+- 📝 **Audit Logging** - Comprehensive activity tracking
+
+#### User Experience
+- 📱 **Responsive Design** - Beautiful UI across all devices
+- 🎨 **Modern UI/UX** - Tailwind CSS, Alpine.js, Chart.js
+- 🌙 **Smart Formatting** - Intelligent number and currency display
+- 🔔 **Real-time Notifications** - Slack and email alerts
+- 📥 **Export Functionality** - CSV and PDF exports
+
+#### Pricing & Billing
+- 💰 **Pay-Per-Account Model** - $9.99 one-time per additional account
+- 🎁 **First Account FREE** - Forever, no credit card required
+- 🏢 **Enterprise Plans** - Custom solutions for brokers
+- 🚫 **No Monthly Fees** - One-time payment per account
 
 ---
 
@@ -111,19 +158,31 @@ TheTradeVisor is an enterprise-grade trading analytics platform that aggregates,
 - **Database**: PostgreSQL 16
 - **Cache**: Redis 7.x
 - **Queue**: Laravel Horizon
+- **Authentication**: Laravel Breeze + Passport
+- **API**: RESTful with rate limiting
 
 ### Frontend
 - **Framework**: Blade Templates
 - **Styling**: Tailwind CSS 3.x
-- **JavaScript**: Alpine.js, Chart.js
+- **JavaScript**: Alpine.js 3.x, Chart.js 4.x
+- **Build Tool**: Vite 6.x
 - **Icons**: Lucide Icons
+- **Components**: Flowbite
 
 ### Infrastructure
-- **Web Server**: Nginx (Load Balanced)
-- **PHP**: PHP-FPM (5 pools)
-- **Platform**: AWS EC2
-- **CDN**: Cloudflare
-- **Monitoring**: Custom health checks
+- **Platform**: AWS EC2 M5.large (8GB RAM, 2 vCPUs)
+- **Web Server**: Nginx 1.24 (Direct PHP-FPM)
+- **PHP**: PHP 8.3-FPM (5 pools: www, pool1-4)
+- **CDN**: Cloudflare (with page rules)
+- **SSL**: Let's Encrypt (Auto-renewal)
+- **Monitoring**: Custom health checks + system monitoring
+
+### DevOps
+- **Version Control**: Git
+- **CI/CD**: Manual deployment with scripts
+- **Backup**: Automated daily backups
+- **Logging**: Laravel Telescope + Custom logs
+- **Alerts**: Slack + Email notifications
 
 ---
 
@@ -206,22 +265,47 @@ For detailed installation instructions, see the [Installation Guide](docs/gettin
 
 ---
 
-## 💰 Subscription Tiers
+## 💰 Pricing Model
 
-TheTradeVisor offers flexible pricing to suit traders of all levels:
+TheTradeVisor uses a **pay-per-account model** with no monthly subscriptions:
 
-| Tier | Price | Accounts | Features |
-|------|-------|----------|----------|
-| **Free** | $0 | 1 account | Full analytics, real-time data, global insights |
-| **Pay-Per-Account** | $9.99 one-time | Unlimited | Add accounts as needed, lifetime access per account |
-| **Enterprise** | Custom | Unlimited | Custom solutions, priority support, dedicated infrastructure |
+### Individual Traders
+
+| Accounts | Price | Features |
+|----------|-------|----------|
+| **First Account** | **FREE Forever** | Full analytics, real-time data, all features |
+| **Additional Accounts** | **$9.99 one-time** | Lifetime access, no recurring fees |
+
+**Example Pricing:**
+- 1 account: **$0** (FREE)
+- 3 accounts: **$19.98** ($0 + $9.99 × 2)
+- 5 accounts: **$39.96** ($0 + $9.99 × 4)
+- 10 accounts: **$89.91** ($0 + $9.99 × 9)
+
+### Enterprise Brokers
+
+**Broker Whitelist Program** - Give your clients unlimited free accounts!
+
+| Feature | Benefit |
+|---------|--------|
+| **Whitelisted Broker** | All your clients get unlimited free accounts |
+| **Enterprise Portal** | Dedicated subdomain with aggregated analytics |
+| **Broker Analytics** | View all client accounts and performance |
+| **Custom Pricing** | Contact us for broker-specific plans |
+
+**How It Works:**
+1. Broker subscribes to enterprise plan
+2. Broker's MT4/MT5 server name is whitelisted
+3. Any trader using that broker gets unlimited free accounts
+4. Broker gets access to enterprise portal with client analytics
 
 **Key Points:**
-- ✅ First account is **FREE** forever
-- ✅ Additional accounts: **$9.99 one-time payment** (no monthly fees!)
-- ✅ Account limits enforced to prevent abuse
-- ✅ All tiers include full platform features
-- ✅ Enterprise tier for trading firms and institutions
+- ✅ First account is **FREE** forever for all users
+- ✅ No monthly subscriptions - pay once, use forever
+- ✅ Whitelisted brokers: Unlimited free accounts for clients
+- ✅ All features included regardless of account count
+- ✅ Enterprise portal for broker admins
+- ✅ 30-day grace period for expired enterprise subscriptions
 
 ---
 
@@ -241,29 +325,52 @@ All data is anonymized and aggregated for privacy.
 
 ## 📈 System Status
 
-### Current Version: 1.5.0
+### Current Version: 1.6.0
 
-**Production Status**: ✅ Stable
+**Production Status**: ✅ Stable & Production Ready
 
-**Latest Updates** (November 18, 2025):
-- ✅ **Account Snapshots System** - Historical account metrics tracking
-- ✅ **Account Health Dashboard** - Interactive widgets with charts and gauges
-- ✅ **Max Drawdown Visualization** - Color-coded risk indicators
-- ✅ **Intelligent Caching** - 2h/24h TTLs for optimal performance
-- ✅ **Account Health Navigation** - Easy access from Statistics menu
-- ✅ **API Endpoints** - RESTful API for snapshots data
-- ✅ **CSV Export** - Download historical data
-- ✅ **Automated Data Management** - Aggregation and cleanup jobs
+**Latest Updates** (November 21, 2025):
+
+#### 🏢 Enterprise Features
+- ✅ **Enterprise Subdomain** - `enterprise.thetradevisor.com` with SSL
+- ✅ **Broker Whitelist System** - Unlimited free accounts for broker clients
+- ✅ **Enterprise Portal** - Dedicated dashboard, analytics, and settings
+- ✅ **Broker Management** - Admin tools for managing enterprise brokers
+- ✅ **Usage Tracking** - Monitor whitelisted broker adoption
+- ✅ **Grace Period System** - 30-day grace period for expired subscriptions
+
+#### 💰 Billing System Overhaul
+- ✅ **Pay-Per-Account Model** - $9.99 one-time per additional account
+- ✅ **Removed Subscription Tiers** - Simplified pricing structure
+- ✅ **Database Migration** - Removed `subscription_tier` and `max_accounts` fields
+- ✅ **First Account FREE** - Forever, for all users
+
+#### 🚀 Infrastructure Upgrade
+- ✅ **AWS EC2 M5.large** - Upgraded from T-series (8GB RAM, 2 vCPUs)
+- ✅ **Consistent CPU Performance** - No more CPU credit exhaustion
+- ✅ **Simplified Architecture** - Direct Nginx → PHP-FPM connection
+- ✅ **Improved Stability** - 99.9% uptime
+
+#### 🔧 Admin Enhancements
+- ✅ **Enhanced Admin Dashboard** - Broker stats, enterprise expiry, active terminals
+- ✅ **Admin Wiki** - Comprehensive system documentation
+- ✅ **Broker Management UI** - Full CRUD for enterprise brokers
+- ✅ **Enhanced User Management** - Broker information in user list
+
+#### 🐛 Bug Fixes
+- ✅ **Domain Routing** - Fixed multi-domain routing with middleware
+- ✅ **API Subdomain** - Fixed 404 errors on data collection endpoint
+- ✅ **MT4 Data Display** - Fixed trade display for MT4 accounts
+- ✅ **Performance Page** - Fixed time period selection and data loading
+- ✅ **PRO Badges** - Added visual indicators for locked features
 
 **Previous Updates** (November 2025):
-- ✅ Account limit enforcement (prevent abuse)
-- ✅ Redirect authenticated users from guest pages
-- ✅ Updated pricing model ($9.99 one-time per account)
-- ✅ Circuit breaker implementation
-- ✅ Comprehensive rate limiting
-- ✅ Slow query logging
-- ✅ Alert system (Slack/Email)
-- ✅ Redis caching optimization
+- ✅ Account Snapshots System with historical metrics
+- ✅ Account Health Dashboard with interactive widgets
+- ✅ Circuit breaker and rate limiting implementation
+- ✅ Redis caching optimization (90% hit rate)
+- ✅ GeoIP analytics and country-based insights
+- ✅ Alert system (Slack/Email notifications)
 
 See [CHANGELOG.md](docs/CHANGELOG.md) for complete history.
 
@@ -297,8 +404,16 @@ For licensing inquiries, contact: [hello@thetradevisor.com](mailto:hello@thetrad
 
 - 📧 Email: [hello@thetradevisor.com](mailto:hello@thetradevisor.com)
 - 🌐 Website: [https://thetradevisor.com](https://thetradevisor.com)
+- 🏢 Enterprise Portal: [https://enterprise.thetradevisor.com](https://enterprise.thetradevisor.com)
 - 📖 Documentation: [docs/](docs/)
 - 🐛 Issues: [GitHub Issues](https://github.com/abuzant/TheTradeVisor/issues)
+
+### For Brokers
+
+Interested in the Enterprise Broker Whitelist program?
+- 📧 Contact: [hello@thetradevisor.com](mailto:hello@thetradevisor.com)
+- 🌐 Learn More: [https://thetradevisor.com/for-brokers](https://thetradevisor.com/for-brokers)
+- 📄 Documentation: [Enterprise Broker Whitelist](docs/features/ENTERPRISE_BROKER_WHITELIST.md)
 
 ### Professional Services
 

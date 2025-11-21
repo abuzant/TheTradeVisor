@@ -7,6 +7,118 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.7.0] - 2025-11-21
+
+### 🏢 Enterprise Features
+
+#### Enterprise Subdomain Portal
+- **New**: Dedicated enterprise portal at `enterprise.thetradevisor.com`
+- **Features**: Dashboard, Analytics, Accounts, Settings for broker admins
+- **Infrastructure**: Nginx configuration, SSL certificate, security headers
+- **Authentication**: Separate enterprise login with reCAPTCHA
+- **Middleware**: `EnterpriseAdminMiddleware` for access control
+- **Documentation**: `docs/implementation/ENTERPRISE_SUBDOMAIN_SETUP.md`
+
+#### Broker Whitelist System
+- **New**: Enterprise brokers can whitelist their MT4/MT5 server
+- **Benefit**: All clients of whitelisted brokers get unlimited free accounts
+- **Database**: `enterprise_brokers` and `whitelisted_broker_usage` tables
+- **Grace Period**: 30-day grace period after subscription expires
+- **API Integration**: Automatic whitelist detection in data collection
+- **Documentation**: `docs/features/ENTERPRISE_BROKER_WHITELIST.md`
+
+### 💰 Billing System Overhaul
+
+#### Pay-Per-Account Model
+- **Changed**: Removed subscription tiers (Free/Basic/Pro/Enterprise)
+- **New Model**: First account FREE, additional accounts $9.99 one-time
+- **Database**: Removed `subscription_tier` and `max_accounts` from users table
+- **Migration**: `2025_11_21_064434_remove_subscription_fields_from_users.php`
+- **Impact**: Simpler pricing, no monthly fees, lifetime access per account
+- **Updated**: Pricing page, FAQ, API key settings
+
+### 🚀 Infrastructure Upgrade
+
+#### AWS EC2 M5.large Migration
+- **Upgraded**: From T-series to M5.large (8GB RAM, 2 vCPUs)
+- **Benefit**: Consistent CPU performance, no more credit exhaustion
+- **Architecture**: Simplified to direct Nginx → PHP-FPM connection
+- **Removed**: Backend nginx instances (8081-8084)
+- **Performance**: 99.9% uptime, consistent 24/7 performance
+- **Documentation**: `docs/INSTANCE_UPGRADE_SUMMARY.md`
+
+### 🔧 Admin Panel Enhancements
+
+#### Enhanced Admin Dashboard
+- **New Stats**: Brokers count, Next enterprise expiry, Active terminals
+- **Enhanced Table**: Recent users now show broker information
+- **Indicators**: Enterprise broker star indicators (✨)
+- **Files**: `AdminController.php`, `admin/dashboard.blade.php`
+- **Documentation**: `docs/changelog/ADMIN_DASHBOARD_STATS_UPDATE_NOV21.md`
+
+#### Broker Management System
+- **New Controller**: `BrokerManagementController`
+- **Features**: Full CRUD for enterprise brokers
+- **Views**: Index, Create, Edit broker pages
+- **Tracking**: Subscription status, expiry dates, usage statistics
+
+#### Admin Wiki Enhancement
+- **Updated**: Added enterprise broker management procedures
+- **New Sections**: Whitelist verification, grace period handling
+- **Documentation**: `docs/guides/ADMIN_WIKI.md`
+
+### 🐛 Bug Fixes
+
+#### Domain Routing
+- **Fixed**: Multi-domain routing issues with middleware approach
+- **New Middleware**: `EnterpriseSubdomainOnly`, `MainDomainOnly`
+- **Impact**: All domains (main, enterprise, API) working correctly
+
+#### API Subdomain
+- **Fixed**: 404 errors on `/api/v1/data/collect` endpoint
+- **Cause**: Nginx variable `$redirect_to_main` not initialized
+- **Impact**: Expert Advisors can now send data successfully
+
+#### MT4 Data Display
+- **Fixed**: Account #4 (MT4) returning 500 error
+- **Fixed**: MT4 trades showing only 1 instead of 4
+- **Cause**: Incorrect assumptions about MT4 data storage
+- **Solution**: Dynamic table detection, NULL position_id handling
+
+#### Performance Page
+- **Fixed**: Time period selection stuck on "7 Days"
+- **Fixed**: 90d/180d showing same data as 30d
+- **Solution**: Added `paramName` prop, missing period configs
+
+#### PRO Badges
+- **Added**: Visual indicators for locked time periods
+- **Design**: Small gradient badges on locked buttons
+- **Consistency**: Applied across all time selector pages
+
+#### Enterprise Login
+- **Added**: Google Analytics tracking
+- **Added**: reCAPTCHA v2 protection
+- **Security**: Prevents automated attacks
+
+### 📊 Technical Improvements
+
+- **Performance**: Optimized cache durations per time period
+- **Security**: Enhanced headers on enterprise subdomain
+- **Database**: Indexed columns for enterprise broker queries
+- **Caching**: Maintained 90% cache hit rate
+- **Monitoring**: Enhanced system monitoring and alerts
+
+### 📚 Documentation
+
+- **New**: `docs/changelog/RELEASE_NOTES_v1.7.0_NOV21_2025.md`
+- **New**: `docs/implementation/ENTERPRISE_SUBDOMAIN_SETUP.md`
+- **New**: `docs/features/ENTERPRISE_BROKER_WHITELIST.md`
+- **New**: `docs/INSTANCE_UPGRADE_SUMMARY.md`
+- **Updated**: README.md with comprehensive badges and features
+- **Updated**: All pricing and billing documentation
+
+---
+
 ## [1.4.0] - 2025-11-17
 
 ### 🚀 New Features
