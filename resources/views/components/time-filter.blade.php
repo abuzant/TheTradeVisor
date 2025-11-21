@@ -1,11 +1,14 @@
-@props(['periods', 'currentPeriod', 'baseRoute', 'routeParams' => []])
+@props(['periods', 'currentPeriod', 'baseRoute', 'routeParams' => [], 'paramName' => 'period'])
 
 <div class="inline-flex rounded-lg border border-gray-200 bg-white p-1 shadow-sm">
     @foreach($periods as $key => $period)
         @php
             $isActive = $currentPeriod === $key;
             $isLocked = $period['locked'];
-            $params = array_merge($routeParams, ['days' => $period['days'] ?: 1]);
+            // Use the period key (e.g., '7d', '30d') for routes that expect period parameter
+            // Use days value for routes that expect days parameter
+            $paramValue = $paramName === 'period' ? $key : $period['days'];
+            $params = array_merge($routeParams, [$paramName => $paramValue]);
             $route = $isLocked ? '#' : route($baseRoute, $params);
         @endphp
         

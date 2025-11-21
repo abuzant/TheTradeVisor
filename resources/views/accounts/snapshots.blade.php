@@ -40,6 +40,7 @@
                             :currentPeriod="$days . 'd'" 
                             baseRoute="account.snapshots" 
                             :routeParams="['account' => $account->id]"
+                            paramName="days"
                         />
                     </div>
                     <div class="text-sm text-gray-600">

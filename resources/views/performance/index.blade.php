@@ -24,7 +24,8 @@
                         <x-time-filter 
                             :periods="$timePeriods" 
                             :currentPeriod="$period" 
-                            baseRoute="performance" 
+                            baseRoute="performance"
+                            paramName="period"
                         />
                     </div>
                 </div>
