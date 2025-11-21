@@ -56,47 +56,16 @@
                                 @enderror
                             </div>
 
-                            {{-- Subscription Tier --}}
-                            <div>
-                                <label for="subscription_tier" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Subscription Tier <span class="text-red-500">*</span>
-                                </label>
-                                <select name="subscription_tier"
-                                        id="subscription_tier"
-                                        required
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
-                                    <option value="free" {{ old('subscription_tier', $user->subscription_tier) === 'free' ? 'selected' : '' }}>
-                                        Free (1 account)
-                                    </option>
-                                    <option value="basic" {{ old('subscription_tier', $user->subscription_tier) === 'basic' ? 'selected' : '' }}>
-                                        Basic (Pay-per-account: $9.99 each)
-                                    </option>
-                                    <option value="enterprise" {{ old('subscription_tier', $user->subscription_tier) === 'enterprise' ? 'selected' : '' }}>
-                                        Enterprise (Unlimited) - Custom
-                                    </option>
-                                </select>
-                                @error('subscription_tier')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
-
-                            {{-- Max Accounts --}}
-                            <div>
-                                <label for="max_accounts" class="block text-sm font-medium text-gray-700 mb-2">
-                                    Maximum Accounts <span class="text-red-500">*</span>
-                                </label>
-                                <input type="number"
-                                       name="max_accounts"
-                                       id="max_accounts"
-                                       value="{{ old('max_accounts', $user->max_accounts) }}"
-                                       min="1"
-                                       max="100"
-                                       required
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
-                                <p class="mt-1 text-xs text-gray-500">Current usage: {{ $user->tradingAccounts()->count() }} accounts</p>
-                                @error('max_accounts')
-                                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
-                                @enderror
+                            {{-- Account Information --}}
+                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                                <h4 class="text-sm font-semibold text-gray-700 mb-2">Account Information</h4>
+                                <div class="space-y-2 text-sm text-gray-600">
+                                    <p><strong>Trading Accounts:</strong> {{ $user->tradingAccounts()->count() }} (Unlimited)</p>
+                                    <p><strong>Account Type:</strong> Free (All users have unlimited accounts)</p>
+                                    @if($user->is_enterprise_admin)
+                                        <p class="text-indigo-600"><strong>⭐ Enterprise Admin:</strong> Has access to enterprise portal</p>
+                                    @endif
+                                </div>
                             </div>
 
                             {{-- Status --}}

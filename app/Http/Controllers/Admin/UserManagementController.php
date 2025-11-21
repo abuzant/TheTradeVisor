@@ -16,16 +16,15 @@ class UserManagementController extends Controller
     public function index(Request $request)
     {
         $search = $request->get('search');
-        $tier = $request->get('tier');
         $status = $request->get('status');
 
-        // Define sortable columns
+        // Define sortable columns (removed subscription_tier and max_accounts)
         $sortableColumns = [
             'name',
             'email',
-            'subscription_tier',
-            'max_accounts',
             'is_active',
+            'is_admin',
+            'is_enterprise_admin',
             'created_at',
             'last_login_at',
         ];
@@ -37,9 +36,6 @@ class UserManagementController extends Controller
                     $q->where('name', 'like', "%{$search}%")
                       ->orWhere('email', 'like', "%{$search}%");
                 });
-            })
-            ->when($tier, function($query, $tier) {
-                $query->where('subscription_tier', $tier);
             })
             ->when($status !== null, function($query) use ($status) {
                 $query->where('is_active', $status === 'active');
@@ -58,7 +54,6 @@ class UserManagementController extends Controller
         return view('admin.users.index', compact(
             'users', 
             'search', 
-            'tier', 
             'status',
             'sortBy',
             'sortDirection'
@@ -100,17 +95,11 @@ class UserManagementController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $user->id,
-            'subscription_tier' => 'required|in:free,basic,enterprise',
-            'max_accounts' => 'required|integer|min:1|max:100',
             'is_active' => 'required|boolean',
             'is_admin' => 'required|boolean',
         ]);
 
-        // Auto-set max_accounts for enterprise users
-        if ($validated['subscription_tier'] === 'enterprise') {
-            $validated['max_accounts'] = 999999;
-        }
-
+        // All users have unlimited accounts now - no subscription tiers
         $user->update($validated);
 
         return redirect()

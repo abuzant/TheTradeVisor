@@ -40,18 +40,6 @@
                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
                             </div>
 
-                            {{-- Subscription Tier --}}
-                            <div>
-                                <label for="tier" class="block text-sm font-medium text-gray-700 mb-2">Subscription</label>
-                                <select name="tier" id="tier" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
-                                    <option value="">All Tiers</option>
-                                    <option value="free" {{ $tier === 'free' ? 'selected' : '' }}>Free</option>
-                                    <option value="basic" {{ $tier === 'basic' ? 'selected' : '' }}>Basic</option>
-                                    <option value="pro" {{ $tier === 'pro' ? 'selected' : '' }}>Pro</option>
-                                    <option value="enterprise" {{ $tier === 'enterprise' ? 'selected' : '' }}>Enterprise</option>
-                                </select>
-                            </div>
-
                             {{-- Status --}}
                             <div>
                                 <label for="status" class="block text-sm font-medium text-gray-700 mb-2">Status</label>
@@ -101,14 +89,12 @@
                                         :sortBy="$sortBy"
                                         :sortDirection="$sortDirection" />
 
-                                    <x-sortable-header
-                                        column="subscription_tier"
-                                        label="Plan"
-                                        :sortBy="$sortBy"
-                                        :sortDirection="$sortDirection" />
-
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                         Accounts
+                                    </th>
+
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Type
                                     </th>
 
                                     <x-sortable-header
@@ -143,22 +129,18 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         {{ $user->email }}
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                                            {{ $user->subscription_tier === 'free' ? 'bg-gray-100 text-gray-800' : '' }}
-                                            {{ $user->subscription_tier === 'basic' ? 'bg-blue-100 text-blue-800' : '' }}
-                                            {{ $user->subscription_tier === 'enterprise' ? 'bg-indigo-100 text-indigo-800' : '' }}">
-                                            {{ ucfirst($user->subscription_tier) }}
-                                        </span>
-                                    </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                        <div class="flex items-center">
-                                            <span class="font-medium {{ $user->trading_accounts_count >= $user->max_accounts ? 'text-red-600' : 'text-gray-900' }}">
-                                                {{ $user->trading_accounts_count }}
+                                        <span class="font-medium text-gray-900">{{ $user->trading_accounts_count }}</span>
+                                        <span class="text-gray-400 text-xs ml-1">(Unlimited)</span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                        @if($user->is_enterprise_admin)
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-indigo-100 text-indigo-800">
+                                                🏢 Enterprise Admin
                                             </span>
-                                            <span class="text-gray-400 mx-1">/</span>
-                                            <span class="text-gray-500">{{ $user->max_accounts }}</span>
-                                        </div>
+                                        @else
+                                            <span class="text-gray-500 text-xs">Regular User</span>
+                                        @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         @if($user->last_login_at)
