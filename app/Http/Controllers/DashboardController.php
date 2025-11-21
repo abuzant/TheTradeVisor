@@ -285,83 +285,8 @@ class DashboardController extends Controller
         // Get account
         $account = $accountData['account'];
         
-        // Get recent closed trades (last 30 days)
-        // FIXED: Use Deal model with entry='out' for complete trade history
-        $closedTrades = Deal::closedTrades()
-            ->forAccount($account->id)
-            ->dateRange(now()->subDays(30))
-            ->recent()
-            ->limit(1000)
-            ->get();
-        
-        // Group by position_id to show position-level view
-        $positions = $closedTrades->groupBy('position_id')->map(function($positionDeals, $positionId) use ($account) {
-            // Skip deals with null position_id (MT4 standalone deals)
-            if ($positionId === null || $positionId === '') {
-                // For MT4 deals without position_id, use the deal itself
-                $outDeal = $positionDeals->first();
-                return (object) [
-                    'position_id' => null,
-                    'symbol' => $outDeal->symbol,
-                    'normalized_symbol' => $outDeal->normalized_symbol,
-                    'type' => $outDeal->display_type,
-                    'display_type' => $outDeal->display_type,
-                    'is_buy' => $outDeal->is_buy,
-                    'is_open' => false,
-                    'volume' => $outDeal->volume,
-                    'open_price' => $outDeal->price ?? 0,
-                    'close_price' => $outDeal->price ?? 0,
-                    'profit' => $outDeal->profit,
-                    'commission' => $outDeal->commission ?? 0,
-                    'swap' => $outDeal->swap ?? 0,
-                    'open_time' => $outDeal->time,
-                    'close_time' => $outDeal->time,
-                    'deals' => collect([$outDeal]),
-                    'deal_count' => 1,
-                    'trading_account_id' => $account->id,
-                    'platform_type' => $account->platform_type ?? 'MT4',
-                    'position_identifier' => null,
-                ];
-            }
-            
-            // Get all deals for this position (IN and OUT)
-            $allDeals = Deal::forPosition($positionId)
-                ->forAccount($account->id)
-                ->orderBy('time', 'asc')
-                ->limit(100)
-                ->get();
-            
-            $inDeal = $allDeals->where('entry', 'in')->first();
-            $outDeal = $allDeals->where('entry', 'out')->sortByDesc('time')->first();
-            
-            // Determine position type from IN deal (not OUT deal)
-            $positionType = $inDeal ? $inDeal->display_type : $outDeal->display_type;
-            $isBuy = $inDeal ? $inDeal->is_buy : false;
-            
-            // Create a position-like object for display
-            return (object) [
-                'position_id' => $positionId,
-                'symbol' => $outDeal->symbol,
-                'normalized_symbol' => $outDeal->normalized_symbol,
-                'type' => $positionType, // Use position type, not closing action
-                'display_type' => $positionType,
-                'is_buy' => $isBuy,
-                'is_open' => false, // These are all closed positions
-                'volume' => $allDeals->where('entry', 'in')->sum('volume'),
-                'open_price' => $inDeal->price ?? 0,
-                'close_price' => $outDeal->price ?? 0,
-                'profit' => $allDeals->where('entry', 'out')->sum('profit'),
-                'commission' => $allDeals->sum('commission'),
-                'swap' => $outDeal->swap ?? 0,
-                'open_time' => $inDeal->time ?? null,
-                'close_time' => $outDeal->time ?? null,
-                'deals' => $allDeals,
-                'deal_count' => $allDeals->count(), // Number of deals for this position
-                'trading_account_id' => $account->id,
-                'platform_type' => $account->platform_type ?? 'MT4', // Platform type
-                'position_identifier' => $positionId, // Position identifier
-            ];
-        })->values();
+        // Get recent closed trades (last 30 days) - handles both MT4 and MT5
+        $positions = $this->getClosedTrades($account, 30);
         
         // Paginate manually
         $currentPage = request()->get('page', 1);
@@ -453,38 +378,180 @@ class DashboardController extends Controller
         ];
     }
 
+    private function getClosedTrades($account, $days = 30)
+    {
+        $platformType = $account->platform_type ?? 'MT4';
+        
+        if ($platformType === 'MT4') {
+            // MT4: Get closed orders from Orders table
+            $closedOrders = \App\Models\Order::where('trading_account_id', $account->id)
+                ->whereNotNull('time_done')
+                ->whereIn('type', [0, 1]) // OP_BUY (0) and OP_SELL (1) only
+                ->where('time_done', '>=', now()->subDays($days))
+                ->orderBy('time_done', 'desc')
+                ->limit(1000)
+                ->get();
+            
+            // Convert MT4 orders to position-like objects for display
+            return $closedOrders->map(function($order) use ($account) {
+                return (object) [
+                    'position_id' => $order->ticket,
+                    'symbol' => $order->symbol,
+                    'normalized_symbol' => $order->getNormalizedSymbolAttribute(),
+                    'type' => $order->type == 0 ? 'BUY' : 'SELL',
+                    'display_type' => $order->type == 0 ? 'BUY' : 'SELL',
+                    'is_buy' => $order->type == 0,
+                    'is_open' => false,
+                    'volume' => $order->volume_initial,
+                    'open_price' => $order->price_open,
+                    'close_price' => $order->price_current,
+                    'profit' => $order->profit ?? 0,
+                    'commission' => $order->commission ?? 0,
+                    'swap' => $order->swap ?? 0,
+                    'open_time' => $order->time_setup,
+                    'close_time' => $order->time_done,
+                    'deals' => collect([]), // MT4 doesn't have deals
+                    'deal_count' => 1,
+                    'trading_account_id' => $account->id,
+                    'platform_type' => 'MT4',
+                    'position_identifier' => $order->ticket,
+                ];
+            })->values();
+        } else {
+            // MT5: Get closed deals and group by position
+            $closedTrades = \App\Models\Deal::closedTrades()
+                ->forAccount($account->id)
+                ->dateRange(now()->subDays($days))
+                ->recent()
+                ->limit(1000)
+                ->get();
+            
+            // Group by position_id to show position-level view
+            return $closedTrades->groupBy('position_id')->map(function($positionDeals, $positionId) use ($account) {
+                // Skip deals with null position_id
+                if ($positionId === null || $positionId === '') {
+                    $outDeal = $positionDeals->first();
+                    return (object) [
+                        'position_id' => null,
+                        'symbol' => $outDeal->symbol,
+                        'normalized_symbol' => $outDeal->normalized_symbol,
+                        'type' => $outDeal->display_type,
+                        'display_type' => $outDeal->display_type,
+                        'is_buy' => $outDeal->is_buy,
+                        'is_open' => false,
+                        'volume' => $outDeal->volume,
+                        'open_price' => $outDeal->price ?? 0,
+                        'close_price' => $outDeal->price ?? 0,
+                        'profit' => $outDeal->profit,
+                        'commission' => $outDeal->commission ?? 0,
+                        'swap' => $outDeal->swap ?? 0,
+                        'open_time' => $outDeal->time,
+                        'close_time' => $outDeal->time,
+                        'deals' => collect([$outDeal]),
+                        'deal_count' => 1,
+                        'trading_account_id' => $account->id,
+                        'platform_type' => 'MT5',
+                        'position_identifier' => null,
+                    ];
+                }
+                
+                // Get all deals for this position
+                $allDeals = \App\Models\Deal::forPosition($positionId)
+                    ->forAccount($account->id)
+                    ->orderBy('time', 'asc')
+                    ->limit(100)
+                    ->get();
+                
+                $inDeal = $allDeals->where('entry', 'in')->first();
+                $outDeal = $allDeals->where('entry', 'out')->sortByDesc('time')->first();
+                
+                $positionType = $inDeal ? $inDeal->display_type : $outDeal->display_type;
+                $isBuy = $inDeal ? $inDeal->is_buy : false;
+                
+                return (object) [
+                    'position_id' => $positionId,
+                    'symbol' => $outDeal->symbol,
+                    'normalized_symbol' => $outDeal->normalized_symbol,
+                    'type' => $positionType,
+                    'display_type' => $positionType,
+                    'is_buy' => $isBuy,
+                    'is_open' => false,
+                    'volume' => $allDeals->where('entry', 'in')->sum('volume'),
+                    'open_price' => $inDeal->price ?? 0,
+                    'close_price' => $outDeal->price ?? 0,
+                    'profit' => $allDeals->where('entry', 'out')->sum('profit'),
+                    'commission' => $allDeals->sum('commission'),
+                    'swap' => $outDeal->swap ?? 0,
+                    'open_time' => $inDeal->time ?? null,
+                    'close_time' => $outDeal->time ?? null,
+                    'deals' => $allDeals,
+                    'deal_count' => $allDeals->count(),
+                    'trading_account_id' => $account->id,
+                    'platform_type' => 'MT5',
+                    'position_identifier' => $positionId,
+                ];
+            })->values();
+        }
+    }
+
     private function calculateAccountStats($account)
     {
         $accountId = $account->id;
+        $platformType = $account->platform_type ?? 'MT4';
 
-        // Total trades
-        $totalTrades = Deal::where('trading_account_id', $accountId)
-            ->whereIn('entry', ['out', 'inout'])
-            ->count();
+        if ($platformType === 'MT4') {
+            // MT4: Use Orders table (closed orders have time_done set)
+            $totalTrades = \App\Models\Order::where('trading_account_id', $accountId)
+                ->whereNotNull('time_done')
+                ->whereIn('type', [0, 1]) // OP_BUY and OP_SELL only
+                ->count();
 
-        // Winning trades
-        $winningTrades = Deal::where('trading_account_id', $accountId)
-            ->whereIn('entry', ['out', 'inout'])
-            ->where('profit', '>', 0)
-            ->count();
+            $winningTrades = \App\Models\Order::where('trading_account_id', $accountId)
+                ->whereNotNull('time_done')
+                ->whereIn('type', [0, 1])
+                ->where('profit', '>', 0)
+                ->count();
 
-        // Total profit/loss
-        $totalProfit = Deal::where('trading_account_id', $accountId)
-            ->whereIn('entry', ['out', 'inout'])
-            ->sum('profit');
+            $totalProfit = \App\Models\Order::where('trading_account_id', $accountId)
+                ->whereNotNull('time_done')
+                ->whereIn('type', [0, 1])
+                ->sum('profit');
+
+            $mostTradedSymbol = \App\Models\Order::select('symbol', DB::raw('count(*) as count'))
+                ->where('trading_account_id', $accountId)
+                ->whereNotNull('time_done')
+                ->whereIn('type', [0, 1])
+                ->groupBy('symbol')
+                ->orderBy('count', 'desc')
+                ->first();
+        } else {
+            // MT5: Use Deals table
+            $totalTrades = \App\Models\Deal::where('trading_account_id', $accountId)
+                ->whereIn('entry', ['out', 'inout'])
+                ->count();
+
+            $winningTrades = \App\Models\Deal::where('trading_account_id', $accountId)
+                ->whereIn('entry', ['out', 'inout'])
+                ->where('profit', '>', 0)
+                ->count();
+
+            $totalProfit = \App\Models\Deal::where('trading_account_id', $accountId)
+                ->whereIn('entry', ['out', 'inout'])
+                ->sum('profit');
+
+            $mostTradedSymbol = \App\Models\Deal::select('symbol', DB::raw('count(*) as count'))
+                ->where('trading_account_id', $accountId)
+                ->whereIn('entry', ['out', 'inout'])
+                ->groupBy('symbol')
+                ->orderBy('count', 'desc')
+                ->first();
+        }
 
         // Average profit per trade
         $avgProfit = $totalTrades > 0 ? $totalProfit / $totalTrades : 0;
 
         // Win rate
         $winRate = $totalTrades > 0 ? ($winningTrades / $totalTrades) * 100 : 0;
-
-        // Most traded symbol
-        $mostTradedSymbol = Deal::select('symbol', DB::raw('count(*) as count'))
-            ->where('trading_account_id', $accountId)
-            ->groupBy('symbol')
-            ->orderBy('count', 'desc')
-            ->first();
 
         return [
             'total_trades' => $totalTrades,
