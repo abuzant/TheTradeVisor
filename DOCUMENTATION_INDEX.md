@@ -95,13 +95,13 @@
 - **[Infrastructure](docs/INSTANCE_UPGRADE_SUMMARY.md)** - AWS EC2 M5.large setup
 
 ### Caching & Performance
-- **[Redis Caching Strategy](docs/REDIS_CACHING_OPTIMIZATION.md)** - Cache implementation
-- **[Query Optimization](docs/SLOW_QUERY_LOGGING.md)** - Database performance
-- **[Performance Optimization](docs/REDIS_CACHING_OPTIMIZATION.md)** - System optimization
+- **[Redis Caching Strategy](docs/technical/REDIS_CACHING_OPTIMIZATION.md)** - Cache implementation
+- **[Query Optimization](docs/technical/SLOW_QUERY_LOGGING.md)** - Database performance
+- **[Performance Optimization](docs/technical/REDIS_CACHING_OPTIMIZATION.md)** - System optimization
 
 ### Security & Protection
-- **[Rate Limiting](docs/RATE_LIMITING_COMPLETE.md)** - Request throttling
-- **[Circuit Breakers](docs/CIRCUIT_BREAKER_IMPLEMENTATION.md)** - Overload protection
+- **[Rate Limiting](docs/technical/RATE_LIMITING_COMPLETE.md)** - Request throttling
+- **[Circuit Breakers](docs/technical/CIRCUIT_BREAKER_IMPLEMENTATION.md)** - Overload protection
 - **[Security Features](docs/README.md#-security-features)** - Multi-layer protection
 
 ---
@@ -115,13 +115,13 @@
 
 ### Monitoring & Maintenance
 - **[System Monitoring](docs/operations/MONITORING_IMPLEMENTATION.md)** - Health checks
-- **[Alert System](docs/ALERT_SYSTEM_SETUP.md)** - Slack/Email notifications
+- **[Alert System](docs/operations/ALERT_SYSTEM_SETUP.md)** - Slack/Email notifications
 - **[Scaling Guide](docs/operations/SCALING_ANALYSIS.md)** - Horizontal/vertical scaling
 - **[Instance Upgrade](docs/INSTANCE_UPGRADE_SUMMARY.md)** - M5.large migration
 
 ### Troubleshooting
-- **[Cloudflare 521 Errors](docs/CLOUDFLARE_521_TROUBLESHOOTING.md)** - Connection issues
-- **[System Crash Postmortem](docs/SYSTEM_CRASH_POSTMORTEM.md)** - Incident analysis
+- **[Cloudflare 521 Errors](docs/operations/CLOUDFLARE_521_TROUBLESHOOTING.md)** - Connection issues
+- **[System Crash Postmortem](docs/operations/SYSTEM_CRASH_POSTMORTEM.md)** - Incident analysis
 - **[Incident Analysis](docs/technical/INCIDENT_ANALYSIS_AND_FIXES.md)** - Root cause analysis
 - **[Protection Summary](docs/technical/PROTECTION_SUMMARY.md)** - System safeguards
 
@@ -134,14 +134,14 @@
 ## 🔐 Security & Performance
 
 ### Security Implementation
-- **[Rate Limiting Complete](docs/RATE_LIMITING_COMPLETE.md)** - Comprehensive rate limiting
-- **[Circuit Breaker Implementation](docs/CIRCUIT_BREAKER_IMPLEMENTATION.md)** - System protection
-- **[User Data Bleeding Fix](docs/USER_DATA_BLEEDING_FIX.md)** - Critical security fix
+- **[Rate Limiting Complete](docs/technical/RATE_LIMITING_COMPLETE.md)** - Comprehensive rate limiting
+- **[Circuit Breaker Implementation](docs/technical/CIRCUIT_BREAKER_IMPLEMENTATION.md)** - System protection
+- **[User Data Bleeding Fix](docs/bugfixes/USER_DATA_BLEEDING_FIX.md)** - Critical security fix
 - **[Session Management](docs/changelog/SESSION_NOV_21_2025_FIXES.md)** - Session fixes
 
 ### Performance Monitoring
-- **[Slow Query Logging](docs/SLOW_QUERY_LOGGING.md)** - Database monitoring
-- **[Redis Caching](docs/REDIS_CACHING_OPTIMIZATION.md)** - 90% hit rate
+- **[Slow Query Logging](docs/technical/SLOW_QUERY_LOGGING.md)** - Database monitoring
+- **[Redis Caching](docs/technical/REDIS_CACHING_OPTIMIZATION.md)** - 90% hit rate
 - **[Performance Metrics](docs/README.md#-performance)** - Benchmarks
 
 ---
