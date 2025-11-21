@@ -2,13 +2,17 @@
 
 **Release Date**: November 17, 2025  
 **Tag**: v1.4.0  
-**Status**: Production Ready ✅
+**Status**: ⚠️ **SUPERSEDED BY v1.7.0**
+
+> **⚠️ IMPORTANT NOTE:** The pricing model described in this release has been completely replaced in v1.7.0 (November 21, 2025). TheTradeVisor is now **completely FREE** for all users with unlimited accounts. Access to extended time periods is controlled by broker whitelist status, not payment. See [v1.7.0 Release Notes](RELEASE_NOTES_v1.7.0_NOV21_2025.md) for current pricing model.
 
 ---
 
 ## 📋 Overview
 
 Version 1.4.0 introduces critical account limit enforcement, a simplified pricing model, and enhanced user experience improvements. This release focuses on preventing subscription abuse while making the platform more accessible with a clear pay-per-account model.
+
+**NOTE:** This pricing model was active from November 17-20, 2025 and has since been replaced with a completely free model.
 
 ---
 

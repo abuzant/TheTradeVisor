@@ -2,7 +2,9 @@
 
 **Release Date**: November 17, 2025  
 **Commit**: 2a858c8  
-**Status**: ✅ **PUSHED TO GITHUB**
+**Status**: ⚠️ **SUPERSEDED BY v1.7.0**
+
+> **⚠️ NOTE:** Pricing model mentioned in this release has been replaced. TheTradeVisor is now completely FREE for all users. See [v1.7.0 Release Notes](RELEASE_NOTES_v1.7.0_NOV21_2025.md).
 
 ---
 
