@@ -263,45 +263,50 @@ For detailed installation instructions, see the [Installation Guide](docs/gettin
 
 ## 💰 Pricing Model
 
-TheTradeVisor uses a **pay-per-account model** with no monthly subscriptions:
+TheTradeVisor uses a **broker-based billing model**:
 
-### Individual Traders
+### For Traders
 
-| Accounts | Price | Features |
-|----------|-------|----------|
-| **First Account** | **FREE Forever** | Full analytics, real-time data, all features |
-| **Additional Accounts** | **$9.99 one-time** | Lifetime access, no recurring fees |
+**If your broker is whitelisted:**
+- ✅ **UNLIMITED FREE ACCOUNTS** - No payment required, ever
+- ✅ Full analytics, real-time data, all features
+- ✅ No credit card needed
 
-**Example Pricing:**
+**If your broker is NOT whitelisted:**
+- ✅ **First Account: FREE Forever**
+- 💳 **Additional Accounts: $9.99 one-time** per account
+- ✅ Lifetime access, no recurring fees
+
+**Example Pricing (Non-Whitelisted Brokers Only):**
 - 1 account: **$0** (FREE)
 - 3 accounts: **$19.98** ($0 + $9.99 × 2)
 - 5 accounts: **$39.96** ($0 + $9.99 × 4)
 - 10 accounts: **$89.91** ($0 + $9.99 × 9)
 
-### Enterprise Brokers
+### For Brokers
 
-**Broker Whitelist Program** - Give your clients unlimited free accounts!
+**Enterprise Broker Whitelist Program**
 
 | Feature | Benefit |
 |---------|--------|
-| **Whitelisted Broker** | All your clients get unlimited free accounts |
-| **Enterprise Portal** | Dedicated subdomain with aggregated analytics |
-| **Broker Analytics** | View all client accounts and performance |
-| **Custom Pricing** | Contact us for broker-specific plans |
+| **Whitelisted Server** | All your clients get unlimited free accounts automatically |
+| **Enterprise Portal** | Dedicated subdomain at `enterprise.thetradevisor.com` |
+| **Aggregated Analytics** | View all client accounts and performance metrics |
+| **Usage Tracking** | Monitor client adoption and engagement |
+| **30-Day Grace Period** | Service continues after subscription expires |
 
 **How It Works:**
-1. Broker subscribes to enterprise plan
-2. Broker's MT4/MT5 server name is whitelisted
-3. Any trader using that broker gets unlimited free accounts
-4. Broker gets access to enterprise portal with client analytics
+1. Broker subscribes to enterprise whitelist program
+2. Broker's MT4/MT5 server name is whitelisted in our system
+3. Any trader using that broker server gets **unlimited free accounts** automatically
+4. Broker gets access to enterprise portal with aggregated client analytics
+5. Traders don't pay anything - broker covers the cost
 
-**Key Points:**
-- ✅ First account is **FREE** forever for all users
-- ✅ No monthly subscriptions - pay once, use forever
-- ✅ Whitelisted brokers: Unlimited free accounts for clients
-- ✅ All features included regardless of account count
-- ✅ Enterprise portal for broker admins
-- ✅ 30-day grace period for expired enterprise subscriptions
+**Key Benefits:**
+- ✅ **Attract more clients** - Offer unlimited free analytics
+- ✅ **Competitive advantage** - Stand out from other brokers
+- ✅ **Client insights** - Understand your traders better
+- ✅ **No client billing** - We handle everything
 
 ---
 
