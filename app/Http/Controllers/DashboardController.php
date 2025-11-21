@@ -429,32 +429,37 @@ class DashboardController extends Controller
                 ->get();
             
             // Group by position_id to show position-level view
-            return $closedTrades->groupBy('position_id')->map(function($positionDeals, $positionId) use ($account) {
-                // Skip deals with null position_id
+            // For MT4 data (null position_id), treat each deal as separate trade
+            $positions = collect();
+            
+            foreach ($closedTrades->groupBy('position_id') as $positionId => $positionDeals) {
+                // Deals with null position_id (MT4 data) - treat each as separate trade
                 if ($positionId === null || $positionId === '') {
-                    $outDeal = $positionDeals->first();
-                    return (object) [
-                        'position_id' => null,
-                        'symbol' => $outDeal->symbol,
-                        'normalized_symbol' => $outDeal->normalized_symbol,
-                        'type' => $outDeal->display_type,
-                        'display_type' => $outDeal->display_type,
-                        'is_buy' => $outDeal->is_buy,
-                        'is_open' => false,
-                        'volume' => $outDeal->volume,
-                        'open_price' => $outDeal->price ?? 0,
-                        'close_price' => $outDeal->price ?? 0,
-                        'profit' => $outDeal->profit,
-                        'commission' => $outDeal->commission ?? 0,
-                        'swap' => $outDeal->swap ?? 0,
-                        'open_time' => $outDeal->time,
-                        'close_time' => $outDeal->time,
-                        'deals' => collect([$outDeal]),
-                        'deal_count' => 1,
-                        'trading_account_id' => $account->id,
-                        'platform_type' => $account->platform_type ?? 'MT4',
-                        'position_identifier' => null,
-                    ];
+                    foreach ($positionDeals as $deal) {
+                        $positions->push((object) [
+                            'position_id' => $deal->ticket, // Use ticket as unique ID
+                            'symbol' => $deal->symbol,
+                            'normalized_symbol' => $deal->normalized_symbol,
+                            'type' => $deal->display_type,
+                            'display_type' => $deal->display_type,
+                            'is_buy' => $deal->is_buy,
+                            'is_open' => false,
+                            'volume' => $deal->volume,
+                            'open_price' => $deal->price ?? 0,
+                            'close_price' => $deal->price ?? 0,
+                            'profit' => $deal->profit,
+                            'commission' => $deal->commission ?? 0,
+                            'swap' => $deal->swap ?? 0,
+                            'open_time' => $deal->time,
+                            'close_time' => $deal->time,
+                            'deals' => collect([$deal]),
+                            'deal_count' => 1,
+                            'trading_account_id' => $account->id,
+                            'platform_type' => $account->platform_type ?? 'MT4',
+                            'position_identifier' => $deal->ticket,
+                        ]);
+                    }
+                    continue;
                 }
                 
                 // Get all deals for this position
@@ -470,7 +475,7 @@ class DashboardController extends Controller
                 $positionType = $inDeal ? $inDeal->display_type : $outDeal->display_type;
                 $isBuy = $inDeal ? $inDeal->is_buy : false;
                 
-                return (object) [
+                $positions->push((object) [
                     'position_id' => $positionId,
                     'symbol' => $outDeal->symbol,
                     'normalized_symbol' => $outDeal->normalized_symbol,
@@ -491,8 +496,10 @@ class DashboardController extends Controller
                     'trading_account_id' => $account->id,
                     'platform_type' => $account->platform_type ?? 'MT5',
                     'position_identifier' => $positionId,
-                ];
-            })->values();
+                ]);
+            }
+            
+            return $positions;
         }
     }
 
