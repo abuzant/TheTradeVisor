@@ -141,39 +141,43 @@ class DashboardController extends Controller
             }
 
             // Group by position_id to build position-level view with deals
-            $positions = $closedTrades->groupBy('position_id')->map(function($positionDeals, $positionId) {
+            // For MT4 data (null position_id), treat each deal as separate trade
+            $positions = collect();
+            
+            foreach ($closedTrades->groupBy('position_id') as $positionId => $positionDeals) {
                 $sampleDeal = $positionDeals->first();
                 $account = $sampleDeal->tradingAccount;
 
-                // Skip deals with null position_id (MT4 standalone deals)
+                // Deals with null position_id (MT4 data) - treat each as separate trade
                 if ($positionId === null || $positionId === '') {
-                    // For MT4 deals without position_id, use the deal itself
-                    $outDeal = $positionDeals->first();
-                    return (object) [
-                        'position_id' => null,
-                        'symbol' => $outDeal->symbol,
-                        'normalized_symbol' => $outDeal->normalized_symbol,
-                        'type' => $outDeal->display_type,
-                        'display_type' => $outDeal->display_type,
-                        'is_buy' => $outDeal->is_buy,
-                        'is_open' => false,
-                        'volume' => $outDeal->volume,
-                        'open_price' => $outDeal->price ?? 0,
-                        'close_price' => $outDeal->price ?? 0,
-                        'profit' => $outDeal->profit,
-                        'commission' => $outDeal->commission ?? 0,
-                        'swap' => $outDeal->swap ?? 0,
-                        'open_time' => $outDeal->time,
-                        'close_time' => $outDeal->time,
-                        'deals' => collect([$outDeal]),
-                        'deal_count' => 1,
-                        'trading_account_id' => $sampleDeal->trading_account_id,
-                        'platform_type' => $account->platform_type ?? 'MT4',
-                        'position_identifier' => null,
-                        'account_currency' => $account->account_currency ?? 'USD',
-                        'account_number' => $account->account_number ?? null,
-                        'broker_name' => $account->broker_name ?? 'Unknown',
-                    ];
+                    foreach ($positionDeals as $deal) {
+                        $positions->push((object) [
+                            'position_id' => $deal->ticket, // Use ticket as unique ID
+                            'symbol' => $deal->symbol,
+                            'normalized_symbol' => $deal->normalized_symbol,
+                            'type' => $deal->display_type,
+                            'display_type' => $deal->display_type,
+                            'is_buy' => $deal->is_buy,
+                            'is_open' => false,
+                            'volume' => $deal->volume,
+                            'open_price' => $deal->price ?? 0,
+                            'close_price' => $deal->price ?? 0,
+                            'profit' => $deal->profit,
+                            'commission' => $deal->commission ?? 0,
+                            'swap' => $deal->swap ?? 0,
+                            'open_time' => $deal->time,
+                            'close_time' => $deal->time,
+                            'deals' => collect([$deal]),
+                            'deal_count' => 1,
+                            'trading_account_id' => $deal->trading_account_id,
+                            'platform_type' => $account->platform_type ?? 'MT4',
+                            'position_identifier' => $deal->ticket,
+                            'account_currency' => $account->account_currency ?? 'USD',
+                            'account_number' => $account->account_number ?? null,
+                            'broker_name' => $account->broker_name ?? 'Unknown',
+                        ]);
+                    }
+                    continue;
                 }
 
                 // Load all deals (IN + OUT) for this position on this account
@@ -190,7 +194,7 @@ class DashboardController extends Controller
                 $positionType = $inDeal ? $inDeal->display_type : ($outDeal ? $outDeal->display_type : null);
                 $isBuy = $inDeal ? $inDeal->is_buy : false;
 
-                return (object) [
+                $positions->push((object) [
                     'position_id' => $positionId,
                     'symbol' => $outDeal ? $outDeal->symbol : $sampleDeal->symbol,
                     'normalized_symbol' => $outDeal ? $outDeal->normalized_symbol : $sampleDeal->normalized_symbol,
@@ -214,9 +218,9 @@ class DashboardController extends Controller
                     'account_currency' => $account->account_currency ?? 'USD',
                     'account_number' => $account->account_number,
                     'broker_name' => $account->broker_name,
-                ];
-            })->values();
-
+                ]);
+            }
+            
             // Limit to most recent 20 positions by close_time
             return $positions->sortByDesc('close_time')->take(20)->values();
         });
