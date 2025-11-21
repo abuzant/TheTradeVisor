@@ -20,8 +20,8 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
                     </svg>
                 </div>
-                <h1 class="text-3xl font-bold text-gray-900 mb-2">Enterprise Broker Portal</h1>
-                <p class="text-gray-600">TheTradeVisor</p>
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">TheTradeVisor<br />Enterprise Broker Portal</h1>
+                <p class="text-gray-600">Smart MT4/MT5 Trading Analytics & Research Platform</p>
             </div>
 
             <!-- Login Card -->
@@ -68,7 +68,7 @@
                             autofocus 
                             autocomplete="username"
                             class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 @error('email') border-red-500 @enderror"
-                            placeholder="broker@example.com"
+                            placeholder="enterprise@example-broker.com"
                         >
                     </div>
 
@@ -114,8 +114,8 @@
                 <div class="mt-6 pt-6 border-t border-gray-200">
                     <p class="text-sm text-gray-600 text-center">
                         Need access? Contact 
-                        <a href="mailto:support@thetradevisor.com" class="text-indigo-600 hover:text-indigo-700 font-medium">
-                            support@thetradevisor.com
+                        <a href="mailto:enterprise@thetradevisor.com" class="text-indigo-600 hover:text-indigo-700 font-medium">
+                            enterprise@thetradevisor.com
                         </a>
                     </p>
                 </div>

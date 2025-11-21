@@ -22,36 +22,27 @@ Route::get('/healthcheck', function () {
 | ENTERPRISE SUBDOMAIN ROUTES (enterprise.thetradevisor.com)
 |--------------------------------------------------------------------------
 | Enterprise broker portal - Login only, no registration, no public pages
+| These routes are available on ALL domains but middleware restricts access
 */
-Route::domain('enterprise.thetradevisor.com')->group(function () {
-    
-    // Health check for enterprise subdomain
-    Route::get('/healthcheck', function () {
-        return response()->json([
-            'status' => 'ok',
-            'timestamp' => now()->toIso8601String(),
-            'service' => 'TheTradeVisor Enterprise Portal'
-        ], 200);
-    })->middleware('throttle:60,1');
-    
-    // Enterprise login (custom page, no registration)
-    Route::get('/login', [App\Http\Controllers\Auth\EnterpriseLoginController::class, 'showLoginForm'])->name('enterprise.login');
-    Route::post('/login', [App\Http\Controllers\Auth\EnterpriseLoginController::class, 'login'])->name('enterprise.login.submit');
-    Route::post('/logout', [App\Http\Controllers\Auth\EnterpriseLoginController::class, 'logout'])->name('enterprise.logout');
-    
-    // Enterprise authenticated routes
-    Route::middleware(['auth', 'enterprise.admin'])->prefix('enterprise')->name('enterprise.')->group(function () {
-        Route::get('/dashboard', [App\Http\Controllers\EnterpriseController::class, 'dashboard'])->name('dashboard');
-        Route::get('/analytics', [App\Http\Controllers\EnterpriseController::class, 'analytics'])->name('analytics');
-        Route::get('/accounts', [App\Http\Controllers\EnterpriseController::class, 'accounts'])->name('accounts');
-        Route::get('/settings', [App\Http\Controllers\EnterpriseController::class, 'settings'])->name('settings');
-        Route::post('/settings', [App\Http\Controllers\EnterpriseController::class, 'updateSettings'])->name('settings.update');
-    });
-    
-    // Redirect all other requests to login
-    Route::fallback(function () {
-        return redirect()->route('enterprise.login');
-    });
+
+// Enterprise login (accessible from any domain, but middleware restricts)
+Route::get('/enterprise-login', [App\Http\Controllers\Auth\EnterpriseLoginController::class, 'showLoginForm'])
+    ->middleware('enterprise.subdomain')
+    ->name('enterprise.login');
+Route::post('/enterprise-login', [App\Http\Controllers\Auth\EnterpriseLoginController::class, 'login'])
+    ->middleware('enterprise.subdomain')
+    ->name('enterprise.login.submit');
+Route::post('/enterprise-logout', [App\Http\Controllers\Auth\EnterpriseLoginController::class, 'logout'])
+    ->middleware('enterprise.subdomain')
+    ->name('enterprise.logout');
+
+// Enterprise authenticated routes
+Route::middleware(['enterprise.subdomain', 'auth', 'enterprise.admin'])->prefix('enterprise')->name('enterprise.')->group(function () {
+    Route::get('/dashboard', [App\Http\Controllers\EnterpriseController::class, 'dashboard'])->name('dashboard');
+    Route::get('/analytics', [App\Http\Controllers\EnterpriseController::class, 'analytics'])->name('analytics');
+    Route::get('/accounts', [App\Http\Controllers\EnterpriseController::class, 'accounts'])->name('accounts');
+    Route::get('/settings', [App\Http\Controllers\EnterpriseController::class, 'settings'])->name('settings');
+    Route::post('/settings', [App\Http\Controllers\EnterpriseController::class, 'updateSettings'])->name('settings.update');
 });
 
 /*
@@ -60,9 +51,9 @@ Route::domain('enterprise.thetradevisor.com')->group(function () {
 |--------------------------------------------------------------------------
 | Public pages, user registration, trader portal
 */
-Route::domain('{domain}')->where(['domain' => '(thetradevisor\.com|www\.thetradevisor\.com|localhost)'])->group(function () {
 
-// Public pages
+// Public pages (with main domain middleware to block enterprise subdomain)
+Route::middleware('main.domain')->group(function () {
 Route::get('/', [App\Http\Controllers\PublicController::class, 'landing'])->name('landing');
 Route::get('/features', [App\Http\Controllers\PublicController::class, 'features'])->name('features');
 Route::get('/screenshots', [App\Http\Controllers\PublicController::class, 'screenshots'])->name('screenshots');
@@ -286,4 +277,13 @@ Route::get('/debug-session', function() {
     ];
 })->middleware('web');
 
-}); // End of main domain group
+}); // End of main domain middleware group
+
+// Fallback for enterprise subdomain (must be AFTER main domain group)
+Route::fallback(function () {
+    $host = request()->getHost();
+    if ($host === 'enterprise.thetradevisor.com') {
+        return redirect()->route('enterprise.login');
+    }
+    abort(404);
+})->middleware('web');

@@ -41,6 +41,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'circuit.breaker' => \App\Http\Middleware\CircuitBreakerMiddleware::class,
             'enterprise.api' => \App\Http\Middleware\EnterpriseApiAuth::class,
             'enterprise.admin' => \App\Http\Middleware\EnterpriseAdminMiddleware::class,
+            'enterprise.subdomain' => \App\Http\Middleware\EnterpriseSubdomainOnly::class,
+            'main.domain' => \App\Http\Middleware\MainDomainOnly::class,
         ]);
 
         // Global middleware (runs on every request)
