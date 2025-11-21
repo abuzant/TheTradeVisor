@@ -54,35 +54,30 @@
                     {{-- Rate Limits --}}
                     <div id="rate-limits" class="mb-16">
                         <h2 class="text-3xl font-bold text-gray-900 mb-4">Rate Limits</h2>
-                        <p class="text-gray-700 mb-6">API rate limits are based on your subscription tier and are calculated per hour:</p>
+                        <p class="text-gray-700 mb-6">All users have the same API rate limits, calculated per hour:</p>
                         
                         <div class="overflow-x-auto mb-6">
                             <table class="min-w-full border border-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900 border-b">Plan</th>
+                                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900 border-b">API Type</th>
                                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900 border-b">Requests/Hour</th>
                                         <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900 border-b">Window</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white">
                                     <tr>
-                                        <td class="px-6 py-4 border-b text-gray-700">Free</td>
-                                        <td class="px-6 py-4 border-b text-gray-700">100</td>
-                                        <td class="px-6 py-4 border-b text-gray-700">Rolling 60 minutes</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="px-6 py-4 border-b text-gray-700">Pro</td>
-                                        <td class="px-6 py-4 border-b text-gray-700">1,000</td>
-                                        <td class="px-6 py-4 border-b text-gray-700">Rolling 60 minutes</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="px-6 py-4 text-gray-700">Enterprise</td>
-                                        <td class="px-6 py-4 text-gray-700">Unlimited</td>
-                                        <td class="px-6 py-4 text-gray-700">No limits</td>
+                                        <td class="px-6 py-4 text-gray-700">Standard API</td>
+                                        <td class="px-6 py-4 text-gray-700">1,000</td>
+                                        <td class="px-6 py-4 text-gray-700">Rolling 60 minutes</td>
                                     </tr>
                                 </tbody>
                             </table>
+                        </div>
+
+                        <div class="p-4 bg-indigo-50 border-l-4 border-indigo-600 rounded mb-6">
+                            <p class="text-indigo-900 font-semibold">🏢 Enterprise API for Brokers</p>
+                            <p class="text-indigo-800 mt-1">Brokers with enterprise subscriptions have access to a separate Enterprise API with higher rate limits and aggregated analytics endpoints. Enterprise API keys are prefixed with <code class="bg-indigo-100 px-2 py-1 rounded">ent_</code> and use the endpoint: <code class="bg-indigo-100 px-2 py-1 rounded">https://api.thetradevisor.com/enterprise/v1</code></p>
                         </div>
 
                         <div class="space-y-4">

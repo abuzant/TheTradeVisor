@@ -58,29 +58,34 @@
                     </div>
                 </div>
 
-                {{-- Pricing & Billing --}}
+                {{-- Pricing & Accounts --}}
                 <div>
-                    <h2 class="text-2xl font-bold text-gray-900 mb-6 pb-2 border-b-2 border-blue-600">Pricing & Billing</h2>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6 pb-2 border-b-2 border-blue-600">Pricing & Accounts</h2>
                     
                     <div class="space-y-6">
                         <div>
-                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Is there a free plan?</h3>
-                            <p class="text-gray-600">Yes! You can connect 1 trading account completely free, forever. No credit card required.</p>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Is TheTradeVisor really 100% free?</h3>
+                            <p class="text-gray-600">Yes! Completely free for all traders with unlimited accounts. No credit card required, no hidden fees, no trials that expire. Our platform is funded by enterprise broker partnerships.</p>
                         </div>
 
                         <div>
-                            <h3 class="text-lg font-semibold text-gray-900 mb-2">How much does it cost to add more accounts?</h3>
-                            <p class="text-gray-600">Additional accounts cost $9.99 one-time payment for lifetime access. No monthly fees! For trading firms needing unlimited accounts, we offer an Enterprise plan.</p>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">How many accounts can I connect?</h3>
+                            <p class="text-gray-600">Unlimited! Connect as many MT4/MT5 trading accounts as you want, completely free. There are no account limits.</p>
                         </div>
 
                         <div>
-                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Can I cancel anytime?</h3>
-                            <p class="text-gray-600">Yes, you can cancel your subscription at any time. Your account will remain active until the end of your billing period.</p>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">What's the difference between standard and enterprise brokers?</h3>
+                            <p class="text-gray-600">Standard brokers: 7 days of historical data access. Enterprise brokers: 180 days of historical data access. If your broker is an enterprise partner, you automatically get extended data access at no cost to you.</p>
                         </div>
 
                         <div>
-                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Do you offer refunds?</h3>
-                            <p class="text-gray-600">Yes, we offer a 30-day money-back guarantee on all paid plans. Contact support for a full refund within 30 days of purchase.</p>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">How do I get 180-day data access?</h3>
+                            <p class="text-gray-600">If you trade with an enterprise broker partner, you automatically get 180-day historical data access. Check your analytics page to see your current data access period. You can also ask your broker to become an enterprise partner.</p>
+                        </div>
+
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">I'm a broker. How do I become an enterprise partner?</h3>
+                            <p class="text-gray-600">Enterprise plans for brokers start at $999/month and include 180-day data access for all your traders, dedicated enterprise portal, REST API access, and priority support. <a href="/contact" class="text-blue-600 hover:text-blue-800 underline">Contact our sales team</a> to learn more.</p>
                         </div>
                     </div>
                 </div>
@@ -102,7 +107,7 @@
 
                         <div>
                             <h3 class="text-lg font-semibold text-gray-900 mb-2">Do you have an API?</h3>
-                            <p class="text-gray-600">Yes, API access is available on Pro and Enterprise plans. Full API documentation is provided in your dashboard.</p>
+                            <p class="text-gray-600">Yes, all users have API access to their own trading data. Enterprise brokers have access to an additional Enterprise API with aggregated analytics. Full API documentation is available at <a href="/api-docs" class="text-blue-600 hover:text-blue-800 underline">/api-docs</a>.</p>
                         </div>
 
                         <div>
