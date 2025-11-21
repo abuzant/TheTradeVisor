@@ -160,11 +160,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/profile/digests', [\App\Http\Controllers\ProfileDigestController::class, 'update'])
         ->name('profile.digests.update');
 
-    // Currency Settings
-    Route::get('/settings/currency', [App\Http\Controllers\Settings\CurrencyController::class, 'edit'])
-        ->name('settings.currency');
-    Route::put('/settings/currency', [App\Http\Controllers\Settings\CurrencyController::class, 'update'])
-        ->name('settings.currency.update');
     // Country Analytics (must come before parameterized route)
     Route::get('/analytics/countries', [App\Http\Controllers\CountryAnalyticsController::class, 'topTradingCountries'])->name('analytics.countries');
     
@@ -259,6 +254,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     
     // Admin Wiki
     Route::get('/wiki', [App\Http\Controllers\Admin\AdminWikiController::class, 'index'])->name('wiki');
+    Route::post('/wiki/action', [App\Http\Controllers\Admin\AdminWikiController::class, 'executeAction'])->name('wiki.action');
 });
 
 // Legal pages (public)

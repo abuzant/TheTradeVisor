@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\TradingAccount;
 use App\Models\Position;
 use App\Models\Deal;
+use App\Models\EnterpriseBroker;
 use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
@@ -17,6 +18,24 @@ class AdminController extends Controller
 
     public function index(Request $request)
     {
+        // Get unique broker names from trading accounts
+        $knownBrokers = TradingAccount::distinct('broker_name')
+            ->whereNotNull('broker_name')
+            ->count('broker_name');
+        
+        // Get enterprise brokers count
+        $enterpriseBrokers = EnterpriseBroker::where('is_active', true)->count();
+        
+        // Get next enterprise broker expiry
+        $nextExpiry = EnterpriseBroker::where('is_active', true)
+            ->whereNotNull('subscription_ends_at')
+            ->orderBy('subscription_ends_at', 'asc')
+            ->first();
+        
+        // Get active terminals (sent data within last hour)
+        $activeTerminals = TradingAccount::where('last_sync_at', '>=', now()->subHour())
+            ->count();
+
         $stats = [
             'total_users' => User::count(),
             'admin_users' => User::where('is_admin', true)->count(),
@@ -25,11 +44,21 @@ class AdminController extends Controller
             'total_positions' => Position::where('is_open', true)->count(),
             'total_trades_today' => Deal::whereDate('time', today())->count(),
             'total_volume_today' => Deal::whereDate('time', today())->sum('volume'),
+            'known_brokers' => $knownBrokers,
+            'enterprise_brokers' => $enterpriseBrokers,
+            'active_terminals' => $activeTerminals,
         ];
+
+        // Get list of enterprise broker names for star indicator
+        $enterpriseBrokerNames = EnterpriseBroker::where('is_active', true)
+            ->pluck('official_broker_name')
+            ->toArray();
 
         // Sortable columns for users
         $userSortableColumns = ['name', 'email', 'created_at'];
-        $usersQuery = User::query();
+        $usersQuery = User::with(['tradingAccounts' => function($query) {
+            $query->select('user_id', 'broker_name', 'id');
+        }]);
 
         if ($request->has('users_sort_by')) {
             $usersQuery = $this->applySorting($usersQuery, $request, $userSortableColumns, 'created_at', 'desc', 'users_');
@@ -64,7 +93,9 @@ class AdminController extends Controller
             'usersSortBy',
             'usersSortDirection',
             'accountsSortBy',
-            'accountsSortDirection'
+            'accountsSortDirection',
+            'nextExpiry',
+            'enterpriseBrokerNames'
         ));
     }
 

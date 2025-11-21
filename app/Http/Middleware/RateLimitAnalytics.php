@@ -7,13 +7,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
+use App\Models\RateLimitSetting;
 
 class RateLimitAnalytics
 {
     /**
-     * Maximum analytics requests per user per minute
+     * Default maximum analytics requests per user per minute (fallback)
      */
-    private const MAX_REQUESTS_PER_MINUTE = 10;
+    private const DEFAULT_MAX_REQUESTS = 10;
     
     /**
      * Cache duration for analytics data (5 minutes)
@@ -31,13 +32,17 @@ class RateLimitAnalytics
             return $next($request);
         }
         
+        // Get limit from database settings, fallback to default
+        $maxRequests = RateLimitSetting::get('analytics_limit', self::DEFAULT_MAX_REQUESTS);
+        
         $key = "analytics_rate_limit:{$userId}";
         $requests = Cache::get($key, 0);
         
-        if ($requests >= self::MAX_REQUESTS_PER_MINUTE) {
+        if ($requests >= $maxRequests) {
             Log::warning('Analytics rate limit exceeded', [
                 'user_id' => $userId,
                 'requests' => $requests,
+                'limit' => $maxRequests,
                 'url' => $request->fullUrl(),
             ]);
             

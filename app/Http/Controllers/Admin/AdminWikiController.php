@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 
 class AdminWikiController extends Controller
 {
@@ -29,13 +30,29 @@ class AdminWikiController extends Controller
         // Get service information
         $services = $this->getServicesInfo();
         
+        // Get new sections
+        $recentEvents = $this->getRecentEvents();
+        $databaseSchema = $this->getDatabaseSchema();
+        $apiEndpoints = $this->getApiEndpoints();
+        $performanceMetrics = $this->getPerformanceMetrics();
+        $troubleshooting = $this->getTroubleshootingGuide();
+        $securityInfo = $this->getSecurityInfo();
+        $backupInfo = $this->getBackupInfo();
+        
         return view('admin.wiki.index', compact(
             'artisanCommands',
             'scripts',
             'systemInfo',
             'scheduledTasks',
             'middleware',
-            'services'
+            'services',
+            'recentEvents',
+            'databaseSchema',
+            'apiEndpoints',
+            'performanceMetrics',
+            'troubleshooting',
+            'securityInfo',
+            'backupInfo'
         ));
     }
     
@@ -432,5 +449,356 @@ class AdminWikiController extends Controller
                 'description_full' => 'Manages queue workers and provides monitoring dashboard',
             ],
         ];
+    }
+    
+    private function getRecentEvents()
+    {
+        $events = [];
+        
+        // Get recent failed jobs
+        try {
+            $failedJobs = \DB::table('failed_jobs')
+                ->orderBy('failed_at', 'desc')
+                ->limit(10)
+                ->get()
+                ->map(function($job) {
+                    return [
+                        'type' => 'failed_job',
+                        'time' => $job->failed_at,
+                        'message' => 'Failed Job: ' . substr($job->exception, 0, 100) . '...',
+                        'severity' => 'error',
+                    ];
+                });
+            $events = array_merge($events, $failedJobs->toArray());
+        } catch (\Exception $e) {
+            // Table might not exist
+        }
+        
+        // Parse recent Laravel logs
+        try {
+            $logFile = storage_path('logs/laravel.log');
+            if (file_exists($logFile)) {
+                $lines = array_slice(file($logFile), -50);
+                foreach (array_reverse($lines) as $line) {
+                    if (preg_match('/\[(.*?)\] (\w+)\.(\w+): (.*)/', $line, $matches)) {
+                        $events[] = [
+                            'type' => 'log',
+                            'time' => $matches[1],
+                            'message' => substr($matches[4], 0, 150),
+                            'severity' => strtolower($matches[3]),
+                        ];
+                        if (count($events) >= 20) break;
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            // Ignore errors
+        }
+        
+        return array_slice($events, 0, 20);
+    }
+    
+    private function getDatabaseSchema()
+    {
+        try {
+            $tables = \DB::select("
+                SELECT 
+                    table_name,
+                    (SELECT COUNT(*) FROM information_schema.columns WHERE table_name = t.table_name AND table_schema = 'public') as column_count
+                FROM information_schema.tables t
+                WHERE table_schema = 'public' AND table_type = 'BASE TABLE'
+                ORDER BY table_name
+            ");
+            
+            $schema = [];
+            foreach ($tables as $table) {
+                // Get row count (with timeout protection)
+                try {
+                    $count = \DB::table($table->table_name)->count();
+                } catch (\Exception $e) {
+                    $count = 'N/A';
+                }
+                
+                $schema[] = [
+                    'name' => $table->table_name,
+                    'columns' => $table->column_count,
+                    'rows' => $count,
+                ];
+            }
+            
+            return $schema;
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+    
+    private function getApiEndpoints()
+    {
+        return [
+            [
+                'method' => 'GET',
+                'endpoint' => '/api/v1/accounts',
+                'description' => 'List all trading accounts for authenticated user',
+                'auth' => 'API Key',
+                'rate_limit' => 'api_key_limit',
+            ],
+            [
+                'method' => 'GET',
+                'endpoint' => '/api/v1/accounts/{id}',
+                'description' => 'Get specific account details',
+                'auth' => 'API Key',
+                'rate_limit' => 'api_key_limit',
+            ],
+            [
+                'method' => 'GET',
+                'endpoint' => '/api/v1/accounts/{id}/positions',
+                'description' => 'Get open positions for account',
+                'auth' => 'API Key',
+                'rate_limit' => 'api_key_limit',
+            ],
+            [
+                'method' => 'GET',
+                'endpoint' => '/api/v1/accounts/{id}/deals',
+                'description' => 'Get closed deals/trades for account',
+                'auth' => 'API Key',
+                'rate_limit' => 'api_key_limit',
+            ],
+            [
+                'method' => 'GET',
+                'endpoint' => '/api/v1/analytics/performance',
+                'description' => 'Get performance analytics',
+                'auth' => 'API Key',
+                'rate_limit' => 'analytics_limit',
+            ],
+            [
+                'method' => 'POST',
+                'endpoint' => '/api/v1/sync',
+                'description' => 'Sync trading data from MT4/MT5',
+                'auth' => 'API Key',
+                'rate_limit' => 'api_key_limit',
+            ],
+        ];
+    }
+    
+    private function getPerformanceMetrics()
+    {
+        $metrics = [];
+        
+        // Database connections
+        try {
+            $connections = \DB::select("SELECT count(*) as count FROM pg_stat_activity WHERE state = 'active'");
+            $metrics['db_connections'] = $connections[0]->count ?? 'N/A';
+        } catch (\Exception $e) {
+            $metrics['db_connections'] = 'N/A';
+        }
+        
+        // Queue jobs
+        try {
+            $metrics['queue_pending'] = \DB::table('jobs')->count();
+            $metrics['queue_failed'] = \DB::table('failed_jobs')->count();
+        } catch (\Exception $e) {
+            $metrics['queue_pending'] = 'N/A';
+            $metrics['queue_failed'] = 'N/A';
+        }
+        
+        // Disk usage
+        try {
+            $disk = disk_free_space('/');
+            $total = disk_total_space('/');
+            $metrics['disk_free'] = round($disk / 1024 / 1024 / 1024, 2) . ' GB';
+            $metrics['disk_total'] = round($total / 1024 / 1024 / 1024, 2) . ' GB';
+            $metrics['disk_used_percent'] = round((($total - $disk) / $total) * 100, 1) . '%';
+        } catch (\Exception $e) {
+            $metrics['disk_free'] = 'N/A';
+        }
+        
+        // Memory usage
+        $metrics['memory_usage'] = round(memory_get_usage(true) / 1024 / 1024, 2) . ' MB';
+        $metrics['memory_peak'] = round(memory_get_peak_usage(true) / 1024 / 1024, 2) . ' MB';
+        
+        return $metrics;
+    }
+    
+    private function getTroubleshootingGuide()
+    {
+        return [
+            [
+                'issue' => 'Site is Slow / High Response Time',
+                'symptoms' => ['Pages loading slowly', 'Timeouts', 'High server load'],
+                'checks' => [
+                    'Check active database queries: SELECT * FROM pg_stat_activity WHERE state = \'active\'',
+                    'Check PHP-FPM slow log: tail -50 /var/log/php8.3-fpm-slow.log',
+                    'Check system resources: top -bn1',
+                    'Check cache status: php artisan cache:clear',
+                ],
+                'solutions' => [
+                    'Clear all caches: php artisan optimize:clear',
+                    'Restart PHP-FPM: sudo systemctl restart php8.3-fpm',
+                    'Check for slow queries in PostgreSQL logs',
+                    'Review recent code changes',
+                ],
+            ],
+            [
+                'issue' => '500 Internal Server Error',
+                'symptoms' => ['White screen', 'Generic error page', 'API returning 500'],
+                'checks' => [
+                    'Check Laravel logs: tail -100 /www/storage/logs/laravel.log',
+                    'Check Nginx error log: tail -50 /var/log/nginx/error.log',
+                    'Check PHP-FPM error log: tail -50 /var/log/php8.3-fpm.log',
+                    'Verify file permissions: ls -la /www/storage',
+                ],
+                'solutions' => [
+                    'Clear compiled views: php artisan view:clear',
+                    'Fix storage permissions: chmod -R 775 /www/storage',
+                    'Check .env file for missing variables',
+                    'Review recent deployments',
+                ],
+            ],
+            [
+                'issue' => 'Queue Jobs Not Processing',
+                'symptoms' => ['Jobs stuck in queue', 'Horizon showing no workers', 'Delayed notifications'],
+                'checks' => [
+                    'Check Horizon status: php artisan horizon:status',
+                    'Check failed jobs: php artisan queue:failed',
+                    'Check queue table: SELECT COUNT(*) FROM jobs',
+                    'Check supervisor status: sudo supervisorctl status',
+                ],
+                'solutions' => [
+                    'Restart Horizon: php artisan horizon:terminate',
+                    'Retry failed jobs: php artisan queue:retry all',
+                    'Check Redis connection: redis-cli ping',
+                    'Review job logs for errors',
+                ],
+            ],
+            [
+                'issue' => 'High Memory Usage',
+                'symptoms' => ['OOM errors', 'Slow performance', 'Process crashes'],
+                'checks' => [
+                    'Check memory usage: free -h',
+                    'Check top processes: ps aux --sort=-%mem | head -10',
+                    'Check PHP memory limit: php -i | grep memory_limit',
+                    'Check for memory leaks in logs',
+                ],
+                'solutions' => [
+                    'Restart PHP-FPM pools: sudo systemctl restart php8.3-fpm',
+                    'Clear application cache: php artisan cache:clear',
+                    'Review recent code for memory leaks',
+                    'Increase PHP memory_limit if needed',
+                ],
+            ],
+        ];
+    }
+    
+    private function getSecurityInfo()
+    {
+        $info = [];
+        
+        // Failed login attempts (last 24 hours)
+        try {
+            $info['failed_logins_24h'] = \DB::table('activity_log')
+                ->where('description', 'like', '%failed%login%')
+                ->where('created_at', '>=', now()->subDay())
+                ->count();
+        } catch (\Exception $e) {
+            $info['failed_logins_24h'] = 'N/A';
+        }
+        
+        // Active API keys
+        try {
+            $info['active_api_keys'] = \DB::table('enterprise_api_keys')->count();
+        } catch (\Exception $e) {
+            $info['active_api_keys'] = 'N/A';
+        }
+        
+        // Rate limit violations (estimate from logs)
+        $info['rate_limit_violations'] = 'Check logs for 429 responses';
+        
+        // Environment
+        $info['environment'] = config('app.env');
+        $info['debug_mode'] = config('app.debug') ? 'ENABLED ⚠️' : 'Disabled ✓';
+        
+        return $info;
+    }
+    
+    private function getBackupInfo()
+    {
+        return [
+            'database' => [
+                'command' => 'pg_dump -U tradevisor_user thetradevisor > backup_$(date +%Y%m%d).sql',
+                'location' => '/backups/database/',
+                'schedule' => 'Daily at 2:00 AM',
+                'retention' => '30 days',
+            ],
+            'files' => [
+                'command' => 'tar -czf backup_$(date +%Y%m%d).tar.gz /www',
+                'location' => '/backups/files/',
+                'schedule' => 'Weekly on Sunday',
+                'retention' => '4 weeks',
+            ],
+            'restore_db' => [
+                'steps' => [
+                    '1. Stop application: sudo systemctl stop php8.3-fpm',
+                    '2. Drop database: sudo -u postgres psql -c "DROP DATABASE thetradevisor;"',
+                    '3. Create database: sudo -u postgres psql -c "CREATE DATABASE thetradevisor OWNER tradevisor_user;"',
+                    '4. Restore backup: sudo -u postgres psql thetradevisor < backup_file.sql',
+                    '5. Start application: sudo systemctl start php8.3-fpm',
+                    '6. Clear caches: php artisan optimize:clear',
+                ],
+            ],
+        ];
+    }
+    
+    public function executeAction(Request $request)
+    {
+        $action = $request->input('action');
+        
+        try {
+            switch ($action) {
+                case 'cache-clear':
+                    Artisan::call('cache:clear');
+                    Artisan::call('config:clear');
+                    Artisan::call('route:clear');
+                    Artisan::call('view:clear');
+                    $output = "✅ All caches cleared successfully!\n\n";
+                    $output .= "- Application cache: Cleared\n";
+                    $output .= "- Configuration cache: Cleared\n";
+                    $output .= "- Route cache: Cleared\n";
+                    $output .= "- View cache: Cleared";
+                    break;
+                    
+                case 'horizon-restart':
+                    Artisan::call('horizon:terminate');
+                    $output = "✅ Horizon terminated successfully!\n\n";
+                    $output .= "Supervisor will automatically restart Horizon workers.";
+                    break;
+                    
+                case 'view-logs':
+                    $logFile = storage_path('logs/laravel.log');
+                    if (file_exists($logFile)) {
+                        $lines = array_slice(file($logFile), -100);
+                        $output = implode('', $lines);
+                    } else {
+                        $output = "No log file found.";
+                    }
+                    break;
+                    
+                default:
+                    return response()->json([
+                        'success' => false,
+                        'error' => 'Unknown action'
+                    ]);
+            }
+            
+            return response()->json([
+                'success' => true,
+                'output' => $output
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 }

@@ -93,10 +93,6 @@
                                         Accounts
                                     </th>
 
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Type
-                                    </th>
-
                                     <x-sortable-header
                                         column="last_login_at"
                                         label="Last Login"
@@ -133,15 +129,6 @@
                                         <span class="font-medium text-gray-900">{{ $user->trading_accounts_count }}</span>
                                         <span class="text-gray-400 text-xs ml-1">(Unlimited)</span>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                        @if($user->is_enterprise_admin)
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-indigo-100 text-indigo-800">
-                                                🏢 Enterprise Admin
-                                            </span>
-                                        @else
-                                            <span class="text-gray-500 text-xs">Regular User</span>
-                                        @endif
-                                    </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                         @if($user->last_login_at)
                                             <span title="{{ $user->last_login_at->format('Y-m-d H:i:s') }}">
@@ -164,7 +151,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="8" class="px-6 py-12 text-center">
+                                    <td colspan="7" class="px-6 py-12 text-center">
                                         <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
                                         </svg>

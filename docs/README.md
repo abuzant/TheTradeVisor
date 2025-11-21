@@ -12,7 +12,7 @@
 
 - **[Installation Guide](getting-started/INSTALLATION.md)** - Complete step-by-step setup
 - **[Quick Start](../README.md#-quick-start)** - Get running in 5 minutes
-- **[Docker Deployment](DOCKER_DEPLOYMENT.md)** - 🐳 One-click deployment
+- **[Docker Deployment](../README.md#-docker-deployment)** - 🐳 One-click deployment
 - **[Configuration Guide](getting-started/CONFIGURATION.md)** - Environment setup *(coming soon)*
 
 ---
@@ -20,42 +20,42 @@
 ### 📚 Core Documentation
 
 #### System Protection & Performance
-- **[Protection Summary](PROTECTION_SUMMARY.md)** - All active protections overview
-- **[Circuit Breaker Implementation](CIRCUIT_BREAKER_IMPLEMENTATION.md)** - High-load protection
-- **[Rate Limiting](RATE_LIMITING_COMPLETE.md)** - Request rate limiting
-- **[Pagination Implementation](PAGINATION_IMPLEMENTATION.md)** - Query pagination
-- **[Slow Query Logging](SLOW_QUERY_LOGGING.md)** - Performance monitoring
-- **[Redis Caching](REDIS_CACHING_OPTIMIZATION.md)** - 90% load reduction
-- **[Logging Configuration](LOGGING_CONFIGURATION.md)** - Clean log files
-- **[Storage Permissions](STORAGE_PERMISSIONS_SETUP.md)** - Group-based access
+- **[Protection Summary](technical/PROTECTION_SUMMARY.md)** - All active protections overview
+- **[Circuit Breaker Implementation](technical/CIRCUIT_BREAKER_IMPLEMENTATION.md)** - High-load protection
+- **[Rate Limiting](technical/RATE_LIMITING_COMPLETE.md)** - Request rate limiting
+- **[Pagination Implementation](features/PAGINATION_IMPLEMENTATION.md)** - Query pagination
+- **[Slow Query Logging](technical/SLOW_QUERY_LOGGING.md)** - Performance monitoring
+- **[Redis Caching](technical/REDIS_CACHING_OPTIMIZATION.md)** - 90% load reduction
+- **[Logging Configuration](technical/LOGGING_CONFIGURATION.md)** - Clean log files
+- **[Storage Permissions](operations/STORAGE_PERMISSIONS_SETUP.md)** - Group-based access
 
 #### Incident Reports & Analysis
-- **[System Crash Postmortem](SYSTEM_CRASH_POSTMORTEM.md)** - November 12, 2025 incident
-- **[Incident Analysis](INCIDENT_ANALYSIS_AND_FIXES.md)** - Technical details
-- **[Final Fixes](FINAL_FIXES_NOV_9_2025.md)** - November 9 updates
+- **[System Crash Postmortem](operations/SYSTEM_CRASH_POSTMORTEM.md)** - November 12, 2025 incident
+- **[Incident Analysis](technical/INCIDENT_ANALYSIS_AND_FIXES.md)** - Technical details
+- **[Final Fixes](changelog/FINAL_FIXES_NOV_9_2025.md)** - November 9 updates
 
 #### Operations & Deployment
 - **[Monitoring Implementation](operations/MONITORING_IMPLEMENTATION.md)** - Complete monitoring setup
 - **[Deployment Guide](operations/DEPLOYMENT.md)** - Production deployment
 - **[Scaling Analysis](operations/SCALING_ANALYSIS.md)** - Horizontal/vertical scaling
 - **[Infrastructure Recommendations](operations/INFRASTRUCTURE_RECOMMENDATIONS.md)** - Hardware/software recommendations
-- **[Multi-Instance Deployment](MULTI_INSTANCE_DEPLOYMENT.md)** - Load balancing setup
+- **[Multi-Instance Deployment](operations/MULTI_INSTANCE_DEPLOYMENT.md)** - Load balancing setup
 
 ---
 
 ### 🎯 Features & Guides
 
 #### Trading Features
-- **[MT4/MT5 Position System](MT4_MT5_POSITION_SYSTEM.md)** - Position tracking
+- **[MT4/MT5 Position System](technical/MT4_MT5_POSITION_SYSTEM.md)** - Position tracking
 - **[MT4 EA Installation](guides/MT4_EA_INSTALLATION.md)** - Expert Advisor setup
 - **[GeoIP Analytics](features/geoip-analytics.md)** - Country-based insights
-- **[Flag Icons Implementation](FLAG_ICONS_IMPLEMENTATION.md)** - Professional country flags
+- **[Flag Icons Implementation](features/FLAG_ICONS_IMPLEMENTATION.md)** - Professional country flags
 - **[Currency Display System](features/CURRENCY_DISPLAY.md)** - Multi-currency handling *(coming soon)*
 
 #### System Features
-- **[Alert System Setup](ALERT_SYSTEM_SETUP.md)** - Slack/Email notifications
-- **[Admin Log Viewer](ADMIN_LOG_VIEWER_UPDATE.md)** - Log management
-- **[Implementation Details](IMPLEMENTATION_DETAILS.md)** - Technical implementation
+- **[Alert System Setup](operations/ALERT_SYSTEM_SETUP.md)** - Slack/Email notifications
+- **[Admin Log Viewer](changelog/ADMIN_LOG_VIEWER_UPDATE.md)** - Log management
+- **[Implementation Details](technical/IMPLEMENTATION_DETAILS.md)** - Technical implementation
 
 ---
 
@@ -82,8 +82,8 @@
 ### 🐛 Troubleshooting
 
 #### Common Issues
-- **[Cloudflare 521 Errors](CLOUDFLARE_521_TROUBLESHOOTING.md)** - Connection issues
-- **[Cloudflare Optimizations](CLOUDFLARE_OPTIMIZATIONS_APPLIED.md)** - CDN configuration
+- **[Cloudflare 521 Errors](operations/CLOUDFLARE_521_TROUBLESHOOTING.md)** - Connection issues
+- **[Cloudflare Optimizations](operations/CLOUDFLARE_OPTIMIZATIONS_APPLIED.md)** - CDN configuration
 - **[Common Issues](troubleshooting/COMMON_ISSUES.md)** - FAQ *(coming soon)*
 - **[Error Messages](troubleshooting/ERROR_MESSAGES.md)** - Error reference *(coming soon)*
 
@@ -93,43 +93,43 @@
 
 #### Releases & Changelog
 - **[Changelog](CHANGELOG.md)** - Complete version history
-- **[Release Notes v1.2.0](RELEASE_NOTES_v1.2.0.md)** - Latest release
-- **[Release Summary v1.2.0](RELEASE_SUMMARY_v1.2.0.md)** - Summary
-- **[Release Notes v1.0.0](RELEASE_NOTES_v1.0.0.md)** - Initial release
+- **[Release Notes v1.2.0](changelog/RELEASE_NOTES_v1.2.0.md)** - Latest release
+- **[Release Summary v1.2.0](changelog/RELEASE_SUMMARY_v1.2.0.md)** - Summary
+- **[Release Notes v1.0.0](changelog/RELEASE_NOTES_v1.0.0.md)** - Initial release
 - **[Implementation Summary](changelog/IMPLEMENTATION_SUMMARY.md)** - Feature summary
 - **[Bug Fixes](changelog/BUGFIX_TIME_DISPLAY.md)** - Bug fix history
 
 #### Project Documentation
-- **[GitHub Issue Template](GITHUB_ISSUE_TEMPLATE.md)** - Issue reporting
-- **[GitHub Release Instructions](GITHUB_RELEASE_INSTRUCTIONS.md)** - Release process
-- **[Documentation Reorganization Plan](DOCUMENTATION_REORGANIZATION_PLAN.md)** - Docs roadmap
+- **[GitHub Issue Template](project/GITHUB_ISSUE_TEMPLATE.md)** - Issue reporting
+- **[GitHub Release Instructions](project/GITHUB_RELEASE_INSTRUCTIONS.md)** - Release process
+- **[Documentation Reorganization Plan](project/DOCUMENTATION_REORGANIZATION_PLAN.md)** - Docs roadmap
 
 ---
 
 ## 🗂️ Documentation by Topic
 
 ### Performance Optimization
-1. [Redis Caching](REDIS_CACHING_OPTIMIZATION.md) - 90% load reduction
-2. [Pagination](PAGINATION_IMPLEMENTATION.md) - Query optimization
-3. [Slow Query Logging](SLOW_QUERY_LOGGING.md) - Performance monitoring
+1. [Redis Caching](technical/REDIS_CACHING_OPTIMIZATION.md) - 90% load reduction
+2. [Pagination](features/PAGINATION_IMPLEMENTATION.md) - Query optimization
+3. [Slow Query Logging](technical/SLOW_QUERY_LOGGING.md) - Performance monitoring
 4. [Monitoring](operations/MONITORING_IMPLEMENTATION.md) - System health
 
 ### Security & Protection
-1. [Rate Limiting](RATE_LIMITING_COMPLETE.md) - Request throttling
-2. [Circuit Breakers](CIRCUIT_BREAKER_IMPLEMENTATION.md) - Overload protection
-3. [Alert System](ALERT_SYSTEM_SETUP.md) - Notifications
-4. [Storage Permissions](STORAGE_PERMISSIONS_SETUP.md) - Access control
+1. [Rate Limiting](technical/RATE_LIMITING_COMPLETE.md) - Request throttling
+2. [Circuit Breakers](technical/CIRCUIT_BREAKER_IMPLEMENTATION.md) - Overload protection
+3. [Alert System](operations/ALERT_SYSTEM_SETUP.md) - Notifications
+4. [Storage Permissions](operations/STORAGE_PERMISSIONS_SETUP.md) - Access control
 
 ### Deployment & Operations
 1. [Installation](getting-started/INSTALLATION.md) - Setup guide
-2. [Docker Deployment](DOCKER_DEPLOYMENT.md) - Containerization
+2. [Docker Deployment](../README.md#-docker-deployment) - Containerization
 3. [Deployment Guide](operations/DEPLOYMENT.md) - Production
 4. [Scaling](operations/SCALING_ANALYSIS.md) - Growth planning
 
 ### Incident Response
-1. [System Crash Postmortem](SYSTEM_CRASH_POSTMORTEM.md) - Nov 12 incident
-2. [Incident Analysis](INCIDENT_ANALYSIS_AND_FIXES.md) - Root cause
-3. [Protection Summary](PROTECTION_SUMMARY.md) - Current protections
+1. [System Crash Postmortem](operations/SYSTEM_CRASH_POSTMORTEM.md) - Nov 12 incident
+2. [Incident Analysis](technical/INCIDENT_ANALYSIS_AND_FIXES.md) - Root cause
+3. [Protection Summary](technical/PROTECTION_SUMMARY.md) - Current protections
 
 ---
 
@@ -164,7 +164,7 @@
 
 **Common Searches:**
 - "installation" → [Installation Guide](getting-started/INSTALLATION.md)
-- "docker" → [Docker Deployment](DOCKER_DEPLOYMENT.md)
+- "docker" → [Docker Deployment](../README.md#-docker-deployment)
 - "error" → [Troubleshooting](#-troubleshooting)
 - "API" → [API Documentation](reference/API_DOCUMENTATION.md)
 - "monitoring" → [Monitoring Implementation](operations/MONITORING_IMPLEMENTATION.md)

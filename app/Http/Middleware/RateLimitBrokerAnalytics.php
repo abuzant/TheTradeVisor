@@ -6,9 +6,15 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Symfony\Component\HttpFoundation\Response;
+use App\Models\RateLimitSetting;
 
 class RateLimitBrokerAnalytics
 {
+    /**
+     * Default maximum broker analytics requests per user per minute (fallback)
+     */
+    private const DEFAULT_MAX_REQUESTS = 20;
+
     /**
      * Handle an incoming request.
      * Limit broker analytics to prevent abuse.
@@ -23,9 +29,9 @@ class RateLimitBrokerAnalytics
             return $next($request);
         }
 
-        // Rate limit: 20 requests per minute per user
+        // Get limit from database settings, fallback to default
+        $maxAttempts = RateLimitSetting::get('broker_analytics_limit', self::DEFAULT_MAX_REQUESTS);
         $key = 'broker_analytics_rate_limit:' . $user->id;
-        $maxAttempts = 20;
         $decayMinutes = 1;
 
         $attempts = Cache::get($key, 0);

@@ -104,8 +104,8 @@ TheTradeVisor is an enterprise-grade trading analytics platform that aggregates,
 
 ### Core Features
 
-- [Account Snapshots System](docs/ACCOUNT_SNAPSHOTS_SYSTEM.md) - Historical metrics tracking and analysis
-- [Account Health Dashboard](docs/ACCOUNT_SNAPSHOTS_WIDGETS.md) - Interactive widgets and visualizations
+- [Account Snapshots System](docs/features/ACCOUNT_SNAPSHOTS_SYSTEM.md) - Historical metrics tracking and analysis
+- [Account Health Dashboard](docs/features/ACCOUNT_SNAPSHOTS_WIDGETS.md) - Interactive widgets and visualizations
 - [GeoIP Analytics](docs/features/geoip-analytics.md) - Geographic insights
 - [Trading Analytics](docs/README.md#-core-features) - Analytics system overview
 - [Performance Analytics](docs/features/performance.md) - Trade analysis, equity curves, and drawdown

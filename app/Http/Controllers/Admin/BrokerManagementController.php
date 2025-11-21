@@ -8,6 +8,7 @@ use App\Models\EnterpriseBroker;
 use App\Models\EnterpriseApiKey;
 use App\Models\User;
 use App\Models\WhitelistedBrokerUsage;
+use App\Models\TradingAccount;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -104,7 +105,7 @@ class BrokerManagementController extends Controller
                 'official_broker_name' => $request->official_broker_name,
                 'is_active' => true,
                 'monthly_fee' => $request->monthly_fee,
-                'subscription_ends_at' => now()->addMonths($request->subscription_months),
+                'subscription_ends_at' => now()->addMonths((int) $request->subscription_months),
                 'grace_period_ends_at' => null,
             ]);
 
@@ -327,8 +328,43 @@ class BrokerManagementController extends Controller
             }
         }
 
+        // Platform filter
+        if ($request->has('platform') && $request->platform !== 'all') {
+            $query->whereHas('tradingAccount', function($q) use ($request) {
+                $q->where('platform_type', $request->platform);
+            });
+        }
+
+        // Profit/Loss filter
+        if ($request->has('profit_status') && $request->profit_status !== 'all') {
+            $query->whereHas('tradingAccount', function($q) use ($request) {
+                if ($request->profit_status === 'profit') {
+                    $q->whereRaw('equity > balance');
+                } elseif ($request->profit_status === 'loss') {
+                    $q->whereRaw('equity < balance');
+                }
+            });
+        }
+
+        // Country filter
+        if ($request->has('country') && $request->country !== 'all') {
+            $query->whereHas('tradingAccount', function($q) use ($request) {
+                $q->where('country_code', $request->country);
+            });
+        }
+
         $accounts = $query->orderBy('last_seen_at', 'desc')->paginate(50);
 
-        return view('admin.brokers.accounts', compact('broker', 'accounts'));
+        // Get unique countries for filter dropdown
+        $countries = TradingAccount::whereIn('id', 
+            WhitelistedBrokerUsage::where('enterprise_broker_id', $broker->id)->pluck('trading_account_id')
+        )
+        ->whereNotNull('country_code')
+        ->select('country_code', 'country_name')
+        ->distinct()
+        ->orderBy('country_name')
+        ->get();
+
+        return view('admin.brokers.accounts', compact('broker', 'accounts', 'countries'));
     }
 }

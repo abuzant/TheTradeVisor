@@ -20,7 +20,7 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
                     <form method="GET" action="{{ route('admin.brokers.accounts', $broker->id) }}" class="space-y-4">
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
 
                             {{-- Status Filter --}}
                             <div>
@@ -32,8 +32,41 @@
                                 </select>
                             </div>
 
+                            {{-- Platform Filter --}}
+                            <div>
+                                <label for="platform" class="block text-sm font-medium text-gray-700 mb-2">Platform</label>
+                                <select name="platform" id="platform" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option value="all">All Platforms</option>
+                                    <option value="MT4" {{ request('platform') === 'MT4' ? 'selected' : '' }}>MT4 Only</option>
+                                    <option value="MT5" {{ request('platform') === 'MT5' ? 'selected' : '' }}>MT5 Only</option>
+                                </select>
+                            </div>
+
+                            {{-- Profit/Loss Filter --}}
+                            <div>
+                                <label for="profit_status" class="block text-sm font-medium text-gray-700 mb-2">Profit/Loss</label>
+                                <select name="profit_status" id="profit_status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option value="all">All</option>
+                                    <option value="profit" {{ request('profit_status') === 'profit' ? 'selected' : '' }}>In Profit Only</option>
+                                    <option value="loss" {{ request('profit_status') === 'loss' ? 'selected' : '' }}>In Loss Only</option>
+                                </select>
+                            </div>
+
+                            {{-- Country Filter --}}
+                            <div>
+                                <label for="country" class="block text-sm font-medium text-gray-700 mb-2">Country</label>
+                                <select name="country" id="country" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option value="all">All Countries</option>
+                                    @foreach($countries as $country)
+                                        <option value="{{ $country->country_code }}" {{ request('country') === $country->country_code ? 'selected' : '' }}>
+                                            {{ $country->country_name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
                             {{-- Submit --}}
-                            <div class="flex items-end space-x-2 md:col-span-2">
+                            <div class="flex items-end space-x-2">
                                 <button type="submit" class="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                                     Filter
                                 </button>
@@ -58,16 +91,14 @@
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Account Number</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acc#</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Platform</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Country</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Balance</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Equity</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Profit</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">First Seen</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Seen</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
@@ -79,23 +110,36 @@
                                             @endphp
                                             <tr class="hover:bg-gray-50">
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                    {{ $usage->account_number }}
+                                                    @php
+                                                        $statusDot = $isActive ? '🟢' : '🟡';
+                                                        if ($account->is_paused || !$account->is_active) {
+                                                            $statusDot = '🔴';
+                                                        }
+                                                    @endphp
+                                                    <span class="mr-2">{{ $statusDot }}</span>{{ $usage->account_number }}
                                                 </td>
                                                 <td class="px-6 py-4 whitespace-nowrap">
                                                     <div class="text-sm font-medium text-gray-900">{{ $usage->user->name ?? 'N/A' }}</div>
                                                     <div class="text-sm text-gray-500">{{ $usage->user->email ?? 'N/A' }}</div>
                                                 </td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                    {{ $account->platform_type }}
-                                                </td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                    @if($account->country_name)
-                                                        <div class="flex items-center">
-                                                            <span class="mr-2">{{ strtoupper($account->country_code) }}</span>
-                                                            <span class="text-gray-500">{{ $account->country_name }}</span>
-                                                        </div>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                                    @if($account->platform_type)
+                                                        <span class="px-2 py-1 text-xs font-semibold rounded {{ $account->platform_type === 'MT5' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800' }}">
+                                                            {{ $account->platform_type }}
+                                                        </span>
                                                     @else
-                                                        <span class="text-gray-400">Unknown</span>
+                                                        <span class="text-gray-400">N/A</span>
+                                                    @endif
+                                                </td>
+                                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                    @if($account->country_code)
+                                                        <span class="inline-flex items-center" title="{{ $account->country_name }}">
+                                                            {!! \App\Helpers\CountryHelper::getFlag($account->country_code) !!}
+                                                        </span>
+                                                    @else
+                                                        <span class="inline-flex items-center">
+                                                            <i class="fi fi-globe"></i>
+                                                        </span>
                                                     @endif
                                                 </td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -104,27 +148,11 @@
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                     {{ number_format($account->equity, 2) }} {{ $account->account_currency }}
                                                 </td>
-                                                <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                                    <span class="{{ $account->profit >= 0 ? 'text-green-600' : 'text-red-600' }} font-medium">
-                                                        {{ $account->profit >= 0 ? '+' : '' }}{{ number_format($account->profit, 2) }} {{ $account->account_currency }}
-                                                    </span>
-                                                </td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                     {{ $usage->first_seen_at ? $usage->first_seen_at->format('M d, Y') : 'N/A' }}
                                                 </td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                     {{ $usage->last_seen_at ? $usage->last_seen_at->diffForHumans() : 'Never' }}
-                                                </td>
-                                                <td class="px-6 py-4 whitespace-nowrap">
-                                                    @if($isActive)
-                                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                                            Active
-                                                        </span>
-                                                    @else
-                                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                                                            Dormant
-                                                        </span>
-                                                    @endif
                                                 </td>
                                             </tr>
                                         @endif

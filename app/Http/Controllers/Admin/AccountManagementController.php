@@ -10,6 +10,7 @@ use App\Models\Deal;
 use App\Models\Position;
 use App\Models\Order;
 use App\Models\AccountSnapshot;
+use App\Models\EnterpriseBroker;
 use App\Traits\Sortable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -83,6 +84,11 @@ class AccountManagementController extends Controller
         $brokers = TradingAccount::select('broker_name')->distinct()->pluck('broker_name');
         $currencies = TradingAccount::select('account_currency')->distinct()->pluck('account_currency');
     
+        // Get list of enterprise broker names for star indicator
+        $enterpriseBrokerNames = EnterpriseBroker::where('is_active', true)
+            ->pluck('official_broker_name')
+            ->toArray();
+    
         // Get sort parameters for view
         $sortBy = $request->get('sort_by', 'last_sync_at');
         $sortDirection = $request->get('sort_direction', 'desc');
@@ -97,7 +103,8 @@ class AccountManagementController extends Controller
             'status', 
             'userId',
             'sortBy',
-            'sortDirection'
+            'sortDirection',
+            'enterpriseBrokerNames'
         ));
     }
 

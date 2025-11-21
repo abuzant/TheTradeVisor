@@ -6,9 +6,15 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Symfony\Component\HttpFoundation\Response;
+use App\Models\RateLimitSetting;
 
 class RateLimitExports
 {
+    /**
+     * Default maximum export requests per user per minute (fallback)
+     */
+    private const DEFAULT_MAX_REQUESTS = 5;
+
     /**
      * Handle an incoming request.
      * Limit exports to prevent abuse and server overload.
@@ -23,9 +29,9 @@ class RateLimitExports
             return $next($request);
         }
 
-        // Rate limit: 5 exports per minute per user
+        // Get limit from database settings, fallback to default
+        $maxAttempts = RateLimitSetting::get('export_limit', self::DEFAULT_MAX_REQUESTS);
         $key = 'export_rate_limit:' . $user->id;
-        $maxAttempts = 5;
         $decayMinutes = 1;
 
         $attempts = Cache::get($key, 0);

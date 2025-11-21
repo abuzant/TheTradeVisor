@@ -232,7 +232,7 @@ class ExportController extends Controller
     public function exportAccountData(Request $request)
     {
         $user = $request->user();
-        $displayCurrency = $user->display_currency ?? 'USD';
+        $displayCurrency = 'USD'; // Always USD for multi-account exports
         
         $exportData = $this->exportService->createAccountDataExport($user, $displayCurrency);
         

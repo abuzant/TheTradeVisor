@@ -101,8 +101,7 @@
                                 <thead class="bg-gray-50">
                                     <tr>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company</th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Broker Name</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Broker</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Accounts</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Users</th>
@@ -117,12 +116,11 @@
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                                 #{{ $broker->id }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                <div class="text-sm font-medium text-gray-900">{{ $broker->company_name }}</div>
-                                                <div class="text-sm text-gray-500">{{ $broker->user->email ?? 'N/A' }}</div>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                {{ $broker->official_broker_name }}
+                                            <td class="px-6 py-4">
+                                                <div class="text-sm font-medium text-gray-900" title="{{ $broker->company_name }}">
+                                                    {{ implode(' ', array_slice(explode(' ', $broker->company_name), 0, 2)) }}
+                                                </div>
+                                                <div class="text-sm text-gray-500">{{ $broker->official_broker_name }}</div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap">
                                                 @if($broker->isCurrentlyActive())

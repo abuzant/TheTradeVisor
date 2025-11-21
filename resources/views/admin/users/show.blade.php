@@ -131,21 +131,6 @@
                                     <dt class="text-sm font-medium text-gray-500">Email</dt>
                                     <dd class="mt-1 text-sm text-gray-900">{{ $user->email }}</dd>
                                 </div>
-                                <div>
-                                    <dt class="text-sm font-medium text-gray-500">Subscription Tier</dt>
-                                    <dd class="mt-1">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                                            {{ $user->subscription_tier === 'free' ? 'bg-gray-100 text-gray-800' : '' }}
-                                            {{ $user->subscription_tier === 'basic' ? 'bg-blue-100 text-blue-800' : '' }}
-                                            {{ $user->subscription_tier === 'enterprise' ? 'bg-indigo-100 text-indigo-800' : '' }}">
-                                            {{ ucfirst($user->subscription_tier) }}
-                                        </span>
-                                    </dd>
-                                </div>
-                                <div>
-                                    <dt class="text-sm font-medium text-gray-500">Account Limit</dt>
-                                    <dd class="mt-1 text-sm text-gray-900">{{ $user->max_accounts }} accounts</dd>
-                                </div>
                             </dl>
                         </div>
 
@@ -213,7 +198,7 @@
                                     <tr>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Broker</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Account</th>
-					<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Balance</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Equity</th>
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Last Sync</th>
@@ -224,17 +209,27 @@
                                     @foreach($user->tradingAccounts as $account)
                                     <tr>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                            @if(in_array($account->broker_name, $enterpriseBrokerNames))
+                                                <span class="mr-1" title="Enterprise Broker">✨</span>
+                                            @endif
                                             <x-broker-name :broker="$account->broker_name" class="text-indigo-600 hover:text-indigo-900" />
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $account->account_number ?? 'Anonymous' }}</td>
-					<td class="px-6 py-4 whitespace-nowrap text-sm">
-					    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-					        {{ $account->account_type === 'real' ? 'bg-green-100 text-green-800' : '' }}
-					        {{ $account->account_type === 'demo' ? 'bg-yellow-100 text-yellow-800' : '' }}
-					        {{ $account->account_type === 'contest' ? 'bg-blue-100 text-blue-800' : '' }}">
-					        {{ ucfirst($account->account_type) }}
-					    </span>
-					</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            @if($account->platform_type)
+                                                <span class="px-2 py-1.5 text-xs font-semibold rounded {{ $account->platform_type === 'MT5' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800' }}">
+                                                    {{ $account->platform_type === 'MT5' ? 'MT5' : 'MT4' }}
+                                                </span>
+                                            @endif
+                                            {{ $account->account_number ?? 'Anonymous' }}
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                                {{ $account->account_type === 'real' ? 'bg-green-100 text-green-800' : '' }}
+                                                {{ $account->account_type === 'demo' ? 'bg-yellow-100 text-yellow-800' : '' }}
+                                                {{ $account->account_type === 'contest' ? 'bg-blue-100 text-blue-800' : '' }}">
+                                                {{ ucfirst($account->account_type) }}
+                                            </span>
+                                        </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $account->account_currency }} {{ number_format($account->balance, 2) }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $account->account_currency }} {{ number_format($account->equity, 2) }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -254,14 +249,6 @@
                 </div>
             </div>
 
-            {{-- Payment History (Placeholder for future) --}}
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Payment History</h3>
-                    <p class="text-sm text-gray-500 italic">Payment integration coming soon...</p>
-                    {{-- We'll implement this later with Stripe/PayPal --}}
-                </div>
-            </div>
 
         </div>
     </div>

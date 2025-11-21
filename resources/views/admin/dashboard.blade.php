@@ -69,59 +69,88 @@
                     </div>
                 </div>
 
-                {{-- Today's Trades --}}
+                {{-- Brokers Statistics --}}
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">
                         <div class="flex items-center">
                             <div class="flex-shrink-0 bg-purple-500 rounded-md p-3">
                                 <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                                 </svg>
                             </div>
                             <div class="ml-5 w-0 flex-1">
                                 <dl>
-                                    <dt class="text-sm font-medium text-gray-500 truncate">Trades Today</dt>
-                                    <dd class="text-3xl font-semibold text-gray-900">{{ number_format($stats['total_trades_today']) }}</dd>
+                                    <dt class="text-sm font-medium text-gray-500 truncate">Brokers</dt>
+                                    <dd class="text-3xl font-semibold text-gray-900">{{ number_format($stats['known_brokers']) }}</dd>
+                                    <dd class="text-xs text-gray-500 mt-1">{{ $stats['enterprise_brokers'] }} enterprise</dd>
                                 </dl>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {{-- Today's Volume --}}
+                {{-- Next Enterprise Expiry --}}
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">
                         <div class="flex items-center">
                             <div class="flex-shrink-0 bg-red-500 rounded-md p-3">
                                 <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                 </svg>
                             </div>
                             <div class="ml-5 w-0 flex-1">
                                 <dl>
-                                    <dt class="text-sm font-medium text-gray-500 truncate">Volume Today</dt>
-                                    <dd class="text-3xl font-semibold text-gray-900">{{ number_format($stats['total_volume_today'], 2) }}</dd>
+                                    <dt class="text-sm font-medium text-gray-500 truncate">Next Enterprise Expiry</dt>
+                                    @if($nextExpiry)
+                                        <dd class="text-lg font-semibold text-gray-900 truncate" title="{{ $nextExpiry->company_name }}">{{ $nextExpiry->company_name }}</dd>
+                                        <dd class="text-xs text-gray-500 mt-1">{{ $nextExpiry->subscription_ends_at->format('M d, Y') }} ({{ $nextExpiry->subscription_ends_at->diffForHumans() }})</dd>
+                                    @else
+                                        <dd class="text-lg font-semibold text-gray-500">No active subscriptions</dd>
+                                    @endif
                                 </dl>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {{-- Quick Links --}}
-                <div class="bg-gradient-to-r from-indigo-500 to-purple-600 overflow-hidden shadow-sm sm:rounded-lg">
+                {{-- Active Terminals --}}
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                     <div class="p-6">
-                        <h3 class="text-lg font-semibold text-white mb-4">Quick Actions</h3>
-                        <div class="space-y-2">
-                            <a href="{{ route('admin.logs') }}" class="block text-sm text-white hover:text-indigo-100">
-                                → View System Logs
-                            </a>
-                            <a href="{{ route('admin.services') }}" class="block text-sm text-white hover:text-indigo-100">
-                                → Service Management
-                            </a>
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 bg-cyan-500 rounded-md p-3">
+                                <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                </svg>
+                            </div>
+                            <div class="ml-5 w-0 flex-1">
+                                <dl>
+                                    <dt class="text-sm font-medium text-gray-500 truncate">Active Terminals</dt>
+                                    <dd class="text-3xl font-semibold text-gray-900">{{ number_format($stats['active_terminals']) }}</dd>
+                                    <dd class="text-xs text-gray-500 mt-1">Last hour</dd>
+                                </dl>
+                            </div>
                         </div>
                     </div>
                 </div>
 
+            </div>
+
+            {{-- Quick Actions --}}
+            <div class="bg-gradient-to-r from-indigo-500 to-purple-600 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6">
+                    <h3 class="text-lg font-semibold text-white mb-4">Quick Actions</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <a href="{{ route('admin.logs') }}" class="block text-sm text-white hover:text-indigo-100">
+                            → View System Logs
+                        </a>
+                        <a href="{{ route('admin.services') }}" class="block text-sm text-white hover:text-indigo-100">
+                            → Service Management
+                        </a>
+                        <a href="{{ route('admin.users.index') }}" class="block text-sm text-white hover:text-indigo-100">
+                            → Manage Users
+                        </a>
+                    </div>
+                </div>
             </div>
 
             {{-- Recent Users --}}
@@ -140,7 +169,7 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
                         <x-sortable-header-custom column="name" label="Name" :sortBy="$usersSortBy" :sortDirection="$usersSortDirection" sortByParam="users_sort_by" sortDirectionParam="users_sort_direction" />
                         <x-sortable-header-custom column="email" label="Email" :sortBy="$usersSortBy" :sortDirection="$usersSortDirection" sortByParam="users_sort_by" sortDirectionParam="users_sort_direction" />
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Plan</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Broker</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Accounts</th>
                         <x-sortable-header-custom column="created_at" label="Registered" :sortBy="$usersSortBy" :sortDirection="$usersSortDirection" sortByParam="users_sort_by" sortDirectionParam="users_sort_direction" />
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
@@ -158,16 +187,30 @@
                             @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $user->email }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm">
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                                {{ $user->subscription_tier === 'free' ? 'bg-gray-100 text-gray-800' : '' }}
-                                {{ $user->subscription_tier === 'basic' ? 'bg-blue-100 text-blue-800' : '' }}
-                                {{ $user->subscription_tier === 'enterprise' ? 'bg-indigo-100 text-indigo-800' : '' }}">
-                                {{ ucfirst($user->subscription_tier) }}
-                            </span>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            @php
+                                $brokers = $user->tradingAccounts->pluck('broker_name')->filter()->countBy();
+                                $primaryBroker = $brokers->sortDesc()->keys()->first();
+                                $isEnterprise = $primaryBroker && in_array($primaryBroker, $enterpriseBrokerNames);
+                            @endphp
+                            @if($primaryBroker)
+                                @if($isEnterprise)
+                                    <span class="mr-1" title="Enterprise Broker">✨</span>
+                                @endif
+                                <x-broker-name :broker="$primaryBroker" />
+                                @if($brokers->count() > 1)
+                                    <span class="text-xs text-gray-500 ml-1">(+{{ $brokers->count() - 1 }})</span>
+                                @endif
+                            @else
+                                <span class="text-gray-400 text-xs">No accounts</span>
+                            @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {{ $user->tradingAccounts->count() }} / {{ $user->max_accounts }}
+                            @if($primaryBroker)
+                                {{ $brokers[$primaryBroker] }} {{ Str::plural('account', $brokers[$primaryBroker]) }}
+                            @else
+                                0 accounts
+                            @endif
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {{ $user->created_at->diffForHumans() }}

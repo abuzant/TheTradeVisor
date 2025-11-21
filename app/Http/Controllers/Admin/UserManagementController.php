@@ -7,6 +7,7 @@ use App\Traits\Sortable;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\TradingAccount;
+use App\Models\EnterpriseBroker;
 use Illuminate\Support\Facades\Hash;
 
 class UserManagementController extends Controller
@@ -66,6 +67,11 @@ class UserManagementController extends Controller
             $query->orderBy('last_sync_at', 'desc');
         }]);
 
+        // Get list of enterprise broker names for star indicator
+        $enterpriseBrokerNames = EnterpriseBroker::where('is_active', true)
+            ->pluck('official_broker_name')
+            ->toArray();
+
         // Get user statistics (multi-account context: Always use USD)
         $displayCurrency = 'USD';
 
@@ -82,7 +88,7 @@ class UserManagementController extends Controller
             'last_login' => $user->last_login_at ? $user->last_login_at->diffForHumans() : 'Never',
         ];
 
-        return view('admin.users.show', compact('user', 'stats'));
+        return view('admin.users.show', compact('user', 'stats', 'enterpriseBrokerNames'));
     }
 
     public function edit(User $user)

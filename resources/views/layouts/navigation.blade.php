@@ -143,10 +143,6 @@
 
                                     <div class="border-t border-gray-100"></div>
 
-                                    <x-dropdown-link :href="route('settings.currency')">
-                                        {{ __('Currency Settings') }}
-                                    </x-dropdown-link>
-
                                     <x-dropdown-link :href="route('admin.symbols.index')">
                                         {{ __('Symbol Management') }}
                                     </x-dropdown-link>

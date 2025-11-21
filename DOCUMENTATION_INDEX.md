@@ -92,7 +92,7 @@
 - **[Architecture Overview](docs/development/architecture.md)** - System design
 - **[MT4/MT5 Architecture](docs/technical/MT4_MT5_ARCHITECTURE.md)** - Platform differences
 - **[Database Schema](docs/README.md)** - Data models
-- **[Infrastructure](docs/INSTANCE_UPGRADE_SUMMARY.md)** - AWS EC2 M5.large setup
+- **[Infrastructure](INSTANCE_UPGRADE_SUMMARY.md)** - AWS EC2 M5.large setup
 
 ### Caching & Performance
 - **[Redis Caching Strategy](docs/technical/REDIS_CACHING_OPTIMIZATION.md)** - Cache implementation
@@ -117,7 +117,7 @@
 - **[System Monitoring](docs/operations/MONITORING_IMPLEMENTATION.md)** - Health checks
 - **[Alert System](docs/operations/ALERT_SYSTEM_SETUP.md)** - Slack/Email notifications
 - **[Scaling Guide](docs/operations/SCALING_ANALYSIS.md)** - Horizontal/vertical scaling
-- **[Instance Upgrade](docs/INSTANCE_UPGRADE_SUMMARY.md)** - M5.large migration
+- **[Instance Upgrade](INSTANCE_UPGRADE_SUMMARY.md)** - M5.large migration
 
 ### Troubleshooting
 - **[Cloudflare 521 Errors](docs/operations/CLOUDFLARE_521_TROUBLESHOOTING.md)** - Connection issues
@@ -186,15 +186,15 @@
 ## 🔧 Troubleshooting
 
 ### Common Issues
-- **[Troubleshooting Guide](docs/CLOUDFLARE_521_TROUBLESHOOTING.md)** - Common problems
-- **[System Crash Postmortem](docs/SYSTEM_CRASH_POSTMORTEM.md)** - Major incidents
-- **[Pending Issues](docs/PENDING_ISSUES.md)** - Known issues
+- **[Troubleshooting Guide](docs/operations/CLOUDFLARE_521_TROUBLESHOOTING.md)** - Common problems
+- **[System Crash Postmortem](docs/operations/SYSTEM_CRASH_POSTMORTEM.md)** - Major incidents
+- **[Pending Issues](docs/project/PENDING_ISSUES.md)** - Known issues
 - **[GitHub Issue Template](docs/project/GITHUB_ISSUE_TEMPLATE.md)** - Report bugs
 
 ### Specific Fixes
-- **[User Data Bleeding](docs/USER_DATA_BLEEDING_FIX.md)** - Security fix
-- **[Cloudflare 521](docs/CLOUDFLARE_521_TROUBLESHOOTING.md)** - Connection errors
-- **[Admin Trades Grouping](docs/ADMIN_TRADES_GROUPING.md)** - Trade display
+- **[User Data Bleeding](docs/bugfixes/USER_DATA_BLEEDING_FIX.md)** - Security fix
+- **[Cloudflare 521](docs/operations/CLOUDFLARE_521_TROUBLESHOOTING.md)** - Connection errors
+- **[Admin Trades Grouping](docs/bugfixes/ADMIN_TRADES_GROUPING.md)** - Trade display
 - **[Session Fixes](docs/changelog/SESSION_NOV_21_2025_FIXES.md)** - Session issues
 
 ---

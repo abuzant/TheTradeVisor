@@ -21,7 +21,6 @@ class User extends Authenticatable
         'is_admin',
         'is_enterprise_admin',
         'last_login_at',
-        'display_currency',
     ];
 
     protected $hidden = [

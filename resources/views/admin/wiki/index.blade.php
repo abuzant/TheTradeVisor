@@ -15,22 +15,54 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
                     <h3 class="text-2xl font-bold mb-4">🚀 Quick Navigation</h3>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <a href="#artisan-commands" class="bg-white/20 hover:bg-white/30 rounded-lg p-4 text-center transition">
-                            <div class="text-3xl mb-2">⚡</div>
-                            <div class="font-semibold">Artisan Commands</div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                        <a href="#quick-actions" class="bg-white/20 hover:bg-white/30 rounded-lg p-3 text-center transition">
+                            <div class="text-2xl mb-1">⚡</div>
+                            <div class="font-semibold text-sm">Quick Actions</div>
                         </a>
-                        <a href="#scripts" class="bg-white/20 hover:bg-white/30 rounded-lg p-4 text-center transition">
-                            <div class="text-3xl mb-2">📜</div>
-                            <div class="font-semibold">Shell Scripts</div>
+                        <a href="#performance" class="bg-white/20 hover:bg-white/30 rounded-lg p-3 text-center transition">
+                            <div class="text-2xl mb-1">📊</div>
+                            <div class="font-semibold text-sm">Performance</div>
                         </a>
-                        <a href="#scheduled-tasks" class="bg-white/20 hover:bg-white/30 rounded-lg p-4 text-center transition">
-                            <div class="text-3xl mb-2">⏰</div>
-                            <div class="font-semibold">Scheduled Tasks</div>
+                        <a href="#recent-events" class="bg-white/20 hover:bg-white/30 rounded-lg p-3 text-center transition">
+                            <div class="text-2xl mb-1">📋</div>
+                            <div class="font-semibold text-sm">Recent Events</div>
                         </a>
-                        <a href="#services" class="bg-white/20 hover:bg-white/30 rounded-lg p-4 text-center transition">
-                            <div class="text-3xl mb-2">🔧</div>
-                            <div class="font-semibold">Services</div>
+                        <a href="#database" class="bg-white/20 hover:bg-white/30 rounded-lg p-3 text-center transition">
+                            <div class="text-2xl mb-1">🗄️</div>
+                            <div class="font-semibold text-sm">Database</div>
+                        </a>
+                        <a href="#api-endpoints" class="bg-white/20 hover:bg-white/30 rounded-lg p-3 text-center transition">
+                            <div class="text-2xl mb-1">📡</div>
+                            <div class="font-semibold text-sm">API Endpoints</div>
+                        </a>
+                        <a href="#troubleshooting" class="bg-white/20 hover:bg-white/30 rounded-lg p-3 text-center transition">
+                            <div class="text-2xl mb-1">🔍</div>
+                            <div class="font-semibold text-sm">Troubleshooting</div>
+                        </a>
+                        <a href="#artisan-commands" class="bg-white/20 hover:bg-white/30 rounded-lg p-3 text-center transition">
+                            <div class="text-2xl mb-1">⚡</div>
+                            <div class="font-semibold text-sm">Artisan</div>
+                        </a>
+                        <a href="#scripts" class="bg-white/20 hover:bg-white/30 rounded-lg p-3 text-center transition">
+                            <div class="text-2xl mb-1">📜</div>
+                            <div class="font-semibold text-sm">Scripts</div>
+                        </a>
+                        <a href="#scheduled-tasks" class="bg-white/20 hover:bg-white/30 rounded-lg p-3 text-center transition">
+                            <div class="text-2xl mb-1">⏰</div>
+                            <div class="font-semibold text-sm">Cron Jobs</div>
+                        </a>
+                        <a href="#services" class="bg-white/20 hover:bg-white/30 rounded-lg p-3 text-center transition">
+                            <div class="text-2xl mb-1">🔧</div>
+                            <div class="font-semibold text-sm">Services</div>
+                        </a>
+                        <a href="#security" class="bg-white/20 hover:bg-white/30 rounded-lg p-3 text-center transition">
+                            <div class="text-2xl mb-1">🛡️</div>
+                            <div class="font-semibold text-sm">Security</div>
+                        </a>
+                        <a href="#backups" class="bg-white/20 hover:bg-white/30 rounded-lg p-3 text-center transition">
+                            <div class="text-2xl mb-1">💾</div>
+                            <div class="font-semibold text-sm">Backups</div>
                         </a>
                     </div>
                 </div>
@@ -58,6 +90,348 @@
                             </dl>
                         </div>
                         @endforeach
+                    </div>
+                </div>
+            </div>
+
+            {{-- Quick Actions Panel --}}
+            <div id="quick-actions" class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                        <span class="text-2xl mr-2">⚡</span>
+                        Quick Actions
+                    </h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <button onclick="showConfirmModal('Clear All Caches', 'This will clear application, config, route, and view caches.', 'cache-clear')" 
+                                class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-4 px-6 rounded-lg shadow-md transition flex flex-col items-center">
+                            <span class="text-3xl mb-2">🗑️</span>
+                            <span>Clear All Caches</span>
+                        </button>
+
+                        <button onclick="showConfirmModal('Restart Horizon', 'This will gracefully terminate Horizon. Supervisor will restart it automatically.', 'horizon-restart')" 
+                                class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-6 rounded-lg shadow-md transition flex flex-col items-center">
+                            <span class="text-3xl mb-2">🔄</span>
+                            <span>Restart Horizon</span>
+                        </button>
+
+                        <button onclick="showConfirmModal('View Recent Logs', 'This will display the last 100 lines from Laravel log.', 'view-logs')" 
+                                class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-4 px-6 rounded-lg shadow-md transition flex flex-col items-center">
+                            <span class="text-3xl mb-2">📄</span>
+                            <span>View Recent Logs</span>
+                        </button>
+                    </div>
+
+                    <div class="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <p class="text-sm text-blue-800">
+                            <strong>Note:</strong> All actions require confirmation and will execute immediately upon approval.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Performance Metrics --}}
+            <div id="performance" class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                        <span class="text-2xl mr-2">📊</span>
+                        Performance Metrics (Snapshot)
+                    </h3>
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="border border-gray-200 rounded-lg p-4 text-center">
+                            <div class="text-3xl font-bold text-indigo-600">{{ $performanceMetrics['db_connections'] }}</div>
+                            <div class="text-sm text-gray-600 mt-1">Active DB Connections</div>
+                        </div>
+
+                        <div class="border border-gray-200 rounded-lg p-4 text-center">
+                            <div class="text-3xl font-bold text-green-600">{{ $performanceMetrics['queue_pending'] }}</div>
+                            <div class="text-sm text-gray-600 mt-1">Pending Queue Jobs</div>
+                        </div>
+
+                        <div class="border border-gray-200 rounded-lg p-4 text-center">
+                            <div class="text-3xl font-bold text-red-600">{{ $performanceMetrics['queue_failed'] }}</div>
+                            <div class="text-sm text-gray-600 mt-1">Failed Queue Jobs</div>
+                        </div>
+
+                        <div class="border border-gray-200 rounded-lg p-4 text-center">
+                            <div class="text-3xl font-bold text-purple-600">{{ $performanceMetrics['disk_used_percent'] }}</div>
+                            <div class="text-sm text-gray-600 mt-1">Disk Usage</div>
+                        </div>
+
+                        <div class="border border-gray-200 rounded-lg p-4 text-center">
+                            <div class="text-2xl font-bold text-gray-700">{{ $performanceMetrics['disk_free'] }}</div>
+                            <div class="text-sm text-gray-600 mt-1">Disk Free</div>
+                        </div>
+
+                        <div class="border border-gray-200 rounded-lg p-4 text-center">
+                            <div class="text-2xl font-bold text-gray-700">{{ $performanceMetrics['disk_total'] }}</div>
+                            <div class="text-sm text-gray-600 mt-1">Disk Total</div>
+                        </div>
+
+                        <div class="border border-gray-200 rounded-lg p-4 text-center">
+                            <div class="text-2xl font-bold text-gray-700">{{ $performanceMetrics['memory_usage'] }}</div>
+                            <div class="text-sm text-gray-600 mt-1">Memory Usage</div>
+                        </div>
+
+                        <div class="border border-gray-200 rounded-lg p-4 text-center">
+                            <div class="text-2xl font-bold text-gray-700">{{ $performanceMetrics['memory_peak'] }}</div>
+                            <div class="text-sm text-gray-600 mt-1">Peak Memory</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Recent System Events --}}
+            <div id="recent-events" class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                        <span class="text-2xl mr-2">📋</span>
+                        Recent System Events
+                    </h3>
+
+                    @if(count($recentEvents) > 0)
+                        <div class="space-y-2">
+                            @foreach($recentEvents as $event)
+                                <div class="border-l-4 pl-4 py-2 {{ 
+                                    $event['severity'] === 'error' ? 'border-red-500 bg-red-50' : 
+                                    ($event['severity'] === 'warning' ? 'border-yellow-500 bg-yellow-50' : 'border-blue-500 bg-blue-50') 
+                                }}">
+                                    <div class="flex justify-between items-start">
+                                        <div class="flex-1">
+                                            <span class="text-xs font-mono text-gray-600">{{ $event['time'] }}</span>
+                                            <p class="text-sm text-gray-800 mt-1">{{ $event['message'] }}</p>
+                                        </div>
+                                        <span class="text-xs px-2 py-1 rounded {{ 
+                                            $event['severity'] === 'error' ? 'bg-red-200 text-red-800' : 
+                                            ($event['severity'] === 'warning' ? 'bg-yellow-200 text-yellow-800' : 'bg-blue-200 text-blue-800') 
+                                        }}">
+                                            {{ strtoupper($event['severity']) }}
+                                        </span>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <p class="text-gray-500 text-center py-4">No recent events found.</p>
+                    @endif
+                </div>
+            </div>
+
+            {{-- Database Schema --}}
+            <div id="database" class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                        <span class="text-2xl mr-2">🗄️</span>
+                        Database Schema Overview
+                    </h3>
+
+                    @if(count($databaseSchema) > 0)
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Table Name</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Columns</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Row Count</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    @foreach($databaseSchema as $table)
+                                        <tr class="hover:bg-gray-50">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">{{ $table['name'] }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $table['columns'] }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ number_format($table['rows']) }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <p class="text-gray-500 text-center py-4">Unable to load database schema.</p>
+                    @endif
+                </div>
+            </div>
+
+            {{-- API Endpoints --}}
+            <div id="api-endpoints" class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                        <span class="text-2xl mr-2">📡</span>
+                        API Endpoints Reference
+                    </h3>
+
+                    <div class="space-y-4">
+                        @foreach($apiEndpoints as $endpoint)
+                            <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
+                                <div class="flex items-start justify-between mb-2">
+                                    <div class="flex items-center gap-3">
+                                        <span class="px-3 py-1 rounded font-mono text-sm font-bold {{ 
+                                            $endpoint['method'] === 'GET' ? 'bg-blue-100 text-blue-800' : 
+                                            ($endpoint['method'] === 'POST' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800') 
+                                        }}">
+                                            {{ $endpoint['method'] }}
+                                        </span>
+                                        <code class="text-sm font-mono text-gray-900">{{ $endpoint['endpoint'] }}</code>
+                                    </div>
+                                    <span class="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">{{ $endpoint['rate_limit'] }}</span>
+                                </div>
+                                <p class="text-sm text-gray-600 ml-16">{{ $endpoint['description'] }}</p>
+                                <p class="text-xs text-gray-500 ml-16 mt-1">Auth: {{ $endpoint['auth'] }}</p>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+
+            {{-- Troubleshooting Guide --}}
+            <div id="troubleshooting" class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                        <span class="text-2xl mr-2">🔍</span>
+                        Troubleshooting Guide
+                    </h3>
+
+                    @foreach($troubleshooting as $guide)
+                        <div class="mb-8 border border-gray-200 rounded-lg p-6">
+                            <h4 class="text-lg font-bold text-red-600 mb-3">{{ $guide['issue'] }}</h4>
+                            
+                            <div class="mb-4">
+                                <h5 class="font-semibold text-gray-700 mb-2">Symptoms:</h5>
+                                <ul class="list-disc list-inside space-y-1 text-sm text-gray-600">
+                                    @foreach($guide['symptoms'] as $symptom)
+                                        <li>{{ $symptom }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+
+                            <div class="mb-4">
+                                <h5 class="font-semibold text-gray-700 mb-2">Diagnostic Checks:</h5>
+                                <div class="space-y-2">
+                                    @foreach($guide['checks'] as $check)
+                                        <div class="bg-gray-900 text-green-400 p-2 rounded font-mono text-xs">{{ $check }}</div>
+                                    @endforeach
+                                </div>
+                            </div>
+
+                            <div>
+                                <h5 class="font-semibold text-gray-700 mb-2">Solutions:</h5>
+                                <ul class="list-decimal list-inside space-y-1 text-sm text-gray-600">
+                                    @foreach($guide['solutions'] as $solution)
+                                        <li>{{ $solution }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            {{-- Security Overview --}}
+            <div id="security" class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                        <span class="text-2xl mr-2">🛡️</span>
+                        Security Overview
+                    </h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-gray-700 mb-3">Security Metrics</h4>
+                            <dl class="space-y-2">
+                                <div class="flex justify-between text-sm">
+                                    <dt class="text-gray-600">Failed Logins (24h):</dt>
+                                    <dd class="text-gray-900 font-bold">{{ $securityInfo['failed_logins_24h'] }}</dd>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <dt class="text-gray-600">Active API Keys:</dt>
+                                    <dd class="text-gray-900 font-bold">{{ $securityInfo['active_api_keys'] }}</dd>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <dt class="text-gray-600">Rate Limit Violations:</dt>
+                                    <dd class="text-gray-900 font-mono text-xs">{{ $securityInfo['rate_limit_violations'] }}</dd>
+                                </div>
+                            </dl>
+                        </div>
+
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-gray-700 mb-3">Environment Status</h4>
+                            <dl class="space-y-2">
+                                <div class="flex justify-between text-sm">
+                                    <dt class="text-gray-600">Environment:</dt>
+                                    <dd class="text-gray-900 font-bold">{{ strtoupper($securityInfo['environment']) }}</dd>
+                                </div>
+                                <div class="flex justify-between text-sm">
+                                    <dt class="text-gray-600">Debug Mode:</dt>
+                                    <dd class="text-gray-900 font-bold">{{ $securityInfo['debug_mode'] }}</dd>
+                                </div>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Backup & Recovery --}}
+            <div id="backups" class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
+                        <span class="text-2xl mr-2">💾</span>
+                        Backup & Recovery Procedures
+                    </h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-indigo-600 mb-3">Database Backups</h4>
+                            <dl class="space-y-2 text-sm">
+                                <div>
+                                    <dt class="text-gray-600 font-semibold">Command:</dt>
+                                    <dd class="bg-gray-900 text-green-400 p-2 rounded font-mono text-xs mt-1">{{ $backupInfo['database']['command'] }}</dd>
+                                </div>
+                                <div class="flex justify-between">
+                                    <dt class="text-gray-600">Location:</dt>
+                                    <dd class="text-gray-900 font-mono">{{ $backupInfo['database']['location'] }}</dd>
+                                </div>
+                                <div class="flex justify-between">
+                                    <dt class="text-gray-600">Schedule:</dt>
+                                    <dd class="text-gray-900">{{ $backupInfo['database']['schedule'] }}</dd>
+                                </div>
+                                <div class="flex justify-between">
+                                    <dt class="text-gray-600">Retention:</dt>
+                                    <dd class="text-gray-900">{{ $backupInfo['database']['retention'] }}</dd>
+                                </div>
+                            </dl>
+                        </div>
+
+                        <div class="border border-gray-200 rounded-lg p-4">
+                            <h4 class="font-semibold text-purple-600 mb-3">File Backups</h4>
+                            <dl class="space-y-2 text-sm">
+                                <div>
+                                    <dt class="text-gray-600 font-semibold">Command:</dt>
+                                    <dd class="bg-gray-900 text-green-400 p-2 rounded font-mono text-xs mt-1">{{ $backupInfo['files']['command'] }}</dd>
+                                </div>
+                                <div class="flex justify-between">
+                                    <dt class="text-gray-600">Location:</dt>
+                                    <dd class="text-gray-900 font-mono">{{ $backupInfo['files']['location'] }}</dd>
+                                </div>
+                                <div class="flex justify-between">
+                                    <dt class="text-gray-600">Schedule:</dt>
+                                    <dd class="text-gray-900">{{ $backupInfo['files']['schedule'] }}</dd>
+                                </div>
+                                <div class="flex justify-between">
+                                    <dt class="text-gray-600">Retention:</dt>
+                                    <dd class="text-gray-900">{{ $backupInfo['files']['retention'] }}</dd>
+                                </div>
+                            </dl>
+                        </div>
+                    </div>
+
+                    <div class="border border-red-200 bg-red-50 rounded-lg p-4">
+                        <h4 class="font-semibold text-red-700 mb-3">⚠️ Database Restore Procedure</h4>
+                        <ol class="space-y-2 text-sm text-red-800">
+                            @foreach($backupInfo['restore_db']['steps'] as $step)
+                                <li class="font-mono">{{ $step }}</li>
+                            @endforeach
+                        </ol>
                     </div>
                 </div>
             </div>
@@ -467,6 +841,48 @@
         </div>
     </div>
 
+    {{-- Confirmation Modal --}}
+    <div id="confirmModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-75 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
+        <div class="relative bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div class="p-6">
+                <div class="flex items-center justify-center w-12 h-12 mx-auto bg-yellow-100 rounded-full mb-4">
+                    <span class="text-2xl">⚠️</span>
+                </div>
+                <h3 id="modalTitle" class="text-lg font-bold text-gray-900 text-center mb-2"></h3>
+                <p id="modalMessage" class="text-sm text-gray-600 text-center mb-6"></p>
+                
+                <div class="flex gap-3">
+                    <button onclick="closeConfirmModal()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded transition">
+                        Cancel
+                    </button>
+                    <button id="confirmButton" onclick="executeAction()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded transition">
+                        Confirm
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Result Modal --}}
+    <div id="resultModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-75 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
+        <div class="relative bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold text-gray-900">Action Result</h3>
+                    <button onclick="closeResultModal()" class="text-gray-400 hover:text-gray-600">
+                        <span class="text-2xl">&times;</span>
+                    </button>
+                </div>
+                <div id="resultContent" class="bg-gray-900 text-green-400 p-4 rounded font-mono text-sm max-h-96 overflow-y-auto"></div>
+                <div class="mt-4 flex justify-end">
+                    <button onclick="closeResultModal()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded transition">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <style>
         /* Smooth scroll */
         html {
@@ -478,4 +894,55 @@
             font-family: 'Courier New', monospace;
         }
     </style>
+
+    <script>
+        let currentAction = null;
+
+        function showConfirmModal(title, message, action) {
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('modalMessage').textContent = message;
+            currentAction = action;
+            document.getElementById('confirmModal').classList.remove('hidden');
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').classList.add('hidden');
+            currentAction = null;
+        }
+
+        function closeResultModal() {
+            document.getElementById('resultModal').classList.add('hidden');
+        }
+
+        function executeAction() {
+            if (!currentAction) return;
+
+            closeConfirmModal();
+
+            // Show loading state
+            document.getElementById('resultContent').textContent = 'Executing action...';
+            document.getElementById('resultModal').classList.remove('hidden');
+
+            // Execute action based on type
+            fetch('/admin/wiki/action', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({ action: currentAction })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('resultContent').textContent = data.output || 'Action completed successfully!';
+                } else {
+                    document.getElementById('resultContent').textContent = 'Error: ' + (data.error || 'Unknown error occurred');
+                }
+            })
+            .catch(error => {
+                document.getElementById('resultContent').textContent = 'Error: ' + error.message;
+            });
+        }
+    </script>
 </x-app-layout>

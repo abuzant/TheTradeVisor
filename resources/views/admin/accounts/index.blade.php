@@ -171,6 +171,9 @@
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            @if(in_array($account->broker_name, $enterpriseBrokerNames))
+                                                <span class="mr-1" title="Enterprise Broker">✨</span>
+                                            @endif
                                             <x-broker-name :broker="$account->broker_name" class="text-indigo-600 hover:text-indigo-900" />
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">

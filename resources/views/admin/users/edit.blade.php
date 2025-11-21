@@ -56,18 +56,6 @@
                                 @enderror
                             </div>
 
-                            {{-- Account Information --}}
-                            <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                                <h4 class="text-sm font-semibold text-gray-700 mb-2">Account Information</h4>
-                                <div class="space-y-2 text-sm text-gray-600">
-                                    <p><strong>Trading Accounts:</strong> {{ $user->tradingAccounts()->count() }} (Unlimited)</p>
-                                    <p><strong>Account Type:</strong> Free (All users have unlimited accounts)</p>
-                                    @if($user->is_enterprise_admin)
-                                        <p class="text-indigo-600"><strong>⭐ Enterprise Admin:</strong> Has access to enterprise portal</p>
-                                    @endif
-                                </div>
-                            </div>
-
                             {{-- Status --}}
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">
