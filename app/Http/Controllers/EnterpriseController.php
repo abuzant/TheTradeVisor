@@ -295,6 +295,135 @@ class EnterpriseController extends Controller
     }
 
     /**
+     * Show enterprise analytics page
+     */
+    public function analytics(Request $request)
+    {
+        $user = Auth::user();
+        $broker = $user->enterpriseBroker;
+
+        if (!$broker) {
+            return redirect()->route('dashboard')->with('error', 'Enterprise account not found');
+        }
+
+        // Get timeframe from request (default: 30 days)
+        $days = (int) $request->input('days', 30);
+        $validDays = [7, 30, 90, 180];
+        if (!in_array($days, $validDays, true)) {
+            $days = 30;
+        }
+
+        // Get all trading accounts for this broker
+        $accountIds = WhitelistedBrokerUsage::where('enterprise_broker_id', $broker->id)
+            ->pluck('trading_account_id')
+            ->toArray();
+
+        // Country distribution
+        $countryStats = TradingAccount::whereIn('id', $accountIds)
+            ->selectRaw('country_code, country_name, COUNT(*) as account_count')
+            ->whereNotNull('country_code')
+            ->groupBy('country_code', 'country_name')
+            ->orderByDesc('account_count')
+            ->get();
+
+        // Platform distribution
+        $platformStats = TradingAccount::whereIn('id', $accountIds)
+            ->selectRaw('platform_type, COUNT(*) as account_count')
+            ->groupBy('platform_type')
+            ->get();
+
+        // Symbol performance
+        $symbolPerformance = Deal::whereIn('trading_account_id', $accountIds)
+            ->where('time', '>=', now()->subDays($days))
+            ->where('entry', 'out')
+            ->selectRaw('symbol, COUNT(*) as trade_count, SUM(profit) as total_profit')
+            ->groupBy('symbol')
+            ->orderByDesc('total_profit')
+            ->limit(20)
+            ->get();
+
+        return view('enterprise.analytics', compact(
+            'broker',
+            'days',
+            'countryStats',
+            'platformStats',
+            'symbolPerformance'
+        ));
+    }
+
+    /**
+     * Show enterprise accounts page
+     */
+    public function accounts(Request $request)
+    {
+        $user = Auth::user();
+        $broker = $user->enterpriseBroker;
+
+        if (!$broker) {
+            return redirect()->route('dashboard')->with('error', 'Enterprise account not found');
+        }
+
+        // Get filters
+        $platform = $request->input('platform', 'all');
+        $country = $request->input('country', 'all');
+        $status = $request->input('status', 'all');
+
+        // Get all accounts for this broker
+        $query = TradingAccount::whereIn('id', function($q) use ($broker) {
+            $q->select('trading_account_id')
+              ->from('whitelisted_broker_usage')
+              ->where('enterprise_broker_id', $broker->id);
+        });
+
+        // Apply filters
+        if ($platform !== 'all') {
+            $query->where('platform_type', strtoupper($platform));
+        }
+
+        if ($country !== 'all') {
+            $query->where('country_code', strtoupper($country));
+        }
+
+        if ($status === 'active') {
+            $query->whereHas('whitelistedBrokerUsage', function($q) {
+                $q->where('last_seen_at', '>=', now()->subDays(30));
+            });
+        } elseif ($status === 'dormant') {
+            $query->whereHas('whitelistedBrokerUsage', function($q) {
+                $q->where('last_seen_at', '<', now()->subDays(30))
+                  ->orWhereNull('last_seen_at');
+            });
+        }
+
+        // Paginate
+        $accounts = $query->with('whitelistedBrokerUsage')->paginate(50);
+
+        // Get filter options
+        $countries = TradingAccount::whereIn('id', function($q) use ($broker) {
+            $q->select('trading_account_id')
+              ->from('whitelisted_broker_usage')
+              ->where('enterprise_broker_id', $broker->id);
+        })
+        ->whereNotNull('country_code')
+        ->selectRaw('country_code, country_name')
+        ->distinct()
+        ->orderBy('country_name')
+        ->get();
+
+        $platforms = ['MT4', 'MT5'];
+
+        return view('enterprise.accounts', compact(
+            'broker',
+            'accounts',
+            'countries',
+            'platforms',
+            'platform',
+            'country',
+            'status'
+        ));
+    }
+
+    /**
      * Show enterprise settings
      */
     public function settings()
@@ -306,7 +435,10 @@ class EnterpriseController extends Controller
             return redirect()->route('dashboard')->with('error', 'Enterprise account not found');
         }
 
-        return view('enterprise.settings', compact('broker'));
+        // Get API keys for this broker
+        $apiKeys = $broker->apiKeys()->orderBy('created_at', 'desc')->get();
+
+        return view('enterprise.settings', compact('broker', 'apiKeys'));
     }
 
     /**

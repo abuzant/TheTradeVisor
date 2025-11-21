@@ -42,6 +42,14 @@ class EnterpriseBroker extends Model
     }
 
     /**
+     * Get all API keys for this broker
+     */
+    public function apiKeys(): HasMany
+    {
+        return $this->hasMany(EnterpriseApiKey::class);
+    }
+
+    /**
      * Check if broker is currently active (including grace period)
      */
     public function isCurrentlyActive(): bool

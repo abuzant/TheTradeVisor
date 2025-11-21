@@ -39,6 +39,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'rate.limit.exports' => \App\Http\Middleware\RateLimitExports::class,
             'rate.limit.broker' => \App\Http\Middleware\RateLimitBrokerAnalytics::class,
             'circuit.breaker' => \App\Http\Middleware\CircuitBreakerMiddleware::class,
+            'enterprise.api' => \App\Http\Middleware\EnterpriseApiAuth::class,
+            'enterprise.admin' => \App\Http\Middleware\EnterpriseAdminMiddleware::class,
         ]);
 
         // Global middleware (runs on every request)

@@ -215,9 +215,61 @@ public function historyUploadProgress(): HasOne
     return $this->hasOne(HistoryUploadProgress::class);
 }
 
+/**
+ * Get maximum days of data this account can view
+ * Enterprise whitelisted accounts: 180 days
+ * Standard accounts: 7 days
+ */
+public function getMaxDaysView(): int
+{
+    $usage = $this->whitelistedBrokerUsage;
+    
+    if ($usage && $usage->enterpriseBroker && $usage->enterpriseBroker->isCurrentlyActive()) {
+        return 180; // Enterprise: Full access
+    }
+    
+    return 7; // Standard: Limited to 7 days
+}
 
+/**
+ * Check if this account is whitelisted by an enterprise broker
+ */
+public function isEnterpriseWhitelisted(): bool
+{
+    return $this->getMaxDaysView() === 180;
+}
 
+/**
+ * Get the enterprise broker for this account (if whitelisted)
+ */
+public function getEnterpriseBroker()
+{
+    $usage = $this->whitelistedBrokerUsage;
+    return $usage ? $usage->enterpriseBroker : null;
+}
 
+/**
+ * Check if account is active (last seen within days)
+ */
+public function isActive(int $days = 30): bool
+{
+    $usage = $this->whitelistedBrokerUsage;
+    
+    if (!$usage || !$usage->last_seen_at) {
+        // Fallback to updated_at
+        return $this->updated_at && $this->updated_at->isAfter(now()->subDays($days));
+    }
+    
+    return $usage->last_seen_at->isAfter(now()->subDays($days));
+}
+
+/**
+ * Check if account is dormant (no activity in X days)
+ */
+public function isDormant(int $days = 30): bool
+{
+    return !$this->isActive($days);
+}
 
 
 

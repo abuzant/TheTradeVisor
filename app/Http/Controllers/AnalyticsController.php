@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\Deal;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use App\Helpers\TimeFilterHelper;
 
 class AnalyticsController extends Controller
 {
@@ -24,9 +25,23 @@ class AnalyticsController extends Controller
             return view('analytics.locked');
         }
 
-        // Validate days parameter
-        if (!in_array($days, [1, 7, 30])) {
+        // Validate days parameter - now supports 1, 7, 30, 90, 180
+        if (!in_array($days, [1, 7, 30, 90, 180])) {
             $days = 30;
+        }
+        
+        // Check if user has access to this time period
+        // Get user's first account to check enterprise status
+        $firstAccount = $user->tradingAccounts()->first();
+        $maxDays = $firstAccount ? $firstAccount->getMaxDaysView() : 7;
+        
+        // If requesting more days than allowed, show upgrade prompt
+        if ($days > $maxDays) {
+            return view('analytics.upgrade-required', [
+                'requested_days' => $days,
+                'max_days' => $maxDays,
+                'is_enterprise' => $maxDays >= 180,
+            ]);
         }
 
         // Cache key for the analytics data
@@ -68,8 +83,19 @@ class AnalyticsController extends Controller
 
         // Get display currency (default to USD for global analytics)
         $displayCurrency = 'USD';
+        
+        // Get available time periods for this user
+        $timePeriods = TimeFilterHelper::getPeriodsForAccount($firstAccount);
+        $currentPeriod = match($days) {
+            0, 1 => 'today',
+            7 => '7d',
+            30 => '30d',
+            90 => '90d',
+            180 => '180d',
+            default => '7d',
+        };
 
-        return view('analytics.index', compact('analytics', 'days', 'displayCurrency'));
+        return view('analytics.index', compact('analytics', 'days', 'displayCurrency', 'timePeriods', 'currentPeriod', 'maxDays'));
     }
 
     /**

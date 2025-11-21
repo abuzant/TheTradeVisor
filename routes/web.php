@@ -135,9 +135,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Global Analytics
     Route::get('/analytics/{days?}', [App\Http\Controllers\AnalyticsController::class, 'index'])->name('analytics')->where('days', '[0-9]+');
 
-    // Enterprise Broker Routes
-    Route::prefix('enterprise')->name('enterprise.')->group(function () {
+    // Enterprise Broker Routes (for enterprise admins only)
+    Route::prefix('enterprise')->name('enterprise.')->middleware('enterprise.admin')->group(function () {
         Route::get('/dashboard', [App\Http\Controllers\EnterpriseController::class, 'dashboard'])->name('dashboard');
+        Route::get('/analytics', [App\Http\Controllers\EnterpriseController::class, 'analytics'])->name('analytics');
+        Route::get('/accounts', [App\Http\Controllers\EnterpriseController::class, 'accounts'])->name('accounts');
         Route::get('/settings', [App\Http\Controllers\EnterpriseController::class, 'settings'])->name('settings');
         Route::post('/settings', [App\Http\Controllers\EnterpriseController::class, 'updateSettings'])->name('settings.update');
     });
@@ -190,6 +192,22 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::put('/symbols/{symbol}', [App\Http\Controllers\Admin\SymbolManagementController::class, 'update'])->name('symbols.update.alt');
     Route::post('/symbols/bulk-normalize', [App\Http\Controllers\Admin\SymbolManagementController::class, 'bulkNormalize'])->name('symbols.bulk-normalize');
     Route::post('/symbols/auto-normalize', [App\Http\Controllers\Admin\SymbolManagementController::class, 'autoNormalize'])->name('symbols.auto-normalize');
+
+    // Enterprise Broker Management
+    Route::prefix('brokers')->name('brokers.')->group(function () {
+        Route::get('/', [App\Http\Controllers\Admin\BrokerManagementController::class, 'index'])->name('index');
+        Route::get('/create', [App\Http\Controllers\Admin\BrokerManagementController::class, 'create'])->name('create');
+        Route::post('/', [App\Http\Controllers\Admin\BrokerManagementController::class, 'store'])->name('store');
+        Route::get('/{id}', [App\Http\Controllers\Admin\BrokerManagementController::class, 'show'])->name('show');
+        Route::get('/{id}/edit', [App\Http\Controllers\Admin\BrokerManagementController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [App\Http\Controllers\Admin\BrokerManagementController::class, 'update'])->name('update');
+        Route::delete('/{id}', [App\Http\Controllers\Admin\BrokerManagementController::class, 'destroy'])->name('destroy');
+        Route::post('/{id}/toggle-status', [App\Http\Controllers\Admin\BrokerManagementController::class, 'toggleStatus'])->name('toggle-status');
+        Route::post('/{id}/extend-subscription', [App\Http\Controllers\Admin\BrokerManagementController::class, 'extendSubscription'])->name('extend-subscription');
+        Route::post('/{id}/api-keys', [App\Http\Controllers\Admin\BrokerManagementController::class, 'createApiKey'])->name('api-keys.create');
+        Route::delete('/{brokerId}/api-keys/{keyId}', [App\Http\Controllers\Admin\BrokerManagementController::class, 'revokeApiKey'])->name('api-keys.revoke');
+        Route::get('/{id}/accounts', [App\Http\Controllers\Admin\BrokerManagementController::class, 'accounts'])->name('accounts');
+    });
     Route::post('/symbols/sync', [App\Http\Controllers\Admin\SymbolManagementController::class, 'syncSymbols'])->name('symbols.sync');
 
     // Digest Control

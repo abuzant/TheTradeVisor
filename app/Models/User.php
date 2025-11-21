@@ -17,10 +17,9 @@ class User extends Authenticatable
         'email',
         'password',
         'api_key',
-        'subscription_tier',
-        'max_accounts',
         'is_active',
         'is_admin',
+        'is_enterprise_admin',
         'last_login_at',
         'display_currency',
     ];
@@ -32,39 +31,27 @@ class User extends Authenticatable
 
     protected $casts = [
         'email_verified_at' => 'datetime',
-    'last_login_at' => 'datetime',
+        'last_login_at' => 'datetime',
         'password' => 'hashed',
         'is_active' => 'boolean',
-    'is_admin' => 'boolean', 
-        'max_accounts' => 'integer',
+        'is_admin' => 'boolean',
+        'is_enterprise_admin' => 'boolean',
     ];
 
-/**
- * Boot the model
- */
-protected static function boot()
-{
-    parent::boot();
-    
-    // Auto-generate API key when creating a new user
-    static::creating(function ($user) {
-        if (empty($user->api_key)) {
-            $user->api_key = self::generateApiKey();
-        }
+    /**
+     * Boot the model
+     */
+    protected static function boot()
+    {
+        parent::boot();
         
-        // Auto-set max_accounts for enterprise users
-        if ($user->subscription_tier === 'enterprise' && empty($user->max_accounts)) {
-            $user->max_accounts = 999999;
-        }
-    });
-    
-    // Auto-update max_accounts when subscription tier changes to enterprise
-    static::updating(function ($user) {
-        if ($user->isDirty('subscription_tier') && $user->subscription_tier === 'enterprise') {
-            $user->max_accounts = 999999;
-        }
-    });
-}
+        // Auto-generate API key when creating a new user
+        static::creating(function ($user) {
+            if (empty($user->api_key)) {
+                $user->api_key = self::generateApiKey();
+            }
+        });
+    }
 
     // Relationships
     public function tradingAccounts()
@@ -98,15 +85,8 @@ protected static function boot()
         return 'tvsr_' . Str::random(64);
     }
 
-    public function canAddAccount()
-    {
-        return $this->tradingAccounts()->count() < $this->max_accounts;
-    }
-
-    public function isSubscribed()
-    {
-        return $this->subscription_tier !== 'free';
-    }
+    // Removed: canAddAccount() - no more account limits
+    // Removed: isSubscribed() - no more subscriptions
 
 /**
  * Regenerate API key
@@ -118,28 +98,23 @@ public function regenerateApiKey()
     return $this->api_key;
 }
 
-/**
- * Check if user can add more accounts
- */
-public function canAddMoreAccounts()
-{
-    return $this->tradingAccounts()->count() < $this->max_accounts;
-}
+    /**
+     * Check if user is an enterprise admin
+     */
+    public function isEnterpriseAdmin()
+    {
+        return $this->is_enterprise_admin === true;
+    }
 
-/**
- * Get account limit info
- */
-public function getAccountLimitInfo()
-{
-    $current = $this->tradingAccounts()->count();
-    $max = $this->max_accounts;
-    
-    return [
-        'current' => $current,
-        'max' => $max,
-        'remaining' => max(0, $max - $current),
-        'can_add' => $current < $max,
-    ];
-}
+    /**
+     * Get the enterprise broker for this admin
+     */
+    public function getEnterpriseBroker()
+    {
+        if (!$this->isEnterpriseAdmin()) {
+            return null;
+        }
+        return $this->enterpriseBroker;
+    }
 
 }

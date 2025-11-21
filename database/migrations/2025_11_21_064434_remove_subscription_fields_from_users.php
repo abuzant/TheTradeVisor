@@ -1,0 +1,37 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            // Drop indexes first
+            $table->dropIndex(['subscription_tier']);
+            
+            // Drop columns
+            $table->dropColumn(['subscription_tier', 'max_accounts']);
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            // Restore columns
+            $table->enum('subscription_tier', ['free', 'basic', 'pro', 'enterprise'])->default('free');
+            $table->integer('max_accounts')->default(1);
+            
+            // Restore index
+            $table->index('subscription_tier');
+        });
+    }
+};

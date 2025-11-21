@@ -120,31 +120,8 @@ class DataCollectionController extends Controller
                 }
             }
 
-            // CHECK: Enforce account limit for new accounts (unless broker is whitelisted)
-            if (!$existingAccount && !$bypassLimits) {
-                $currentAccountCount = $user->tradingAccounts()->count();
-                
-                if ($currentAccountCount >= $user->max_accounts) {
-                    Log::warning('Account limit exceeded - new account rejected', [
-                        'user_id' => $user->id,
-                        'current_accounts' => $currentAccountCount,
-                        'max_accounts' => $user->max_accounts,
-                        'subscription_tier' => $user->subscription_tier,
-                        'attempted_account' => $accountInfo['account_number'] ?? $accountInfo['account_hash'] ?? 'unknown',
-                        'broker' => $brokerName,
-                    ]);
-
-                    return response()->json([
-                        'success' => false,
-                        'error' => 'ACCOUNT_LIMIT_EXCEEDED',
-                        'message' => "Account limit reached. You have {$currentAccountCount} account(s) but your {$user->subscription_tier} plan allows {$user->max_accounts}. Please upgrade at https://thetradevisor.com/pricing to add more accounts.",
-                        'current_accounts' => $currentAccountCount,
-                        'max_accounts' => $user->max_accounts,
-                        'subscription_tier' => $user->subscription_tier,
-                        'upgrade_url' => 'https://thetradevisor.com/pricing'
-                    ], 403);
-                }
-            }
+            // REMOVED: Account limit check - all users now have unlimited accounts
+            // Enterprise brokers get 180-day view, standard brokers get 7-day view
 
             // Check if this is historical data or current data
             $isHistorical = $data['meta']['is_historical'] ?? false;
@@ -200,6 +177,9 @@ class DataCollectionController extends Controller
                 $this->trackWhitelistedUsage($user, $whitelistedBroker, $accountInfo);
             }
 
+            // Determine max days view based on broker status
+            $maxDaysView = $bypassLimits ? 180 : 7;
+            
             $response = [
                 'success' => true,
                 'message' => 'Data received successfully',
@@ -207,6 +187,8 @@ class DataCollectionController extends Controller
                 'timestamp' => now()->toIso8601String(),
                 'queued' => true,
                 'whitelisted_broker' => $bypassLimits,
+                'max_days_view' => $maxDaysView,
+                'data_retention_days' => 180, // All data retained for 180 days
             ];
 
             if ($gracePeriodMessage) {
