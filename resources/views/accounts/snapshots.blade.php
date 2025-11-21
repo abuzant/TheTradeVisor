@@ -33,16 +33,14 @@
             {{-- Time Range Selector --}}
             <div class="bg-white/90 backdrop-blur-sm rounded-xl shadow-card p-4">
                 <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-2">
+                    <div class="flex items-center justify-between">
                         <span class="text-sm font-medium text-gray-700">Time Range:</span>
-                        <div class="flex space-x-2">
-                            @foreach([7, 30, 90, 180] as $period)
-                                <a href="{{ route('account.snapshots', ['account' => $account->id, 'days' => $period]) }}"
-                                   class="px-4 py-2 rounded-lg text-sm font-medium transition {{ $days == $period ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200' }}">
-                                    {{ $period }}d
-                                </a>
-                            @endforeach
-                        </div>
+                        <x-time-filter 
+                            :periods="$timePeriods" 
+                            :currentPeriod="$days . 'd'" 
+                            baseRoute="account.snapshots" 
+                            :routeParams="['account' => $account->id]"
+                        />
                     </div>
                     <div class="text-sm text-gray-600">
                         <span class="font-semibold">{{ $statistics['total_snapshots'] }}</span> snapshots in last {{ $days }} days

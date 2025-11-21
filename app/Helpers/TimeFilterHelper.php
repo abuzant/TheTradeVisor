@@ -89,6 +89,24 @@ class TimeFilterHelper
     }
 
     /**
+     * Get periods based on user's data access (checks all accounts)
+     */
+    public static function getPeriodsForUser($user): array
+    {
+        // Get the maximum data access days from all user's accounts
+        $maxDays = $user->tradingAccounts()
+            ->get()
+            ->map(fn($account) => $account->getMaxDaysView())
+            ->max() ?? 7; // Default to 7 if no accounts
+        
+        if ($maxDays >= 180) {
+            return self::getEnterprisePeriods();
+        }
+        
+        return self::getStandardPeriods();
+    }
+
+    /**
      * Get date range for a period
      */
     public static function getDateRange(string $period): array

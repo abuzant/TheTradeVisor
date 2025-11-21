@@ -1,11 +1,12 @@
-@props(['periods', 'currentPeriod', 'baseRoute'])
+@props(['periods', 'currentPeriod', 'baseRoute', 'routeParams' => []])
 
 <div class="inline-flex rounded-lg border border-gray-200 bg-white p-1 shadow-sm">
     @foreach($periods as $key => $period)
         @php
             $isActive = $currentPeriod === $key;
             $isLocked = $period['locked'];
-            $route = $isLocked ? '#' : route($baseRoute, ['days' => $period['days'] ?: 1]);
+            $params = array_merge($routeParams, ['days' => $period['days'] ?: 1]);
+            $route = $isLocked ? '#' : route($baseRoute, $params);
         @endphp
         
         @if($isLocked)
@@ -51,7 +52,7 @@
             </h3>
             
             <p class="text-gray-600 mb-6">
-                Connect to an enterprise broker to unlock <strong id="modalPeriod"></strong> of historical data.
+                Ask your broker about enterprise access to unlock <strong id="modalPeriod"></strong> of historical data.
             </p>
             
             <div class="flex flex-col sm:flex-row gap-3">

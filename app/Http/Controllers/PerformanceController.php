@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Services\PerformanceMetricsService;
 use Illuminate\Support\Facades\Cache;
+use App\Helpers\TimeFilterHelper;
 
 class PerformanceController extends Controller
 {
@@ -21,17 +22,29 @@ class PerformanceController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
-        $period = $request->get('period', '30d'); // Default to 30 days
+        $period = $request->get('period', '7d'); // Default to 7 days
         // Multi-account context: Always use USD
         $displayCurrency = 'USD';
 
         // Get all user's account IDs
         $accountIds = $user->tradingAccounts()->pluck('id')->toArray();
 
+        // Get available time periods based on user's data access
+        $timePeriods = TimeFilterHelper::getPeriodsForUser($user);
+        
+        // Check if requested period is locked
+        $requestedPeriodData = $timePeriods[$period] ?? null;
+        if ($requestedPeriodData && $requestedPeriodData['locked']) {
+            // Redirect to default period if trying to access locked period
+            return redirect()->route('performance', ['period' => '7d'])
+                ->with('error', 'This time period requires enterprise broker access. Ask your broker about enterprise access.');
+        }
+
         if (empty($accountIds)) {
             return view('performance.index', [
                 'hasAccounts' => false,
                 'period' => $period,
+                'timePeriods' => $timePeriods,
             ]);
         }
 
@@ -56,6 +69,7 @@ class PerformanceController extends Controller
             'period' => $period,
             'days' => $days,
             'user' => $user,
+            'timePeriods' => $timePeriods,
         ]);
     }
 

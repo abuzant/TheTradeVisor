@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
 use Carbon\Carbon;
+use App\Helpers\TimeFilterHelper;
 
 class AccountSnapshotViewController extends Controller
 {
@@ -71,10 +72,21 @@ class AccountSnapshotViewController extends Controller
             abort(403, 'Unauthorized access to this account.');
         }
 
-        // Get time range from request (default: 30 days)
-        // Only accept 7, 30, 90, 180 - anything else defaults to 30
-        $days = $request->input('days', 30);
-        $days = in_array((int)$days, [7, 30, 90, 180], true) ? (int)$days : 30;
+        // Get available time periods based on account's data access
+        $timePeriods = TimeFilterHelper::getPeriodsForAccount($account);
+        
+        // Get time range from request (default: 7 days)
+        $days = $request->input('days', 7);
+        $days = in_array((int)$days, [7, 30, 90, 180], true) ? (int)$days : 7;
+        
+        // Check if requested period is locked
+        $periodKey = $days . 'd';
+        $requestedPeriodData = $timePeriods[$periodKey] ?? null;
+        if ($requestedPeriodData && $requestedPeriodData['locked']) {
+            // Redirect to default period if trying to access locked period
+            return redirect()->route('account.snapshots', ['account' => $account->id, 'days' => 7])
+                ->with('error', 'This time period requires enterprise broker access. Ask your broker about enterprise access.');
+        }
 
         // Determine cache TTL based on time range
         $cacheTTL = $days === 7 ? 7200 : 86400; // 2 hours for 7d, 24 hours for others
@@ -90,6 +102,7 @@ class AccountSnapshotViewController extends Controller
         return view('accounts.snapshots', array_merge($viewData, [
             'account' => $account,
             'days' => $days,
+            'timePeriods' => $timePeriods,
         ]));
     }
 
