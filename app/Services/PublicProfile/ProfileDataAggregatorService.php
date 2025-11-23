@@ -137,12 +137,12 @@ class ProfileDataAggregatorService
             ->where('entry', 'out')
             ->whereIn('type', ['buy', 'sell'])
             ->where('time', '>=', $startDate)
-            ->select('symbol', 'normalized_symbol')
+            ->select('symbol')
             ->selectRaw('COUNT(*) as trades')
             ->selectRaw('SUM(CASE WHEN profit > 0 THEN 1 ELSE 0 END) as wins')
             ->selectRaw('SUM(profit) as total_profit')
             ->selectRaw('SUM(volume) as total_volume')
-            ->groupBy('symbol', 'normalized_symbol')
+            ->groupBy('symbol')
             ->orderByDesc('trades')
             ->limit(10)
             ->get()
@@ -150,7 +150,7 @@ class ProfileDataAggregatorService
                 $winRate = $item->trades > 0 ? ($item->wins / $item->trades) * 100 : 0;
                 return [
                     'symbol' => $item->symbol,
-                    'normalized_symbol' => $item->normalized_symbol,
+                    'normalized_symbol' => $this->normalizeSymbol($item->symbol),
                     'trades' => $item->trades,
                     'win_rate' => round($winRate, 2),
                     'profit' => $item->total_profit,
@@ -158,6 +158,15 @@ class ProfileDataAggregatorService
                 ];
             })
             ->toArray();
+    }
+
+    /**
+     * Normalize symbol name (remove broker suffixes)
+     */
+    private function normalizeSymbol($symbol): string
+    {
+        // Remove common broker suffixes
+        return preg_replace('/\.(sd|lv|iv|Roll|pro|ecn|raw|prime|mini|micro)$/i', '', $symbol);
     }
 
     /**
