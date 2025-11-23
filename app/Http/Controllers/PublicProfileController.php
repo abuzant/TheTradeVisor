@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use App\Services\PublicProfile\UsernameValidationService;
 use App\Services\PublicProfile\UsernameGeneratorService;
+use App\Services\PublicProfile\ProfileDataAggregatorService;
+use App\Models\PublicProfileAccount;
+use App\Models\User;
 
 class PublicProfileController extends Controller
 {
@@ -136,5 +139,71 @@ class PublicProfileController extends Controller
         );
 
         return response()->json(['success' => true, 'profile' => $profileAccount]);
+    }
+
+    /**
+     * Show public profile
+     * URL: /@{username}/{slug}/{account_number}
+     */
+    public function show(Request $request, string $username, string $slug, string $accountNumber, ProfileDataAggregatorService $dataAggregator)
+    {
+        // Handle @anonymous special case
+        if ($username === 'anonymous') {
+            $user = User::whereHas('publicProfileAccounts', function ($query) use ($slug, $accountNumber) {
+                $query->where('account_slug', $slug)
+                      ->whereHas('tradingAccount', function ($q) use ($accountNumber) {
+                          $q->where('account_number', $accountNumber);
+                      });
+            })->where('public_display_mode', 'anonymous')->first();
+        } else {
+            $user = User::where('public_username', $username)->first();
+        }
+
+        if (!$user) {
+            abort(404, 'Profile not found');
+        }
+
+        // Find the public profile account
+        $profileAccount = PublicProfileAccount::where('user_id', $user->id)
+            ->where('account_slug', $slug)
+            ->where('is_public', true)
+            ->whereHas('tradingAccount', function ($query) use ($accountNumber) {
+                $query->where('account_number', $accountNumber);
+            })
+            ->with(['tradingAccount', 'user'])
+            ->first();
+
+        if (!$profileAccount) {
+            abort(404, 'Profile not found or not public');
+        }
+
+        // Get all profile data
+        $data = $dataAggregator->getProfileData($profileAccount);
+
+        // Track view (async, don't block)
+        $this->trackView($request, $profileAccount);
+
+        return view('public-profile.show', $data);
+    }
+
+    /**
+     * Track profile view
+     */
+    private function trackView(Request $request, PublicProfileAccount $profileAccount): void
+    {
+        try {
+            \App\Models\ProfileView::create([
+                'public_profile_account_id' => $profileAccount->id,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'referer' => $request->header('referer'),
+                'viewed_at' => now(),
+            ]);
+
+            $profileAccount->incrementViewCount();
+        } catch (\Exception $e) {
+            // Silently fail, don't break profile view
+            \Log::error('Failed to track profile view: ' . $e->getMessage());
+        }
     }
 }

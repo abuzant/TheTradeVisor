@@ -54,6 +54,14 @@ Route::middleware(['enterprise.subdomain', 'auth', 'enterprise.admin'])->prefix(
 
 // Public pages (with main domain middleware to block enterprise subdomain)
 Route::middleware('main.domain')->group(function () {
+
+// Public Profile Route (must be before other routes to avoid conflicts)
+Route::get('/@{username}/{slug}/{account}', [\App\Http\Controllers\PublicProfileController::class, 'show'])
+    ->name('public.profile.show')
+    ->where('username', '[a-zA-Z0-9_]+')
+    ->where('slug', '[a-z0-9-]+')
+    ->where('account', '[0-9]+');
+
 Route::get('/', [App\Http\Controllers\PublicController::class, 'landing'])->name('landing');
 Route::get('/features', [App\Http\Controllers\PublicController::class, 'features'])->name('features');
 Route::get('/screenshots', [App\Http\Controllers\PublicController::class, 'screenshots'])->name('screenshots');
