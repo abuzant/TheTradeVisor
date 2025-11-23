@@ -285,50 +285,27 @@ class PublicProfileController extends Controller
     {
         $startDate = now()->subDays(30);
         
-        // Get closed trades (deals with entry='out' for MT5, positions for MT4)
-        if ($account->platform_type === 'MT5') {
-            $deals = $account->deals()
-                ->where('entry', 'out')
-                ->whereIn('type', ['buy', 'sell'])
-                ->where('time', '>=', $startDate)
-                ->get();
-            
-            if ($deals->isEmpty()) {
-                return [
-                    'total_profit' => 0,
-                    'total_trades' => 0,
-                    'win_rate' => 0,
-                    'roi' => 0,
-                    'profit_factor' => 0,
-                ];
-            }
-
-            $totalProfit = $deals->sum('profit');
-            $totalTrades = $deals->count();
-            $winningTrades = $deals->where('profit', '>', 0);
-            $losingTrades = $deals->where('profit', '<', 0);
-        } else {
-            // MT4 uses positions
-            $positions = $account->positions()
-                ->whereNotNull('close_time')
-                ->where('close_time', '>=', $startDate)
-                ->get();
-            
-            if ($positions->isEmpty()) {
-                return [
-                    'total_profit' => 0,
-                    'total_trades' => 0,
-                    'win_rate' => 0,
-                    'roi' => 0,
-                    'profit_factor' => 0,
-                ];
-            }
-
-            $totalProfit = $positions->sum('profit');
-            $totalTrades = $positions->count();
-            $winningTrades = $positions->where('profit', '>', 0);
-            $losingTrades = $positions->where('profit', '<', 0);
+        // Get closed trades (deals with entry='out' for both MT4 and MT5)
+        $deals = $account->deals()
+            ->where('entry', 'out')
+            ->whereIn('type', ['buy', 'sell'])
+            ->where('time', '>=', $startDate)
+            ->get();
+        
+        if ($deals->isEmpty()) {
+            return [
+                'total_profit' => 0,
+                'total_trades' => 0,
+                'win_rate' => 0,
+                'roi' => 0,
+                'profit_factor' => 0,
+            ];
         }
+
+        $totalProfit = $deals->sum('profit');
+        $totalTrades = $deals->count();
+        $winningTrades = $deals->where('profit', '>', 0);
+        $losingTrades = $deals->where('profit', '<', 0);
         
         $winRate = $totalTrades > 0 ? ($winningTrades->count() / $totalTrades) * 100 : 0;
         
