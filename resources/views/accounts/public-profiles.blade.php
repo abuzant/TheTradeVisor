@@ -37,7 +37,7 @@
 
             {{-- Accounts List --}}
             @forelse($accounts as $account)
-                <div class="bg-white shadow-card rounded-xl p-6" x-data="accountProfileForm({{ $account->id }}, @js($account->publicProfileAccount))">
+                <div class="bg-white shadow-card rounded-xl p-6" x-data="accountProfileForm({{ $account->id }}, @js($account->publicProfileAccount), '{{ $account->account_number }}')">
                     {{-- Account Header --}}
                     <div class="flex items-center justify-between mb-6">
                         <div class="flex items-center space-x-4">
@@ -219,9 +219,10 @@
     </div>
 
     <script>
-        window.accountProfileForm = function(accountId, existingProfile) {
+        window.accountProfileForm = function(accountId, existingProfile, accountNumber) {
             return {
                 accountId: accountId,
+                accountNumber: accountNumber,
                 isPublic: existingProfile?.is_public || false,
                 slug: existingProfile?.account_slug || '',
                 slugSet: !!existingProfile?.account_slug,
@@ -241,8 +242,7 @@
 
                 getPublicUrl() {
                     const username = '{{ auth()->user()->public_username ?? "username" }}';
-                    const accountNumber = '{{ $account->account_number ?? "000000" }}';
-                    return `https://thetradevisor.com/@${username}/${this.slug}/${accountNumber}`;
+                    return `https://thetradevisor.com/@${username}/${this.slug}/${this.accountNumber}`;
                 },
 
                 async copyUrl() {
