@@ -101,13 +101,13 @@ class ProfileDataAggregatorService
         // Get account snapshots for equity curve
         $snapshots = DB::table('account_snapshots')
             ->where('trading_account_id', $account->id)
-            ->where('snapshot_at', '>=', $startDate)
-            ->orderBy('snapshot_at', 'asc')
-            ->get(['snapshot_at', 'equity', 'balance']);
+            ->where('snapshot_time', '>=', $startDate)
+            ->orderBy('snapshot_time', 'asc')
+            ->get(['snapshot_time', 'equity', 'balance']);
 
         return $snapshots->map(function ($snapshot) {
             return [
-                'date' => $snapshot->snapshot_at,
+                'date' => $snapshot->snapshot_time,
                 'equity' => (float) $snapshot->equity,
                 'balance' => (float) $snapshot->balance,
             ];
