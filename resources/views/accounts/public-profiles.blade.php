@@ -58,21 +58,16 @@
                             </div>
                         </div>
                         
-                        {{-- Public/Private Toggle --}}
-                        <div class="flex items-center space-x-3">
-                            <span class="text-sm text-gray-600">Private</span>
-                            <label class="relative inline-flex items-center cursor-pointer">
-                                <input 
-                                    type="checkbox" 
-                                    class="sr-only peer" 
-                                    x-model="isPublic"
-                                    x-on:change="togglePublic"
-                                >
-                                <div class="w-11 h-6 bg-gray-200 rounded-full relative transition-colors duration-200 peer-checked:bg-indigo-600 peer-focus:ring-4 peer-focus:ring-indigo-300">
-                                    <div class="absolute top-0.5 left-0.5 bg-white rounded-full h-5 w-5 transition-transform duration-200 shadow-sm peer-checked:translate-x-5"></div>
-                                </div>
-                            </label>
-                            <span class="text-sm text-gray-600">Public</span>
+                        {{-- Public/Private Dropdown --}}
+                        <div>
+                            <select 
+                                x-model="isPublic"
+                                @change="togglePublic"
+                                class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
+                            >
+                                <option :value="false">Private</option>
+                                <option :value="true">Public</option>
+                            </select>
                         </div>
                     </div>
 
