@@ -61,12 +61,12 @@
                         {{-- Public/Private Dropdown --}}
                         <div>
                             <select 
-                                x-model="isPublic"
+                                x-model.boolean="isPublic"
                                 @change="togglePublic"
                                 class="rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
                             >
-                                <option :value="false">Private</option>
-                                <option :value="true">Public</option>
+                                <option value="false">Private</option>
+                                <option value="true">Public</option>
                             </select>
                         </div>
                     </div>
