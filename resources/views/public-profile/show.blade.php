@@ -141,23 +141,20 @@
             </div>
         @endif
 
-        {{-- CTA Section --}}
-        <div class="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl shadow-card p-8 text-center text-white">
-            <h2 class="text-2xl font-bold mb-2">Track Your Trading Performance</h2>
-            <p class="text-indigo-100 mb-6">Join thousands of traders using TheTradeVisor to analyze their performance</p>
-            <a href="{{ route('register') }}" class="inline-block px-8 py-3 bg-white text-indigo-600 rounded-lg font-semibold hover:bg-gray-100 transition">
-                Get Started Free
-            </a>
-        </div>
+        {{-- CTA Section (only for guests) --}}
+        @guest
+            <div class="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl shadow-card p-8 text-center text-white">
+                <h2 class="text-2xl font-bold mb-2">Track Your Trading Performance</h2>
+                <p class="text-indigo-100 mb-6">Join thousands of traders using TheTradeVisor to analyze their performance</p>
+                <a href="{{ route('register') }}" class="inline-block px-8 py-3 bg-white text-indigo-600 rounded-lg font-semibold hover:bg-gray-100 transition">
+                    Get Started Free
+                </a>
+            </div>
+        @endguest
     </main>
 
-    {{-- Footer --}}
-    <footer class="bg-white border-t mt-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center text-gray-600">
-            <p>Powered by <a href="{{ route('landing') }}" class="text-indigo-600 hover:text-indigo-700 font-semibold">TheTradeVisor</a></p>
-            <p class="text-sm mt-2">Professional Trading Analytics Platform</p>
-        </div>
-    </footer>
+    {{-- Unified Footer --}}
+    <x-footer />
 
     <script>
         // Equity Curve Chart
