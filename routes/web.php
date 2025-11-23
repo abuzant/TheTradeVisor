@@ -156,6 +156,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    // Public profile settings
+    Route::patch('/profile/public', [\App\Http\Controllers\PublicProfileController::class, 'updateSettings'])
+        ->name('profile.public.update');
+
     // Profile digest preferences
     Route::post('/profile/digests', [\App\Http\Controllers\ProfileDigestController::class, 'update'])
         ->name('profile.digests.update');
