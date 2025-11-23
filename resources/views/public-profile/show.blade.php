@@ -9,15 +9,15 @@
     <meta name="description" content="View {{ $user->public_display_mode === 'anonymous' ? 'anonymous trader' : '@' . $user->public_username }}'s trading performance: {{ $stats['win_rate'] }}% win rate, {{ $stats['total_trades'] }} trades, {{ number_format($stats['total_profit'], 2) }} {{ $stats['currency'] }} profit.">
     
     {{-- Open Graph --}}
-    <meta property="og:title" content="{{ $user->public_display_mode === 'anonymous' ? 'Anonymous Trader' : '@' . $user->public_username }} - {{ $stats['win_rate'] }}% Win Rate">
-    <meta property="og:description" content="{{ number_format($stats['total_profit'], 2) }} {{ $stats['currency'] }} profit • {{ $stats['total_trades'] }} trades • {{ $stats['win_rate'] }}% win rate">
+    <meta property="og:title" content="{{ $user->public_display_mode === 'anonymous' ? 'Anonymous Trader' : '@' . $user->public_username }} - {{ $stats['win_rate'] }}% Win Rate tracked by TheTradeVisor">
+    <meta property="og:description" content="{{ number_format($stats['total_profit'], 2) }} {{ $stats['currency'] }} profit • {{ $stats['total_trades'] }} trades • {{ $stats['win_rate'] }}% win rateaccount tracking by TheTradeVisor">
     <meta property="og:type" content="profile">
     <meta property="og:url" content="{{ url()->current() }}">
     
     {{-- Twitter Card --}}
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="{{ $user->public_display_mode === 'anonymous' ? 'Anonymous Trader' : '@' . $user->public_username }}'s Trading Performance">
-    <meta name="twitter:description" content="{{ $stats['win_rate'] }}% win rate • {{ number_format($stats['total_profit'], 2) }} {{ $stats['currency'] }} profit • {{ $stats['total_trades'] }} trades">
+    <meta name="twitter:title" content="{{ $user->public_display_mode === 'anonymous' ? 'Anonymous Trader' : '@' . $user->public_username }}'s Trading Performance from TheTradeVisor">
+    <meta name="twitter:description" content="{{ $stats['win_rate'] }}% win rate • {{ number_format($stats['total_profit'], 2) }} {{ $stats['currency'] }} profit • {{ $stats['total_trades'] }} trades on TheTradeVisor">
     
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
