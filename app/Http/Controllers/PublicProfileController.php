@@ -232,10 +232,11 @@ class PublicProfileController extends Controller
             }])
             ->get();
 
-        // Calculate stats for each trader and their best account
+        // Calculate aggregated stats for each trader across all their accounts
         $leaderboardData = $traders->map(function ($user) use ($rankBy) {
-            $bestAccount = null;
-            $bestValue = null;
+            $allStats = [];
+            $primaryAccount = null;
+            $primaryProfile = null;
 
             foreach ($user->publicProfileAccounts as $profileAccount) {
                 $account = $profileAccount->tradingAccount;
@@ -243,33 +244,65 @@ class PublicProfileController extends Controller
 
                 // Calculate stats for the account (last 30 days)
                 $stats = $this->calculateAccountStats($account);
+                $allStats[] = $stats;
                 
-                $value = match($rankBy) {
-                    'total_profit' => $stats['total_profit'] ?? 0,
-                    'roi' => $stats['roi'] ?? 0,
-                    'win_rate' => $stats['win_rate'] ?? 0,
-                    'profit_factor' => $stats['profit_factor'] ?? 0,
-                    default => 0,
-                };
-
-                if ($bestValue === null || $value > $bestValue) {
-                    $bestValue = $value;
-                    $bestAccount = [
-                        'profile' => $profileAccount,
-                        'account' => $account,
-                        'stats' => $stats,
-                        'value' => $value,
-                    ];
+                // Use first account as primary for display
+                if (!$primaryAccount) {
+                    $primaryAccount = $account;
+                    $primaryProfile = $profileAccount;
                 }
             }
 
-            return $bestAccount ? [
+            if (empty($allStats)) {
+                return null;
+            }
+
+            // Aggregate stats across all accounts
+            $totalProfit = array_sum(array_column($allStats, 'total_profit'));
+            $totalTrades = array_sum(array_column($allStats, 'total_trades'));
+            
+            // Calculate weighted averages for percentages
+            $totalWinningTrades = 0;
+            $totalGrossProfit = 0;
+            $totalGrossLoss = 0;
+            
+            foreach ($allStats as $stats) {
+                $totalWinningTrades += ($stats['win_rate'] / 100) * $stats['total_trades'];
+                // Reconstruct gross profit/loss from profit factor
+                $pf = $stats['profit_factor'];
+                if ($pf > 0 && $stats['total_profit'] > 0) {
+                    $gp = $stats['total_profit'] * ($pf / ($pf + 1));
+                    $totalGrossProfit += $gp;
+                    $totalGrossLoss += abs($stats['total_profit'] - $gp);
+                } elseif ($stats['total_profit'] < 0) {
+                    $totalGrossLoss += abs($stats['total_profit']);
+                }
+            }
+            
+            $aggregatedStats = [
+                'total_profit' => $totalProfit,
+                'total_trades' => $totalTrades,
+                'win_rate' => $totalTrades > 0 ? round(($totalWinningTrades / $totalTrades) * 100, 2) : 0,
+                'roi' => 0, // ROI doesn't aggregate well across accounts
+                'profit_factor' => $totalGrossLoss > 0 ? round($totalGrossProfit / $totalGrossLoss, 2) : ($totalGrossProfit > 0 ? 999 : 0),
+            ];
+
+            $value = match($rankBy) {
+                'total_profit' => $aggregatedStats['total_profit'],
+                'roi' => $aggregatedStats['roi'],
+                'win_rate' => $aggregatedStats['win_rate'],
+                'profit_factor' => $aggregatedStats['profit_factor'],
+                default => 0,
+            };
+
+            return [
                 'user' => $user,
-                'profile' => $bestAccount['profile'],
-                'account' => $bestAccount['account'],
-                'stats' => $bestAccount['stats'],
-                'rank_value' => $bestAccount['value'],
-            ] : null;
+                'profile' => $primaryProfile,
+                'account' => $primaryAccount,
+                'stats' => $aggregatedStats,
+                'rank_value' => $value,
+                'account_count' => count($allStats),
+            ];
         })->filter()->sortByDesc('rank_value')->take(50)->values();
 
         return view('leaderboard.index', [

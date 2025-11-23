@@ -159,7 +159,7 @@
                                                         @endif
                                                     </div>
                                                     <div class="text-sm text-gray-500">
-                                                        <x-broker-name :broker="$trader['account']->broker_name" />
+                                                        {{ $trader['account_count'] }} {{ $trader['account_count'] === 1 ? 'Account' : 'Accounts' }}
                                                     </div>
                                                 </div>
                                             </div>
