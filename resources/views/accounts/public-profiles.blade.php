@@ -76,7 +76,7 @@
                     </div>
 
                     {{-- Configuration Form (shown when public) --}}
-                    <div x-show="isPublic" x-collapse>
+                    <div x-show="isPublic" x-collapse style="display: none;">
                         <form @submit.prevent="saveSettings" class="space-y-6 border-t pt-6">
                             
                             {{-- Account Slug --}}
