@@ -1,42 +1,47 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Top Traders Leaderboard | {{ config('app.name') }}</title>
-    
-    <!-- Favicons -->
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="font-sans antialiased">
-    <div class="min-h-screen bg-gray-50">
+@if(auth()->check())
+    <x-app-layout>
+        <x-slot name="header">
+            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+                {{ __('🏆 Top Traders Leaderboard') }}
+            </h2>
+        </x-slot>
+@else
+    <!DOCTYPE html>
+    <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csrf-token" content="{{ csrf_token() }}">
+        <title>Top Traders Leaderboard | {{ config('app.name') }}</title>
         
-        {{-- Simple Navigation --}}
-        <nav class="bg-white shadow-sm">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between h-16">
-                    <div class="flex items-center">
-                        <a href="{{ route('landing') }}" class="flex items-center space-x-3">
-                            <img src="{{ asset('images/logo.svg') }}" alt="TheTradeVisor" class="h-8 w-8">
-                            <span class="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">TheTradeVisor</span>
-                        </a>
-                    </div>
-                    <div class="flex items-center space-x-4">
-                        @auth
-                            <a href="{{ route('dashboard') }}" class="text-gray-700 hover:text-indigo-600 font-medium">Dashboard</a>
-                        @else
+        <!-- Favicons -->
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+        
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    </head>
+    <body class="font-sans antialiased">
+        <div class="min-h-screen bg-gray-50">
+            
+            {{-- Simple Navigation for Guests --}}
+            <nav class="bg-white shadow-sm">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex justify-between h-16">
+                        <div class="flex items-center">
+                            <a href="{{ route('landing') }}" class="flex items-center space-x-3">
+                                <img src="{{ asset('logo.svg') }}" alt="TheTradeVisor" class="h-8 w-8">
+                                <span class="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">TheTradeVisor</span>
+                            </a>
+                        </div>
+                        <div class="flex items-center space-x-4">
                             <a href="{{ route('login') }}" class="text-gray-700 hover:text-indigo-600 font-medium">Login</a>
                             <a href="{{ route('register') }}" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium">Sign Up</a>
-                        @endauth
+                        </div>
                     </div>
                 </div>
-            </div>
-        </nav>
+            </nav>
+@endif
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -225,7 +230,7 @@
 
                                     {{-- Expandable Accounts Sub-table --}}
                                     @if($trader['account_count'] > 1)
-                                        <tr x-show="expanded" x-collapse class="bg-gray-50">
+                                        <tr x-show="expanded" x-transition x-collapse class="bg-gray-50">
                                             <td colspan="8" class="px-6 py-4">
                                                 <div class="bg-white rounded-lg shadow-sm overflow-hidden">
                                                     <table class="min-w-full">
@@ -318,6 +323,13 @@
 
         </div>
     </div>
+
+@if(auth()->check())
+    </x-app-layout>
+@else
+    {{-- Footer for guests --}}
+    <x-footer />
     </div>
-</body>
-</html>
+    </body>
+    </html>
+@endif
