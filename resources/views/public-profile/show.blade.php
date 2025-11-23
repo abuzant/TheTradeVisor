@@ -116,22 +116,26 @@
                 <h2 class="text-xl font-bold text-gray-900 mb-4">Top Symbols</h2>
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-200">
-                        <thead>
+                        <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Symbol</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Trades</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Win Rate</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Profit</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Symbol</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trades</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Win Rate</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Profit</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-200">
+                        <tbody class="bg-white divide-y divide-gray-200">
                             @foreach($symbol_performance as $symbol)
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap font-medium">{{ $symbol['symbol'] }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">{{ $symbol['trades'] }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap">{{ $symbol['win_rate'] }}%</td>
-                                    <td class="px-6 py-4 whitespace-nowrap {{ $symbol['profit'] >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                        {{ number_format($symbol['profit'], 2) }} {{ $stats['currency'] }}
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                        <span class="cursor-help" title="Raw: {{ $symbol['symbol'] }}">
+                                            {{ $symbol['normalized_symbol'] ?? $symbol['symbol'] }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $symbol['trades'] }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $symbol['win_rate'] }}%</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold {{ $symbol['profit'] >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                                        {{ $symbol['profit'] >= 0 ? '+' : '' }}{{ number_format($symbol['profit'], 2) }} {{ $stats['currency'] }}
                                     </td>
                                 </tr>
                             @endforeach

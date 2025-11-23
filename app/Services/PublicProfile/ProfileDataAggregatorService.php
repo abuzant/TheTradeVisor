@@ -137,12 +137,12 @@ class ProfileDataAggregatorService
             ->where('entry', 'out')
             ->whereIn('type', ['buy', 'sell'])
             ->where('time', '>=', $startDate)
-            ->select('symbol')
+            ->select('symbol', 'normalized_symbol')
             ->selectRaw('COUNT(*) as trades')
             ->selectRaw('SUM(CASE WHEN profit > 0 THEN 1 ELSE 0 END) as wins')
             ->selectRaw('SUM(profit) as total_profit')
             ->selectRaw('SUM(volume) as total_volume')
-            ->groupBy('symbol')
+            ->groupBy('symbol', 'normalized_symbol')
             ->orderByDesc('trades')
             ->limit(10)
             ->get()
@@ -150,6 +150,7 @@ class ProfileDataAggregatorService
                 $winRate = $item->trades > 0 ? ($item->wins / $item->trades) * 100 : 0;
                 return [
                     'symbol' => $item->symbol,
+                    'normalized_symbol' => $item->normalized_symbol,
                     'trades' => $item->trades,
                     'win_rate' => round($winRate, 2),
                     'profit' => $item->total_profit,
