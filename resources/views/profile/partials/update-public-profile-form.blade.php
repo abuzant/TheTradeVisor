@@ -224,9 +224,10 @@
                 </div>
             </div>
     </div>
+</section>
 
-    <script>
-        function publicProfileForm() {
+<script>
+    function publicProfileForm() {
             return {
                 username: '{{ old('public_username', '') }}',
                 displayMode: '{{ old('public_display_mode', auth()->user()->public_display_mode) }}',
@@ -274,5 +275,4 @@
                 }
             }
         }
-    </script>
-</section>
+</script>
