@@ -179,46 +179,59 @@
         {{-- Warning Modal for Username Confirmation --}}
         <div x-show="showUsernameWarning" 
          x-cloak
-         class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center" 
+         class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4" 
          aria-labelledby="modal-title" 
          role="dialog" 
          aria-modal="true"
          style="display: none;">
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="showUsernameWarning = false"></div>
+            <div class="fixed inset-0 bg-gray-900 bg-opacity-60 backdrop-blur-sm transition-opacity" @click="showUsernameWarning = false"></div>
 
-            <div class="relative bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:max-w-lg sm:w-full mx-4">
-                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                    <div class="sm:flex sm:items-start">
-                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                            <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            <div class="relative bg-white rounded-2xl shadow-2xl transform transition-all sm:max-w-md w-full">
+                <!-- Header with Icon -->
+                <div class="bg-gradient-to-br from-amber-50 to-orange-50 px-6 pt-6 pb-4 rounded-t-2xl">
+                    <div class="flex items-center space-x-4">
+                        <div class="flex-shrink-0 flex items-center justify-center h-14 w-14 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 shadow-lg">
+                            <svg class="h-7 w-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                             </svg>
                         </div>
-                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
-                                ⚠️ Username Cannot Be Changed
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-900" id="modal-title">
+                                Permanent Username
                             </h3>
-                            <div class="mt-2">
-                                <p class="text-sm text-gray-500">
-                                    Once you set your username, <strong class="text-red-600">it cannot be changed or modified</strong>. 
-                                    This is permanent and will be part of your public profile URL.
-                                </p>
-                                <p class="mt-2 text-sm text-gray-500">
-                                    Are you sure you want to set your username as:
-                                </p>
-                                <p class="mt-2 text-lg font-bold text-indigo-600">
+                            <p class="text-sm text-amber-700 font-medium">This action cannot be undone</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Content -->
+                <div class="px-6 py-5">
+                    <div class="space-y-4">
+                        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+                            <p class="text-sm text-gray-700 leading-relaxed">
+                                Once you set your username, <strong class="text-red-600 font-semibold">it cannot be changed or modified</strong>. 
+                                This will be permanent and part of your public profile URL.
+                            </p>
+                        </div>
+
+                        <div class="text-center py-2">
+                            <p class="text-sm text-gray-600 mb-2">You're about to set your username as:</p>
+                            <div class="bg-indigo-50 border-2 border-indigo-200 rounded-lg px-4 py-3">
+                                <p class="text-2xl font-bold text-indigo-600">
                                     @<span x-text="username"></span>
                                 </p>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <button type="button" @click="confirmUsername" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm">
-                        Yes, Set Username
-                    </button>
-                    <button type="button" @click="showUsernameWarning = false" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+
+                <!-- Actions -->
+                <div class="bg-gray-50 px-6 py-4 rounded-b-2xl flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+                    <button type="button" @click="showUsernameWarning = false" class="w-full sm:w-auto inline-flex justify-center items-center px-5 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
                         Cancel
+                    </button>
+                    <button type="button" @click="confirmUsername" class="w-full sm:w-auto inline-flex justify-center items-center px-5 py-2.5 border border-transparent rounded-lg text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-lg transition-all">
+                        ✓ Confirm & Set Username
                     </button>
                 </div>
             </div>
