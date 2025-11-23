@@ -19,8 +19,8 @@
             
             @if(auth()->user()->public_username)
                 {{-- Username already set --}}
-                <div class="mt-2 flex items-center space-x-2">
-                    <span class="text-lg font-bold text-indigo-600">@{{ auth()->user()->public_username }}</span>
+                <div class="mt-2 flex items-center space-x-2 flex-wrap">
+                    <span class="text-lg font-bold text-indigo-600 break-all">{{ '@' . auth()->user()->public_username }}</span>
                     <span class="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">✓ Set</span>
                 </div>
                 <p class="mt-1 text-xs text-gray-500">
@@ -79,7 +79,7 @@
                            class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500">
                     <span class="ml-2 text-sm text-gray-700">
                         <strong>Username</strong> - Show as 
-                        <span class="text-indigo-600 font-mono">@{{ auth()->user()->public_username ?? 'your_username' }}</span>
+                        <span class="text-indigo-600 font-mono break-all">{{ '@' . (auth()->user()->public_username ?? 'your_username') }}</span>
                     </span>
                 </label>
 
