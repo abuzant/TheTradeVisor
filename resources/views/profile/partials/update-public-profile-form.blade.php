@@ -9,7 +9,7 @@
         </p>
     </header>
 
-    <form method="post" action="{{ route('profile.public.update') }}" class="mt-6 space-y-6" x-data="publicProfileForm()" @submit.prevent="handleSubmit">
+    <form method="post" action="{{ route('profile.public.update') }}" class="mt-6 space-y-6" x-data="publicProfileForm" @submit.prevent="handleSubmit">
         @csrf
         @method('patch')
 
