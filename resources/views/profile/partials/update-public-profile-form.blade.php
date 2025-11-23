@@ -276,15 +276,19 @@
                     if (!this.usernameAlreadySet && this.username && this.username.length >= 3) {
                         this.showUsernameWarning = true;
                     } else {
-                        // Submit directly
-                        this.$el.submit();
+                        // Submit directly - allow default form submission
+                        event.target.submit();
                     }
                 },
 
                 confirmUsername() {
                     this.showUsernameWarning = false;
-                    // Submit the form
-                    this.$el.submit();
+                    // Remove the Alpine event listener and submit normally
+                    const form = this.$el;
+                    // Use setTimeout to let Alpine finish processing
+                    setTimeout(() => {
+                        form.submit();
+                    }, 100);
                 }
         }));
     });
