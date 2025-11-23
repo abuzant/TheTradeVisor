@@ -223,9 +223,8 @@
     </div>
 
     <script>
-        document.addEventListener('alpine:init', () => {
-            window.accountProfileForm = function(accountId, existingProfile) {
-                return {
+        window.accountProfileForm = function(accountId, existingProfile) {
+            return {
                 accountId: accountId,
                 isPublic: existingProfile?.is_public || false,
                 slug: existingProfile?.account_slug || '',
@@ -297,6 +296,5 @@
                 }
             }
         };
-        });
     </script>
 </x-app-layout>
