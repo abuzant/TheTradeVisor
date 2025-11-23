@@ -232,11 +232,14 @@ class PublicProfileController extends Controller
             }])
             ->get();
 
-        // Calculate aggregated stats for each trader across all their accounts
+        // Calculate aggregated stats for each trader and collect individual account data
         $leaderboardData = $traders->map(function ($user) use ($rankBy) {
-            $allStats = [];
-            $primaryAccount = null;
-            $primaryProfile = null;
+            $accountsData = [];
+            $totalProfit = 0;
+            $totalTrades = 0;
+            $totalWinningTrades = 0;
+            $totalGrossProfit = 0;
+            $totalGrossLoss = 0;
 
             foreach ($user->publicProfileAccounts as $profileAccount) {
                 $account = $profileAccount->tradingAccount;
@@ -244,30 +247,18 @@ class PublicProfileController extends Controller
 
                 // Calculate stats for the account (last 30 days)
                 $stats = $this->calculateAccountStats($account);
-                $allStats[] = $stats;
                 
-                // Use first account as primary for display
-                if (!$primaryAccount) {
-                    $primaryAccount = $account;
-                    $primaryProfile = $profileAccount;
-                }
-            }
-
-            if (empty($allStats)) {
-                return null;
-            }
-
-            // Aggregate stats across all accounts
-            $totalProfit = array_sum(array_column($allStats, 'total_profit'));
-            $totalTrades = array_sum(array_column($allStats, 'total_trades'));
-            
-            // Calculate weighted averages for percentages
-            $totalWinningTrades = 0;
-            $totalGrossProfit = 0;
-            $totalGrossLoss = 0;
-            
-            foreach ($allStats as $stats) {
+                $accountsData[] = [
+                    'profile' => $profileAccount,
+                    'account' => $account,
+                    'stats' => $stats,
+                ];
+                
+                // Aggregate for trader totals
+                $totalProfit += $stats['total_profit'];
+                $totalTrades += $stats['total_trades'];
                 $totalWinningTrades += ($stats['win_rate'] / 100) * $stats['total_trades'];
+                
                 // Reconstruct gross profit/loss from profit factor
                 $pf = $stats['profit_factor'];
                 if ($pf > 0 && $stats['total_profit'] > 0) {
@@ -278,7 +269,11 @@ class PublicProfileController extends Controller
                     $totalGrossLoss += abs($stats['total_profit']);
                 }
             }
-            
+
+            if (empty($accountsData)) {
+                return null;
+            }
+
             $aggregatedStats = [
                 'total_profit' => $totalProfit,
                 'total_trades' => $totalTrades,
@@ -297,11 +292,10 @@ class PublicProfileController extends Controller
 
             return [
                 'user' => $user,
-                'profile' => $primaryProfile,
-                'account' => $primaryAccount,
                 'stats' => $aggregatedStats,
                 'rank_value' => $value,
-                'account_count' => count($allStats),
+                'accounts' => $accountsData,
+                'account_count' => count($accountsData),
             ];
         })->filter()->sortByDesc('rank_value')->take(50)->values();
 

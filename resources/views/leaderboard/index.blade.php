@@ -124,7 +124,7 @@
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @foreach($traders as $index => $trader)
-                                    <tr class="hover:bg-gray-50 transition-colors">
+                                    <tr class="hover:bg-gray-50 transition-colors" x-data="{ expanded: false }">
                                         {{-- Rank --}}
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="flex items-center">
@@ -143,9 +143,16 @@
                                         {{-- Trader Info --}}
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="flex items-center">
+                                                @if($trader['account_count'] > 1)
+                                                    <button @click="expanded = !expanded" class="mr-2 text-gray-400 hover:text-gray-600">
+                                                        <svg class="w-5 h-5 transition-transform" :class="{ 'rotate-90': expanded }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                                        </svg>
+                                                    </button>
+                                                @endif
                                                 <div class="flex-shrink-0 h-10 w-10">
-                                                    <div class="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold">
-                                                        {{ substr($trader['account']->broker_name, 0, 1) }}
+                                                    <div class="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-lg">
+                                                        {{ $trader['account_count'] }}
                                                     </div>
                                                 </div>
                                                 <div class="ml-4">
@@ -168,7 +175,7 @@
                                         {{-- Profit --}}
                                         <td class="px-6 py-4 whitespace-nowrap text-right">
                                             <div class="text-sm font-semibold {{ $trader['stats']['total_profit'] >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                                {{ $trader['stats']['total_profit'] >= 0 ? '+' : '' }}{{ number_format($trader['stats']['total_profit'], 2) }} {{ $trader['account']->account_currency }}
+                                                {{ $trader['stats']['total_profit'] >= 0 ? '+' : '' }}{{ number_format($trader['stats']['total_profit'], 2) }} {{ $trader['accounts'][0]['account']->account_currency }}
                                             </div>
                                         </td>
 
@@ -202,12 +209,88 @@
 
                                         {{-- Action --}}
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <a href="{{ url('/@' . $trader['user']->public_username . '/' . $trader['profile']->account_slug . '/' . $trader['account']->account_number) }}" 
-                                               class="text-indigo-600 hover:text-indigo-900 font-semibold">
-                                                View Profile →
-                                            </a>
+                                            @if($trader['account_count'] > 1)
+                                                <button @click="expanded = !expanded" class="text-indigo-600 hover:text-indigo-900 font-semibold">
+                                                    <span x-show="!expanded">Show Accounts →</span>
+                                                    <span x-show="expanded">Hide Accounts ↑</span>
+                                                </button>
+                                            @else
+                                                <a href="{{ url('/@' . $trader['user']->public_username . '/' . $trader['accounts'][0]['profile']->account_slug . '/' . $trader['accounts'][0]['account']->account_number) }}" 
+                                                   class="text-indigo-600 hover:text-indigo-900 font-semibold">
+                                                    View Profile →
+                                                </a>
+                                            @endif
                                         </td>
                                     </tr>
+
+                                    {{-- Expandable Accounts Sub-table --}}
+                                    @if($trader['account_count'] > 1)
+                                        <tr x-show="expanded" x-collapse class="bg-gray-50">
+                                            <td colspan="8" class="px-6 py-4">
+                                                <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                                                    <table class="min-w-full">
+                                                        <thead class="bg-gray-100">
+                                                            <tr>
+                                                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-600">Account</th>
+                                                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-600">Profit</th>
+                                                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-600">ROI</th>
+                                                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-600">Win Rate</th>
+                                                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-600">Profit Factor</th>
+                                                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-600">Trades</th>
+                                                                <th class="px-4 py-2 text-right text-xs font-medium text-gray-600">Action</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody class="divide-y divide-gray-200">
+                                                            @foreach($trader['accounts'] as $accountData)
+                                                                <tr class="hover:bg-gray-50">
+                                                                    <td class="px-4 py-3">
+                                                                        <div class="flex items-center">
+                                                                            <div class="w-8 h-8 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-lg flex items-center justify-center text-white font-bold text-xs mr-3">
+                                                                                {{ substr($accountData['account']->broker_name, 0, 1) }}
+                                                                            </div>
+                                                                            <div>
+                                                                                <div class="text-sm font-medium text-gray-900">
+                                                                                    <x-broker-name :broker="$accountData['account']->broker_name" /> #{{ $accountData['account']->account_number }}
+                                                                                </div>
+                                                                                <div class="text-xs text-gray-500">
+                                                                                    <x-platform-badge :account="$accountData['account']" />
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td class="px-4 py-3 text-right">
+                                                                        <span class="text-sm font-semibold {{ $accountData['stats']['total_profit'] >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                                                                            {{ $accountData['stats']['total_profit'] >= 0 ? '+' : '' }}{{ number_format($accountData['stats']['total_profit'], 2) }}
+                                                                        </span>
+                                                                    </td>
+                                                                    <td class="px-4 py-3 text-right">
+                                                                        <span class="text-sm {{ $accountData['stats']['roi'] >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                                                                            {{ $accountData['stats']['roi'] >= 0 ? '+' : '' }}{{ $accountData['stats']['roi'] }}%
+                                                                        </span>
+                                                                    </td>
+                                                                    <td class="px-4 py-3 text-right text-sm text-gray-900">
+                                                                        {{ $accountData['stats']['win_rate'] }}%
+                                                                    </td>
+                                                                    <td class="px-4 py-3 text-right text-sm text-gray-900">
+                                                                        {{ $accountData['stats']['profit_factor'] }}
+                                                                    </td>
+                                                                    <td class="px-4 py-3 text-right text-sm text-gray-900">
+                                                                        {{ $accountData['stats']['total_trades'] }}
+                                                                    </td>
+                                                                    <td class="px-4 py-3 text-right">
+                                                                        <a href="{{ url('/@' . $trader['user']->public_username . '/' . $accountData['profile']->account_slug . '/' . $accountData['account']->account_number) }}" 
+                                                                           class="text-indigo-600 hover:text-indigo-900 text-sm font-semibold">
+                                                                            View →
+                                                                        </a>
+                                                                    </td>
+                                                                </tr>
+                                                            @endforeach
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endif
                                 @endforeach
                             </tbody>
                         </table>
