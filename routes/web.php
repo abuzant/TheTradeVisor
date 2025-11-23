@@ -62,6 +62,10 @@ Route::get('/@{username}/{slug}/{account}', [\App\Http\Controllers\PublicProfile
     ->where('slug', '[a-z0-9-]+')
     ->where('account', '[0-9]+');
 
+// Top Traders Leaderboard
+Route::get('/top-traders', [\App\Http\Controllers\PublicProfileController::class, 'leaderboard'])
+    ->name('leaderboard');
+
 Route::get('/', [App\Http\Controllers\PublicController::class, 'landing'])->name('landing');
 Route::get('/features', [App\Http\Controllers\PublicController::class, 'features'])->name('features');
 Route::get('/screenshots', [App\Http\Controllers\PublicController::class, 'screenshots'])->name('screenshots');

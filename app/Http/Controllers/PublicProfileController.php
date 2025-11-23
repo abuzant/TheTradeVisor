@@ -206,4 +206,146 @@ class PublicProfileController extends Controller
             \Log::error('Failed to track profile view: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Show top traders leaderboard
+     */
+    public function leaderboard(Request $request)
+    {
+        $rankBy = $request->get('rank_by', 'total_profit');
+        
+        // Validate rank_by parameter
+        $validRankings = ['total_profit', 'roi', 'win_rate', 'profit_factor'];
+        if (!in_array($rankBy, $validRankings)) {
+            $rankBy = 'total_profit';
+        }
+
+        // Get users who opted into leaderboard with public profiles
+        $traders = User::where('show_on_leaderboard', true)
+            ->whereNotNull('public_username')
+            ->whereHas('publicProfileAccounts', function ($query) {
+                $query->where('is_public', true);
+            })
+            ->with(['publicProfileAccounts' => function ($query) {
+                $query->where('is_public', true)
+                    ->with('tradingAccount');
+            }])
+            ->get();
+
+        // Calculate stats for each trader and their best account
+        $leaderboardData = $traders->map(function ($user) use ($rankBy) {
+            $bestAccount = null;
+            $bestValue = null;
+
+            foreach ($user->publicProfileAccounts as $profileAccount) {
+                $account = $profileAccount->tradingAccount;
+                if (!$account) continue;
+
+                // Calculate stats for the account (last 30 days)
+                $stats = $this->calculateAccountStats($account);
+                
+                $value = match($rankBy) {
+                    'total_profit' => $stats['total_profit'] ?? 0,
+                    'roi' => $stats['roi'] ?? 0,
+                    'win_rate' => $stats['win_rate'] ?? 0,
+                    'profit_factor' => $stats['profit_factor'] ?? 0,
+                    default => 0,
+                };
+
+                if ($bestValue === null || $value > $bestValue) {
+                    $bestValue = $value;
+                    $bestAccount = [
+                        'profile' => $profileAccount,
+                        'account' => $account,
+                        'stats' => $stats,
+                        'value' => $value,
+                    ];
+                }
+            }
+
+            return $bestAccount ? [
+                'user' => $user,
+                'profile' => $bestAccount['profile'],
+                'account' => $bestAccount['account'],
+                'stats' => $bestAccount['stats'],
+                'rank_value' => $bestAccount['value'],
+            ] : null;
+        })->filter()->sortByDesc('rank_value')->take(50)->values();
+
+        return view('leaderboard.index', [
+            'traders' => $leaderboardData,
+            'rankBy' => $rankBy,
+        ]);
+    }
+
+    /**
+     * Calculate account statistics for leaderboard
+     */
+    private function calculateAccountStats($account)
+    {
+        $startDate = now()->subDays(30);
+        
+        // Get closed trades (deals with entry='out' for MT5, positions for MT4)
+        if ($account->platform === 'MT5') {
+            $deals = $account->deals()
+                ->where('entry', 'out')
+                ->whereIn('type', ['buy', 'sell'])
+                ->where('time', '>=', $startDate)
+                ->get();
+            
+            if ($deals->isEmpty()) {
+                return [
+                    'total_profit' => 0,
+                    'total_trades' => 0,
+                    'win_rate' => 0,
+                    'roi' => 0,
+                    'profit_factor' => 0,
+                ];
+            }
+
+            $totalProfit = $deals->sum('profit');
+            $totalTrades = $deals->count();
+            $winningTrades = $deals->where('profit', '>', 0);
+            $losingTrades = $deals->where('profit', '<', 0);
+        } else {
+            // MT4 uses positions
+            $positions = $account->positions()
+                ->whereNotNull('close_time')
+                ->where('close_time', '>=', $startDate)
+                ->get();
+            
+            if ($positions->isEmpty()) {
+                return [
+                    'total_profit' => 0,
+                    'total_trades' => 0,
+                    'win_rate' => 0,
+                    'roi' => 0,
+                    'profit_factor' => 0,
+                ];
+            }
+
+            $totalProfit = $positions->sum('profit');
+            $totalTrades = $positions->count();
+            $winningTrades = $positions->where('profit', '>', 0);
+            $losingTrades = $positions->where('profit', '<', 0);
+        }
+        
+        $winRate = $totalTrades > 0 ? ($winningTrades->count() / $totalTrades) * 100 : 0;
+        
+        $grossProfit = $winningTrades->sum('profit');
+        $grossLoss = abs($losingTrades->sum('profit'));
+        $profitFactor = $grossLoss > 0 ? $grossProfit / $grossLoss : ($grossProfit > 0 ? 999 : 0);
+        
+        // Calculate ROI based on initial balance
+        $initialBalance = $account->balance - $totalProfit;
+        $roi = $initialBalance > 0 ? ($totalProfit / $initialBalance) * 100 : 0;
+
+        return [
+            'total_profit' => $totalProfit,
+            'total_trades' => $totalTrades,
+            'win_rate' => round($winRate, 2),
+            'roi' => round($roi, 2),
+            'profit_factor' => round($profitFactor, 2),
+        ];
+    }
 }
