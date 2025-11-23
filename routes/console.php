@@ -66,3 +66,15 @@ Schedule::command('snapshots:cleanup --days=180')
     ->onSuccess(function () {
         \Log::info('Old snapshots cleanup completed successfully');
     });
+
+// Calculate verification badges daily at 4:00 AM
+Schedule::command('badges:calculate')
+    ->dailyAt('04:00')
+    ->name('calculate-verification-badges')
+    ->withoutOverlapping()
+    ->onFailure(function () {
+        \Log::error('Badge calculation failed');
+    })
+    ->onSuccess(function () {
+        \Log::info('Badge calculation completed successfully');
+    });
