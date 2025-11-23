@@ -9,33 +9,33 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
 
-                <div class="p-6 text-gray-900">
+                <div class="p-6 text-gray-900 sm:p-8 shadow sm:rounded">
                     @include('profile.partials.update-profile-information-form')
                 </div>
                 <hr />
 
-                <div class="p-6 text-gray-900">
+                <div class="p-6 text-gray-900 sm:p-8 shadow sm:rounded">
                     @include('profile.partials.update-password-form')
                 </div>
                 <hr />
 
-                <div class="p-6 text-gray-900">
+                <div class="p-6 text-gray-900 sm:p-8 shadow sm:rounded">
                     @include('profile.partials.update-public-profile-form')
                 </div>
                 <hr />
 
-                <div class="p-6 text-gray-900">
+                <div class="p-6 text-gray-900 sm:p-8 shadow sm:rounded">
                     TEST 4
                 </div>
                 <hr />
 
-                <div class="p-6 text-gray-900">
-                    TEST 5
+                <div class="p-6 text-gray-900 sm:p-8 shadow sm:rounded">
+                    @include('profile.partials.delete-user-form')
                 </div>
                 <hr />
 
-                <div class="p-6 text-gray-900">
-                    TEST 6
+                <div class="p-6 text-gray-900 sm:p-8 shadow sm:rounded">
+                    @include('profile.partials.update-digest-preferences-form')
                 </div>
 
             </div>
