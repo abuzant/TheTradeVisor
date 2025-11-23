@@ -227,8 +227,8 @@
 </section>
 
 <script>
-    function publicProfileForm() {
-            return {
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('publicProfileForm', () => ({
                 username: '{{ old('public_username', '') }}',
                 displayMode: '{{ old('public_display_mode', auth()->user()->public_display_mode) }}',
                 showOnLeaderboard: {{ old('show_on_leaderboard', auth()->user()->show_on_leaderboard) ? 'true' : 'false' }},
@@ -273,6 +273,6 @@
                     // Submit the form
                     this.$el.submit();
                 }
-            }
-        }
+        }));
+    });
 </script>
