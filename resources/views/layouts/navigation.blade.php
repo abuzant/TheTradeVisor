@@ -203,6 +203,10 @@
                             {{ __('Profile') }}
                         </x-dropdown-link>
 
+                        <x-dropdown-link :href="route('accounts.public-profiles')">
+                            {{ __('Public Profiles') }}
+                        </x-dropdown-link>
+
                         <!-- Authentication -->
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
@@ -335,6 +339,10 @@
 
                 <x-responsive-nav-link :href="route('profile.edit')">
                     {{ __('Profile') }}
+                </x-responsive-nav-link>
+
+                <x-responsive-nav-link :href="route('accounts.public-profiles')">
+                    {{ __('Public Profiles') }}
                 </x-responsive-nav-link>
 
                 <!-- Authentication -->
