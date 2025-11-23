@@ -37,7 +37,7 @@
 
             {{-- Accounts List --}}
             @forelse($accounts as $account)
-                <div class="bg-white shadow-card rounded-xl p-6" x-data="accountProfileForm({{ $account->id }}, {{ json_encode($account->publicProfileAccount ?? null) }})">
+                <div class="bg-white shadow-card rounded-xl p-6" x-data="accountProfileForm({{ $account->id }}, @js($account->publicProfileAccount))">
                     {{-- Account Header --}}
                     <div class="flex items-center justify-between mb-6">
                         <div class="flex items-center space-x-4">
