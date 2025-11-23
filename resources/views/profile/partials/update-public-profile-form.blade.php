@@ -175,10 +175,9 @@
                 >{{ __('Saved.') }}</p>
             @endif
         </div>
-    </form>
 
-    {{-- Warning Modal for Username Confirmation --}}
-    <div x-show="showUsernameWarning" 
+        {{-- Warning Modal for Username Confirmation --}}
+        <div x-show="showUsernameWarning" 
          x-cloak
          class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center" 
          aria-labelledby="modal-title" 
@@ -223,7 +222,8 @@
                     </button>
                 </div>
             </div>
-    </div>
+        </div>
+    </form>
 </section>
 
 <script>
