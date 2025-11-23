@@ -127,8 +127,8 @@
                         <tbody class="bg-white divide-y divide-gray-200">
                             @foreach($symbol_performance as $symbol)
                                 <tr class="hover:bg-gray-50">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                        <span class="cursor-pointer" 
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900" style="min-width: 150px; width: 150px;">
+                                        <span class="cursor-pointer inline-block" style="min-width: 120px;"
                                               onmouseover="this.innerHTML='{{ $symbol['symbol'] }}'" 
                                               onmouseout="this.innerHTML='{{ $symbol['normalized_symbol'] ?? $symbol['symbol'] }}'">
                                             {{ $symbol['normalized_symbol'] ?? $symbol['symbol'] }}
