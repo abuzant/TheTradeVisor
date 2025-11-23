@@ -9,7 +9,7 @@
         </p>
     </header>
 
-    <form method="post" action="{{ route('profile.public.update') }}" class="mt-6 space-y-6" x-data="publicProfileForm" @submit.prevent="handleSubmit">
+    <form method="post" action="{{ route('profile.public.update') }}" class="mt-6 space-y-6" x-data="publicProfileForm" @submit="handleSubmit">
         @csrf
         @method('patch')
 
@@ -274,21 +274,23 @@
                 handleSubmit(event) {
                     // If username is being set for first time and has value, show warning
                     if (!this.usernameAlreadySet && this.username && this.username.length >= 3) {
+                        event.preventDefault();
                         this.showUsernameWarning = true;
-                    } else {
-                        // Submit directly - allow default form submission
-                        event.target.submit();
+                        return false;
                     }
+                    // Otherwise allow normal form submission
+                    return true;
                 },
 
                 confirmUsername() {
                     this.showUsernameWarning = false;
-                    // Remove the Alpine event listener and submit normally
-                    const form = this.$el;
-                    // Use setTimeout to let Alpine finish processing
-                    setTimeout(() => {
-                        form.submit();
-                    }, 100);
+                    // Create a submit button and click it to trigger native form submission
+                    const submitBtn = document.createElement('button');
+                    submitBtn.type = 'submit';
+                    submitBtn.style.display = 'none';
+                    this.$el.appendChild(submitBtn);
+                    submitBtn.click();
+                    submitBtn.remove();
                 }
         }));
     });
