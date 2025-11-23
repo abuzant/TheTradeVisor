@@ -470,19 +470,19 @@
                                         </td>
                                         
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {{ number_format($position->volume, 2) }}
+                                            {{ rtrim(rtrim(number_format($position->volume, 2), '0'), '.') }}
                                         </td>
                                         
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {{ number_format($position->open_price, 5) }}
+                                            {{ rtrim(rtrim(number_format($position->open_price, 5), '0'), '.') }}
                                         </td>
                                         
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {{ $position->close_price ? number_format($position->close_price, 5) : '-' }}
+                                            {{ $position->close_price ? rtrim(rtrim(number_format($position->close_price, 5), '0'), '.') : '-' }}
                                         </td>
                                         
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium {{ $position->profit >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                            {{ $account->account_currency }} {{ number_format($position->profit, 2) }}
+                                            {{ $account->account_currency }} {{ rtrim(rtrim(number_format($position->profit, 2), '0'), '.') }}
                                         </td>
                                         
                                         <td class="px-6 py-4 whitespace-nowrap">
@@ -542,16 +542,16 @@
                                                                         </span>
                                                                     </td>
                                                                     <td class="px-4 py-2 whitespace-nowrap text-xs text-gray-900">
-                                                                        {{ number_format($deal->volume, 2) }}
+                                                                        {{ rtrim(rtrim(number_format($deal->volume, 2), '0'), '.') }}
                                                                     </td>
                                                                     <td class="px-4 py-2 whitespace-nowrap text-xs text-gray-500">
-                                                                        {{ number_format($deal->price, 5) }}
+                                                                        {{ rtrim(rtrim(number_format($deal->price, 5), '0'), '.') }}
                                                                     </td>
                                                                     <td class="px-4 py-2 whitespace-nowrap text-xs font-medium {{ $deal->profit >= 0 ? 'text-green-600' : 'text-red-600' }}">
                                                                         @if($deal->entry === 'in')
                                                                             <span class="text-gray-400">-</span>
                                                                         @else
-                                                                            {{ number_format($deal->profit, 2) }}
+                                                                            {{ rtrim(rtrim(number_format($deal->profit, 2), '0'), '.') }}
                                                                         @endif
                                                                     </td>
                                                                 </tr>

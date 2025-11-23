@@ -98,6 +98,7 @@ check_postgres() {
 check_php_fpm() {
     # Count slow requests in last minute
     SLOW_REQUESTS=$(journalctl -u php8.3-fpm --since "1 minute ago" | grep -c "executing too slow" || echo 0)
+    SLOW_REQUESTS=$(echo "$SLOW_REQUESTS" | tr -d '\n' | tr -d ' ')
     
     if [ "$SLOW_REQUESTS" -gt "$MAX_PHP_SLOW_REQUESTS" ]; then
         alert "Too many slow PHP-FPM requests in last minute: $SLOW_REQUESTS"
@@ -110,14 +111,9 @@ check_php_fpm() {
     return 0
 }
 
-# Check backend nginx instances
+# Check backend nginx instances (DEPRECATED - no longer using backend nginx)
 check_backends() {
-    for port in 8081 8082 8083 8084; do
-        if ! nc -z 127.0.0.1 $port 2>/dev/null; then
-            alert "Backend nginx on port $port is DOWN"
-            return 1
-        fi
-    done
+    # Backend nginx instances removed - now using direct PHP-FPM connection
     return 0
 }
 
