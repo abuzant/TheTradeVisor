@@ -35,7 +35,7 @@
                     <div>
                         <h1 class="text-3xl font-bold text-gray-900">
                             @if($user->public_display_mode === 'username')
-                                @{{ $user->public_username }}
+                                {{ '@' . $user->public_username }}
                             @elseif($user->public_display_mode === 'anonymous')
                                 Anonymous Trader
                             @else
