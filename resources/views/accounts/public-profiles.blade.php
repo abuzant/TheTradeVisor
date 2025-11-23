@@ -66,10 +66,11 @@
                                     type="checkbox" 
                                     class="sr-only peer" 
                                     x-model="isPublic"
-                                    @change="togglePublic"
-                                    {{ !auth()->user()->public_username ? 'disabled' : '' }}
+                                    x-on:change="togglePublic"
                                 >
-                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:bg-indigo-600 peer-focus:ring-4 peer-focus:ring-indigo-300 relative">
+                                    <div class="absolute top-[2px] left-[2px] bg-white border border-gray-300 rounded-full h-5 w-5 transition-transform peer-checked:translate-x-full"></div>
+                                </div>
                             </label>
                             <span class="text-sm text-gray-600">Public</span>
                         </div>
