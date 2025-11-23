@@ -127,10 +127,8 @@
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
+                            <tbody class="bg-white divide-y divide-gray-200" x-data="{ expandedRows: {} }">
                                 @foreach($traders as $index => $trader)
-                                    {{-- Wrapper for both rows to share Alpine state --}}
-                                    <template x-data="{ expanded: false }">
                                     <tr class="hover:bg-gray-50 transition-colors">
                                         {{-- Rank --}}
                                         <td class="px-6 py-4 whitespace-nowrap">
@@ -151,8 +149,8 @@
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="flex items-center">
                                                 @if($trader['account_count'] > 1)
-                                                    <button @click="expanded = !expanded" class="mr-2 text-gray-400 hover:text-gray-600">
-                                                        <svg class="w-5 h-5 transition-transform" :class="{ 'rotate-90': expanded }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <button @click="expandedRows[{{ $index }}] = !expandedRows[{{ $index }}]" class="mr-2 text-gray-400 hover:text-gray-600">
+                                                        <svg class="w-5 h-5 transition-transform" :class="{ 'rotate-90': expandedRows[{{ $index }}] }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                                         </svg>
                                                     </button>
@@ -217,9 +215,9 @@
                                         {{-- Action --}}
                                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             @if($trader['account_count'] > 1)
-                                                <button @click="expanded = !expanded" class="text-indigo-600 hover:text-indigo-900 font-semibold">
-                                                    <span x-show="!expanded">Show Accounts →</span>
-                                                    <span x-show="expanded">Hide Accounts ↑</span>
+                                                <button @click="expandedRows[{{ $index }}] = !expandedRows[{{ $index }}]" class="text-indigo-600 hover:text-indigo-900 font-semibold">
+                                                    <span x-show="!expandedRows[{{ $index }}]">Show Accounts →</span>
+                                                    <span x-show="expandedRows[{{ $index }}]" x-cloak>Hide Accounts ↑</span>
                                                 </button>
                                             @else
                                                 <a href="{{ url('/@' . $trader['user']->public_username . '/' . $trader['accounts'][0]['profile']->account_slug . '/' . $trader['accounts'][0]['account']->account_number) }}" 
@@ -232,7 +230,7 @@
 
                                     {{-- Expandable Accounts Sub-table --}}
                                     @if($trader['account_count'] > 1)
-                                        <tr x-show="expanded" 
+                                        <tr x-show="expandedRows[{{ $index }}]" 
                                             x-cloak
                                             x-transition:enter="transition ease-out duration-200"
                                             x-transition:enter-start="opacity-0 transform scale-95"
@@ -306,7 +304,6 @@
                                             </td>
                                         </tr>
                                     @endif
-                                    </template>
                                 @endforeach
                             </tbody>
                         </table>
@@ -323,7 +320,7 @@
                         </div>
                         <div class="ml-3">
                             <p class="text-sm text-blue-700">
-                                <strong>Want to join the leaderboard?</strong> Enable "Show on Leaderboard" in your 
+                                <strong>Want to join the leaderboard?</strong><br /> Enable "Show on Leaderboard" in your 
                                 <a href="{{ route('profile.edit') }}" class="underline font-semibold">profile settings</a> 
                                 and make at least one trading account public.
                             </p>
