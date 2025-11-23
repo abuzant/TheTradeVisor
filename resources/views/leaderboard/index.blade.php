@@ -129,7 +129,9 @@
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @foreach($traders as $index => $trader)
-                                    <tr class="hover:bg-gray-50 transition-colors" x-data="{ expanded: false }">
+                                    {{-- Wrapper for both rows to share Alpine state --}}
+                                    <template x-data="{ expanded: false }">
+                                    <tr class="hover:bg-gray-50 transition-colors">
                                         {{-- Rank --}}
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="flex items-center">
@@ -304,6 +306,7 @@
                                             </td>
                                         </tr>
                                     @endif
+                                    </template>
                                 @endforeach
                             </tbody>
                         </table>
