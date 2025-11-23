@@ -286,7 +286,7 @@ class PublicProfileController extends Controller
         $startDate = now()->subDays(30);
         
         // Get closed trades (deals with entry='out' for MT5, positions for MT4)
-        if ($account->platform === 'MT5') {
+        if ($account->platform_type === 'MT5') {
             $deals = $account->deals()
                 ->where('entry', 'out')
                 ->whereIn('type', ['buy', 'sell'])
