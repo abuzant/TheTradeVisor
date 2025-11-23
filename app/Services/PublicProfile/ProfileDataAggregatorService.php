@@ -94,20 +94,34 @@ class ProfileDataAggregatorService
     }
 
     /**
-     * Get equity curve data
+     * Get equity curve data (one snapshot per day for performance)
      */
     private function getEquityCurve($account, $startDate): array
     {
-        // Get account snapshots for equity curve
+        // Get last snapshot of each day for smoother chart and better performance
         $snapshots = DB::table('account_snapshots')
+            ->select(
+                DB::raw('DATE(snapshot_time) as date'),
+                DB::raw('MAX(snapshot_time) as last_snapshot_time')
+            )
             ->where('trading_account_id', $account->id)
             ->where('snapshot_time', '>=', $startDate)
+            ->groupBy(DB::raw('DATE(snapshot_time)'))
+            ->orderBy('date', 'asc')
+            ->get();
+
+        // Get the actual snapshot data for those timestamps
+        $timestamps = $snapshots->pluck('last_snapshot_time');
+        
+        $snapshotData = DB::table('account_snapshots')
+            ->whereIn('snapshot_time', $timestamps)
+            ->where('trading_account_id', $account->id)
             ->orderBy('snapshot_time', 'asc')
             ->get(['snapshot_time', 'equity', 'balance']);
 
-        return $snapshots->map(function ($snapshot) {
+        return $snapshotData->map(function ($snapshot) {
             return [
-                'date' => $snapshot->snapshot_time,
+                'date' => date('Y-m-d', strtotime($snapshot->snapshot_time)),
                 'equity' => (float) $snapshot->equity,
                 'balance' => (float) $snapshot->balance,
             ];
