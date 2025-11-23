@@ -9,7 +9,7 @@
         </p>
     </header>
 
-    <form method="post" action="{{ route('profile.public.update') }}" class="mt-6 space-y-6" x-data="publicProfileForm()">
+    <form method="post" action="{{ route('profile.public.update') }}" class="mt-6 space-y-6" x-data="publicProfileForm()" @submit.prevent="handleSubmit">
         @csrf
         @method('patch')
 
@@ -180,14 +180,14 @@
     {{-- Warning Modal for Username Confirmation --}}
     <div x-show="showUsernameWarning" 
          x-cloak
-         class="fixed inset-0 z-50 overflow-y-auto" 
+         class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center" 
          aria-labelledby="modal-title" 
          role="dialog" 
-         aria-modal="true">
-        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="showUsernameWarning = false"></div>
+         aria-modal="true"
+         style="display: none;">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="showUsernameWarning = false"></div>
 
-            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <div class="relative bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:max-w-lg sm:w-full mx-4">
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                     <div class="sm:flex sm:items-start">
                         <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
@@ -235,6 +235,7 @@
                 usernameChecking: false,
                 usernameAvailable: false,
                 showUsernameWarning: false,
+                usernameAlreadySet: {{ auth()->user()->public_username ? 'true' : 'false' }},
 
                 checkUsername() {
                     // Basic client-side validation
@@ -257,9 +258,20 @@
                     }, 500);
                 },
 
+                handleSubmit(event) {
+                    // If username is being set for first time and has value, show warning
+                    if (!this.usernameAlreadySet && this.username && this.username.length >= 3) {
+                        this.showUsernameWarning = true;
+                    } else {
+                        // Submit directly
+                        this.$el.submit();
+                    }
+                },
+
                 confirmUsername() {
                     this.showUsernameWarning = false;
-                    this.$el.closest('form').submit();
+                    // Submit the form
+                    this.$el.submit();
                 }
             }
         }
