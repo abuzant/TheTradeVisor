@@ -77,4 +77,64 @@ class PublicProfileController extends Controller
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
+
+    /**
+     * Show account public profiles management page
+     */
+    public function manageAccounts(Request $request)
+    {
+        $accounts = $request->user()
+            ->tradingAccounts()
+            ->with('publicProfileAccount')
+            ->where('is_active', true)
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('accounts.public-profiles', compact('accounts'));
+    }
+
+    /**
+     * Update account public profile settings
+     */
+    public function updateAccountProfile(Request $request, $accountId)
+    {
+        $account = $request->user()
+            ->tradingAccounts()
+            ->findOrFail($accountId);
+
+        $validated = $request->validate([
+            'is_public' => 'required|boolean',
+            'account_slug' => 'required|string|min:3|max:100|regex:/^[a-z0-9-]+$/',
+            'custom_title' => 'nullable|string|max:150',
+            'widget_preset' => 'required|in:minimal,full_stats,trader_showcase,custom',
+            'show_symbols' => 'required|boolean',
+            'show_recent_trades' => 'required|boolean',
+        ]);
+
+        // Check if slug is unique for this user
+        $existingSlug = \App\Models\PublicProfileAccount::where('user_id', $request->user()->id)
+            ->where('account_slug', $validated['account_slug'])
+            ->where('trading_account_id', '!=', $accountId)
+            ->exists();
+
+        if ($existingSlug) {
+            return response()->json(['message' => 'This slug is already used by another account'], 422);
+        }
+
+        // Create or update public profile account
+        $profileAccount = $account->publicProfileAccount()->updateOrCreate(
+            ['trading_account_id' => $accountId],
+            [
+                'user_id' => $request->user()->id,
+                'account_slug' => $validated['account_slug'],
+                'is_public' => $validated['is_public'],
+                'custom_title' => $validated['custom_title'],
+                'widget_preset' => $validated['widget_preset'],
+                'show_symbols' => $validated['show_symbols'],
+                'show_recent_trades' => $validated['show_recent_trades'],
+            ]
+        );
+
+        return response()->json(['success' => true, 'profile' => $profileAccount]);
+    }
 }

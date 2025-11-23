@@ -159,6 +159,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Public profile settings
     Route::patch('/profile/public', [\App\Http\Controllers\PublicProfileController::class, 'updateSettings'])
         ->name('profile.public.update');
+    Route::get('/accounts/public-profiles', [\App\Http\Controllers\PublicProfileController::class, 'manageAccounts'])
+        ->name('accounts.public-profiles');
+    Route::post('/accounts/{account}/public-profile', [\App\Http\Controllers\PublicProfileController::class, 'updateAccountProfile'])
+        ->name('accounts.public-profile.update');
 
     // Profile digest preferences
     Route::post('/profile/digests', [\App\Http\Controllers\ProfileDigestController::class, 'update'])
