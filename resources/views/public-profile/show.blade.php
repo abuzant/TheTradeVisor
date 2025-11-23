@@ -128,7 +128,9 @@
                             @foreach($symbol_performance as $symbol)
                                 <tr class="hover:bg-gray-50">
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                        <span class="cursor-help" title="Raw: {{ $symbol['symbol'] }}">
+                                        <span class="cursor-pointer" 
+                                              onmouseover="this.innerHTML='{{ $symbol['symbol'] }}'" 
+                                              onmouseout="this.innerHTML='{{ $symbol['normalized_symbol'] ?? $symbol['symbol'] }}'">
                                             {{ $symbol['normalized_symbol'] ?? $symbol['symbol'] }}
                                         </span>
                                     </td>
