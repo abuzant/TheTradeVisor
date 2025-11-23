@@ -133,24 +133,29 @@ class ProfileDataAggregatorService
      */
     private function getSymbolPerformance($account, $startDate): array
     {
-        return Deal::where('trading_account_id', $account->id)
-            ->where('entry', 'out')
-            ->whereIn('type', ['buy', 'sell'])
-            ->where('time', '>=', $startDate)
-            ->select('symbol')
+        return DB::table('deals')
+            ->leftJoin('symbol_mappings', 'deals.symbol', '=', 'symbol_mappings.raw_symbol')
+            ->where('deals.trading_account_id', $account->id)
+            ->where('deals.entry', 'out')
+            ->whereIn('deals.type', ['buy', 'sell'])
+            ->where('deals.time', '>=', $startDate)
+            ->select(
+                'deals.symbol as raw_symbol',
+                DB::raw('COALESCE(symbol_mappings.normalized_symbol, deals.symbol) as normalized_symbol')
+            )
             ->selectRaw('COUNT(*) as trades')
-            ->selectRaw('SUM(CASE WHEN profit > 0 THEN 1 ELSE 0 END) as wins')
-            ->selectRaw('SUM(profit) as total_profit')
-            ->selectRaw('SUM(volume) as total_volume')
-            ->groupBy('symbol')
+            ->selectRaw('SUM(CASE WHEN deals.profit > 0 THEN 1 ELSE 0 END) as wins')
+            ->selectRaw('SUM(deals.profit) as total_profit')
+            ->selectRaw('SUM(deals.volume) as total_volume')
+            ->groupBy('deals.symbol', 'symbol_mappings.normalized_symbol')
             ->orderByDesc('trades')
             ->limit(10)
             ->get()
             ->map(function ($item) {
                 $winRate = $item->trades > 0 ? ($item->wins / $item->trades) * 100 : 0;
                 return [
-                    'symbol' => $item->symbol,
-                    'normalized_symbol' => $this->normalizeSymbol($item->symbol),
+                    'symbol' => $item->raw_symbol,
+                    'normalized_symbol' => $item->normalized_symbol,
                     'trades' => $item->trades,
                     'win_rate' => round($winRate, 2),
                     'profit' => $item->total_profit,
@@ -158,15 +163,6 @@ class ProfileDataAggregatorService
                 ];
             })
             ->toArray();
-    }
-
-    /**
-     * Normalize symbol name (remove broker suffixes)
-     */
-    private function normalizeSymbol($symbol): string
-    {
-        // Remove common broker suffixes
-        return preg_replace('/\.(sd|lv|iv|Roll|pro|ecn|raw|prime|mini|micro)$/i', '', $symbol);
     }
 
     /**
