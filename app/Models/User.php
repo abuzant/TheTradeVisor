@@ -21,6 +21,12 @@ class User extends Authenticatable
         'is_admin',
         'is_enterprise_admin',
         'last_login_at',
+        'public_username',
+        'public_username_set_at',
+        'public_display_mode',
+        'public_display_name',
+        'show_on_leaderboard',
+        'leaderboard_rank_by',
     ];
 
     protected $hidden = [
@@ -35,6 +41,8 @@ class User extends Authenticatable
         'is_active' => 'boolean',
         'is_admin' => 'boolean',
         'is_enterprise_admin' => 'boolean',
+        'public_username_set_at' => 'datetime',
+        'show_on_leaderboard' => 'boolean',
     ];
 
     /**
@@ -76,6 +84,11 @@ class User extends Authenticatable
     public function whitelistedBrokerUsage()
     {
         return $this->hasMany(WhitelistedBrokerUsage::class);
+    }
+
+    public function publicProfileAccounts()
+    {
+        return $this->hasMany(PublicProfileAccount::class);
     }
 
     // Helper methods

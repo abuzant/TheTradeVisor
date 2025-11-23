@@ -107,6 +107,16 @@ class TradingAccount extends Model
         return $this->hasOne(WhitelistedBrokerUsage::class);
     }
 
+    public function publicProfileAccount()
+    {
+        return $this->hasOne(PublicProfileAccount::class);
+    }
+
+    public function verificationBadges()
+    {
+        return $this->hasMany(ProfileVerificationBadge::class);
+    }
+
     // Helper methods
     public static function generateUuid()
     {
