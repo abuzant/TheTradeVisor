@@ -176,9 +176,10 @@
             @endif
         </div>
     </form>
+</section>
 
-    {{-- Warning Modal for Username Confirmation --}}
-    <div x-show="showUsernameWarning" 
+{{-- Warning Modal for Username Confirmation (outside section to prevent layout breaking) --}}
+<div x-show="showUsernameWarning" 
          x-cloak
          class="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center" 
          aria-labelledby="modal-title" 
@@ -276,4 +277,4 @@
             }
         }
     </script>
-</section>
+</div>
