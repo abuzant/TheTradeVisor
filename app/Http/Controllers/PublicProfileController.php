@@ -240,6 +240,7 @@ class PublicProfileController extends Controller
             $totalWinningTrades = 0;
             $totalGrossProfit = 0;
             $totalGrossLoss = 0;
+            $totalInitialBalance = 0;
 
             foreach ($user->publicProfileAccounts as $profileAccount) {
                 $account = $profileAccount->tradingAccount;
@@ -259,6 +260,10 @@ class PublicProfileController extends Controller
                 $totalTrades += $stats['total_trades'];
                 $totalWinningTrades += ($stats['win_rate'] / 100) * $stats['total_trades'];
                 
+                // Calculate initial balance for ROI
+                $initialBalance = $account->balance - $stats['total_profit'];
+                $totalInitialBalance += $initialBalance;
+                
                 // Reconstruct gross profit/loss from profit factor
                 $pf = $stats['profit_factor'];
                 if ($pf > 0 && $stats['total_profit'] > 0) {
@@ -274,11 +279,14 @@ class PublicProfileController extends Controller
                 return null;
             }
 
+            // Calculate aggregated ROI
+            $aggregatedROI = $totalInitialBalance > 0 ? ($totalProfit / $totalInitialBalance) * 100 : 0;
+
             $aggregatedStats = [
                 'total_profit' => $totalProfit,
                 'total_trades' => $totalTrades,
                 'win_rate' => $totalTrades > 0 ? round(($totalWinningTrades / $totalTrades) * 100, 2) : 0,
-                'roi' => 0, // ROI doesn't aggregate well across accounts
+                'roi' => round($aggregatedROI, 2),
                 'profit_factor' => $totalGrossLoss > 0 ? round($totalGrossProfit / $totalGrossLoss, 2) : ($totalGrossProfit > 0 ? 999 : 0),
             ];
 
