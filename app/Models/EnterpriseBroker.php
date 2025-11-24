@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class EnterpriseBroker extends Model
 {
     protected $fillable = [
-        'user_id',
         'company_name',
         'official_broker_name',
         'is_active',
@@ -26,11 +25,19 @@ class EnterpriseBroker extends Model
     ];
 
     /**
-     * Get the user (admin) who owns this enterprise broker
+     * Get all admins for this enterprise broker
      */
-    public function user(): BelongsTo
+    public function admins(): HasMany
     {
-        return $this->belongsTo(User::class);
+        return $this->hasMany(EnterpriseAdmin::class);
+    }
+
+    /**
+     * Get active admins only
+     */
+    public function activeAdmins(): HasMany
+    {
+        return $this->hasMany(EnterpriseAdmin::class)->where('is_active', true);
     }
 
     /**

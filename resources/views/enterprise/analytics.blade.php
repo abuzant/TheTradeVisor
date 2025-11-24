@@ -1,6 +1,6 @@
 @section('title', 'Enterprise Analytics - TheTradeVisor')
 
-<x-app-layout>
+<x-enterprise-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <div>
@@ -48,7 +48,7 @@
                         </div>
                         <div class="ml-5">
                             <p class="text-sm font-medium text-gray-500">Active Accounts (7d)</p>
-                            <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['active_accounts']) }}</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['active_accounts_7d']) }}</p>
                         </div>
                     </div>
                 </div>
@@ -61,12 +61,227 @@
                             </svg>
                         </div>
                         <div class="ml-5">
-                            <p class="text-sm font-medium text-gray-500">Trades (30d)</p>
-                            <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['total_trades_30d']) }}</p>
+                            <p class="text-sm font-medium text-gray-500">Trades ({{ $days }}d)</p>
+                            <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['total_trades']) }}</p>
                         </div>
                     </div>
                 </div>
 
+            </div>
+
+            {{-- Time Period Selector --}}
+            <div class="flex justify-center space-x-2 mb-6">
+                <a href="{{ route('enterprise.analytics', ['days' => 7]) }}"
+                   class="px-4 py-2 rounded-lg text-sm font-medium transition-all {{ $days == 7 ? 'bg-indigo-600 text-white shadow-lg' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50' }}">
+                    7 Days
+                </a>
+                <a href="{{ route('enterprise.analytics', ['days' => 30]) }}"
+                   class="px-4 py-2 rounded-lg text-sm font-medium transition-all {{ $days == 30 ? 'bg-indigo-600 text-white shadow-lg' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50' }}">
+                    30 Days
+                </a>
+                <a href="{{ route('enterprise.analytics', ['days' => 90]) }}"
+                   class="px-4 py-2 rounded-lg text-sm font-medium transition-all {{ $days == 90 ? 'bg-indigo-600 text-white shadow-lg' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50' }}">
+                    90 Days
+                </a>
+                <a href="{{ route('enterprise.analytics', ['days' => 180]) }}"
+                   class="px-4 py-2 rounded-lg text-sm font-medium transition-all {{ $days == 180 ? 'bg-indigo-600 text-white shadow-lg' : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50' }}">
+                    180 Days
+                </a>
+            </div>
+
+            {{-- Trading Performance Metrics --}}
+            <div class="mb-6">
+                <h2 class="text-xl font-bold text-gray-900 mb-4">💰 Trading Performance (Last {{ $days }} Days)</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {{-- Win Rate --}}
+                    <div class="bg-yellow-50 rounded-xl p-6 border-2 border-yellow-200 shadow-lg hover:shadow-xl transition-shadow">
+                        <p class="text-sm font-medium text-yellow-600 mb-1">Win Rate</p>
+                        <p class="text-3xl font-bold text-yellow-900">{{ number_format($stats['win_rate'], 1) }}%</p>
+                        <p class="text-xs text-yellow-600 mt-1">{{ number_format($stats['winning_trades']) }} wins / {{ number_format($stats['total_trades']) }} trades</p>
+                    </div>
+
+                    {{-- Profit Factor --}}
+                    <div class="bg-orange-50 rounded-xl p-6 border-2 border-orange-200 shadow-lg hover:shadow-xl transition-shadow">
+                        <p class="text-sm font-medium text-orange-600 mb-1">Profit Factor</p>
+                        <p class="text-3xl font-bold text-orange-900">{{ number_format($stats['profit_factor'], 2) }}</p>
+                        <p class="text-xs text-orange-600 mt-1">{{ $stats['profit_factor'] > 1 ? '✓ Profitable' : '✗ Unprofitable' }}</p>
+                    </div>
+
+                    {{-- Total Profit --}}
+                    <div class="bg-green-50 rounded-xl p-6 border-2 border-green-200 shadow-lg hover:shadow-xl transition-shadow">
+                        <p class="text-sm font-medium text-green-600 mb-1">Total Profit</p>
+                        <p class="text-3xl font-bold {{ $stats['total_profit'] >= 0 ? 'text-green-900' : 'text-red-900' }}">${{ number_format($stats['total_profit'], 2) }}</p>
+                    </div>
+
+                    {{-- Net Profit --}}
+                    <div class="bg-cyan-50 rounded-xl p-6 border-2 border-cyan-200 shadow-lg hover:shadow-xl transition-shadow">
+                        <p class="text-sm font-medium text-cyan-600 mb-1">Net Profit</p>
+                        <p class="text-3xl font-bold {{ $stats['net_profit'] >= 0 ? 'text-cyan-900' : 'text-red-900' }}">${{ number_format($stats['net_profit'], 2) }}</p>
+                        <p class="text-xs text-cyan-600 mt-1">After fees & swap</p>
+                    </div>
+
+                    {{-- Average Win --}}
+                    <div class="bg-emerald-50 rounded-xl p-6 border-2 border-emerald-200 shadow-lg hover:shadow-xl transition-shadow">
+                        <p class="text-sm font-medium text-emerald-600 mb-1">Average Win</p>
+                        <p class="text-3xl font-bold text-emerald-900">${{ number_format($stats['avg_win'], 2) }}</p>
+                    </div>
+
+                    {{-- Average Loss --}}
+                    <div class="bg-rose-50 rounded-xl p-6 border-2 border-rose-200 shadow-lg hover:shadow-xl transition-shadow">
+                        <p class="text-sm font-medium text-rose-600 mb-1">Average Loss</p>
+                        <p class="text-3xl font-bold text-rose-900">${{ number_format($stats['avg_loss'], 2) }}</p>
+                    </div>
+
+                    {{-- Best Trade --}}
+                    <div class="bg-green-50 rounded-xl p-6 border-2 border-green-200 shadow-lg hover:shadow-xl transition-shadow">
+                        <p class="text-sm font-medium text-green-600 mb-1">Best Trade</p>
+                        <p class="text-3xl font-bold text-green-900">${{ number_format($stats['best_trade'], 2) }}</p>
+                    </div>
+
+                    {{-- Worst Trade --}}
+                    <div class="bg-red-50 rounded-xl p-6 border-2 border-red-200 shadow-lg hover:shadow-xl transition-shadow">
+                        <p class="text-sm font-medium text-red-600 mb-1">Worst Trade</p>
+                        <p class="text-3xl font-bold text-red-900">${{ number_format($stats['worst_trade'], 2) }}</p>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Account Balance Metrics --}}
+            <div class="mb-6">
+                <h2 class="text-xl font-bold text-gray-900 mb-4">💼 Account Balances</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {{-- Total Balance --}}
+                    <div class="bg-blue-50 rounded-xl p-6 border-2 border-blue-200 shadow-lg hover:shadow-xl transition-shadow">
+                        <p class="text-sm font-medium text-blue-600 mb-1">Total Balance</p>
+                        <p class="text-3xl font-bold text-blue-900">${{ number_format($stats['total_balance'], 2) }}</p>
+                    </div>
+
+                    {{-- Total Equity --}}
+                    <div class="bg-indigo-50 rounded-xl p-6 border-2 border-indigo-200 shadow-lg hover:shadow-xl transition-shadow">
+                        <p class="text-sm font-medium text-indigo-600 mb-1">Total Equity</p>
+                        <p class="text-3xl font-bold text-indigo-900">${{ number_format($stats['total_equity'], 2) }}</p>
+                    </div>
+
+                    {{-- Average Balance --}}
+                    <div class="bg-purple-50 rounded-xl p-6 border-2 border-purple-200 shadow-lg hover:shadow-xl transition-shadow">
+                        <p class="text-sm font-medium text-purple-600 mb-1">Avg Balance</p>
+                        <p class="text-3xl font-bold text-purple-900">${{ number_format($stats['avg_balance'], 2) }}</p>
+                    </div>
+
+                    {{-- Average Equity --}}
+                    <div class="bg-pink-50 rounded-xl p-6 border-2 border-pink-200 shadow-lg hover:shadow-xl transition-shadow">
+                        <p class="text-sm font-medium text-pink-600 mb-1">Avg Equity</p>
+                        <p class="text-3xl font-bold text-pink-900">${{ number_format($stats['avg_equity'], 2) }}</p>
+                    </div>
+
+                    {{-- Max Balance --}}
+                    <div class="bg-teal-50 rounded-xl p-6 border-2 border-teal-200 shadow-lg hover:shadow-xl transition-shadow">
+                        <p class="text-sm font-medium text-teal-600 mb-1">Largest Account</p>
+                        <p class="text-3xl font-bold text-teal-900">${{ number_format($stats['max_balance'], 2) }}</p>
+                    </div>
+
+                    {{-- Min Balance --}}
+                    <div class="bg-gray-50 rounded-xl p-6 border-2 border-gray-200 shadow-lg hover:shadow-xl transition-shadow">
+                        <p class="text-sm font-medium text-gray-600 mb-1">Smallest Account</p>
+                        <p class="text-3xl font-bold text-gray-900">${{ number_format($stats['min_balance'], 2) }}</p>
+                    </div>
+
+                    {{-- Average Leverage --}}
+                    <div class="bg-amber-50 rounded-xl p-6 border-2 border-amber-200 shadow-lg hover:shadow-xl transition-shadow">
+                        <p class="text-sm font-medium text-amber-600 mb-1">Avg Leverage</p>
+                        <p class="text-3xl font-bold text-amber-900">1:{{ number_format($stats['avg_leverage'], 0) }}</p>
+                    </div>
+
+                    {{-- Total Margin Used --}}
+                    <div class="bg-orange-50 rounded-xl p-6 border-2 border-orange-200 shadow-lg hover:shadow-xl transition-shadow">
+                        <p class="text-sm font-medium text-orange-600 mb-1">Total Margin</p>
+                        <p class="text-3xl font-bold text-orange-900">${{ number_format($stats['total_margin_used'], 2) }}</p>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Trading Volume Metrics --}}
+            <div class="mb-6">
+                <h2 class="text-xl font-bold text-gray-900 mb-4">📊 Trading Volume</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {{-- Winning Trades --}}
+                    <div class="bg-emerald-50 rounded-xl p-6 border-2 border-emerald-200 shadow-lg hover:shadow-xl transition-shadow">
+                        <p class="text-sm font-medium text-emerald-600 mb-1">Winning Trades</p>
+                        <p class="text-3xl font-bold text-emerald-900">{{ number_format($stats['winning_trades']) }}</p>
+                        <p class="text-xs text-emerald-600 mt-1">{{ $stats['total_trades'] > 0 ? number_format(($stats['winning_trades'] / $stats['total_trades']) * 100, 1) : 0 }}%</p>
+                    </div>
+
+                    {{-- Losing Trades --}}
+                    <div class="bg-red-50 rounded-xl p-6 border-2 border-red-200 shadow-lg hover:shadow-xl transition-shadow">
+                        <p class="text-sm font-medium text-red-600 mb-1">Losing Trades</p>
+                        <p class="text-3xl font-bold text-red-900">{{ number_format($stats['losing_trades']) }}</p>
+                        <p class="text-xs text-red-600 mt-1">{{ $stats['total_trades'] > 0 ? number_format(($stats['losing_trades'] / $stats['total_trades']) * 100, 1) : 0 }}%</p>
+                    </div>
+
+                    {{-- Breakeven Trades --}}
+                    <div class="bg-gray-50 rounded-xl p-6 border-2 border-gray-200 shadow-lg hover:shadow-xl transition-shadow">
+                        <p class="text-sm font-medium text-gray-600 mb-1">Breakeven</p>
+                        <p class="text-3xl font-bold text-gray-900">{{ number_format($stats['breakeven_trades']) }}</p>
+                        <p class="text-xs text-gray-600 mt-1">{{ $stats['total_trades'] > 0 ? number_format(($stats['breakeven_trades'] / $stats['total_trades']) * 100, 1) : 0 }}%</p>
+                    </div>
+
+                    {{-- Total Volume --}}
+                    <div class="bg-indigo-50 rounded-xl p-6 border-2 border-indigo-200 shadow-lg hover:shadow-xl transition-shadow">
+                        <p class="text-sm font-medium text-indigo-600 mb-1">Total Volume</p>
+                        <p class="text-3xl font-bold text-indigo-900">{{ number_format($stats['total_volume'], 2) }}</p>
+                        <p class="text-xs text-indigo-600 mt-1">Lots</p>
+                    </div>
+
+                    {{-- Avg Volume Per Trade --}}
+                    <div class="bg-purple-50 rounded-xl p-6 border-2 border-purple-200 shadow-lg hover:shadow-xl transition-shadow">
+                        <p class="text-sm font-medium text-purple-600 mb-1">Avg Volume/Trade</p>
+                        <p class="text-3xl font-bold text-purple-900">{{ number_format($stats['avg_volume_per_trade'], 2) }}</p>
+                        <p class="text-xs text-purple-600 mt-1">Lots</p>
+                    </div>
+
+                    {{-- Max Volume Trade --}}
+                    <div class="bg-pink-50 rounded-xl p-6 border-2 border-pink-200 shadow-lg hover:shadow-xl transition-shadow">
+                        <p class="text-sm font-medium text-pink-600 mb-1">Largest Trade</p>
+                        <p class="text-3xl font-bold text-pink-900">{{ number_format($stats['max_volume_trade'], 2) }}</p>
+                        <p class="text-xs text-pink-600 mt-1">Lots</p>
+                    </div>
+
+                    {{-- Most Traded Symbol --}}
+                    <div class="bg-blue-50 rounded-xl p-6 border-2 border-blue-200 shadow-lg hover:shadow-xl transition-shadow">
+                        <p class="text-sm font-medium text-blue-600 mb-1">Most Traded</p>
+                        <p class="text-2xl font-bold text-blue-900">{{ $stats['most_traded_symbol'] ?? 'N/A' }}</p>
+                    </div>
+
+                    {{-- Most Profitable Symbol --}}
+                    <div class="bg-green-50 rounded-xl p-6 border-2 border-green-200 shadow-lg hover:shadow-xl transition-shadow">
+                        <p class="text-sm font-medium text-green-600 mb-1">Most Profitable</p>
+                        <p class="text-2xl font-bold text-green-900">{{ $stats['most_profitable_symbol'] ?? 'N/A' }}</p>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Fees & Costs --}}
+            <div class="mb-6">
+                <h2 class="text-xl font-bold text-gray-900 mb-4">💸 Fees & Costs</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {{-- Total Commission --}}
+                    <div class="bg-amber-50 rounded-xl p-6 border-2 border-amber-200 shadow-lg hover:shadow-xl transition-shadow">
+                        <p class="text-sm font-medium text-amber-600 mb-1">Total Commission</p>
+                        <p class="text-3xl font-bold text-amber-900">${{ number_format(abs($stats['total_commission']), 2) }}</p>
+                    </div>
+
+                    {{-- Total Swap --}}
+                    <div class="bg-orange-50 rounded-xl p-6 border-2 border-orange-200 shadow-lg hover:shadow-xl transition-shadow">
+                        <p class="text-sm font-medium text-orange-600 mb-1">Total Swap</p>
+                        <p class="text-3xl font-bold {{ $stats['total_swap'] >= 0 ? 'text-orange-900' : 'text-red-900' }}">${{ number_format($stats['total_swap'], 2) }}</p>
+                    </div>
+
+                    {{-- Avg Profit Per Trade --}}
+                    <div class="bg-lime-50 rounded-xl p-6 border-2 border-lime-200 shadow-lg hover:shadow-xl transition-shadow">
+                        <p class="text-sm font-medium text-lime-600 mb-1">Avg Profit/Trade</p>
+                        <p class="text-3xl font-bold {{ $stats['avg_profit_per_trade'] >= 0 ? 'text-lime-900' : 'text-red-900' }}">${{ number_format($stats['avg_profit_per_trade'], 2) }}</p>
+                    </div>
+                </div>
             </div>
 
             {{-- Users Table --}}
@@ -103,9 +318,9 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         @if($usage->last_seen_at && $usage->last_seen_at->gt(now()->subDays(7)))
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Active</span>
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">Active</span>
                                         @else
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Inactive</span>
+                                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-800">Inactive</span>
                                         @endif
                                     </td>
                                 </tr>
@@ -128,4 +343,4 @@
 
         </div>
     </div>
-</x-app-layout>
+</x-enterprise-layout>

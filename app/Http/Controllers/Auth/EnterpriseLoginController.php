@@ -15,7 +15,7 @@ class EnterpriseLoginController extends Controller
     public function showLoginForm()
     {
         // If already authenticated as enterprise admin, redirect to dashboard
-        if (Auth::check() && Auth::user()->is_enterprise_admin) {
+        if (Auth::guard('enterprise')->check()) {
             return redirect()->route('enterprise.dashboard');
         }
         
@@ -35,27 +35,31 @@ class EnterpriseLoginController extends Controller
         $credentials = $request->only('email', 'password');
         $remember = $request->filled('remember');
 
-        if (Auth::attempt($credentials, $remember)) {
-            $user = Auth::user();
+        if (Auth::guard('enterprise')->attempt($credentials, $remember)) {
+            $admin = Auth::guard('enterprise')->user();
             
-            // Check if user is enterprise admin
-            if (!$user->is_enterprise_admin) {
-                Auth::logout();
+            // Check if admin is active
+            if (!$admin->is_active) {
+                Auth::guard('enterprise')->logout();
                 
                 throw ValidationException::withMessages([
-                    'email' => ['This portal is for enterprise broker admins only. Please contact TheTradeVisor for access.'],
+                    'email' => ['Your account has been deactivated. Please contact TheTradeVisor support.'],
                 ]);
             }
             
-            // Check if user has active enterprise broker
-            $broker = $user->enterpriseBroker;
+            // Check if broker is active
+            $broker = $admin->enterpriseBroker;
             if (!$broker || !$broker->isCurrentlyActive()) {
-                Auth::logout();
+                Auth::guard('enterprise')->logout();
                 
                 throw ValidationException::withMessages([
                     'email' => ['Your enterprise subscription is inactive. Please contact TheTradeVisor support.'],
                 ]);
             }
+            
+            // Update last login
+            $admin->last_login_at = now();
+            $admin->save();
             
             $request->session()->regenerate();
             
@@ -73,7 +77,7 @@ class EnterpriseLoginController extends Controller
      */
     public function logout(Request $request)
     {
-        Auth::logout();
+        Auth::guard('enterprise')->logout();
         
         $request->session()->invalidate();
         $request->session()->regenerateToken();

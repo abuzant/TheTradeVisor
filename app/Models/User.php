@@ -19,7 +19,6 @@ class User extends Authenticatable
         'api_key',
         'is_active',
         'is_admin',
-        'is_enterprise_admin',
         'last_login_at',
         'public_username',
         'public_username_set_at',
@@ -40,7 +39,6 @@ class User extends Authenticatable
         'password' => 'hashed',
         'is_active' => 'boolean',
         'is_admin' => 'boolean',
-        'is_enterprise_admin' => 'boolean',
         'public_username_set_at' => 'datetime',
         'show_on_leaderboard' => 'boolean',
     ];
@@ -76,11 +74,6 @@ class User extends Authenticatable
         return $this->hasMany(DigestSubscription::class);
     }
 
-    public function enterpriseBroker()
-    {
-        return $this->hasOne(EnterpriseBroker::class);
-    }
-
     public function whitelistedBrokerUsage()
     {
         return $this->hasMany(WhitelistedBrokerUsage::class);
@@ -109,24 +102,5 @@ public function regenerateApiKey()
     $this->save();
     return $this->api_key;
 }
-
-    /**
-     * Check if user is an enterprise admin
-     */
-    public function isEnterpriseAdmin()
-    {
-        return $this->is_enterprise_admin === true;
-    }
-
-    /**
-     * Get the enterprise broker for this admin
-     */
-    public function getEnterpriseBroker()
-    {
-        if (!$this->isEnterpriseAdmin()) {
-            return null;
-        }
-        return $this->enterpriseBroker;
-    }
 
 }

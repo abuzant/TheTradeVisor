@@ -4,39 +4,41 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class EnterpriseAdminMiddleware
 {
     /**
      * Handle an incoming request.
-     * Only allow users who are enterprise admins
+     * Only allow authenticated enterprise admins
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $user = $request->user();
-        
-        // Check if user is authenticated
-        if (!$user) {
-            return redirect()->route('login')->with('error', 'Please login to access enterprise portal.');
+        // Check if authenticated with enterprise guard
+        if (!Auth::guard('enterprise')->check()) {
+            return redirect()->route('enterprise.login')->with('error', 'Please login to access enterprise portal.');
         }
         
-        // Check if user is an enterprise admin
-        if (!$user->isEnterpriseAdmin()) {
-            abort(403, 'Access denied. Enterprise admin privileges required.');
+        $admin = Auth::guard('enterprise')->user();
+        
+        // Check if admin is active
+        if (!$admin->is_active) {
+            Auth::guard('enterprise')->logout();
+            return redirect()->route('enterprise.login')->with('error', 'Your account has been deactivated.');
         }
         
-        // Check if user has an associated enterprise broker
-        $broker = $user->enterpriseBroker;
+        // Check if admin has an associated enterprise broker
+        $broker = $admin->enterpriseBroker;
         if (!$broker) {
             abort(403, 'No enterprise broker associated with your account.');
         }
         
         // Check if broker is active
         if (!$broker->isCurrentlyActive()) {
-            return redirect()->route('dashboard')->with('error', 'Your enterprise subscription is not active. Please contact support.');
+            return redirect()->route('enterprise.login')->with('error', 'Your enterprise subscription is not active. Please contact support.');
         }
         
         return $next($request);

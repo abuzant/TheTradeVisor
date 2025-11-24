@@ -25,7 +25,7 @@ Route::get('/healthcheck', function () {
 | These routes are available on ALL domains but middleware restricts access
 */
 
-// Enterprise login (accessible from any domain, but middleware restricts)
+// Enterprise login routes (on enterprise subdomain)
 Route::get('/enterprise-login', [App\Http\Controllers\Auth\EnterpriseLoginController::class, 'showLoginForm'])
     ->middleware('enterprise.subdomain')
     ->name('enterprise.login');
@@ -36,13 +36,26 @@ Route::post('/enterprise-logout', [App\Http\Controllers\Auth\EnterpriseLoginCont
     ->middleware('enterprise.subdomain')
     ->name('enterprise.logout');
 
+// Enterprise password reset routes
+Route::get('/enterprise-password-reset/{token}', [App\Http\Controllers\Auth\EnterprisePasswordResetController::class, 'showResetForm'])
+    ->middleware('enterprise.subdomain')
+    ->name('enterprise.password.reset');
+Route::post('/enterprise-password-reset', [App\Http\Controllers\Auth\EnterprisePasswordResetController::class, 'reset'])
+    ->middleware('enterprise.subdomain')
+    ->name('enterprise.password.update');
+
 // Enterprise authenticated routes
-Route::middleware(['enterprise.subdomain', 'auth', 'enterprise.admin'])->prefix('enterprise')->name('enterprise.')->group(function () {
+Route::middleware(['enterprise.subdomain', 'auth:enterprise', 'enterprise.admin'])->prefix('enterprise')->name('enterprise.')->group(function () {
     Route::get('/dashboard', [App\Http\Controllers\EnterpriseController::class, 'dashboard'])->name('dashboard');
     Route::get('/analytics', [App\Http\Controllers\EnterpriseController::class, 'analytics'])->name('analytics');
     Route::get('/accounts', [App\Http\Controllers\EnterpriseController::class, 'accounts'])->name('accounts');
     Route::get('/settings', [App\Http\Controllers\EnterpriseController::class, 'settings'])->name('settings');
     Route::post('/settings', [App\Http\Controllers\EnterpriseController::class, 'updateSettings'])->name('settings.update');
+    Route::post('/api-key/regenerate', [App\Http\Controllers\EnterpriseController::class, 'regenerateApiKey'])->name('api-key.regenerate');
+    Route::get('/admins', [App\Http\Controllers\EnterpriseController::class, 'admins'])->name('admins');
+    Route::post('/admins', [App\Http\Controllers\EnterpriseController::class, 'storeAdmin'])->name('admins.store');
+    Route::put('/admins/{admin}', [App\Http\Controllers\EnterpriseController::class, 'updateAdmin'])->name('admins.update');
+    Route::delete('/admins/{admin}', [App\Http\Controllers\EnterpriseController::class, 'deleteAdmin'])->name('admins.delete');
 });
 
 /*

@@ -17,8 +17,8 @@ class EnterpriseController extends Controller
      */
     public function dashboard(Request $request)
     {
-        $user = Auth::user();
-        $broker = $user->enterpriseBroker;
+        $admin = Auth::guard('enterprise')->user();
+        $broker = $admin->enterpriseBroker;
 
         if (!$broker) {
             return redirect()->route('dashboard')->with('error', 'Enterprise account not found');
@@ -299,8 +299,8 @@ class EnterpriseController extends Controller
      */
     public function analytics(Request $request)
     {
-        $user = Auth::user();
-        $broker = $user->enterpriseBroker;
+        $admin = Auth::guard('enterprise')->user();
+        $broker = $admin->enterpriseBroker;
 
         if (!$broker) {
             return redirect()->route('dashboard')->with('error', 'Enterprise account not found');
@@ -342,12 +342,81 @@ class EnterpriseController extends Controller
             ->limit(20)
             ->get();
 
+        // Get all accounts with their data
+        $accounts = TradingAccount::whereIn('id', $accountIds)->get();
+        
+        // Get all deals for the period
+        $deals = Deal::whereIn('trading_account_id', $accountIds)
+            ->where('time', '>=', now()->subDays($days))
+            ->where('entry', 'out')
+            ->get();
+
+        // Calculate comprehensive stats
+        $stats = [
+            // User & Account Stats
+            'total_users' => WhitelistedBrokerUsage::where('enterprise_broker_id', $broker->id)->distinct('user_id')->count('user_id'),
+            'total_accounts' => count($accountIds),
+            'active_accounts_7d' => WhitelistedBrokerUsage::where('enterprise_broker_id', $broker->id)->where('last_seen_at', '>=', now()->subDays(7))->count(),
+            'active_accounts_30d' => WhitelistedBrokerUsage::where('enterprise_broker_id', $broker->id)->where('last_seen_at', '>=', now()->subDays(30))->count(),
+            
+            // Trading Volume Stats
+            'total_trades' => $deals->count(),
+            'winning_trades' => $deals->where('profit', '>', 0)->count(),
+            'losing_trades' => $deals->where('profit', '<', 0)->count(),
+            'breakeven_trades' => $deals->where('profit', '=', 0)->count(),
+            
+            // Profit Stats
+            'total_profit' => $deals->sum('profit'),
+            'total_commission' => $deals->sum('commission'),
+            'total_swap' => $deals->sum('swap'),
+            'net_profit' => $deals->sum('profit') + $deals->sum('commission') + $deals->sum('swap'),
+            'avg_profit_per_trade' => $deals->count() > 0 ? $deals->avg('profit') : 0,
+            'best_trade' => $deals->max('profit'),
+            'worst_trade' => $deals->min('profit'),
+            
+            // Win Rate & Performance
+            'win_rate' => $deals->count() > 0 ? ($deals->where('profit', '>', 0)->count() / $deals->count()) * 100 : 0,
+            'avg_win' => $deals->where('profit', '>', 0)->avg('profit') ?? 0,
+            'avg_loss' => abs($deals->where('profit', '<', 0)->avg('profit') ?? 0),
+            'profit_factor' => abs($deals->where('profit', '<', 0)->sum('profit')) > 0 ? $deals->where('profit', '>', 0)->sum('profit') / abs($deals->where('profit', '<', 0)->sum('profit')) : 0,
+            
+            // Account Balance Stats
+            'total_balance' => $accounts->sum('balance'),
+            'total_equity' => $accounts->sum('equity'),
+            'avg_balance' => $accounts->avg('balance'),
+            'avg_equity' => $accounts->avg('equity'),
+            'max_balance' => $accounts->max('balance'),
+            'min_balance' => $accounts->min('balance'),
+            
+            // Leverage & Margin
+            'avg_leverage' => $accounts->avg('leverage'),
+            'total_margin_used' => $accounts->sum('margin'),
+            'avg_margin_level' => $accounts->where('margin', '>', 0)->avg('margin_level'),
+            
+            // Volume Stats
+            'total_volume' => $deals->sum('volume'),
+            'avg_volume_per_trade' => $deals->count() > 0 ? $deals->avg('volume') : 0,
+            'max_volume_trade' => $deals->max('volume'),
+            
+            // Most Traded Symbols
+            'most_traded_symbol' => $deals->groupBy('symbol')->sortByDesc(fn($group) => $group->count())->keys()->first(),
+            'most_profitable_symbol' => $deals->groupBy('symbol')->sortByDesc(fn($group) => $group->sum('profit'))->keys()->first(),
+        ];
+
+        // Get users with pagination
+        $users = WhitelistedBrokerUsage::where('enterprise_broker_id', $broker->id)
+            ->with(['user', 'tradingAccount'])
+            ->orderBy('last_seen_at', 'desc')
+            ->paginate(20);
+
         return view('enterprise.analytics', compact(
             'broker',
             'days',
             'countryStats',
             'platformStats',
-            'symbolPerformance'
+            'symbolPerformance',
+            'stats',
+            'users'
         ));
     }
 
@@ -356,8 +425,8 @@ class EnterpriseController extends Controller
      */
     public function accounts(Request $request)
     {
-        $user = Auth::user();
-        $broker = $user->enterpriseBroker;
+        $admin = Auth::guard('enterprise')->user();
+        $broker = $admin->enterpriseBroker;
 
         if (!$broker) {
             return redirect()->route('dashboard')->with('error', 'Enterprise account not found');
@@ -428,8 +497,8 @@ class EnterpriseController extends Controller
      */
     public function settings()
     {
-        $user = Auth::user();
-        $broker = $user->enterpriseBroker;
+        $admin = Auth::guard('enterprise')->user();
+        $broker = $admin->enterpriseBroker;
 
         if (!$broker) {
             return redirect()->route('dashboard')->with('error', 'Enterprise account not found');
@@ -446,8 +515,8 @@ class EnterpriseController extends Controller
      */
     public function updateSettings(Request $request)
     {
-        $user = Auth::user();
-        $broker = $user->enterpriseBroker;
+        $admin = Auth::guard('enterprise')->user();
+        $broker = $admin->enterpriseBroker;
 
         if (!$broker) {
             return redirect()->route('dashboard')->with('error', 'Enterprise account not found');
@@ -464,6 +533,149 @@ class EnterpriseController extends Controller
         ]);
 
         return back()->with('success', 'Settings updated successfully');
+    }
+
+    /**
+     * Regenerate API key
+     */
+    public function regenerateApiKey()
+    {
+        $admin = Auth::guard('enterprise')->user();
+        $broker = $admin->enterpriseBroker;
+
+        if (!$broker) {
+            return redirect()->route('dashboard')->with('error', 'Enterprise account not found');
+        }
+
+        // Revoke all existing keys
+        $broker->apiKeys()->delete();
+
+        // Generate new key
+        $newKey = \App\Models\EnterpriseApiKey::create([
+            'enterprise_broker_id' => $broker->id,
+            'key' => \App\Models\EnterpriseApiKey::generateKey(),
+            'name' => 'Primary API Key',
+        ]);
+
+        return back()->with('success', 'API key regenerated successfully')->with('new_api_key', $newKey->key);
+    }
+
+    /**
+     * Manage enterprise admins
+     */
+    public function admins()
+    {
+        $admin = Auth::guard('enterprise')->user();
+        $broker = $admin->enterpriseBroker;
+
+        if (!$broker) {
+            return redirect()->route('dashboard')->with('error', 'Enterprise account not found');
+        }
+
+        // Only admins can manage users
+        if (!$admin->canManage()) {
+            return redirect()->route('enterprise.dashboard')->with('error', 'Only administrators can manage users');
+        }
+
+        $admins = $broker->admins()->orderBy('created_at', 'desc')->get();
+
+        return view('enterprise.admins', compact('broker', 'admins'));
+    }
+
+    /**
+     * Store new enterprise admin
+     */
+    public function storeAdmin(Request $request)
+    {
+        $admin = Auth::guard('enterprise')->user();
+        $broker = $admin->enterpriseBroker;
+
+        if (!$broker || !$admin->canManage()) {
+            return back()->with('error', 'Unauthorized');
+        }
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:enterprise_admins,email',
+            'role' => 'required|in:admin,viewer',
+        ]);
+
+        $newAdmin = \App\Models\EnterpriseAdmin::create([
+            'enterprise_broker_id' => $broker->id,
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => \Hash::make(\Str::random(32)), // Random password, will be reset via email
+            'role' => $request->role,
+            'is_active' => true,
+        ]);
+
+        // Generate password reset token
+        $token = \Password::broker('enterprise_admins')->createToken($newAdmin);
+
+        // Send welcome email with password setup link
+        \Mail::to($newAdmin->email)->send(new \App\Mail\EnterpriseWelcomeMail($newAdmin, $token, $broker));
+
+        return back()->with('success', 'User added successfully. They will receive an email to set their password.');
+    }
+
+    /**
+     * Update enterprise admin
+     */
+    public function updateAdmin(Request $request, $adminId)
+    {
+        $currentAdmin = Auth::guard('enterprise')->user();
+        $broker = $currentAdmin->enterpriseBroker;
+
+        if (!$broker || !$currentAdmin->canManage()) {
+            return back()->with('error', 'Unauthorized');
+        }
+
+        $targetAdmin = \App\Models\EnterpriseAdmin::where('enterprise_broker_id', $broker->id)
+            ->findOrFail($adminId);
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'role' => 'required|in:admin,viewer',
+            'is_active' => 'boolean',
+        ]);
+
+        // Prevent deactivating yourself
+        if ($targetAdmin->id === $currentAdmin->id && $request->is_active === false) {
+            return back()->with('error', 'You cannot deactivate your own account');
+        }
+
+        $targetAdmin->update([
+            'name' => $request->name,
+            'role' => $request->role,
+            'is_active' => $request->is_active ?? $targetAdmin->is_active,
+        ]);
+
+        return back()->with('success', 'User updated successfully');
+    }
+
+    /**
+     * Delete enterprise admin
+     */
+    public function deleteAdmin($adminId)
+    {
+        $currentAdmin = Auth::guard('enterprise')->user();
+        $broker = $currentAdmin->enterpriseBroker;
+
+        if (!$broker || !$currentAdmin->canManage()) {
+            return back()->with('error', 'Unauthorized');
+        }
+
+        $targetAdmin = \App\Models\EnterpriseAdmin::where('enterprise_broker_id', $broker->id)
+            ->findOrFail($adminId);
+
+        // Prevent deleting yourself
+        if ($targetAdmin->id === $currentAdmin->id) {
+            return back()->with('error', 'You cannot delete your own account');
+        }
+
+        $targetAdmin->delete();
+
+        return back()->with('success', 'User deleted successfully');
     }
 
 }

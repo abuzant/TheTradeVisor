@@ -1,6 +1,6 @@
 @section('title', 'Enterprise Settings - TheTradeVisor')
 
-<x-app-layout>
+<x-enterprise-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
             <div>
@@ -62,11 +62,22 @@
                             <p class="text-lg font-semibold text-gray-900">
                                 {{ $broker->subscription_ends_at ? $broker->subscription_ends_at->format('M d, Y') : 'N/A' }}
                             </p>
+                            @if($broker->subscription_ends_at && now()->diffInDays($broker->subscription_ends_at) < 90 && $broker->subscription_ends_at->isFuture())
+                                <p class="text-xs text-indigo-600 font-medium mt-2">
+                                    🎉 Extend for 1 year & get 10% off!
+                                </p>
+                            @endif
                         </div>
                         <div class="bg-white rounded-lg p-4 shadow-sm">
                             <p class="text-sm text-gray-500 mb-1">Grace Period</p>
                             <p class="text-lg font-semibold text-gray-900">
-                                {{ $broker->grace_period_ends_at ? $broker->grace_period_ends_at->format('M d, Y') : 'N/A' }}
+                                @if($broker->grace_period_ends_at)
+                                    {{ $broker->grace_period_ends_at->format('M d, Y') }}
+                                @elseif($broker->is_active)
+                                    <span class="text-green-600">Active</span>
+                                @else
+                                    N/A
+                                @endif
                             </p>
                         </div>
                     </div>
@@ -91,6 +102,7 @@
                                    id="company_name" 
                                    value="{{ old('company_name', $broker->company_name) }}"
                                    class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                   {{ Auth::guard('enterprise')->user()->isViewer() ? 'readonly' : '' }}
                                    required>
                             @error('company_name')
                                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -110,6 +122,7 @@
                                    id="official_broker_name" 
                                    value="{{ old('official_broker_name', $broker->official_broker_name) }}"
                                    class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm font-mono bg-gray-50"
+                                   {{ Auth::guard('enterprise')->user()->isViewer() ? 'readonly' : '' }}
                                    required>
                             @error('official_broker_name')
                                 <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
@@ -128,21 +141,148 @@
                         </div>
 
                         {{-- Submit Button --}}
-                        <div class="flex justify-end pt-4">
-                            <button type="submit"
-                                    class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 border border-transparent rounded-lg font-semibold text-sm text-white shadow-lg hover:shadow-xl transition-all duration-200">
-                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                </svg>
-                                Save Settings
-                            </button>
-                        </div>
+                        @if(Auth::guard('enterprise')->user()->canManage())
+                            <div class="flex justify-end pt-4">
+                                <button type="submit"
+                                        class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 border border-transparent rounded-lg font-semibold text-sm text-white shadow-lg hover:shadow-xl transition-all duration-200">
+                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                    Save Settings
+                                </button>
+                            </div>
+                        @else
+                            <div class="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4 mt-4">
+                                <p class="text-sm text-yellow-800">
+                                    👁️ <strong>View-Only Access:</strong> You can view settings but cannot make changes. Contact an administrator to modify these settings.
+                                </p>
+                            </div>
+                        @endif
                     </form>
                 </div>
             </div>
 
+            {{-- API Access --}}
+            @if(Auth::guard('enterprise')->user()->canManage())
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
+                <div class="bg-indigo-600 px-6 py-4">
+                    <h3 class="text-lg font-semibold text-white flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                        </svg>
+                        API Access
+                    </h3>
+                    <p class="text-sm text-indigo-100 mt-1">Programmatic access to your aggregated data</p>
+                </div>
+                <div class="p-6">
+                    @if(session('new_api_key'))
+                        <div class="mb-6 bg-green-50 border-2 border-green-200 rounded-xl p-4">
+                            <div class="flex items-start">
+                                <svg class="w-6 h-6 text-green-600 mr-3 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <div class="flex-1">
+                                    <h4 class="text-sm font-semibold text-green-800 mb-2">✅ New API Key Generated!</h4>
+                                    <p class="text-sm text-green-700 mb-3">⚠️ <strong>Copy this key now</strong> - it will only be shown once for security reasons.</p>
+                                    <div class="bg-white border border-green-300 rounded-lg p-3 font-mono text-sm break-all">
+                                        {{ session('new_api_key') }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
+                    <div class="space-y-4">
+                        {{-- Current API Key --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Your API Key</label>
+                            @if($apiKeys->count() > 0)
+                                <div class="bg-gray-50 border border-gray-300 rounded-lg p-4">
+                                    <div class="flex items-center justify-between">
+                                        <div class="flex-1">
+                                            <p class="font-mono text-sm text-gray-600">{{ substr($apiKeys->first()->key, 0, 20) }}••••••••••••••••••••</p>
+                                            <p class="text-xs text-gray-500 mt-1">
+                                                Created: {{ $apiKeys->first()->created_at->format('M d, Y') }}
+                                                @if($apiKeys->first()->last_used_at)
+                                                    • Last used: {{ $apiKeys->first()->last_used_at->diffForHumans() }}
+                                                @else
+                                                    • Never used
+                                                @endif
+                                            </p>
+                                        </div>
+                                        <form action="{{ route('enterprise.api-key.regenerate') }}" method="POST" 
+                                              onsubmit="return confirm('⚠️ WARNING: This will revoke your current API key and generate a new one. Any applications using the old key will stop working immediately. Are you sure?');">
+                                            @csrf
+                                            <button type="submit" class="ml-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium">
+                                                🔄 Regenerate
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            @else
+                                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                                    <p class="text-sm text-yellow-800">⚠️ No API key found. Please contact support.</p>
+                                </div>
+                            @endif
+                        </div>
+
+                        {{-- API Documentation --}}
+                        <div class="bg-gradient-to-br from-indigo-50 to-purple-50 border-2 border-indigo-200 rounded-xl p-6">
+                            <h4 class="text-sm font-semibold text-indigo-900 mb-3 flex items-center">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                📚 API Documentation
+                            </h4>
+                            <div class="text-sm text-indigo-800 space-y-2">
+                                <p><strong>Base URL:</strong> <code class="bg-indigo-100 px-2 py-1 rounded">https://thetradevisor.com/api/enterprise/v1/</code></p>
+                                <p><strong>Authentication:</strong> <code class="bg-indigo-100 px-2 py-1 rounded">Authorization: Bearer ent_...</code></p>
+                                
+                                <div class="mt-4 pt-4 border-t border-indigo-200">
+                                    <p class="font-semibold mb-2">Available Endpoints:</p>
+                                    <ul class="space-y-1 ml-4">
+                                        <li>• <code class="bg-white px-2 py-0.5 rounded text-xs">GET /accounts</code> - List all trading accounts</li>
+                                        <li>• <code class="bg-white px-2 py-0.5 rounded text-xs">GET /metrics</code> - Aggregated performance metrics</li>
+                                        <li>• <code class="bg-white px-2 py-0.5 rounded text-xs">GET /performance</code> - Detailed performance data</li>
+                                        <li>• <code class="bg-white px-2 py-0.5 rounded text-xs">GET /top-performers</code> - Top performing accounts</li>
+                                        <li>• <code class="bg-white px-2 py-0.5 rounded text-xs">GET /trading-hours</code> - Trading hours analysis</li>
+                                        <li>• <code class="bg-white px-2 py-0.5 rounded text-xs">GET /export</code> - Export data (CSV/JSON)</li>
+                                    </ul>
+                                </div>
+
+                                <div class="mt-4 pt-4 border-t border-indigo-200">
+                                    <p class="font-semibold mb-2">Example Request:</p>
+                                    <div class="bg-gray-900 text-green-400 rounded-lg p-3 font-mono text-xs overflow-x-auto">
+curl -H "Authorization: Bearer ent_your_key_here" \<br>
+     https://thetradevisor.com/api/enterprise/v1/metrics
+                                    </div>
+                                </div>
+
+                                <div class="mt-4 flex gap-3">
+                                    <a href="{{ asset('docs/api/ENTERPRISE_API.md') }}" target="_blank" download
+                                       class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                        </svg>
+                                        Download API Documentation
+                                    </a>
+                                    <a href="mailto:enterprise@thetradevisor.com?subject=Enterprise API Support" 
+                                       class="inline-flex items-center px-4 py-2 bg-white border border-indigo-300 text-indigo-700 rounded-lg hover:bg-indigo-50 transition-colors text-sm font-medium">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                        </svg>
+                                        API Support
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endif
+
             {{-- How It Works --}}
-            <div class="bg-blue-50 border-l-4 border-blue-500 rounded-r-lg p-6 shadow-sm">
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-6 shadow-lg">
                 <div class="flex">
                     <div class="flex-shrink-0">
                         <svg class="h-6 w-6 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
@@ -164,7 +304,7 @@
             </div>
 
             {{-- Multi-Entity Information --}}
-            <div class="bg-yellow-50 border-l-4 border-yellow-500 rounded-r-lg p-6 shadow-sm">
+            <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-6 shadow-lg">
                 <div class="flex">
                     <div class="flex-shrink-0">
                         <svg class="h-6 w-6 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
@@ -177,7 +317,8 @@
                             <p>If you operate multiple legal entities with different MT4/MT5 server names, each requires a separate enterprise subscription.</p>
                             <p><strong>Example:</strong> Equiti with 4 entities (Equiti-Demo, Equiti-Live, Equiti-UK, Equiti-Jordan) = 4 separate subscriptions</p>
                             <p class="pt-2"><strong>💰 Pricing:</strong> ${{ number_format($broker->monthly_fee, 2) }}/month per server name</p>
-                            <p><strong>📧 Contact:</strong> <a href="mailto:hello@thetradevisor.com" class="underline font-semibold">hello@thetradevisor.com</a> to add additional broker names</p>
+                            <p><strong>📧 Contact:</strong> <a href="mailto:
+                            enterprise@thetradevisor.com" class="underline font-semibold">enterprise@thetradevisor.com</a> to add additional broker names</p>
                         </div>
                     </div>
                 </div>
@@ -210,11 +351,11 @@
             </div>
 
             {{-- Support Contact --}}
-            <div class="bg-gray-50 rounded-xl border border-gray-200 p-6 text-center">
+            <div class="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl border-2 border-indigo-200 p-8 text-center shadow-lg">
                 <h4 class="text-lg font-semibold text-gray-900 mb-2">Need Help?</h4>
                 <p class="text-sm text-gray-600 mb-4">Our team is here to assist you with setup, configuration, or any questions</p>
                 <div class="flex justify-center space-x-4">
-                    <a href="mailto:hello@thetradevisor.com" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+                    <a href="mailto:enterprise@thetradevisor.com" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                         </svg>
@@ -231,4 +372,4 @@
 
         </div>
     </div>
-</x-app-layout>
+</x-enterprise-layout>

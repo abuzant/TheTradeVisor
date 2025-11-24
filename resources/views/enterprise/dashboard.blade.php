@@ -1,6 +1,6 @@
 @section('title', 'Enterprise Dashboard - TheTradeVisor')
 
-<x-app-layout>
+<x-enterprise-layout>
     <x-slot name="header">
         <h1 class="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
             {{ __('Enterprise Dashboard') }}
@@ -543,4 +543,4 @@
             });
         });
     </script>
-</x-app-layout>
+</x-enterprise-layout>

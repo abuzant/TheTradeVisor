@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\EnterpriseBroker;
 use App\Models\EnterpriseApiKey;
-use App\Models\User;
+use App\Models\EnterpriseAdmin;
 use App\Models\WhitelistedBrokerUsage;
 use App\Models\TradingAccount;
 use Illuminate\Support\Facades\DB;
@@ -20,7 +20,7 @@ class BrokerManagementController extends Controller
      */
     public function index(Request $request)
     {
-        $query = EnterpriseBroker::with('user');
+        $query = EnterpriseBroker::with('admins');
 
         // Search filter
         if ($request->has('search') && $request->search) {
@@ -82,31 +82,32 @@ class BrokerManagementController extends Controller
             'official_broker_name' => 'required|string|max:255|unique:enterprise_brokers,official_broker_name',
             'monthly_fee' => 'required|numeric|min:0',
             'admin_name' => 'required|string|max:255',
-            'admin_email' => 'required|email|unique:users,email',
+            'admin_email' => 'required|email|unique:enterprise_admins,email',
             'admin_password' => 'required|string|min:8',
             'subscription_months' => 'required|integer|min:1|max:24',
         ]);
 
         DB::beginTransaction();
         try {
-            // Create admin user
-            $user = User::create([
-                'name' => $request->admin_name,
-                'email' => $request->admin_email,
-                'password' => Hash::make($request->admin_password),
-                'is_enterprise_admin' => true,
-                'is_active' => true,
-            ]);
-
-            // Create enterprise broker
+            // Create enterprise broker first
             $broker = EnterpriseBroker::create([
-                'user_id' => $user->id,
                 'company_name' => $request->company_name,
                 'official_broker_name' => $request->official_broker_name,
                 'is_active' => true,
                 'monthly_fee' => $request->monthly_fee,
                 'subscription_ends_at' => now()->addMonths((int) $request->subscription_months),
                 'grace_period_ends_at' => null,
+            ]);
+
+            // Create admin for this broker
+            EnterpriseAdmin::create([
+                'enterprise_broker_id' => $broker->id,
+                'name' => $request->admin_name,
+                'email' => $request->admin_email,
+                'password' => Hash::make($request->admin_password),
+                'role' => 'admin',
+                'is_active' => true,
+                'email_verified_at' => now(),
             ]);
 
             // Create initial API key
@@ -131,7 +132,7 @@ class BrokerManagementController extends Controller
      */
     public function show($id)
     {
-        $broker = EnterpriseBroker::with('user', 'apiKeys')->findOrFail($id);
+        $broker = EnterpriseBroker::with('admins', 'apiKeys')->findOrFail($id);
 
         // Get statistics
         $stats = [
@@ -168,7 +169,7 @@ class BrokerManagementController extends Controller
      */
     public function edit($id)
     {
-        $broker = EnterpriseBroker::with('user')->findOrFail($id);
+        $broker = EnterpriseBroker::with('admins')->findOrFail($id);
         return view('admin.brokers.edit', compact('broker'));
     }
 
@@ -210,16 +211,8 @@ class BrokerManagementController extends Controller
         
         DB::beginTransaction();
         try {
-            // Delete associated user
-            $user = $broker->user;
-            
-            // Delete broker (cascade will handle API keys and usage records)
+            // Delete broker (cascade will handle admins, API keys and usage records)
             $broker->delete();
-            
-            // Delete user
-            if ($user) {
-                $user->delete();
-            }
 
             DB::commit();
 

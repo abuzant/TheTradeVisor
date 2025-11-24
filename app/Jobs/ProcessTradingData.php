@@ -420,6 +420,9 @@ class ProcessTradingData implements ShouldQueue
                     Log::error('Failed to create deal', [
                         'ticket' => $dealData['ticket'] ?? 'unknown',
                         'error' => $e->getMessage(),
+                        'raw_data' => $dealData, // Log the raw data to see what's missing
+                        'account_id' => $tradingAccount->id,
+                        'platform' => $tradingAccount->platform_type,
                     ]);
                 }
             } else {
@@ -504,6 +507,29 @@ class ProcessTradingData implements ShouldQueue
                     'position_modified' => 'inout',
                 ];
                 $dealData['entry'] = $activityMap[$dealData['activity_type']] ?? 'unknown';
+            }
+        }
+
+        // MT4 might send 'cmd' or 'deal_type' instead of 'type'
+        // Map MT4 command types to standard deal types
+        if (!isset($dealData['type']) || empty($dealData['type'])) {
+            if (isset($dealData['cmd'])) {
+                // MT4 cmd values: 0=buy, 1=sell, 6=balance, 7=credit
+                $cmdMap = [
+                    0 => 'buy',
+                    1 => 'sell',
+                    2 => 'buy_limit',
+                    3 => 'sell_limit',
+                    4 => 'buy_stop',
+                    5 => 'sell_stop',
+                    6 => 'balance',
+                    7 => 'credit',
+                ];
+                $dealData['type'] = $cmdMap[$dealData['cmd']] ?? 'unknown';
+            } elseif (isset($dealData['deal_type'])) {
+                $dealData['type'] = $dealData['deal_type'];
+            } elseif (isset($dealData['order_type'])) {
+                $dealData['type'] = $dealData['order_type'];
             }
         }
 
