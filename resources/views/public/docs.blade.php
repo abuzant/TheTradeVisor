@@ -14,6 +14,8 @@
                         <a href="#getting-started" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded">Getting Started</a>
                         <a href="#installation" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded">Installation</a>
                         <a href="#features" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded">Features</a>
+                        <a href="#public-profiles" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded">Public Profiles</a>
+                        <a href="#badges" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded">Badges</a>
                         <a href="#analytics" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded">Analytics</a>
                         <a href="#api" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded">API</a>
                         <a href="#troubleshooting" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded">Troubleshooting</a>
@@ -102,6 +104,138 @@
                             <li>Maximum drawdown alerts</li>
                             <li>Position sizing recommendations</li>
                         </ul>
+                    </div>
+
+                    {{-- Public Profiles --}}
+                    <div id="public-profiles" class="mb-16">
+                        <h2 class="text-3xl font-bold text-gray-900 mb-4">Public Trading Profiles</h2>
+                        <p class="text-gray-700 mb-4">Share your trading performance publicly with a custom URL and build your reputation in the trading community.</p>
+                        
+                        <h3 class="text-2xl font-bold text-gray-900 mt-8 mb-3">Creating Your Public Profile</h3>
+                        <ol class="list-decimal list-inside space-y-2 text-gray-700 ml-4">
+                            <li>Go to <strong>Profile Settings</strong> and choose your public username (one-time choice)</li>
+                            <li>Select your display mode: Username, Display Name, or Anonymous</li>
+                            <li>Navigate to <strong>Accounts → Public Profiles</strong></li>
+                            <li>For each account, set it to "Public" and configure your preferences</li>
+                            <li>Choose a widget preset: Minimal, Full Stats, or Trader Showcase</li>
+                            <li>Share your unique URL: <code>thetradevisor.com/@username/account-slug/number</code></li>
+                        </ol>
+
+                        <h3 class="text-2xl font-bold text-gray-900 mt-8 mb-3">Widget Presets</h3>
+                        <p class="text-gray-700 mb-4">Choose how much information to share:</p>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700 ml-4">
+                            <li><strong>🔒 Minimal:</strong> Essential stats only - 6 performance cards, equity curve, risk disclaimer</li>
+                            <li><strong>📊 Full Stats:</strong> Everything in Minimal + top symbols performance table</li>
+                            <li><strong>🏆 Trader Showcase:</strong> Maximum transparency - everything + recent trades timeline</li>
+                            <li><strong>⚙️ Custom:</strong> Advanced control - manually select which widgets to show</li>
+                        </ul>
+
+                        <h3 class="text-2xl font-bold text-gray-900 mt-8 mb-3">Performance Cards</h3>
+                        <p class="text-gray-700 mb-4">Your public profile displays 6 key metrics with beautiful icons:</p>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700 ml-4">
+                            <li><strong>📊 Total Trades:</strong> Number of trades with win/loss breakdown</li>
+                            <li><strong>✅ Win Rate:</strong> Percentage of winning trades (last 30 days)</li>
+                            <li><strong>💰 Total Profit:</strong> Total profit/loss in your account currency</li>
+                            <li><strong>📈 ROI:</strong> Return on Investment percentage (30-day)</li>
+                            <li><strong>📅 Monthly Change:</strong> Equity change % for current month</li>
+                            <li><strong>🧮 Profit Factor:</strong> Gross profit / Gross loss ratio</li>
+                        </ul>
+
+                        <h3 class="text-2xl font-bold text-gray-900 mt-8 mb-3">Social Sharing</h3>
+                        <p class="text-gray-700 mb-4">Share your profile with one click:</p>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700 ml-4">
+                            <li>🐦 Twitter/X - Share with custom tweet text</li>
+                            <li>📘 Facebook - Share to your timeline</li>
+                            <li>💼 LinkedIn - Professional sharing</li>
+                            <li>💬 WhatsApp - Mobile-friendly sharing</li>
+                            <li>🔗 Copy Link - One-click copy with tooltip</li>
+                        </ul>
+
+                        <h3 class="text-2xl font-bold text-gray-900 mt-8 mb-3">Top Traders Leaderboard</h3>
+                        <p class="text-gray-700 mb-4">Opt-in to appear on the public leaderboard at <a href="/top-traders" class="text-blue-600 hover:text-blue-700">/top-traders</a></p>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700 ml-4">
+                            <li>Ranked by: Total Profit, ROI, Win Rate, or Profit Factor</li>
+                            <li>Top 50 traders displayed</li>
+                            <li>Expandable rows showing individual account breakdown</li>
+                            <li>Aggregated stats across all your public accounts</li>
+                        </ul>
+
+                        <div class="mt-6 p-4 bg-purple-50 border-l-4 border-purple-600 rounded">
+                            <p class="text-purple-900 font-semibold">🏆 Pro Tip</p>
+                            <p class="text-purple-800 mt-1">Use "Trader Showcase" preset to build maximum trust and credibility with potential followers or clients!</p>
+                        </div>
+                    </div>
+
+                    {{-- Badges --}}
+                    <div id="badges" class="mb-16">
+                        <h2 class="text-3xl font-bold text-gray-900 mb-4">Achievement Badges</h2>
+                        <p class="text-gray-700 mb-4">Earn badges automatically based on your trading activity and performance. Badges are displayed on your public profile and you'll receive email notifications when you earn new ones!</p>
+                        
+                        <h3 class="text-2xl font-bold text-gray-900 mt-8 mb-3">Time-Based Badges</h3>
+                        <p class="text-gray-700 mb-4">Earned based on how long you've been trading:</p>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700 ml-4">
+                            <li><strong>🌱 New Trader:</strong> Just started (< 30 days) - Tier 1</li>
+                            <li><strong>✓ Verified Trader:</strong> Trading for 30+ days - Tier 2</li>
+                            <li><strong>⭐ 3-Month Veteran:</strong> Trading for 90+ days - Tier 3</li>
+                            <li><strong>⭐⭐ 6-Month Veteran:</strong> Trading for 180+ days - Tier 4</li>
+                            <li><strong>🏆 Yearly Veteran:</strong> Trading for 365+ days - Tier 5</li>
+                            <li><strong>💎 Long-Term Trader:</strong> Trading for 730+ days - Tier 6</li>
+                        </ul>
+
+                        <h3 class="text-2xl font-bold text-gray-900 mt-8 mb-3">Activity-Based Badges</h3>
+                        <p class="text-gray-700 mb-4">Earned based on your trading volume:</p>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700 ml-4">
+                            <li><strong>📊 Active Trader:</strong> 50+ trades completed - Tier 2</li>
+                            <li><strong>📈 Experienced Trader:</strong> 100+ trades completed - Tier 3</li>
+                            <li><strong>🎯 Seasoned Trader:</strong> 500+ trades completed - Tier 4</li>
+                            <li><strong>🚀 Professional Trader:</strong> 1,000+ trades completed - Tier 5</li>
+                            <li><strong>💼 Elite Trader:</strong> 5,000+ trades completed - Tier 6</li>
+                        </ul>
+
+                        <h3 class="text-2xl font-bold text-gray-900 mt-8 mb-3">Performance Badges</h3>
+                        <p class="text-gray-700 mb-4">Earned based on your trading results:</p>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700 ml-4">
+                            <li><strong>🔥 Profitable Trader:</strong> Total profit greater than zero - Tier 2</li>
+                        </ul>
+
+                        <h3 class="text-2xl font-bold text-gray-900 mt-8 mb-3">Special Badges</h3>
+                        <p class="text-gray-700 mb-4">Exclusive badges for special accounts:</p>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700 ml-4">
+                            <li><strong>🏢 Enterprise Account:</strong> Whitelisted enterprise broker - Tier 3</li>
+                            <li><strong>⚡ Premium Access:</strong> 180-day data access enabled - Tier 3</li>
+                        </ul>
+
+                        <h3 class="text-2xl font-bold text-gray-900 mt-8 mb-3">Badge Calculation</h3>
+                        <p class="text-gray-700 mb-4">Badges are calculated automatically:</p>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700 ml-4">
+                            <li>Runs daily at 4:00 AM UTC</li>
+                            <li>Checks all active trading accounts</li>
+                            <li>Awards new badges automatically</li>
+                            <li>Removes badges if conditions no longer met</li>
+                            <li>Sends email notification for new badges</li>
+                        </ul>
+
+                        <h3 class="text-2xl font-bold text-gray-900 mt-8 mb-3">Email Notifications</h3>
+                        <p class="text-gray-700 mb-4">When you earn a new badge, you'll receive a beautiful email with:</p>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700 ml-4">
+                            <li>Badge icon, name, and description</li>
+                            <li>Badge tier level (1-6)</li>
+                            <li>Account information and earned date</li>
+                            <li>Link to your public profile</li>
+                        </ul>
+
+                        <h3 class="text-2xl font-bold text-gray-900 mt-8 mb-3">Badge Display</h3>
+                        <p class="text-gray-700 mb-4">Up to 6 badges are shown on your public profile:</p>
+                        <ul class="list-disc list-inside space-y-2 text-gray-700 ml-4">
+                            <li>3 highest tier badges</li>
+                            <li>2 most recent badges</li>
+                            <li>1 user-selected favorite badge</li>
+                        </ul>
+
+                        <div class="mt-6 p-4 bg-green-50 border-l-4 border-green-600 rounded">
+                            <p class="text-green-900 font-semibold">🏅 Badge Tips</p>
+                            <p class="text-green-800 mt-1">Keep trading consistently to unlock higher tier badges! Each tier represents a significant milestone in your trading journey.</p>
+                        </div>
                     </div>
 
                     {{-- Analytics --}}
