@@ -2,6 +2,35 @@
     <x-slot name="title">Pricing - TheTradeVisor | Free Trading Analytics</x-slot>
     <x-slot name="description">100% FREE for traders with unlimited accounts. Enterprise solutions for brokers at $999/month. No credit card required.</x-slot>
     <x-slot name="keywords">free trading analytics, MT4 MT5 free, trading platform free, broker analytics</x-slot>
+    
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "PriceList",
+        "name": "TheTradeVisor Pricing",
+        "description": "Free for traders, Enterprise solutions for brokers",
+        "offers": [
+            {
+                "@type": "Offer",
+                "name": "Trader Plan",
+                "price": "0",
+                "priceCurrency": "USD",
+                "priceValidUntil": "{{ now()->addDays(30)->format('Y-m-d') }}",
+                "description": "Unlimited trading accounts, real-time analytics, and global market insights. 100% Free.",
+                "category": "Free Tier"
+            },
+            {
+                "@type": "Offer",
+                "name": "Enterprise Broker Plan",
+                "price": "999",
+                "priceCurrency": "USD",
+                "priceValidUntil": "{{ now()->addDays(30)->format('Y-m-d') }}",
+                "description": "For brokers. Includes 180-day data access for all clients, dedicated portal, and REST API.",
+                "category": "Enterprise Tier"
+            }
+        ]
+    }
+    </script>
 
     {{-- Hero Section --}}
     <section class="bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-20">

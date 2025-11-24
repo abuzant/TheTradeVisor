@@ -26,6 +26,35 @@
     
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    
+    {{-- JSON-LD Structured Data --}}
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "ProfilePage",
+        "dateCreated": "{{ $account->created_at->toIso8601String() }}",
+        "dateModified": "{{ now()->toIso8601String() }}",
+        "mainEntity": {
+            "@type": "Person",
+            @if($user->public_display_mode !== 'anonymous')
+            "name": "{{ $user->public_display_mode === 'username' ? $user->public_username : $user->public_display_name }}",
+            "alternateName": "{{ $user->public_username }}",
+            "image": "{{ $user->profile_photo_url ?? asset('images/default-avatar.png') }}",
+            @else
+            "name": "Anonymous Trader",
+            @endif
+            "description": "Trader tracking performance on TheTradeVisor",
+            "interactionStatistic": [
+                {
+                    "@type": "InteractionCounter",
+                    "interactionType": "https://schema.org/TradeAction",
+                    "userInteractionCount": {{ $stats['total_trades'] }}
+                }
+            ],
+            "knowsAbout": ["Forex Trading", "MT4", "MT5", "Financial Markets"]
+        }
+    }
+    </script>
 </head>
 <body class="bg-gray-50" data-widget-preset="{{ $profile->widget_preset }}" data-platform="{{ $account->platform_type }}" data-display-mode="{{ $user->public_display_mode }}">
     

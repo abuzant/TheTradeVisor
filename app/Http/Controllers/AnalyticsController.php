@@ -18,6 +18,11 @@ class AnalyticsController extends Controller
      */
     public function index(Request $request, $days = 30)
     {
+        // Redirect guests to demo
+        if (!$request->user()) {
+            return redirect()->route('analytics.demo');
+        }
+
         // User must have at least one active account to view global analytics
         $user = $request->user();
 
@@ -44,11 +49,55 @@ class AnalyticsController extends Controller
             ]);
         }
 
+        $analytics = $this->getAnalyticsData($days);
+
+        // Get display currency (default to USD for global analytics)
+        $displayCurrency = 'USD';
+        
+        // Get available time periods for this user
+        $timePeriods = TimeFilterHelper::getPeriodsForAccount($firstAccount);
+        $currentPeriod = match($days) {
+            0, 1 => 'today',
+            7 => '7d',
+            30 => '30d',
+            90 => '90d',
+            180 => '180d',
+            default => '7d',
+        };
+
+        return view('analytics.index', compact('analytics', 'days', 'displayCurrency', 'timePeriods', 'currentPeriod', 'maxDays'));
+    }
+
+    /**
+     * Public Demo Dashboard
+     */
+    public function demo()
+    {
+        $days = 30;
+        $maxDays = 30;
+        
+        $analytics = $this->getAnalyticsData($days);
+        
+        // Get display currency (default to USD for global analytics)
+        $displayCurrency = 'USD';
+        
+        // Get available time periods for guest (handled by helper)
+        $timePeriods = TimeFilterHelper::getPeriodsForAccount(null);
+        $currentPeriod = '30d';
+
+        return view('analytics.demo', compact('analytics', 'days', 'displayCurrency', 'timePeriods', 'currentPeriod', 'maxDays'));
+    }
+
+    /**
+     * Fetch analytics data (cached)
+     */
+    private function getAnalyticsData($days)
+    {
         // Cache key for the analytics data
         $cacheKey = "global_analytics_{$days}";
         
         // Try to get cached data first
-        $analytics = Cache::remember($cacheKey, 300, function () use ($days) {
+        return Cache::remember($cacheKey, 300, function () use ($days) {
             return [
                 'overview' => $this->getOverviewStats($days),
                 'popular_pairs' => $this->getPopularPairs($days),
@@ -80,22 +129,6 @@ class AnalyticsController extends Controller
                 'market_volatility' => $this->getMarketVolatilityAnalysis($days),
             ];
         });
-
-        // Get display currency (default to USD for global analytics)
-        $displayCurrency = 'USD';
-        
-        // Get available time periods for this user
-        $timePeriods = TimeFilterHelper::getPeriodsForAccount($firstAccount);
-        $currentPeriod = match($days) {
-            0, 1 => 'today',
-            7 => '7d',
-            30 => '30d',
-            90 => '90d',
-            180 => '180d',
-            default => '7d',
-        };
-
-        return view('analytics.index', compact('analytics', 'days', 'displayCurrency', 'timePeriods', 'currentPeriod', 'maxDays'));
     }
 
     /**

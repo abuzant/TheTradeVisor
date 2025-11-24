@@ -3,6 +3,63 @@
     <x-slot name="description">Common questions about TheTradeVisor trading analytics platform. Learn about features, pricing, setup, and technical requirements.</x-slot>
     <x-slot name="keywords">trading analytics FAQ, MT4 MT5 questions, trading platform help, analytics support</x-slot>
 
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question",
+                "name": "What is TheTradeVisor?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "TheTradeVisor is a professional trading analytics platform that aggregates real-time data from MT4 and MT5 trading terminals worldwide. It provides comprehensive insights into trading performance, market trends, and global trading patterns."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Is TheTradeVisor really 100% free?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes! Completely free for all traders with unlimited accounts. No credit card required, no hidden fees. Our platform is funded by enterprise broker partnerships."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "How do I connect my trading account?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "After signing up, download our Expert Advisor (EA) from your dashboard, install it on your MT4/MT5 terminal, and enter your unique API key. The connection is automatic and secure."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Is my data secure?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes. All data is transmitted over encrypted connections (SSL/TLS). We never store your broker passwords or have access to your trading account. Only trading statistics are collected."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What platforms are supported?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "We support both MetaTrader 4 (MT4) and MetaTrader 5 (MT5) platforms on Windows, Mac (via Wine), and VPS environments."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can I export my data?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes, all plans include data export functionality in CSV and PDF formats for further analysis and reporting."
+                }
+            }
+        ]
+    }
+    </script>
+
     <section class="bg-white py-20">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <h1 class="text-5xl font-bold text-gray-900 mb-6 text-center">Frequently Asked Questions</h1>

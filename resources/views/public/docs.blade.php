@@ -1,6 +1,42 @@
 <x-public-layout>
     <x-slot name="title">Documentation - TheTradeVisor | Complete Guide</x-slot>
     <x-slot name="description">Complete documentation for TheTradeVisor trading analytics platform. Setup guides, features, API reference, and troubleshooting.</x-slot>
+    
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": "TheTradeVisor Documentation",
+        "description": "Complete documentation for TheTradeVisor trading analytics platform. Setup guides, features, API reference, and troubleshooting.",
+        "hasPart": [
+            {
+                "@type": "TechArticle",
+                "headline": "Getting Started",
+                "description": "Quick start guide for setting up your TheTradeVisor account and connecting your first trading account."
+            },
+            {
+                "@type": "TechArticle",
+                "headline": "Installation Guide",
+                "description": "Step-by-step instructions for installing the Expert Advisor (EA) on MT4 and MT5 platforms."
+            },
+            {
+                "@type": "TechArticle",
+                "headline": "Features Overview",
+                "description": "Detailed breakdown of real-time analytics, global market insights, and risk management tools."
+            },
+            {
+                "@type": "TechArticle",
+                "headline": "Public Profiles",
+                "description": "Guide to creating and customizing your public trading profile and joining the leaderboard."
+            },
+            {
+                "@type": "TechArticle",
+                "headline": "API Reference",
+                "description": "Documentation for TheTradeVisor REST API, authentication, and rate limits."
+            }
+        ]
+    }
+    </script>
 
     <section class="bg-white py-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

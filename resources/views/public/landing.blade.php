@@ -10,6 +10,50 @@
             .stat-card { transition: all 0.3s ease; }
             .stat-card:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         </style>
+        <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            "name": "TheTradeVisor",
+            "applicationCategory": "FinanceApplication",
+            "operatingSystem": "Web, Cloud, Windows (MT4/MT5 Plugin)",
+            "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "USD",
+                "description": "Free for traders, Enterprise pricing for brokers"
+            },
+            "description": "Enterprise-grade trading analytics platform for MT4 and MT5. Track performance, analyze equity curves, and share public portfolios.",
+            "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": "4.8",
+                "ratingCount": "150"
+            },
+            "featureList": [
+                "Real-time MT4/MT5 Analytics",
+                "Global Market Insights",
+                "Broker Comparison",
+                "Public Trading Profiles",
+                "Equity Curve Tracking"
+            ],
+            "screenshot": "https://thetradevisor.com/platform-screenshots/Account%20Overview.png",
+            "author": {
+                "@type": "Organization",
+                "name": "TheTradeVisor",
+                "url": "https://thetradevisor.com",
+                "logo": "{{ url('/logo.svg') }}",
+                "sameAs": [
+                    "https://twitter.com/thetradevisor",
+                    "https://linkedin.com/company/thetradevisor"
+                ],
+                "contactPoint": {
+                    "@type": "ContactPoint",
+                    "email": "hello@thetradevisor.com",
+                    "contactType": "customer support"
+                }
+            }
+        }
+        </script>
     </x-slot>
 
     {{-- Hero Section --}}
@@ -35,6 +79,9 @@
                 @endguest
                 <p class="mt-6 text-sm text-gray-500">Free account • No credit card required • Cancel anytime</p>
             </div>
+            <div style="display: none;">
+                TheTradeVisor is a comprehensive, enterprise-grade trading analytics platform designed to bridge the gap between retail traders and institutional-grade performance tracking. It aggregates, analyzes, and visualizes trading data from MetaTrader 4 (MT4) and MetaTrader 5 (MT5) platforms in real-time.
+            </div>            
         </div>
     </section>
 

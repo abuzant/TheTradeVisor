@@ -60,8 +60,8 @@
                     </div>
 
                     {{-- Enterprise admins access their portal via https://enterprise.thetradevisor.com/ --}}
-
-                    @if(Auth::user()->is_admin)
+                    
+                    @if(Auth::check() && Auth::user()->is_admin)
                         <!-- Admin Dropdown -->
                         <div class="hidden sm:flex sm:items-center sm:ms-6">
                             <x-dropdown align="left" width="48">
@@ -168,6 +168,7 @@
 
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
+                @auth
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
@@ -223,6 +224,12 @@
                         </form>
                     </x-slot>
                 </x-dropdown>
+                @else
+                <div class="flex items-center space-x-4">
+                    <a href="{{ route('login') }}" class="text-sm text-gray-700 hover:text-indigo-600 font-medium transition-colors">Log in</a>
+                    <a href="{{ route('register') }}" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-md transition-colors shadow-sm">Get Started</a>
+                </div>
+                @endauth
             </div>
 
             <!-- Hamburger -->
@@ -278,7 +285,7 @@
 
             {{-- Enterprise admins access their portal via https://enterprise.thetradevisor.com/ --}}
 
-            @if(Auth::user()->is_admin)
+            @if(Auth::check() && Auth::user()->is_admin)
                 <div class="pt-4 pb-1 border-t border-gray-200">
                     <div class="px-4">
                         <div class="font-medium text-base text-gray-800">Admin Panel</div>
@@ -325,6 +332,7 @@
 
         <!-- Responsive Settings Options -->
         <div class="pt-4 pb-1 border-t border-gray-200">
+            @auth
             <div class="px-4">
                 <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
                 <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
@@ -364,6 +372,16 @@
                     </x-responsive-nav-link>
                 </form>
             </div>
+            @else
+            <div class="px-4 py-2">
+                <a href="{{ route('login') }}" class="block w-full text-left font-medium text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-50 focus:outline-none focus:text-gray-800 focus:bg-gray-50 transition duration-150 ease-in-out">
+                    {{ __('Login') }}
+                </a>
+                <a href="{{ route('register') }}" class="block w-full text-left font-medium text-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none transition duration-150 ease-in-out mt-1">
+                    {{ __('Register') }}
+                </a>
+            </div>
+            @endauth
         </div>
     </div>
 </nav>

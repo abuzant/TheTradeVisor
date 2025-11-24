@@ -103,8 +103,7 @@
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
                                             <input type="checkbox" id="headerCheckbox" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
                                         </th>
-                                        <x-sortable-header column="broker_name" label="Broker" :sortBy="$sortBy" :sortDirection="$sortDirection" />
-                                        <x-sortable-header column="account_number" label="Account" :sortBy="$sortBy" :sortDirection="$sortDirection" />
+                                        <x-sortable-header column="account_number" label="Account / Broker" :sortBy="$sortBy" :sortDirection="$sortDirection" />
                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase" title="Use this ID for API calls">API ID</th>
                                         <x-sortable-header column="account_currency" label="Currency" :sortBy="$sortBy" :sortDirection="$sortDirection" />
                                         <x-sortable-header column="balance" label="Balance" :sortBy="$sortBy" :sortDirection="$sortDirection" />
@@ -120,13 +119,15 @@
                                                 <input type="checkbox" class="account-checkbox rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" 
                                                        value="{{ $account->id }}" data-account-id="{{ $account->id }}">
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                                <x-broker-name :broker="$account->broker_name" class="text-indigo-600 hover:text-indigo-900" />
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                <div class="flex items-center space-x-2">
-                                                    <span>{{ $account->account_number ?? 'Anonymous' }}</span>
-                                                    <x-platform-badge :account="$account" />
+                                            <td class="px-6 py-4">
+                                                <div class="flex flex-col">
+                                                    <div class="flex items-center space-x-2 mb-1">
+                                                        <span class="text-sm font-semibold text-gray-900">{{ $account->account_number ?? 'Anonymous' }}</span>
+                                                        <x-platform-badge :account="$account" />
+                                                    </div>
+                                                    <div class="text-xs text-gray-500">
+                                                        <x-broker-name :broker="$account->broker_name" class="text-indigo-600 hover:text-indigo-900" />
+                                                    </div>
                                                 </div>
                                             </td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm">
@@ -194,7 +195,7 @@
                                 </tbody>
                                 <tfoot class="bg-gray-50">
                                     <tr>
-                                        <td colspan="9" class="px-6 py-3">
+                                        <td colspan="8" class="px-6 py-3">
                                             <div class="flex items-center space-x-4 text-xs text-gray-600">
                                                 <span class="font-semibold">Platform Legend:</span>
                                                 <div class="flex items-center space-x-1">

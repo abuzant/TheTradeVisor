@@ -79,6 +79,16 @@ class TimeFilterHelper
      */
     public static function getPeriodsForAccount($account): array
     {
+        // Handle guest/demo access (null account)
+        if (!$account) {
+            $periods = self::getStandardPeriods();
+            // Unlock 30 days for public demo
+            if (isset($periods['30d'])) {
+                $periods['30d']['locked'] = false;
+            }
+            return $periods;
+        }
+
         $maxDays = $account->getMaxDaysView();
         
         if ($maxDays >= 180) {

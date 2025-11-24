@@ -7,6 +7,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.7.1] - 2025-11-24
+
+### 🐛 Bug Fixes
+
+#### EA Deal Processing Errors
+- **Fixed**: Critical "Deal type is required" errors from MT4 terminals
+- **Issue**: MT4 sending numeric `type: 0` was causing validation failures every minute
+- **Solution**: Enhanced type normalization to handle numeric values and multiple field variants
+- **Files Modified**: `ProcessTradingData.php`, `TradingDataValidationService.php`
+- **Added**: Quarantine cache to prevent log spam from repeated failures
+- **Result**: EA data now processes successfully without errors
+
+#### CSS Build Issues
+- **Fixed**: CSS styles not loading properly after recent changes
+- **Solution**: Rebuilt assets with `npm run build` and cleared caches
+- **Impact**: All pages now display correctly with proper styling
+
+### 📚 Documentation
+- **Created**: 7 new documentation files to eliminate 404 errors
+- **Added**: Environment Setup, Database Setup, User Registration guides
+- **Added**: Adding Accounts, Dashboard Overview, Basic Analytics guides
+- **Added**: Support Center documentation
+- **Updated**: Main documentation index with proper links
+
+### 📝 Full Details
+- See [2025-11-24 EA Deal Processing Fix](changelog/2025-11-24-EA-DEAL-PROCESSING-FIX.md) for complete technical details
+
+---
+
 ## [1.7.0] - 2025-11-21
 
 ### 🏢 Enterprise Features

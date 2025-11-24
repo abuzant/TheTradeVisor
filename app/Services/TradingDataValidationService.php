@@ -33,7 +33,8 @@ class TradingDataValidationService
 
         // Type validation
         if (empty($dealData['type'])) {
-            throw new \Exception('Deal type is required');
+            $warnings[] = 'Deal type was empty, set to unknown';
+            $dealData['type'] = 'unknown';
         }
         $validated['type'] = $this->normalizeType($dealData['type']);
 

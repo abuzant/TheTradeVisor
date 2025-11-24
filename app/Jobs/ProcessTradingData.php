@@ -403,6 +403,13 @@ class ProcessTradingData implements ShouldQueue
 
             if (!$exists) {
                 try {
+                    // Check if this ticket is in quarantine (previously failed)
+                    $quarantineKey = "failed_deal:{$dealData['ticket']}";
+                    if (Cache::has($quarantineKey)) {
+                        $duplicatesSkipped++; // Count as skipped to avoid confusion
+                        continue;
+                    }
+                    
                     // Normalize MT4 deal data to match validator expectations
                     $normalizedDeal = $this->normalizeMT4Deal($dealData);
                     
@@ -417,6 +424,9 @@ class ProcessTradingData implements ShouldQueue
 
                     $newDealsCount++;
                 } catch (\Exception $e) {
+                    // Put this ticket in quarantine for 2 hours to suppress repeated failures
+                    Cache::put($quarantineKey, true, 7200); // 2 hours = 7200 seconds
+                    
                     Log::error('Failed to create deal', [
                         'ticket' => $dealData['ticket'] ?? 'unknown',
                         'error' => $e->getMessage(),
@@ -510,11 +520,12 @@ class ProcessTradingData implements ShouldQueue
             }
         }
 
-        // MT4 might send 'cmd' or 'deal_type' instead of 'type'
+        // MT4 might send various type field names or numeric values
         // Map MT4 command types to standard deal types
-        if (!isset($dealData['type']) || empty($dealData['type'])) {
-            if (isset($dealData['cmd'])) {
-                // MT4 cmd values: 0=buy, 1=sell, 6=balance, 7=credit
+        if (!isset($dealData['type']) || empty($dealData['type']) || is_numeric($dealData['type'])) {
+            // First, if type exists and is numeric, map it directly
+            if (isset($dealData['type']) && is_numeric($dealData['type'])) {
+                // MT4 cmd values: 0=buy, 1=sell, 2=buy_limit, 3=sell_limit, 4=buy_stop, 5=sell_stop, 6=balance, 7=credit
                 $cmdMap = [
                     0 => 'buy',
                     1 => 'sell',
@@ -525,11 +536,56 @@ class ProcessTradingData implements ShouldQueue
                     6 => 'balance',
                     7 => 'credit',
                 ];
-                $dealData['type'] = $cmdMap[$dealData['cmd']] ?? 'unknown';
-            } elseif (isset($dealData['deal_type'])) {
-                $dealData['type'] = $dealData['deal_type'];
-            } elseif (isset($dealData['order_type'])) {
-                $dealData['type'] = $dealData['order_type'];
+                $dealData['type'] = $cmdMap[$dealData['type']] ?? 'unknown';
+            } else {
+                // Try different possible field names for type
+                $typeFields = ['cmd', 'cmd_type', 'command', 'operation', 'deal_cmd', 'order_cmd', 'trade_type', 'deal_type', 'order_type'];
+                $typeFound = false;
+                
+                foreach ($typeFields as $field) {
+                    if (isset($dealData[$field]) && !empty($dealData[$field])) {
+                        // Handle numeric cmd values
+                        if (is_numeric($dealData[$field])) {
+                            // MT4 cmd values: 0=buy, 1=sell, 2=buy_limit, 3=sell_limit, 4=buy_stop, 5=sell_stop, 6=balance, 7=credit
+                            $cmdMap = [
+                                0 => 'buy',
+                                1 => 'sell',
+                                2 => 'buy_limit',
+                                3 => 'sell_limit',
+                                4 => 'buy_stop',
+                                5 => 'sell_stop',
+                                6 => 'balance',
+                                7 => 'credit',
+                            ];
+                            $dealData['type'] = $cmdMap[$dealData[$field]] ?? 'unknown';
+                        } else {
+                            // Handle string type values
+                            $typeValue = strtoupper($dealData[$field]);
+                            $stringMap = [
+                                'OP_BUY' => 'buy',
+                                'OP_SELL' => 'sell',
+                                'OP_BUYLIMIT' => 'buy_limit',
+                                'OP_SELLLIMIT' => 'sell_limit',
+                                'OP_BUYSTOP' => 'buy_stop',
+                                'OP_SELLSTOP' => 'sell_stop',
+                                'OP_BALANCE' => 'balance',
+                                'OP_CREDIT' => 'credit',
+                            ];
+                            $dealData['type'] = $stringMap[$typeValue] ?? strtolower($dealData[$field]);
+                        }
+                        $typeFound = true;
+                        break;
+                    }
+                }
+                
+                // Final fallback if no type found
+                if (!$typeFound) {
+                    $dealData['type'] = 'unknown';
+                    Log::warning('Deal type not found, set to unknown', [
+                        'ticket' => $dealData['ticket'] ?? 'unknown',
+                        'available_fields' => array_keys($dealData)
+                    ]);
+                }
             }
         }
 

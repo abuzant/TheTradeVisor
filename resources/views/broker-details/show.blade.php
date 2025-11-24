@@ -19,13 +19,26 @@
         "@context": "https://schema.org",
         "@type": "FinancialService",
         "name": "{{ $broker }}",
-        "description": "Trading analytics and statistics for {{ $broker }}",
+        "description": "Trading analytics and statistics for {{ $broker }}. Analyzed {{ number_format($overview['total_trades']) }} trades from {{ $overview['active_traders'] }} active traders.",
+        "provider": {
+            "@type": "Organization",
+            "name": "{{ $broker }}"
+        },
+        "areaServed": "Global",
+        "serviceType": "Forex Broker Analytics",
+        "url": "{{ url()->current() }}",
         "aggregateRating": {
             "@type": "AggregateRating",
-            "ratingValue": "{{ $overview['win_rate'] / 20 }}",
+            "ratingValue": "{{ number_format(max(1, min(5, ($overview['win_rate'] / 20) + 1)), 1) }}",
             "bestRating": "5",
             "worstRating": "1",
             "ratingCount": "{{ $overview['active_traders'] }}"
+        },
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD",
+            "description": "Free analytics for {{ $broker }} traders"
         }
     }
     </script>

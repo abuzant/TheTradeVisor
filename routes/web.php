@@ -108,8 +108,29 @@ Route::get('/broker/{broker}', [App\Http\Controllers\BrokerDetailsController::cl
     ->middleware('web')
     ->name('broker-details');
 
-// Logged-in Users
-Route::middleware(['auth', 'verified'])->group(function () {
+    // Global Analytics & Demo
+    Route::middleware(['rate.limit.analytics', 'circuit.breaker:analytics'])->group(function () {
+        // Public Demo Route
+        Route::get('/demo', [App\Http\Controllers\AnalyticsController::class, 'demo'])
+            ->name('analytics.demo');
+            
+        // Main Analytics (Redirects guests to demo)
+        Route::get('/analytics/{days?}', [App\Http\Controllers\AnalyticsController::class, 'index'])
+            ->name('analytics')
+            ->where('days', '[0-9]+');
+            
+        Route::get('/analytics/countries', [App\Http\Controllers\CountryAnalyticsController::class, 'topTradingCountries'])
+            ->name('analytics.countries');
+    });
+
+    // Logged-in Users
+    Route::middleware(['auth', 'verified'])->group(function () {
+
+        // Broker Analytics (with rate limiting and circuit breaker)
+        Route::middleware(['rate.limit.broker', 'circuit.breaker:analytics'])->group(function () {
+            Route::get('/broker-analytics', [App\Http\Controllers\BrokerAnalyticsController::class, 'index'])
+                ->name('broker.analytics');
+        });
 
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -121,20 +142,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Performance
     Route::get('/performance', [App\Http\Controllers\PerformanceController::class, 'index'])
         ->name('performance');
-
-    // Broker Analytics (with rate limiting and circuit breaker)
-    Route::middleware(['rate.limit.broker', 'circuit.breaker:analytics'])->group(function () {
-        Route::get('/broker-analytics', [App\Http\Controllers\BrokerAnalyticsController::class, 'index'])
-            ->name('broker.analytics');
-    });
-
-    // Global Analytics (with rate limiting and circuit breaker)
-    Route::middleware(['rate.limit.analytics', 'circuit.breaker:analytics'])->group(function () {
-        Route::get('/analytics/{days?}', [App\Http\Controllers\AnalyticsController::class, 'index'])
-            ->name('analytics');
-        Route::get('/analytics/countries', [App\Http\Controllers\CountryAnalyticsController::class, 'topTradingCountries'])
-            ->name('analytics.countries');
-    });
 
     // User account management
     Route::get('/accounts', [App\Http\Controllers\AccountManagementController::class, 'index'])
@@ -188,16 +195,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('accounts.public-profiles');
     Route::post('/accounts/{account}/public-profile', [\App\Http\Controllers\PublicProfileController::class, 'updateAccountProfile'])
         ->name('accounts.public-profile.update');
-
-    // Profile digest preferences
     Route::post('/profile/digests', [\App\Http\Controllers\ProfileDigestController::class, 'update'])
         ->name('profile.digests.update');
-
-    // Country Analytics (must come before parameterized route)
-    Route::get('/analytics/countries', [App\Http\Controllers\CountryAnalyticsController::class, 'topTradingCountries'])->name('analytics.countries');
-    
-    // Global Analytics
-    Route::get('/analytics/{days?}', [App\Http\Controllers\AnalyticsController::class, 'index'])->name('analytics')->where('days', '[0-9]+');
 });
 
 // Admin routes

@@ -13,7 +13,14 @@ class PublicController extends Controller
     public function landing()
     {
         // Get comprehensive statistics (cached for 5 minutes)
-        $stats = Cache::remember('landing_stats_comprehensive', 300, function() {
+        $stats = $this->getLandingStats();
+
+        return view('public.landing_dev', compact('stats'));
+    }
+
+    private function getLandingStats()
+    {
+        return Cache::remember('landing_stats_comprehensive', 300, function() {
             $thirtyDaysAgo = now()->subDays(30);
             
             return [
@@ -55,8 +62,6 @@ class PublicController extends Controller
                 'data_points' => Deal::count() + TradingAccount::count(),
             ];
         });
-
-        return view('public.landing', compact('stats'));
     }
     
     private function calculateWinRate($since)

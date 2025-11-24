@@ -1,6 +1,24 @@
 <x-public-layout>
     <x-slot name="title">Contact Us - TheTradeVisor | Get in Touch</x-slot>
     <x-slot name="description">Contact TheTradeVisor support team. We're here to help with any questions about our trading analytics platform.</x-slot>
+    
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "ContactPage",
+        "mainEntity": {
+            "@type": "Organization",
+            "name": "TheTradeVisor",
+            "url": "https://thetradevisor.com",
+            "contactPoint": {
+                "@type": "ContactPoint",
+                "email": "hello@thetradevisor.com",
+                "contactType": "customer support",
+                "availableLanguage": ["English"]
+            }
+        }
+    }
+    </script>
 
     <section class="bg-white py-20">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -14,6 +14,21 @@
     <!-- reCAPTCHA -->
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     @endif
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "TheTradeVisor Enterprise Portal",
+        "url": "{{ url()->current() }}",
+        "audience": {
+            "@type": "BusinessAudience",
+            "audienceType": "Forex Brokers",
+            "geographicArea": "Global"
+        },
+        "description": "Enterprise broker portal for white-label trading analytics and client management."
+    }
+    </script>
 </head>
 <body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen flex flex-col">
     
