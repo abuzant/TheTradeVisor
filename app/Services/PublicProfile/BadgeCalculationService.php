@@ -5,7 +5,10 @@ namespace App\Services\PublicProfile;
 use App\Models\TradingAccount;
 use App\Models\ProfileVerificationBadge;
 use App\Models\Deal;
+use App\Models\PublicProfileAccount;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\BadgeEarnedMail;
 
 class BadgeCalculationService
 {
@@ -268,7 +271,14 @@ class BadgeCalculationService
      */
     private function awardBadge(TradingAccount $account, string $badgeType, array $badgeConfig): ProfileVerificationBadge
     {
-        return ProfileVerificationBadge::updateOrCreate(
+        // Check if badge already exists
+        $existingBadge = ProfileVerificationBadge::where('trading_account_id', $account->id)
+            ->where('badge_type', $badgeType)
+            ->first();
+        
+        $isNewBadge = !$existingBadge;
+        
+        $badge = ProfileVerificationBadge::updateOrCreate(
             [
                 'trading_account_id' => $account->id,
                 'badge_type' => $badgeType,
@@ -278,9 +288,82 @@ class BadgeCalculationService
                 'badge_icon' => $badgeConfig['icon'],
                 'badge_color' => $badgeConfig['color'],
                 'badge_tier' => $badgeConfig['tier'],
-                'earned_at' => now(),
+                'badge_description' => $this->getBadgeDescription($badgeType, $badgeConfig),
+                'earned_at' => $existingBadge ? $existingBadge->earned_at : now(),
             ]
         );
+        
+        // Send email notification for new badges only
+        if ($isNewBadge) {
+            $this->sendBadgeEarnedEmail($badge, $account);
+        }
+        
+        return $badge;
+    }
+    
+    /**
+     * Get badge description based on type
+     */
+    private function getBadgeDescription(string $badgeType, array $badgeConfig): string
+    {
+        $descriptions = [
+            'new_trader' => 'Just started your trading journey',
+            'verified_trader' => 'Trading for 30+ days',
+            'veteran_3m' => 'Trading for 3+ months',
+            'veteran_6m' => 'Trading for 6+ months',
+            'veteran_1y' => 'Trading for 1+ year',
+            'long_term_trader' => 'Trading for 2+ years',
+            'active_trader' => 'Completed 50+ trades',
+            'experienced_trader' => 'Completed 100+ trades',
+            'seasoned_trader' => 'Completed 500+ trades',
+            'professional_trader' => 'Completed 1000+ trades',
+            'elite_trader' => 'Completed 5000+ trades',
+            'profitable_trader' => 'Total profit greater than zero',
+            'enterprise_account' => 'Whitelisted enterprise broker',
+            'premium_access' => '180-day data access enabled',
+        ];
+        
+        return $descriptions[$badgeType] ?? $badgeConfig['name'];
+    }
+    
+    /**
+     * Send badge earned email notification
+     */
+    private function sendBadgeEarnedEmail(ProfileVerificationBadge $badge, TradingAccount $account): void
+    {
+        try {
+            $user = $account->user;
+            
+            // Check if user has email
+            if (!$user || !$user->email) {
+                return;
+            }
+            
+            // Get public profile URL if exists
+            $profileUrl = null;
+            $publicProfile = PublicProfileAccount::where('trading_account_id', $account->id)
+                ->where('is_public', true)
+                ->first();
+            
+            if ($publicProfile) {
+                $profileUrl = route('public.profile.show', [
+                    'username' => $user->public_username,
+                    'slug' => $publicProfile->account_slug,
+                    'account' => $account->account_number,
+                ]);
+            }
+            
+            // Send email (queued)
+            Mail::to($user->email)->send(new BadgeEarnedMail($badge, $user, $account, $profileUrl));
+            
+        } catch (\Exception $e) {
+            // Log error but don't fail the badge calculation
+            \Log::error('Failed to send badge earned email', [
+                'badge_id' => $badge->id,
+                'account_id' => $account->id,
+                'error' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**
@@ -318,6 +401,6 @@ class BadgeCalculationService
             ->take(6)
             ->values();
 
-        return $displayBadges->toArray();
+        return $displayBadges->all();
     }
 }

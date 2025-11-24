@@ -30,13 +30,14 @@
 [![MaxMind](https://img.shields.io/badge/MaxMind-GeoIP2-FF6600.svg)](https://www.maxmind.com)
 [![Circuit Breaker](https://img.shields.io/badge/Circuit%20Breaker-Active-22C55E.svg)](docs/technical/CIRCUIT_BREAKER_IMPLEMENTATION.md)
 [![Rate Limiting](https://img.shields.io/badge/Rate%20Limiting-Active-22C55E.svg)](docs/technical/RATE_LIMITING_COMPLETE.md)
-[![Redis Cache](https://img.shields.io/badge/Redis%20Cache-90%25%20Hit-DC382D.svg)](docs/technical/REDIS_CACHING_OPTIMIZATION.md)
+[![Redis Cache](https://img.shields.io/badge/Redis%20Cache-95%25%20Hit-DC382D.svg)](docs/technical/REDIS_CACHING_OPTIMIZATION.md)
 [![Health Monitoring](https://img.shields.io/badge/Health-Monitoring-22C55E.svg)](docs/operations/MONITORING_IMPLEMENTATION.md)
+[![Public Profiles](https://img.shields.io/badge/Public%20Profiles-Live-9333EA.svg)](docs/guides/PUBLIC_PROFILES_USER_GUIDE.md)
 [![reCAPTCHA](https://img.shields.io/badge/reCAPTCHA-v2-4285F4.svg?logo=google&logoColor=white)](https://www.google.com/recaptcha)
 [![PHPUnit](https://img.shields.io/badge/PHPUnit-Testing-3776AB.svg?logo=php&logoColor=white)](https://phpunit.de)
 [![Slack](https://img.shields.io/badge/Slack-Alerts-4A154B.svg?logo=slack&logoColor=white)](https://slack.com)
 [![Production Ready](https://img.shields.io/badge/Status-Production%20Ready-22C55E.svg)](https://thetradevisor.com)
-[![Version](https://img.shields.io/badge/Version-1.7.0-blue.svg)](docs/CHANGELOG.md)
+[![Version](https://img.shields.io/badge/Version-2.0.0-blue.svg)](docs/changelog/2025-11-24-PUBLIC-PROFILES-PHASE-8-11.md)
 [![Uptime](https://img.shields.io/badge/Uptime-99.9%25-22C55E.svg)](https://thetradevisor.com)
 [![License](https://img.shields.io/badge/License-Proprietary-yellow.svg)](LICENSE)
 
@@ -86,6 +87,19 @@ TheTradeVisor is an enterprise-grade trading analytics platform that aggregates,
 - 🔔 **Real-time Notifications** - Slack and email alerts
 - 📥 **Export Functionality** - CSV and PDF exports
 
+#### Public Profiles & Social
+- 🏆 **Public Trading Profiles** - Share your trading performance with custom URLs
+- 📊 **Top Traders Leaderboard** - Compete globally on multiple ranking criteria
+- 🔒 **Privacy Controls** - Choose what to show and how to appear
+- 🎯 **Widget Presets** - Minimal, Full Stats, or Trader Showcase modes
+- 🏅 **Achievement Badges** - 14 badge types with automated email notifications
+- 📱 **Social Sharing** - Twitter, Facebook, LinkedIn, WhatsApp with one-click sharing
+- 📈 **6 Performance Cards** - Total Trades, Win Rate, Profit, ROI, Monthly Change, Profit Factor
+- 📊 **Recent Trades Timeline** - Last 10 trades with duration and profit/loss
+- ⚠️ **Risk Disclaimer** - Professional legal disclaimers for compliance
+- 📧 **Email Notifications** - Beautiful HTML emails when badges are earned
+- 📊 **Google Analytics** - UTM tracking for all email and social links
+
 #### Pricing & Billing
 - 🎁 **Completely FREE** - Unlimited accounts, no payment ever
 - 🚫 **No Subscriptions** - No credit card, no hidden fees
@@ -111,6 +125,15 @@ TheTradeVisor is an enterprise-grade trading analytics platform that aggregates,
 - [Performance Analytics](docs/features/performance.md) - Trade analysis, equity curves, and drawdown
 - [Dashboard Live Positions](docs/features/DASHBOARD_LIVE_POSITIONS.md) - Real-time open positions and recent closed positions
 - [Broker Comparison](docs/README.md#-core-features) - Broker analytics features
+
+### Public Profiles & Leaderboard
+
+- [User Guide](docs/guides/PUBLIC_PROFILES_USER_GUIDE.md) - How to create and manage public profiles
+- [API Documentation](docs/api/PUBLIC_PROFILES_API.md) - Public profiles API endpoints
+- [Technical Architecture](docs/technical/PUBLIC_PROFILES_ARCHITECTURE.md) - System design and optimization
+- [Implementation Details](docs/features/PUBLIC_PROFILES_IMPLEMENTATION.md) - Complete feature documentation
+- [FAQ](docs/FAQ.md) - Frequently asked questions
+- [Changelog - Phase 8-11](docs/changelog/2025-11-24-PUBLIC-PROFILES-PHASE-8-11.md) - Latest updates and features
 
 ### System Architecture
 

@@ -32,7 +32,7 @@ class ProfileDataAggregatorService
                 'symbol_performance' => $this->getSymbolPerformance($account, $startDate),
                 'trading_hours' => $this->getTradingHours($account, $startDate),
                 'monthly_calendar' => $this->getMonthlyCalendar($account, $startDate),
-                'recent_trades' => $profileAccount->show_recent_trades ? $this->getRecentTrades($account) : [],
+                'recent_trades' => $this->getRecentTrades($account),
                 'milestones' => $this->getMilestones($account),
             ];
         });
@@ -76,6 +76,38 @@ class ProfileDataAggregatorService
         
         $bestTrade = $deals->max('profit');
         $worstTrade = $deals->min('profit');
+        
+        // Calculate ROI based on equity 30 days ago
+        $startingEquity = DB::table('account_snapshots')
+            ->where('trading_account_id', $account->id)
+            ->where('snapshot_time', '>=', $startDate)
+            ->orderBy('snapshot_time', 'asc')
+            ->value('equity');
+        
+        // Fallback to current balance if no snapshot data
+        if (!$startingEquity) {
+            $startingEquity = $account->balance - $totalProfit;
+        }
+        
+        $roi = $startingEquity > 0 ? ($totalProfit / $startingEquity) * 100 : 0;
+        
+        // Calculate monthly equity change %
+        $monthlyChange = 0;
+        $startOfMonth = now()->startOfMonth();
+        $equityAtMonthStart = DB::table('account_snapshots')
+            ->where('trading_account_id', $account->id)
+            ->where('snapshot_time', '>=', $startOfMonth)
+            ->orderBy('snapshot_time', 'asc')
+            ->value('equity');
+        
+        $currentEquity = DB::table('account_snapshots')
+            ->where('trading_account_id', $account->id)
+            ->orderBy('snapshot_time', 'desc')
+            ->value('equity');
+        
+        if ($equityAtMonthStart && $currentEquity && $equityAtMonthStart > 0) {
+            $monthlyChange = (($currentEquity - $equityAtMonthStart) / $equityAtMonthStart) * 100;
+        }
 
         return [
             'total_trades' => $totalTrades,
@@ -85,6 +117,8 @@ class ProfileDataAggregatorService
             'total_profit' => $totalProfit,
             'total_volume' => $totalVolume,
             'profit_factor' => round($profitFactor, 2),
+            'roi' => round($roi, 2),
+            'monthly_change' => round($monthlyChange, 2),
             'avg_win' => $avgWin,
             'avg_loss' => $avgLoss,
             'best_trade' => $bestTrade,
@@ -215,22 +249,29 @@ class ProfileDataAggregatorService
      */
     private function getRecentTrades($account): array
     {
-        return Deal::where('trading_account_id', $account->id)
+        $trades = Deal::where('trading_account_id', $account->id)
             ->where('entry', 'out')
             ->whereIn('type', ['buy', 'sell'])
             ->orderBy('time', 'desc')
             ->limit(10)
-            ->get(['symbol', 'type', 'profit', 'volume', 'time'])
-            ->map(function ($deal) {
-                return [
-                    'symbol' => $deal->symbol,
-                    'type' => $deal->type,
-                    'profit' => $deal->profit,
-                    'volume' => $deal->volume,
-                    'time' => $deal->time,
-                ];
-            })
-            ->toArray();
+            ->get();
+        
+        return $trades->map(function ($deal) use ($account) {
+            // Find the corresponding 'in' deal for open time
+            $openDeal = Deal::where('trading_account_id', $account->id)
+                ->where('position_id', $deal->position_id)
+                ->where('entry', 'in')
+                ->first();
+            
+            return [
+                'symbol' => $deal->symbol,
+                'type' => $deal->type,
+                'profit' => $deal->profit,
+                'volume' => $deal->volume,
+                'open_time' => $openDeal ? $openDeal->time : $deal->time,
+                'close_time' => $deal->time,
+            ];
+        })->toArray();
     }
 
     /**

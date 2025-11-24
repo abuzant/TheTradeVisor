@@ -1,8 +1,8 @@
 # Public Profiles Feature - Implementation Complete
 
-**Date:** November 23, 2025  
-**Status:** ✅ Core Implementation Complete  
-**Version:** 1.0
+**Date:** November 24, 2025  
+**Status:** ✅ Full Implementation Complete  
+**Version:** 2.0
 
 ---
 
@@ -49,6 +49,90 @@ The Public Profiles feature allows traders to share their trading performance pu
 - Symbol performance table
 - View tracking (180-day history)
 - Responsive design
+
+### **Phase 7: Top Traders Leaderboard** ✅
+- Public leaderboard page at `/top-traders`
+- Top 50 traders displayed (opt-in only via `show_on_leaderboard`)
+- Multiple ranking criteria: Total Profit, ROI, Win Rate, Profit Factor
+- Expandable rows showing individual account breakdown per trader
+- Aggregated stats across all public accounts per trader
+- Guest-accessible (no authentication required)
+- Responsive design with fixed column widths
+- Alpine.js for interactive expand/collapse functionality
+- Symbol normalization with hover to show raw broker names
+- Optimized equity curve (30 daily snapshots vs thousands)
+- 15-minute cache per profile for performance
+
+### **Phase 8-10: Widget Presets & Enhanced UI** ✅
+**Widget Preset System:**
+- Three preset modes: Minimal, Full Stats, Trader Showcase
+- Custom preset for advanced users
+- Preset controls widget visibility automatically
+- Google Analytics tracking for preset usage
+
+**Performance Cards Enhancement:**
+- 6 performance cards with SVG icons
+- Icons: Bar chart, Check circle, Dollar, Trending, Calendar, Calculator
+- Color-coded icons based on values (green/red/indigo)
+- Responsive grid: 1→2→3→6 columns
+- Monthly equity change card added (6th card)
+
+**ROI Card Implementation:**
+- Return on Investment calculation
+- Based on 30-day starting equity
+- Color-coded positive/negative values
+- Always visible in all presets
+
+**Recent Trades Timeline:**
+- Last 10 trades display
+- Shows symbol, type, profit, volume, duration
+- Color-coded profit/loss
+- Only visible in Trader Showcase preset
+- Includes open/close times
+
+**Social Sharing Features:**
+- Share buttons: Twitter, Facebook, LinkedIn, WhatsApp
+- Copy link button with tooltip feedback
+- Custom share text per platform
+- Located under CTA button
+
+**Risk Disclaimer:**
+- Professional amber-themed warning section
+- Comprehensive legal disclaimers
+- Trading risk warnings
+- Platform liability clarification
+- Appears after all widgets
+
+**Visual Improvements:**
+- Full broker name display (no truncation)
+- Platform tracking fixed (MT4/MT5)
+- Improved responsive design
+- Better spacing and typography
+
+### **Phase 11: Badge Email Notifications** ✅
+**Email System:**
+- Automated email when new badges earned
+- Beautiful HTML email template with gradient header
+- Badge showcase with icon, name, description, tier
+- Account information and earned date
+- CTA button linking to public profile
+- Queued for async sending (Laravel Queue)
+- Only sent for NEW badges (not re-awards)
+- Error handling with logging
+
+**UTM Tracking:**
+- All email links include UTM parameters
+- Track badge type performance
+- Measure email campaign effectiveness
+- Google Analytics integration
+- Parameters: source=email, medium=badge_notification, campaign=badge_earned, content={badge_type}
+
+**Technical Implementation:**
+- Mailable class: `BadgeEarnedMail`
+- Email template: `emails/badge-earned.blade.php`
+- Database: Added `badge_description` column
+- Service integration in `BadgeCalculationService`
+- Automatic sending during daily badge calculation
 
 ---
 
@@ -238,6 +322,7 @@ php artisan badges:calculate --account=123
 ### **Public Routes**
 ```php
 GET /@{username}/{slug}/{account} → PublicProfileController@show
+GET /top-traders                  → PublicProfileController@leaderboard
 ```
 
 ### **Authenticated Routes**
@@ -267,12 +352,6 @@ POST /accounts/{account}/public-profile → PublicProfileController@updateAccoun
 ---
 
 ## 🎯 Future Enhancements (Not Implemented)
-
-### **Phase 7: Top Traders Leaderboard**
-- Public leaderboard page (`/top-traders`)
-- Top 50 traders (opt-in only)
-- Filterable by ranking criteria
-- Updated daily
 
 ### **Phase 8: OG Image Generation**
 - Auto-generated social share images

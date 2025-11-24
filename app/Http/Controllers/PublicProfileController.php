@@ -138,6 +138,9 @@ class PublicProfileController extends Controller
             ]
         );
 
+        // Clear the profile cache so changes are immediately visible
+        \Cache::forget('public_profile_' . $profileAccount->id);
+
         return response()->json(['success' => true, 'profile' => $profileAccount]);
     }
 

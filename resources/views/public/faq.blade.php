@@ -117,6 +117,73 @@
                     </div>
                 </div>
 
+                {{-- Public Profiles & Leaderboard --}}
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-6 pb-2 border-b-2 border-blue-600">Public Profiles & Leaderboard</h2>
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">How do I make my trading profile public?</h3>
+                            <p class="text-gray-600">Go to Profile Settings and enable "Show on Leaderboard", then navigate to Accounts → Public Profiles and set individual accounts to "Public". You can configure what information to show using widget presets (Minimal, Balanced, or Maximum Transparency).</p>
+                        </div>
+
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">What is the Top Traders Leaderboard?</h3>
+                            <p class="text-gray-600">The leaderboard at <a href="/top-traders" class="text-blue-600 hover:text-blue-800 underline">/top-traders</a> showcases the top 50 traders globally. You can filter by Total Profit, ROI, Win Rate, or Profit Factor. All rankings are based on the last 30 days of trading performance.</p>
+                        </div>
+
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Can I be anonymous on the leaderboard?</h3>
+                            <p class="text-gray-600">Yes! Set your public display mode to "Anonymous" in profile settings and you'll appear as "Anonymous Trader" on the leaderboard. Your profile URL will still use your username but it won't be displayed publicly.</p>
+                        </div>
+
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">What are widget presets?</h3>
+                            <p class="text-gray-600">Widget presets control what information appears on your public profile: <strong>Minimal</strong> shows basic stats only, <strong>Balanced</strong> adds equity curve and top symbols, <strong>Maximum Transparency</strong> includes everything plus recent trades timeline.</p>
+                        </div>
+
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">How are leaderboard rankings calculated?</h3>
+                            <p class="text-gray-600">Rankings aggregate stats across all your public accounts: Total Profit (sum of all profits in USD), ROI (total profit / total initial balance), Win Rate (weighted average), and Profit Factor (aggregated gross profit / gross loss).</p>
+                        </div>
+
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Can I share my profile on social media?</h3>
+                            <p class="text-gray-600">Absolutely! Your profile URL (/@username/account-slug/account-number) includes Open Graph and Twitter Card meta tags for rich previews on Facebook, Twitter, LinkedIn, WhatsApp, and other platforms.</p>
+                        </div>
+
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">What are badges and how do I earn them?</h3>
+                            <p class="text-gray-600">Badges are achievements displayed on your profile. Current badges include: 🏆 Top Performer (top 10 ranking), 📊 Transparent (Maximum Transparency preset), ⭐ Verified Trader (coming soon), and 🔥 Hot Streak (coming soon).</p>
+                        </div>
+
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">How often is the leaderboard updated?</h3>
+                            <p class="text-gray-600">Profile data is cached for 15 minutes for performance. Your stats will update automatically within this timeframe after new trades are synced to the platform.</p>
+                        </div>
+
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Can I remove my profile from the leaderboard?</h3>
+                            <p class="text-gray-600">Yes, simply disable "Show on Leaderboard" in your profile settings or set all accounts to "Private" in Accounts → Public Profiles. Your profile will be removed immediately.</p>
+                        </div>
+
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Is there a cost to make my profile public?</h3>
+                            <p class="text-gray-600">No, public profiles and leaderboard participation are completely free for all users. There are no additional fees or premium tiers required.</p>
+                        </div>
+
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">What information is never shown publicly?</h3>
+                            <p class="text-gray-600">We never show: your email address, account credentials, API keys, broker login details, real-time open positions, or any personal information. Only performance statistics you explicitly choose to share are visible.</p>
+                        </div>
+
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Can I have different settings for different accounts?</h3>
+                            <p class="text-gray-600">Yes! Each trading account has independent privacy and widget settings. You can have some accounts public with Maximum Transparency and others private or public with Minimal preset.</p>
+                        </div>
+                    </div>
+                </div>
+
                 {{-- Support --}}
                 <div>
                     <h2 class="text-2xl font-bold text-gray-900 mb-6 pb-2 border-b-2 border-blue-600">Support</h2>
