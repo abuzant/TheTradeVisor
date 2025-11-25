@@ -33,8 +33,21 @@ class UninstalledController extends Controller
             'experience' => 'required|string|max:255',
             'would_return' => 'required|string|max:50',
             'email' => 'nullable|email|max:255',
-            'comments' => 'nullable|string|max:1000'
+            'comments' => 'nullable|string|max:1000',
+            'recaptcha_token' => 'required|string'
         ]);
+
+        // Verify reCAPTCHA token
+        $recaptchaSecret = env('RECAPTCHA_SECRET_KEY');
+        $response = file_get_contents("https://www.google.com/recaptcha/api/siteverify?secret=" . $recaptchaSecret . "&response=" . $validated['recaptcha_token']);
+        $responseKeys = json_decode($response, true);
+        
+        if (intval($responseKeys["success"]) !== 1) {
+            return response()->json([
+                'success' => false,
+                'message' => 'reCAPTCHA verification failed. Please try again.'
+            ], 422);
+        }
 
         // Log the feedback for analysis
         Log::info('Uninstall feedback received', [

@@ -6,14 +6,15 @@
     <title>We're Sorry to See You Go - TheTradeVisor</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     
     <!-- Google Analytics -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZGPZK0T9NE"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
-        gtag('config', 'GA_MEASUREMENT_ID');
+        gtag('config', 'G-ZGPZK0T9NE');
         
         // Track uninstall page view
         gtag('event', 'page_view', {
@@ -102,30 +103,14 @@
         <!-- Special Offers Section -->
         <section class="mb-12">
             <div class="bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl p-8 text-white text-center">
-                <h3 class="text-2xl font-bold mb-4">🎁 Before You Go - Special Offers Just for You!</h3>
-                <div class="grid md:grid-cols-3 gap-6 mt-8">
-                    <div class="card-hover bg-white/20 backdrop-blur-lg rounded-xl p-6 cursor-pointer" onclick="trackOfferClick('free_month')">
-                        <i data-lucide="gift" class="w-12 h-12 mx-auto mb-3"></i>
-                        <h4 class="font-bold text-lg mb-2">FREE Month</h4>
-                        <p class="text-sm opacity-90">Get 30 days free on any plan</p>
-                        <button class="mt-4 bg-white text-purple-600 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition">
-                            Claim Offer
-                        </button>
-                    </div>
-                    <div class="card-hover bg-white/20 backdrop-blur-lg rounded-xl p-6 cursor-pointer" onclick="trackOfferClick('half_price')">
-                        <i data-lucide="percent" class="w-12 h-12 mx-auto mb-3"></i>
-                        <h4 class="font-bold text-lg mb-2">50% OFF</h4>
-                        <p class="text-sm opacity-90">Half price for 3 months</p>
-                        <button class="mt-4 bg-white text-purple-600 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition">
-                            Get Discount
-                        </button>
-                    </div>
+                <h3 class="text-2xl font-bold mb-4">🎁 Before You Go - Special Offer Just for You!</h3>
+                <div class="grid md:grid-cols-1 gap-6 mt-8">
                     <div class="card-hover bg-white/20 backdrop-blur-lg rounded-xl p-6 cursor-pointer" onclick="trackOfferClick('personal_demo')">
                         <i data-lucide="user-check" class="w-12 h-12 mx-auto mb-3"></i>
                         <h4 class="font-bold text-lg mb-2">Personal Demo</h4>
                         <p class="text-sm opacity-90">1-on-1 setup assistance</p>
                         <button class="mt-4 bg-white text-purple-600 px-4 py-2 rounded-lg font-semibold hover:bg-gray-100 transition">
-                            Schedule Now
+                            Email Us
                         </button>
                     </div>
                 </div>
@@ -247,6 +232,11 @@
                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"></textarea>
                 </div>
 
+                <!-- reCAPTCHA -->
+                <div class="mb-6">
+                    <div class="g-recaptcha" data-sitekey="6LdbKwssAAAAANvWRniOD6J3QJYEYbtq62qUIehx"></div>
+                </div>
+
                 <!-- Submit Button -->
                 <div class="text-center">
                     <button type="submit" class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition transform hover:scale-105">
@@ -317,33 +307,15 @@
                 <button onclick="trackOfferClick('try_again')" class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition">
                     Try TheTradeVisor Again
                 </button>
-                <button onclick="trackOfferClick('stay_updated')" class="bg-white text-purple-600 border-2 border-purple-600 px-6 py-3 rounded-lg font-semibold hover:bg-purple-50 transition">
-                    Stay Updated on Improvements
+                <button onclick="window.location.href='https://github.com/abuzant/TheTradeVisor'" class="bg-white text-purple-600 border-2 border-purple-600 px-6 py-3 rounded-lg font-semibold hover:bg-purple-50 transition">
+                    Give Us Another Chance
                 </button>
             </div>
         </section>
     </main>
 
     <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-8 px-4 mt-12">
-        <div class="max-w-4xl mx-auto text-center">
-            <div class="flex items-center justify-center space-x-3 mb-4">
-                <i data-lucide="trending-up" class="w-6 h-6"></i>
-                <span class="text-lg font-semibold">TheTradeVisor</span>
-            </div>
-            <p class="text-gray-400 mb-4">
-                Thank you for being part of our trading community. We hope to see you again soon!
-            </p>
-            <div class="flex space-x-6 justify-center text-sm">
-                <a href="mailto:support@thetradevisor.com" class="hover:text-purple-400 transition">
-                    support@thetradevisor.com
-                </a>
-                <a href="https://thetradevisor.com" class="hover:text-purple-400 transition">
-                    thetradevisor.com
-                </a>
-            </div>
-        </div>
-    </footer>
+    @include('layouts.footer')
 
     <!-- Success Modal -->
     <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
@@ -389,8 +361,16 @@
         document.getElementById('feedbackForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
+            // Get reCAPTCHA response
+            const recaptchaResponse = grecaptcha.getResponse();
+            if (!recaptchaResponse) {
+                alert('Please complete the reCAPTCHA verification.');
+                return;
+            }
+            
             const formData = new FormData(this);
             const data = Object.fromEntries(formData.entries());
+            data.recaptcha_token = recaptchaResponse;
 
             // Track form submission start
             gtag('event', 'form_submission_start', {
@@ -418,12 +398,14 @@
                     // Show success modal
                     document.getElementById('successModal').style.display = 'flex';
                 } else {
-                    alert('There was an error submitting your feedback. Please try again.');
+                    alert('There was an error submitting your feedback. Please try again or visit our download page to give us another chance.');
+                    window.location.href = '/download';
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('There was an error submitting your feedback. Please try again.');
+                alert('There was an error submitting your feedback. Please try again or visit our download page to give us another chance.');
+                window.location.href = '/download';
             });
         });
 
