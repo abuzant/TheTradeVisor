@@ -37,7 +37,7 @@
 [![PHPUnit](https://img.shields.io/badge/PHPUnit-Testing-3776AB.svg?logo=php&logoColor=white)](https://phpunit.de)
 [![Slack](https://img.shields.io/badge/Slack-Alerts-4A154B.svg?logo=slack&logoColor=white)](https://slack.com)
 [![Production Ready](https://img.shields.io/badge/Status-Production%20Ready-22C55E.svg)](https://thetradevisor.com)
-[![Version](https://img.shields.io/badge/Version-2.1.0-blue.svg)](docs/changelog/2025-11-25-V2-1-0-SECURITY-RELEASE.md)
+[![Version](https://img.shields.io/badge/Version-2.0.2-blue.svg)](docs/changelog/2025-11-25-V2-0-2-SECURITY-RELEASE.md)
 [![Uptime](https://img.shields.io/badge/Uptime-99.9%25-22C55E.svg)](https://thetradevisor.com)
 [![License](https://img.shields.io/badge/License-Proprietary-yellow.svg)](LICENSE)
 
@@ -372,7 +372,7 @@ All data is anonymized and aggregated for privacy.
 
 ## 📈 System Status
 
-### Current Version: 2.1.0
+### Current Version: 2.0.2
 
 **Production Status**: ✅ Stable & Production Ready
 
