@@ -163,7 +163,7 @@ class PublicController extends Controller
     
     public function downloadSetup()
     {
-        $filePath = storage_path('setup.exe');
+        $filePath = resource_path('setup.exe');
         
         if (!file_exists($filePath)) {
             abort(404, 'Setup file not found');

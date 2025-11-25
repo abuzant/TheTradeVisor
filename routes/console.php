@@ -78,3 +78,39 @@ Schedule::command('badges:calculate')
     ->onSuccess(function () {
         \Log::info('Badge calculation completed successfully');
     });
+
+// Detect data gaps daily at 1:00 AM (before aggregation)
+Schedule::command('gaps:detect --hours=24')
+    ->dailyAt('01:00')
+    ->name('detect-daily-data-gaps')
+    ->withoutOverlapping()
+    ->onFailure(function () {
+        \Log::error('Daily gap detection failed');
+    })
+    ->onSuccess(function () {
+        \Log::info('Daily gap detection completed successfully');
+    });
+
+// Trigger backfill for detected gaps daily at 1:30 AM
+Schedule::command('gaps:backfill')
+    ->dailyAt('01:30')
+    ->name('trigger-gap-backfill')
+    ->withoutOverlapping()
+    ->onFailure(function () {
+        \Log::error('Gap backfill trigger failed');
+    })
+    ->onSuccess(function () {
+        \Log::info('Gap backfill trigger completed successfully');
+    });
+
+// Comprehensive gap detection weekly (Sunday at 2:00 AM)
+Schedule::command('gaps:detect --hours=168') // 7 days = 168 hours
+    ->weeklyOn(0, '02:00') // 0 = Sunday
+    ->name('detect-weekly-data-gaps')
+    ->withoutOverlapping()
+    ->onFailure(function () {
+        \Log::error('Weekly gap detection failed');
+    })
+    ->onSuccess(function () {
+        \Log::info('Weekly gap detection completed successfully');
+    });

@@ -37,7 +37,7 @@
 [![PHPUnit](https://img.shields.io/badge/PHPUnit-Testing-3776AB.svg?logo=php&logoColor=white)](https://phpunit.de)
 [![Slack](https://img.shields.io/badge/Slack-Alerts-4A154B.svg?logo=slack&logoColor=white)](https://slack.com)
 [![Production Ready](https://img.shields.io/badge/Status-Production%20Ready-22C55E.svg)](https://thetradevisor.com)
-[![Version](https://img.shields.io/badge/Version-2.0.0-blue.svg)](docs/changelog/2025-11-24-PUBLIC-PROFILES-PHASE-8-11.md)
+[![Version](https://img.shields.io/badge/Version-2.1.0-blue.svg)](docs/changelog/2025-11-25-V2-1-0-SECURITY-RELEASE.md)
 [![Uptime](https://img.shields.io/badge/Uptime-99.9%25-22C55E.svg)](https://thetradevisor.com)
 [![License](https://img.shields.io/badge/License-Proprietary-yellow.svg)](LICENSE)
 
@@ -372,52 +372,48 @@ All data is anonymized and aggregated for privacy.
 
 ## 📈 System Status
 
-### Current Version: 1.6.0
+### Current Version: 2.1.0
 
 **Production Status**: ✅ Stable & Production Ready
 
-**Latest Updates** (November 21, 2025):
+**Latest Updates** (November 25, 2025):
 
-#### 🏢 Enterprise Features
-- ✅ **Enterprise Subdomain** - `enterprise.thetradevisor.com` with SSL
-- ✅ **Broker Whitelist System** - Unlimited free accounts for broker clients
-- ✅ **Enterprise Portal** - Dedicated dashboard, analytics, and settings
-- ✅ **Broker Management** - Admin tools for managing enterprise brokers
-- ✅ **Usage Tracking** - Monitor whitelisted broker adoption
-- ✅ **Grace Period System** - 30-day grace period for expired subscriptions
+#### 🔒 Security & Hardening
+- ✅ **Security Audit Dashboard** - Real-time configuration audit, file permission monitoring, and security issue tracking
+- ✅ **Backup Manager** - Complete database backup system with scheduling, restoration, and download capabilities  
+- ✅ **Enhanced Authentication** - Multi-factor admin authentication with session management
+- ✅ **Proprietary License** - Updated to comprehensive proprietary software license agreement
+- ✅ **CSRF Protection** - Enhanced cross-site request forgery protection across all forms
+- ✅ **Input Validation** - Comprehensive input sanitization and validation system
 
-#### 💰 Billing System Overhaul
-- ✅ **Pay-Per-Account Model** - $9.99 one-time per additional account
-- ✅ **Removed Subscription Tiers** - Simplified pricing structure
-- ✅ **Database Migration** - Removed `subscription_tier` and `max_accounts` fields
-- ✅ **First Account FREE** - Forever, for all users
+#### 🎯 User Experience Enhancements  
+- ✅ **Uninstall Page** - Comprehensive uninstall feedback system with analytics tracking (/uninstalled)
+- ✅ **Gap Detection System** - Automatic data gap detection and EA backfill mechanism
+- ✅ **EA Backfill Logic** - MT4/MT5 EAs automatically restart history upload when gaps detected
+- ✅ **New Setup.exe** - Updated installer package with latest EA versions
+- ✅ **Google Analytics Integration** - Comprehensive tracking on uninstall page
 
-#### 🚀 Infrastructure Upgrade
-- ✅ **AWS EC2 M5.large** - Upgraded from T-series (8GB RAM, 2 vCPUs)
-- ✅ **Consistent CPU Performance** - No more CPU credit exhaustion
-- ✅ **Simplified Architecture** - Direct Nginx → PHP-FPM connection
-- ✅ **Improved Stability** - 99.9% uptime
+#### 🛠️ Technical Improvements
+- ✅ **MT4 Compilation Fix** - Resolved EA compilation errors with proper variable handling
+- ✅ **API Error Handling** - Fixed 500 server errors in data collection endpoint
+- ✅ **Database Optimization** - Enhanced query performance and indexing
+- ✅ **Cache Management** - Improved Redis caching and cache invalidation
+- ✅ **Logging System** - Enhanced error tracking and performance monitoring
 
-#### 🔧 Admin Enhancements
-- ✅ **Enhanced Admin Dashboard** - Broker stats, enterprise expiry, active terminals
-- ✅ **Admin Wiki** - Comprehensive system documentation
-- ✅ **Broker Management UI** - Full CRUD for enterprise brokers
-- ✅ **Enhanced User Management** - Broker information in user list
+#### � Admin & Monitoring
+- ✅ **Admin Backup Module** - Complete database backup and restoration system
+- ✅ **Security Monitoring** - Real-time security configuration tracking
+- ✅ **System Health Dashboard** - Comprehensive server metrics and service monitoring  
+- ✅ **Audit Logging** - Complete activity tracking and security event monitoring
+- ✅ **Alert System** - Real-time notifications for critical system events
 
-#### 🐛 Bug Fixes
-- ✅ **Domain Routing** - Fixed multi-domain routing with middleware
-- ✅ **API Subdomain** - Fixed 404 errors on data collection endpoint
-- ✅ **MT4 Data Display** - Fixed trade display for MT4 accounts
-- ✅ **Performance Page** - Fixed time period selection and data loading
-- ✅ **PRO Badges** - Added visual indicators for locked features
-
-**Previous Updates** (November 2025):
-- ✅ Account Snapshots System with historical metrics
-- ✅ Account Health Dashboard with interactive widgets
-- ✅ Circuit breaker and rate limiting implementation
-- ✅ Redis caching optimization (90% hit rate)
-- ✅ GeoIP analytics and country-based insights
-- ✅ Alert system (Slack/Email notifications)
+**Previous Updates** (November 21-24, 2025):
+- ✅ Enterprise Subdomain & Broker Whitelist System
+- ✅ Public Profiles & Leaderboard System  
+- ✅ Account Snapshots & Historical Metrics
+- ✅ Circuit Breaker & Rate Limiting Implementation
+- ✅ AWS EC2 M5.large Infrastructure Upgrade
+- ✅ Redis Caching Optimization (90% hit rate)
 
 See [CHANGELOG.md](docs/CHANGELOG.md) for complete history.
 

@@ -7,6 +7,13 @@
 /storage/*.key
 /storage/pail
 /vendor
+
+# OAuth Keys - Security Critical
+/storage/oauth-private.key
+/storage/oauth-public.key
+/storage/secure/oauth-private.key
+/storage/secure/oauth-public.key
+
 .env
 .env.backup
 .env.production

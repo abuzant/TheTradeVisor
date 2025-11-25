@@ -1,0 +1,33 @@
+# TheTradeVisor Backup Logs Rotation
+/var/log/backups/*.log {
+    daily
+    missingok
+    rotate 30
+    compress
+    delaycompress
+    notifempty
+    create 640 root tradeadmin
+    postrotate
+        # Ensure www-data can read logs for monitoring
+        setfacl -m g:tradeadmin:rx /var/log/backups
+        setfacl -m g:tradeadmin:r /var/log/backups/*.log
+        setfacl -m u:www-data:rx /var/log/backups
+        setfacl -m u:www-data:r /var/log/backups/*.log
+    endscript
+}
+
+# Laravel Application Logs
+/var/www/thetradevisor.com/storage/logs/*.log {
+    daily
+    missingok
+    rotate 14
+    compress
+    delaycompress
+    notifempty
+    create 640 www-data www-data
+    size 100M
+    postrotate
+        # Restart queue workers after log rotation
+        /usr/bin/php /var/www/thetradevisor.com/artisan queue:restart
+    endscript
+}

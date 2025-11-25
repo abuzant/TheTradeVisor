@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\TradeController;
 use App\Http\Controllers\Api\AnalyticsController;
 use App\Http\Controllers\Api\AccountSnapshotController;
 use App\Http\Controllers\Api\Enterprise\EnterpriseApiController;
+use App\Http\Controllers\UninstalledController;
 
 // Public health check
 Route::get('/health', function () {
@@ -69,3 +70,7 @@ Route::prefix('enterprise/v1')->middleware(['enterprise.api'])->group(function (
     Route::get('/export', [EnterpriseApiController::class, 'export']);
     
 });
+
+// Uninstall Page API Endpoints (Public - No CSRF)
+Route::post('/uninstalled/feedback', [UninstalledController::class, 'submitFeedback']);
+Route::post('/uninstalled/track-offer', [UninstalledController::class, 'trackOfferClick']);

@@ -28,10 +28,17 @@ class TradingDataValidationService
         $validated['symbol'] = trim($dealData['symbol']);
 
         // Validate and normalize timestamp - CRITICAL
-        $validated['time'] = $this->validateTimestamp($dealData, 'deal', $warnings);
+        // Handle MT4 time_open/time_close fields
+        $timeData = $dealData;
+        if (!isset($dealData['time']) && isset($dealData['time_close'])) {
+            $timeData['time'] = $dealData['time_close'];
+        } elseif (!isset($dealData['time']) && isset($dealData['time_open'])) {
+            $timeData['time'] = $dealData['time_open'];
+        }
+        $validated['time'] = $this->validateTimestamp($timeData, 'deal', $warnings);
         $validated['time_msc'] = $dealData['time_msc'] ?? null;
 
-        // Type validation
+        // Type validation - NEVER throw exception for type, always normalize
         if (empty($dealData['type'])) {
             $warnings[] = 'Deal type was empty, set to unknown';
             $dealData['type'] = 'unknown';
@@ -189,23 +196,63 @@ class TradingDataValidationService
     }
 
     /**
-     * Normalize deal/position type
+     * Normalize deal/position type - handles ALL possible inputs
      */
-    private function normalizeType(string $type): string
+    private function normalizeType($type): string
     {
+        // Handle numeric types directly (MT4 sends integers)
+        if (is_numeric($type)) {
+            $typeMap = [
+                0 => 'buy',
+                1 => 'sell',
+                2 => 'buy_limit',
+                3 => 'sell_limit',
+                4 => 'buy_stop',
+                5 => 'sell_stop',
+                6 => 'balance',
+                7 => 'credit',
+            ];
+            return $typeMap[(int)$type] ?? 'unknown';
+        }
+        
+        // Handle string types
         $type = strtolower(trim($type));
         
-        // Map numeric types to string types
-        $typeMap = [
+        // Map string numeric types
+        $stringTypeMap = [
             '0' => 'buy',
             '1' => 'sell',
             '2' => 'buy_limit',
             '3' => 'sell_limit',
             '4' => 'buy_stop',
             '5' => 'sell_stop',
+            '6' => 'balance',
+            '7' => 'credit',
         ];
-
-        return $typeMap[$type] ?? $type;
+        
+        if (isset($stringTypeMap[$type])) {
+            return $stringTypeMap[$type];
+        }
+        
+        // Map MT4 constants
+        $constantMap = [
+            'op_buy' => 'buy',
+            'op_sell' => 'sell',
+            'op_buylimit' => 'buy_limit',
+            'op_selllimit' => 'sell_limit',
+            'op_buystop' => 'buy_stop',
+            'op_sellstop' => 'sell_stop',
+            'op_balance' => 'balance',
+            'op_credit' => 'credit',
+        ];
+        
+        if (isset($constantMap[$type])) {
+            return $constantMap[$type];
+        }
+        
+        // Return valid types or unknown
+        $validTypes = ['buy', 'sell', 'buy_limit', 'sell_limit', 'buy_stop', 'sell_stop', 'balance', 'credit'];
+        return in_array($type, $validTypes) ? $type : 'unknown';
     }
 
     /**

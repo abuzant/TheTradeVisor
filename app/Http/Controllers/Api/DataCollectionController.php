@@ -126,6 +126,12 @@ class DataCollectionController extends Controller
             // Check if this is historical data or current data
             $isHistorical = $data['meta']['is_historical'] ?? false;
             
+            // Find trading account for gap detection (needed before trackWhitelistedUsage)
+            $accountHash = $accountInfo['account_hash'] ?? hash('sha256', ($accountInfo['account_number'] ?? '') . ($accountInfo['server'] ?? ''));
+            $tradingAccount = TradingAccount::where('user_id', $user->id)
+                ->where('account_hash', $accountHash)
+                ->first();
+            
             // Generate unique filename for raw data backup
             $timestamp = now()->format('Y-m-d_His');
             $broker = $accountInfo['broker'] ?? 'unknown';
@@ -174,11 +180,17 @@ class DataCollectionController extends Controller
 
             // Track whitelisted broker usage (for broker analytics)
             if ($whitelistedBroker && $bypassLimits) {
-                $this->trackWhitelistedUsage($user, $whitelistedBroker, $accountInfo);
+                $this->trackWhitelistedUsage($user, $whitelistedBroker, $accountInfo, $tradingAccount);
             }
 
             // Determine max days view based on broker status
             $maxDaysView = $bypassLimits ? 180 : 7;
+            
+            // Check for missing data gaps (only for current data, not historical uploads)
+            $missingDataInfo = null;
+            if (!$isHistorical && $tradingAccount) {
+                $missingDataInfo = $this->checkForMissingData($tradingAccount);
+            }
             
             $response = [
                 'success' => true,
@@ -189,7 +201,18 @@ class DataCollectionController extends Controller
                 'whitelisted_broker' => $bypassLimits,
                 'max_days_view' => $maxDaysView,
                 'data_retention_days' => 180, // All data retained for 180 days
+                'missing_data' => $missingDataInfo !== null,
             ];
+
+            // Add missing data details if gaps were found
+            if ($missingDataInfo) {
+                $response['missing_data_range'] = [
+                    'start_time' => $missingDataInfo['start_time'],
+                    'end_time' => $missingDataInfo['end_time'],
+                    'estimated_days' => $missingDataInfo['estimated_days'],
+                    'severity' => $missingDataInfo['severity'],
+                ];
+            }
 
             if ($gracePeriodMessage) {
                 $response['grace_period_warning'] = $gracePeriodMessage;
@@ -240,16 +263,9 @@ class DataCollectionController extends Controller
     /**
      * Track whitelisted broker usage for analytics
      */
-    private function trackWhitelistedUsage($user, $whitelistedBroker, $accountInfo)
+    private function trackWhitelistedUsage($user, $whitelistedBroker, $accountInfo, $tradingAccount)
     {
         try {
-            $accountHash = $accountInfo['account_hash'] ?? hash('sha256', ($accountInfo['account_number'] ?? '') . ($accountInfo['server'] ?? ''));
-            
-            // Find or create trading account
-            $tradingAccount = TradingAccount::where('user_id', $user->id)
-                ->where('account_hash', $accountHash)
-                ->first();
-            
             if ($tradingAccount) {
                 // Update or create usage record
                 WhitelistedBrokerUsage::updateOrCreate(
@@ -272,6 +288,76 @@ class DataCollectionController extends Controller
                 'user_id' => $user->id,
                 'broker_id' => $whitelistedBroker->id,
             ]);
+        }
+    }
+
+    /**
+     * Check for missing data gaps in the last 24 hours
+     */
+    private function checkForMissingData($tradingAccount)
+    {
+        try {
+            // Check for gaps in the last 24 hours
+            $endTime = now();
+            $startTime = now()->subHours(24);
+            
+            // Get expected snapshots (every 5 minutes = 288 per day)
+            $expectedSnapshots = 288; // 24 hours * 12 snapshots per hour
+            
+            // Count actual snapshots in the last 24 hours
+            $actualSnapshots = \App\Models\AccountSnapshot::where('trading_account_id', $tradingAccount->id)
+                ->whereBetween('snapshot_time', [$startTime, $endTime])
+                ->count();
+            
+            // If we have less than 80% of expected data, consider it a gap
+            $threshold = $expectedSnapshots * 0.8;
+            
+            if ($actualSnapshots < $threshold) {
+                // Find the actual gap range
+                $latestSnapshot = \App\Models\AccountSnapshot::where('trading_account_id', $tradingAccount->id)
+                    ->where('snapshot_time', '<=', $endTime)
+                    ->orderBy('snapshot_time', 'desc')
+                    ->first();
+                
+                $gapStartTime = $latestSnapshot ? $latestSnapshot->snapshot_time : $startTime;
+                $missingHours = $endTime->diffInHours($gapStartTime);
+                $estimatedDays = ceil($missingHours / 24);
+                
+                // Determine severity based on how much data is missing
+                $missingPercentage = (($expectedSnapshots - $actualSnapshots) / $expectedSnapshots) * 100;
+                $severity = 'normal';
+                if ($missingPercentage > 50) {
+                    $severity = 'critical';
+                } elseif ($missingPercentage > 25) {
+                    $severity = 'high';
+                }
+                
+                Log::info('Missing data detected for EA backfill trigger', [
+                    'trading_account_id' => $tradingAccount->id,
+                    'account_number' => $tradingAccount->account_number ?? $tradingAccount->account_hash,
+                    'gap_start' => $gapStartTime->toIso8601String(),
+                    'gap_end' => $endTime->toIso8601String(),
+                    'missing_hours' => $missingHours,
+                    'missing_percentage' => round($missingPercentage, 1),
+                    'severity' => $severity,
+                ]);
+                
+                return [
+                    'start_time' => $gapStartTime->toIso8601String(),
+                    'end_time' => $endTime->toIso8601String(),
+                    'estimated_days' => $estimatedDays,
+                    'severity' => $severity,
+                ];
+            }
+            
+            return null; // No gaps detected
+            
+        } catch (\Exception $e) {
+            Log::warning('Failed to check for missing data', [
+                'trading_account_id' => $tradingAccount->id,
+                'error' => $e->getMessage(),
+            ]);
+            return null; // Don't trigger backfill if we can't detect gaps
         }
     }
 }

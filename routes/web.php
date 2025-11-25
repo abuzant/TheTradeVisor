@@ -5,6 +5,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ApiKeyController;
 use App\Http\Controllers\MyDigestController;
 use App\Http\Controllers\Admin\DigestControlController;
+use App\Http\Controllers\UninstalledController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\SymbolMappingController;
 
@@ -287,6 +288,26 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Admin Wiki
     Route::get('/wiki', [App\Http\Controllers\Admin\AdminWikiController::class, 'index'])->name('wiki');
     Route::post('/wiki/action', [App\Http\Controllers\Admin\AdminWikiController::class, 'executeAction'])->name('wiki.action');
+    
+    // Security Audit
+    Route::get('/security', [App\Http\Controllers\Admin\SecurityAuditController::class, 'index'])->name('security.index');
+    Route::post('/security/secure-configs', [App\Http\Controllers\Admin\SecurityAuditController::class, 'secureConfigs'])->name('security.secure-configs');
+    Route::get('/security/logs', [App\Http\Controllers\Admin\SecurityAuditController::class, 'getSecurityLogs'])->name('security.logs');
+    Route::get('/security/generate-report', [App\Http\Controllers\Admin\SecurityAuditController::class, 'generateReport'])->name('security.generate-report');
+    
+    // Backup Manager
+    Route::get('/backup', [App\Http\Controllers\Admin\BackupManagerController::class, 'index'])->name('backup.index');
+    Route::get('/backup/logs', [App\Http\Controllers\Admin\BackupManagerController::class, 'logs'])->name('backup.logs');
+    Route::get('/backup/download', [App\Http\Controllers\Admin\BackupManagerController::class, 'download'])->name('backup.download');
+    
+    // Test routes for debugging
+    Route::get('/backup/test', function() {
+        return view('admin.backup.test');
+    })->name('backup.test');
+    
+    Route::get('/backup/simple', function() {
+        return view('admin.backup.simple');
+    })->name('backup.simple');
 });
 
 // Legal pages (public)
@@ -306,6 +327,15 @@ Route::get('/debug-session', function() {
 })->middleware('web');
 
 }); // End of main domain middleware group
+
+// Admin Monitoring Routes
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
+    Route::get('/monitoring', [App\Http\Controllers\Admin\MonitoringController::class, 'dashboard'])->name('monitoring.dashboard');
+    Route::post('/monitoring/settings', [App\Http\Controllers\Admin\MonitoringController::class, 'updateSettings'])->name('monitoring.update-settings');
+});
+
+// Uninstall Page Routes (Public)
+Route::get('/uninstalled', [UninstalledController::class, 'index'])->name('uninstalled');
 
 // Fallback for enterprise subdomain (must be AFTER main domain group)
 Route::fallback(function () {
