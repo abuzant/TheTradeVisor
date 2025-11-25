@@ -66,6 +66,14 @@ TheTradeVisor is an enterprise-grade trading analytics platform that aggregates,
 - 🔌 **REST API** - Comprehensive API for data ingestion and retrieval
 - 📡 **Real-time Sync** - Live position updates and trade tracking
 
+#### Admin Management & Monitoring
+- 🛡️ **Security Audit Dashboard** - Real-time configuration audit, file permission monitoring, and security issue tracking
+- 💾 **Backup Manager** - Complete database backup system with scheduling, restoration, and download capabilities
+- 📊 **System Monitoring** - Live server metrics, service status, resource usage, and health checks
+- 🔐 **Admin Authentication** - Role-based access control with secure admin panel
+- 📝 **Audit Logging** - Comprehensive activity tracking and security event monitoring
+- ⚠️ **Alert System** - Real-time Slack/email notifications for critical events
+
 #### Enterprise Features
 - 🏢 **Enterprise Portal** - Dedicated subdomain for broker admins
 - ⭐ **Broker Whitelist** - Unlimited free accounts for whitelisted brokers
@@ -115,6 +123,12 @@ TheTradeVisor is an enterprise-grade trading analytics platform that aggregates,
 - [Installation Guide](docs/getting-started/INSTALLATION.md) - Complete setup instructions
 - [Configuration Guide](docs/README.md#-quick-start) - Quick start guide
 - [MT4/MT5 EA Installation](docs/guides/MT4_EA_INSTALLATION.md) - Expert Advisor setup guide
+
+### Admin & Management
+
+- [Security Audit Dashboard](docs/admin/SECURITY_AUDIT.md) - Security monitoring and configuration auditing
+- [Backup Manager](docs/admin/BACKUP_MANAGER.md) - Database backup and restoration system
+- [System Monitoring](docs/admin/SYSTEM_MONITORING.md) - Server health and performance monitoring
 
 ### Core Features
 
