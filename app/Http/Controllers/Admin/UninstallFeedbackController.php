@@ -30,15 +30,12 @@ class UninstallFeedbackController extends Controller
         // Get base query with date filtering
         $query = UninstallFeedback::whereBetween('submitted_at', [$startDate, $endDate]);
 
-        // Apply filters
-        if ($request->filled('reason')) {
-            $query->where('reason', $request->input('reason'));
-        }
-        if ($request->filled('experience_rating')) {
-            $query->where('experience_rating', $request->input('experience_rating'));
-        }
-        if ($request->filled('would_return')) {
-            $query->where('would_return', $request->input('would_return'));
+        // Apply filters - only accept specific parameters
+        $allowedFilters = ['reason', 'experience_rating', 'would_return'];
+        foreach ($allowedFilters as $filter) {
+            if ($request->filled($filter)) {
+                $query->where($filter, $request->input($filter));
+            }
         }
 
         // Get analytics data
@@ -47,7 +44,7 @@ class UninstallFeedbackController extends Controller
         // Get recent feedback with pagination
         $recentFeedback = $query->orderBy('submitted_at', 'desc')
             ->paginate(20)
-            ->appends($request->query());
+            ->appends($request->only($allowedFilters + ['start_date', 'end_date']));
 
         // Get filter options
         $reasons = UninstallFeedback::select('reason')->distinct()->pluck('reason');
