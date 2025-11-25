@@ -139,15 +139,15 @@ class UninstallFeedbackController extends Controller
             'total_feedback' => $baseQuery->count(),
             'reason_distribution' => $baseQuery->selectRaw('reason, COUNT(*) as count')
                 ->groupBy('reason')
-                ->orderBy('count', 'desc')
+                ->orderByRaw('COUNT(*) DESC')
                 ->get(),
             'experience_distribution' => $baseQuery->selectRaw('experience_rating, COUNT(*) as count')
                 ->groupBy('experience_rating')
-                ->orderBy('count', 'desc')
+                ->orderByRaw('COUNT(*) DESC')
                 ->get(),
             'return_distribution' => $baseQuery->selectRaw('would_return, COUNT(*) as count')
                 ->groupBy('would_return')
-                ->orderBy('count', 'desc')
+                ->orderByRaw('COUNT(*) DESC')
                 ->get(),
             'daily_submissions' => $baseQuery->selectRaw('DATE(submitted_at) as date, COUNT(*) as count')
                 ->groupBy('date')
