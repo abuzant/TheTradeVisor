@@ -1,13 +1,29 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>We're Sorry to See You Go - TheTradeVisor</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+<x-public-layout>
+    <x-slot name="title">We're Sorry to See You Go - TheTradeVisor</x-slot>
+    <x-slot name="description">Your feedback helps us improve our trading analytics platform. Let us know how we can better serve your trading needs.</x-slot>
     
+    <!-- Custom Styles -->
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+    </style>
+
     <!-- Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZGPZK0T9NE"></script>
     <script>
@@ -41,51 +57,119 @@
                 maxScroll = scrollPercent;
                 gtag('event', 'scroll_depth', {
                     custom_parameter: 'uninstall_page',
-                    scroll_depth_percent: maxScroll
+                    scroll_percentage: scrollPercent
                 });
             }
         });
+        
+        // Track offer clicks
+        function trackOfferClick(offerType) {
+            gtag('event', 'offer_click', {
+                custom_parameter: 'uninstall_page',
+                offer_type: offerType
+            });
+
+            // Send to backend
+            fetch('/api/uninstalled/track-offer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ offer: offerType })
+            });
+
+            // Track form field interactions
+            gtag('event', 'form_field_interaction', {
+                custom_parameter: 'uninstall_page',
+                field_type: 'offer_click',
+                offer_type: offerType
+            });
+        }
+
+        // Track offer click and redirect
+        function trackOfferClickAndRedirect(offerType, redirectUrl) {
+            // Track the click first
+            trackOfferClick(offerType);
+            
+            // Redirect after 100ms to ensure analytics is sent
+            setTimeout(() => {
+                window.location.href = redirectUrl;
+            }, 100);
+        }
+
+        // Handle form submission
+        document.getElementById('feedbackForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Get reCAPTCHA response
+            const recaptchaResponse = grecaptcha.getResponse();
+            if (!recaptchaResponse) {
+                alert('Please complete the reCAPTCHA verification.');
+                return;
+            }
+            
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+            data.recaptcha_token = recaptchaResponse;
+
+            // Track form submission start
+            gtag('event', 'form_submission_start', {
+                custom_parameter: 'uninstall_feedback'
+            });
+
+            fetch('/api/uninstalled/feedback', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    // Track successful submission
+                    gtag('event', 'form_submission_complete', {
+                        custom_parameter: 'uninstall_feedback',
+                        reason: data.reason,
+                        experience: data.experience,
+                        would_return: data.would_return
+                    });
+
+                    // Show success modal
+                    document.getElementById('successModal').style.display = 'flex';
+                } else {
+                    alert('There was an error submitting your feedback. Please try again or visit our download page to give us another chance.');
+                    window.location.href = '/download';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('There was an error submitting your feedback. Please try again or visit our download page to give us another chance.');
+                window.location.href = '/download';
+            });
+        });
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('successModal').style.display = 'none';
+        }
+
+        // Track form field interactions
+        document.querySelectorAll('input, select, textarea').forEach(field => {
+            field.addEventListener('focus', function() {
+                gtag('event', 'form_field_interaction', {
+                    custom_parameter: 'uninstall_page',
+                    field_type: this.type || this.tagName.toLowerCase(),
+                    field_name: this.name
+                });
+            });
+        });
+
+        // Initialize Lucide icons
+        document.addEventListener('DOMContentLoaded', function() {
+            lucide.createIcons();
+        });
     </script>
-    
-    <style>
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-        }
-        
-        .float-animation {
-            animation: float 6s ease-in-out infinite;
-        }
-        
-        .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        
-        .card-hover {
-            transition: all 0.3s ease;
-        }
-        
-        .card-hover:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
-    </style>
-</head>
-<body class="bg-gray-50">
-    <!-- Header -->
-    <header class="gradient-bg text-white py-6 px-4">
-        <div class="max-w-4xl mx-auto">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                    <i data-lucide="trending-up" class="w-8 h-8"></i>
-                    <h1 class="text-2xl font-bold">TheTradeVisor</h1>
-                </div>
-                <div class="text-sm opacity-90">
-                    Advanced Trading Analytics
-                </div>
-            </div>
-        </div>
-    </header>
 
     <!-- Main Content -->
     <main class="max-w-4xl mx-auto px-4 py-12">
@@ -247,6 +331,7 @@
         </section>
 
         <!-- Alternative Solutions -->
+         <!--
         <section class="bg-white rounded-2xl shadow-xl p-8 mb-12">
             <h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">
                 🛠️ Having Issues? We Can Help!
@@ -294,6 +379,7 @@
                 </div>
             </div>
         </section>
+        -->
 
         <!-- Final Appeal -->
         <section class="text-center bg-gradient-to-r from-purple-100 to-blue-100 rounded-2xl p-8">
@@ -457,7 +543,4 @@
         }, 1000);
     </script>
 
-    <!-- CSRF Token -->
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-</body>
-</html>
+</x-public-layout>
