@@ -90,7 +90,7 @@ Route::get('/contact', [App\Http\Controllers\PublicController::class, 'contact']
 Route::post('/contact', [App\Http\Controllers\PublicController::class, 'contactSubmit'])
     ->middleware('recaptcha')
     ->name('contact.submit');
-Route::get('/docs', [App\Http\Controllers\PublicController::class, 'docs'])->name('docs');
+Route::get('/documentation', [App\Http\Controllers\PublicController::class, 'docs'])->name('docs');
 Route::get('/api-docs', [App\Http\Controllers\PublicController::class, 'apiDocs'])->name('api.docs');
 Route::get('/download', [App\Http\Controllers\PublicController::class, 'download'])->name('download');
 Route::get('/download/setup', [App\Http\Controllers\PublicController::class, 'downloadSetup'])->name('download.setup');

@@ -12,17 +12,17 @@
                 </div>
             </div>
 
-            <div class="grid md:grid-cols-4 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                 {{-- Sidebar --}}
                 <div class="md:col-span-1">
                     <nav class="sticky top-20 space-y-1">
                         <a href="#authentication" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded font-medium">Authentication</a>
-                        <a href="#rate-limits" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded">Rate Limits</a>
-                        <a href="#accounts" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded">Accounts</a>
-                        <a href="#trades" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded">Trades</a>
-                        <a href="#snapshots" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded">Account Snapshots</a>
-                        <a href="#analytics" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded">Analytics</a>
-                        <a href="#errors" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded">Error Codes</a>
+                        <a href="#rate-limits" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded font-medium">Rate Limits</a>
+                        <a href="#accounts" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded font-medium">Accounts</a>
+                        <a href="#trades" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded font-medium">Trades</a>
+                        <a href="#snapshots" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded font-medium">Account Snapshots</a>
+                        <a href="#analytics" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded font-medium">Analytics</a>
+                        <a href="#errors" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded font-medium">Error Codes</a>
                     </nav>
                 </div>
 
@@ -34,8 +34,8 @@
                         <h2 class="text-3xl font-bold text-gray-900 mb-4">Authentication</h2>
                         <p class="text-gray-700 mb-6">All API requests require authentication using your API key. Include it in the Authorization header:</p>
                         
-                        <div class="bg-gray-900 text-gray-100 p-6 rounded-lg mb-6 overflow-x-auto">
-                            <pre class="text-sm"><code>Authorization: Bearer YOUR_API_KEY</code></pre>
+                        <div class="bg-gray-900 text-gray-100 p-4 sm:p-6 rounded-lg mb-6">
+                            <pre class="text-xs sm:text-sm whitespace-pre-wrap break-all"><code>Authorization: Bearer YOUR_API_KEY</code></pre>
                         </div>
 
                         <div class="p-4 bg-blue-50 border-l-4 border-blue-600 rounded mb-6">
@@ -44,8 +44,8 @@
                         </div>
 
                         <h3 class="text-xl font-bold text-gray-900 mt-8 mb-3">Example Request</h3>
-                        <div class="bg-gray-900 text-gray-100 p-6 rounded-lg overflow-x-auto">
-                            <pre class="text-sm"><code>curl -X GET "https://api.thetradevisor.com/v1/accounts" \
+                        <div class="bg-gray-900 text-gray-100 p-4 sm:p-6 rounded-lg mb-4">
+                            <pre class="text-xs sm:text-sm whitespace-pre-wrap break-all"><code>curl -X GET "https://api.thetradevisor.com/v1/accounts" \
   -H "Authorization: Bearer YOUR_API_KEY" \
   -H "Accept: application/json"</code></pre>
                         </div>
@@ -57,19 +57,19 @@
                         <p class="text-gray-700 mb-6">All users have the same API rate limits, calculated per hour:</p>
                         
                         <div class="overflow-x-auto mb-6">
-                            <table class="min-w-full border border-gray-200">
+                            <table class="min-w-full border border-gray-200 text-xs sm:text-sm">
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900 border-b">API Type</th>
-                                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900 border-b">Requests/Hour</th>
-                                        <th class="px-6 py-3 text-left text-sm font-semibold text-gray-900 border-b">Window</th>
+                                        <th class="px-2 sm:px-6 py-3 text-left text-sm font-semibold text-gray-900 border-b">API Type</th>
+                                        <th class="px-2 sm:px-6 py-3 text-left text-sm font-semibold text-gray-900 border-b">Requests/Hour</th>
+                                        <th class="px-2 sm:px-6 py-3 text-left text-sm font-semibold text-gray-900 border-b">Window</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white">
                                     <tr>
-                                        <td class="px-6 py-4 text-gray-700">Standard API</td>
-                                        <td class="px-6 py-4 text-gray-700">1,000</td>
-                                        <td class="px-6 py-4 text-gray-700">Rolling 60 minutes</td>
+                                        <td class="px-2 sm:px-6 py-4 text-gray-700">Standard API</td>
+                                        <td class="px-2 sm:px-6 py-4 text-gray-700">1,000</td>
+                                        <td class="px-2 sm:px-6 py-4 text-gray-700">Rolling 60 minutes</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -120,8 +120,8 @@
                             <p class="text-gray-700 mb-4">Retrieve all your trading accounts.</p>
                             
                             <h4 class="font-bold text-gray-900 mb-2">Response Example:</h4>
-                            <div class="bg-gray-900 text-gray-100 p-6 rounded-lg overflow-x-auto">
-                                <pre class="text-sm"><code>{
+                            <div class="bg-gray-900 text-gray-100 p-4 sm:p-6 rounded-lg">
+                                <pre class="text-xs sm:text-sm whitespace-pre-wrap break-all"><code>{
   "data": [
     {
       "id": 1,
@@ -150,8 +150,8 @@
                             <p class="text-gray-700 mb-4">Retrieve a specific account by ID.</p>
                             
                             <h4 class="font-bold text-gray-900 mb-2">Response Example:</h4>
-                            <div class="bg-gray-900 text-gray-100 p-6 rounded-lg overflow-x-auto">
-                                <pre class="text-sm"><code>{
+                            <div class="bg-gray-900 text-gray-100 p-4 sm:p-6 rounded-lg">
+                                <pre class="text-xs sm:text-sm whitespace-pre-wrap break-all"><code>{
   "data": {
     "id": 1,
     "account_number": "12345678",
@@ -193,14 +193,14 @@
                             </ul>
 
                             <h4 class="font-bold text-gray-900 mb-2">Example Request:</h4>
-                            <div class="bg-gray-900 text-gray-100 p-6 rounded-lg overflow-x-auto mb-4">
-                                <pre class="text-sm"><code>curl -X GET "https://api.thetradevisor.com/v1/trades?symbol=EURUSD&limit=10" \
+                            <div class="bg-gray-900 text-gray-100 p-4 sm:p-6 rounded-lg mb-4">
+                                <pre class="text-xs sm:text-sm whitespace-pre-wrap break-all"><code>curl -X GET "https://api.thetradevisor.com/v1/trades?symbol=EURUSD&limit=10" \
   -H "Authorization: Bearer YOUR_API_KEY"</code></pre>
                             </div>
                             
                             <h4 class="font-bold text-gray-900 mb-2">Response Example:</h4>
-                            <div class="bg-gray-900 text-gray-100 p-6 rounded-lg overflow-x-auto">
-                                <pre class="text-sm"><code>{
+                            <div class="bg-gray-900 text-gray-100 p-4 sm:p-6 rounded-lg">
+                                <pre class="text-xs sm:text-sm whitespace-pre-wrap break-all"><code>{
   "data": [
     {
       "id": 12345,
@@ -487,7 +487,7 @@
                         <p class="text-gray-700 mb-6">Have questions about the API? We're here to help!</p>
                         <div class="flex gap-4">
                             <a href="/contact" class="px-6 py-3 bg-blue-600 text-white rounded font-semibold hover:bg-blue-700">Contact Support</a>
-                            <a href="/docs" class="px-6 py-3 bg-gray-200 text-gray-900 rounded font-semibold hover:bg-gray-300">View Documentation</a>
+                            <a href="/documentation" class="px-6 py-3 bg-gray-200 text-gray-900 rounded font-semibold hover:bg-gray-300">View Documentation</a>
                         </div>
                     </div>
 
