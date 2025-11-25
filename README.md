@@ -2,7 +2,7 @@
 
 [![Laravel](https://img.shields.io/badge/Laravel-11-red.svg?logo=laravel&logoColor=white)](https://laravel.com)
 [![PHP](https://img.shields.io/badge/PHP-8.3-777BB4.svg?logo=php&logoColor=white)](https://php.net)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791.svg?logo=postgresql&logoColor=white)](https://www.postgresql.org)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791.svg?logo=postgresql)](https://www.postgresql.org)
 [![Redis](https://img.shields.io/badge/Redis-7-DC382D.svg?logo=redis&logoColor=white)](https://redis.io)
 [![Nginx](https://img.shields.io/badge/Nginx-1.24-009639.svg?logo=nginx&logoColor=white)](https://nginx.org)
 [![Composer](https://img.shields.io/badge/Composer-2.x-885630.svg?logo=composer&logoColor=white)](https://getcomposer.org)
