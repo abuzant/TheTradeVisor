@@ -304,7 +304,7 @@
                 We're constantly improving based on user feedback. Many users who reconsider find that our latest updates address their exact concerns.
             </p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <button onclick="trackOfferClick('try_again')" class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition">
+                <button onclick="window.location.href='/download'" class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition">
                     Try TheTradeVisor Again
                 </button>
                 <button onclick="window.location.href='https://github.com/abuzant/TheTradeVisor'" class="bg-white text-purple-600 border-2 border-purple-600 px-6 py-3 rounded-lg font-semibold hover:bg-purple-50 transition">
