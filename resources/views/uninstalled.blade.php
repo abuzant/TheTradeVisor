@@ -307,7 +307,7 @@
                 <button onclick="trackOfferClickAndRedirect('try_again', '/download')" class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition">
                     Try TheTradeVisor Again
                 </button>
-                <button onclick="window.location.href='https://github.com/abuzant/TheTradeVisor'" class="bg-white text-purple-600 border-2 border-purple-600 px-6 py-3 rounded-lg font-semibold hover:bg-purple-50 transition">
+                <button onclick="trackOfferClickAndRedirect('github_chance', 'https://github.com/abuzant/TheTradeVisor')" class="bg-white text-purple-600 border-2 border-purple-600 px-6 py-3 rounded-lg font-semibold hover:bg-purple-50 transition">
                     Give Us Another Chance
                 </button>
             </div>
