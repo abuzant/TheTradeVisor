@@ -315,7 +315,7 @@
     </main>
 
     <!-- Footer -->
-    @include('layouts.footer')
+    @include('components.public-footer')
 
     <!-- Success Modal -->
     <div id="successModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
