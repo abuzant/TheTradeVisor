@@ -274,7 +274,7 @@
             @if(count($logs) > 0)
                 @foreach($logs as $log)
                     <div class="log-entry" data-level="{{ $log['level'] }}">
-                        <span class="log-timestamp">{{ $log['datetime'] }}</span>
+                        <span class="log-timestamp">{{ $log['timestamp'] }}</span>
                         <span class="log-message log-level-{{ $log['level'] }}">
                             {{ $log['message'] }}
                         </span>

@@ -12,7 +12,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
                 {{-- Total Users --}}
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <a href="{{ route('admin.users.index') }}" class="bg-white overflow-hidden shadow-sm sm:rounded-lg block hover:bg-gray-50 transition-colors duration-200">
                     <div class="p-6">
                         <div class="flex items-center">
                             <div class="flex-shrink-0 bg-indigo-500 rounded-md p-3">
@@ -24,14 +24,15 @@
                                 <dl>
                                     <dt class="text-sm font-medium text-gray-500 truncate">Total Users</dt>
                                     <dd class="text-3xl font-semibold text-gray-900">{{ number_format($stats['total_users']) }}</dd>
+                                    <dd class="text-xs text-gray-500 mt-1">{{ $stats['users_last_24_hours'] }} added users in the last 24 hours</dd>
                                 </dl>
                             </div>
                         </div>
                     </div>
-                </div>
+                </a>
 
                 {{-- Total Accounts --}}
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <a href="{{ route('admin.accounts.index') }}" class="bg-white overflow-hidden shadow-sm sm:rounded-lg block hover:bg-gray-50 transition-colors duration-200">
                     <div class="p-6">
                         <div class="flex items-center">
                             <div class="flex-shrink-0 bg-green-500 rounded-md p-3">
@@ -43,15 +44,15 @@
                                 <dl>
                                     <dt class="text-sm font-medium text-gray-500 truncate">Trading Accounts</dt>
                                     <dd class="text-3xl font-semibold text-gray-900">{{ number_format($stats['total_accounts']) }}</dd>
-                                    <dd class="text-xs text-gray-500 mt-1">{{ $stats['active_accounts'] }} active</dd>
+                                    <dd class="text-xs text-gray-500 mt-1">{{ $stats['active_accounts'] }} active, {{ $stats['accounts_last_24_hours'] }} in the last 24 hours</dd>
                                 </dl>
                             </div>
                         </div>
                     </div>
-                </div>
+                </a>
 
                 {{-- Active Positions --}}
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <a href="{{ route('admin.trades.index') }}" class="bg-white overflow-hidden shadow-sm sm:rounded-lg block hover:bg-gray-50 transition-colors duration-200">
                     <div class="p-6">
                         <div class="flex items-center">
                             <div class="flex-shrink-0 bg-yellow-500 rounded-md p-3">
@@ -63,14 +64,15 @@
                                 <dl>
                                     <dt class="text-sm font-medium text-gray-500 truncate">Open Positions</dt>
                                     <dd class="text-3xl font-semibold text-gray-900">{{ number_format($stats['total_positions']) }}</dd>
+                                    <dd class="text-xs text-gray-500 mt-1">{{ $stats['positions_opened_last_24_hours'] }} opened / {{ $stats['positions_closed_last_24_hours'] }} closed in the last 24 hours</dd>
                                 </dl>
                             </div>
                         </div>
                     </div>
-                </div>
+                </a>
 
                 {{-- Brokers Statistics --}}
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <a href="{{ route('admin.brokers.index') }}" class="bg-white overflow-hidden shadow-sm sm:rounded-lg block hover:bg-gray-50 transition-colors duration-200">
                     <div class="p-6">
                         <div class="flex items-center">
                             <div class="flex-shrink-0 bg-purple-500 rounded-md p-3">
@@ -82,15 +84,15 @@
                                 <dl>
                                     <dt class="text-sm font-medium text-gray-500 truncate">Brokers</dt>
                                     <dd class="text-3xl font-semibold text-gray-900">{{ number_format($stats['known_brokers']) }}</dd>
-                                    <dd class="text-xs text-gray-500 mt-1">{{ $stats['enterprise_brokers'] }} enterprise</dd>
+                                    <dd class="text-xs text-gray-500 mt-1">{{ $stats['enterprise_brokers'] }} enterprise, {{ $stats['new_brokers_last_24_hours'] }} new in the last 24 hours</dd>
                                 </dl>
                             </div>
                         </div>
                     </div>
-                </div>
+                </a>
 
                 {{-- Next Enterprise Expiry --}}
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <a href="{{ route('admin.brokers.index') }}" class="bg-white overflow-hidden shadow-sm sm:rounded-lg block hover:bg-gray-50 transition-colors duration-200">
                     <div class="p-6">
                         <div class="flex items-center">
                             <div class="flex-shrink-0 bg-red-500 rounded-md p-3">
@@ -111,10 +113,10 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </a>
 
                 {{-- Active Terminals --}}
-                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <a href="{{ route('admin.monitoring.dashboard') }}" class="bg-white overflow-hidden shadow-sm sm:rounded-lg block hover:bg-gray-50 transition-colors duration-200">
                     <div class="p-6">
                         <div class="flex items-center">
                             <div class="flex-shrink-0 bg-cyan-500 rounded-md p-3">
@@ -131,27 +133,137 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </a>
+
+                {{-- New Uninstalls --}}
+                <a href="{{ route('admin.uninstall-feedback.index') }}" class="bg-white overflow-hidden shadow-sm sm:rounded-lg block hover:bg-gray-50 transition-colors duration-200">
+                    <div class="p-6">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 bg-red-500 rounded-md p-3">
+                                <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                            </div>
+                            <div class="ml-5 w-0 flex-1">
+                                <dl>
+                                    <dt class="text-sm font-medium text-gray-500 truncate">New Uninstalls</dt>
+                                    <dd class="text-3xl font-semibold text-gray-900">{{ number_format($stats['uninstalls_last_24_hours']) }}</dd>
+                                    <dd class="text-xs text-gray-500 mt-1">{{ $stats['uninstalls_with_comments_last_24_hours'] }} with comments / {{ $stats['uninstalls_with_email_last_24_hours'] }} with emails</dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+
+                {{-- Backup Details --}}
+                <a href="{{ route('admin.backup.index') }}" class="bg-white overflow-hidden shadow-sm sm:rounded-lg block hover:bg-gray-50 transition-colors duration-200">
+                    <div class="p-6">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 bg-gray-500 rounded-md p-3">
+                                <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V2"/>
+                                </svg>
+                            </div>
+                            <div class="ml-5 w-0 flex-1">
+                                <dl>
+                                    <dt class="text-sm font-medium text-gray-500 truncate">Backup Details</dt>
+                                    <dd class="text-3xl font-semibold text-gray-900">{{ number_format($stats['total_backups']) }} total backups</dd>
+                                    <dd class="text-xs text-gray-500 mt-1">{{ $stats['filesystem_backups'] }} filesystem / {{ $stats['database_backups'] }} database backups</dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+
+                {{-- Error Rate --}}
+                <a href="{{ route('admin.monitoring.dashboard') }}" class="bg-white overflow-hidden shadow-sm sm:rounded-lg block hover:bg-gray-50 transition-colors duration-200">
+                    <div class="p-6">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0 {{ $stats['error_rate_last_hour'] > $stats['error_rate_threshold'] ? 'bg-red-500' : ($stats['error_rate_last_hour'] > ($stats['error_rate_threshold'] * 0.7) ? 'bg-yellow-500' : 'bg-green-500') }} rounded-md p-3">
+                                <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                            <div class="ml-5 w-0 flex-1">
+                                <dl>
+                                    <dt class="text-sm font-medium text-gray-500 truncate">Error Rate (Last Hour)</dt>
+                                    <dd class="text-3xl font-semibold text-gray-900">{{ number_format($stats['error_rate_last_hour'], 2) }}</dd>
+                                    <dd class="text-xs text-gray-500 mt-1">
+                                        @if($stats['error_rate_last_hour'] > $stats['error_rate_threshold'])
+                                            above the threshold of {{ $stats['error_rate_threshold'] }}%
+                                        @else
+                                            within threshold of {{ $stats['error_rate_threshold'] }}%
+                                        @endif
+                                    </dd>
+                                </dl>
+                            </div>
+                        </div>
+                    </div>
+                </a>
 
             </div>
 
-            {{-- Quick Actions --}}
-            <div class="bg-gradient-to-r from-indigo-500 to-purple-600 overflow-hidden shadow-sm sm:rounded-lg">
+            {{-- Terminal Connections Map --}}
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
-                    <h3 class="text-lg font-semibold text-white mb-4">Quick Actions</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <a href="{{ route('admin.logs') }}" class="block text-sm text-white hover:text-indigo-100">
-                            → View System Logs
-                        </a>
-                        <a href="{{ route('admin.services') }}" class="block text-sm text-white hover:text-indigo-100">
-                            → Service Management
-                        </a>
-                        <a href="{{ route('admin.users.index') }}" class="block text-sm text-white hover:text-indigo-100">
-                            → Manage Users
-                        </a>
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900">Terminal Connections (Last 50)</h3>
+                        <div class="text-sm text-gray-500">
+                            {{ $terminalLocations['unique_countries'] }} countries • {{ $terminalLocations['total_connections'] }} connections
+                        </div>
+                    </div>
+                    <div id="terminal-map" class="h-96 rounded-lg border border-gray-200"></div>
+                    <div class="mt-4 text-xs text-gray-500 text-center">
+                        Latest connection: {{ $terminalLocations['latest_connection'] ? $terminalLocations['latest_connection']->diffForHumans() : 'No data' }}
                     </div>
                 </div>
             </div>
+
+            {{-- Map Scripts --}}
+            <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+            <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+            
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Initialize map
+                    var map = L.map('terminal-map', { zoomControl: false, scrollWheelZoom: false }).setView([20, 0], 1.25);
+                    
+                    // Add OpenStreetMap tiles
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '© OpenStreetMap contributors'
+                    }).addTo(map);
+                    
+                    // Terminal locations data
+                    var locations = @json($terminalLocations['locations']);
+                    
+                    // Add markers for each country
+                    locations.forEach(function(location) {
+                        var markerSize = Math.max(10, Math.min(30, location.connections * 5));
+                        var color = location.connections > 10 ? '#dc2626' : location.connections > 5 ? '#f59e0b' : '#10b981';
+                        
+                        var marker = L.circleMarker([location.lat, location.lng], {
+                            radius: markerSize,
+                            fillColor: color,
+                            color: '#fff',
+                            weight: 2,
+                            opacity: 1,
+                            fillOpacity: 0.8
+                        }).addTo(map);
+                        
+                        // Create popup content
+                        var popupContent = '<div class="text-sm">' +
+                            '<strong>' + location.country + '</strong><br>' +
+                            'Connections: ' + location.connections + '<br>' +
+                            'IPs: ' + location.ips.slice(0, 3).join(', ') + (location.ips.length > 3 ? '...' : '') + '<br>' +
+                            'Brokers: ' + location.brokers.slice(0, 2).join(', ') + (location.brokers.length > 2 ? '...' : '') + '<br>' +
+                            'Last: ' + new Date(location.last_connection).toLocaleString() +
+                            '</div>';
+                        
+                        marker.bindPopup(popupContent);
+                    });
+                    
+                });
+            </script>
 
             {{-- Recent Users --}}
 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
