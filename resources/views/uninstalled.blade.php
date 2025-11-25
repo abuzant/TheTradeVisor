@@ -304,7 +304,7 @@
                 We're constantly improving based on user feedback. Many users who reconsider find that our latest updates address their exact concerns.
             </p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <button onclick="window.location.href='/download'" class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition">
+                <button onclick="trackOfferClickAndRedirect('try_again', '/download')" class="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition">
                     Try TheTradeVisor Again
                 </button>
                 <button onclick="window.location.href='https://github.com/abuzant/TheTradeVisor'" class="bg-white text-purple-600 border-2 border-purple-600 px-6 py-3 rounded-lg font-semibold hover:bg-purple-50 transition">
@@ -355,6 +355,17 @@
                 field_type: 'offer_click',
                 offer_type: offerType
             });
+        }
+
+        // Track offer click and redirect
+        function trackOfferClickAndRedirect(offerType, redirectUrl) {
+            // Track the click first
+            trackOfferClick(offerType);
+            
+            // Redirect after 100ms to ensure analytics is sent
+            setTimeout(() => {
+                window.location.href = redirectUrl;
+            }, 100);
         }
 
         // Handle form submission
