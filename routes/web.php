@@ -205,6 +205,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     Route::get('/dashboard', [App\Http\Controllers\Admin\AdminController::class, 'index'])->name('dashboard');
 
+    // Uninstall Feedback Management
+    Route::get('/uninstall-feedback', [App\Http\Controllers\Admin\UninstallFeedbackController::class, 'index'])->name('uninstall-feedback.index');
+    Route::get('/uninstall-feedback/{id}', [App\Http\Controllers\Admin\UninstallFeedbackController::class, 'show'])->name('uninstall-feedback.show');
+    Route::get('/uninstall-feedback/export', [App\Http\Controllers\Admin\UninstallFeedbackController::class, 'export'])->name('uninstall-feedback.export');
+
     // Log Viewer
     Route::get('/logs', [App\Http\Controllers\Admin\LogViewerController::class, 'index'])->name('logs');
     Route::get('/logs/download', [App\Http\Controllers\Admin\LogViewerController::class, 'download'])->name('logs.download');
