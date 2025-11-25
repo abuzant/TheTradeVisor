@@ -2,6 +2,11 @@
     <x-slot name="title">We're Sorry to See You Go - TheTradeVisor</x-slot>
     <x-slot name="description">Your feedback helps us improve our trading analytics platform. Let us know how we can better serve your trading needs.</x-slot>
     
+    <!-- Add Tailwind CSS for gradients -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    
     <!-- Custom Styles -->
     <style>
         .gradient-bg {
