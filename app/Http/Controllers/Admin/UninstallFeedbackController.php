@@ -147,8 +147,8 @@ class UninstallFeedbackController extends Controller
                 ->orderByRaw('COUNT(*) DESC')
                 ->get(),
             'daily_submissions' => $baseQuery->selectRaw('DATE(submitted_at) as date, COUNT(*) as count')
-                ->groupBy('date')
-                ->orderBy('date', 'asc')
+                ->groupByRaw('DATE(submitted_at)')
+                ->orderByRaw('DATE(submitted_at) ASC')
                 ->get(),
             'with_email' => $baseQuery->whereNotNull('email')->count(),
             'with_comments' => $baseQuery->whereNotNull('comments')->count(),
