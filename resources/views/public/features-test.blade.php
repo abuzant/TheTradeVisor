@@ -13,74 +13,7 @@
             .feature-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); }
         </style>
     </x-slot>
-
-
-<script type="application/ld+json">
-        {
-            "@context": "https://schema.org",
-            "@type": "Service",
-            "serviceType": "Trading Analytics Platform",
-            "provider": {
-                "@type": "Organization",
-                "name": "TheTradeVisor"
-            },
-            "hasOfferCatalog": {
-                "@type": "OfferCatalog",
-                "name": "Trading Analytics Services",
-                "itemListElement": [
-                    {
-                        "@type": "Offer",
-                        "itemOffered": {
-                            "@type": "Service",
-                            "name": "Real-Time Global Analytics",
-                            "description": "Track trading activity from thousands of MT4/MT5 terminals worldwide in real-time."
-                        }
-                    },
-                    {
-                        "@type": "Offer",
-                        "itemOffered": {
-                            "@type": "Service",
-                            "name": "Performance Tracking",
-                            "description": "Comprehensive analytics on your trading performance with detailed metrics like win rate and profit factor."
-                        }
-                    },
-                    {
-                        "@type": "Offer",
-                        "itemOffered": {
-                            "@type": "Service",
-                            "name": "Broker Comparison",
-                            "description": "Compare broker performance, execution quality, and spreads across different platforms and regions."
-                        }
-                    },
-                    {
-                        "@type": "Offer",
-                        "itemOffered": {
-                            "@type": "Service",
-                            "name": "Risk Analytics",
-                            "description": "Advanced risk management tools including volatility analysis, correlation matrices, and drawdown tracking."
-                        }
-                    },
-                    {
-                        "@type": "Offer",
-                        "itemOffered": {
-                            "@type": "Service",
-                            "name": "Geographic Insights",
-                            "description": "Analyze trading patterns by country and region. See where the smart money is moving."
-                        }
-                    },
-                    {
-                        "@type": "Offer",
-                        "itemOffered": {
-                            "@type": "Service",
-                            "name": "Data Export & API",
-                            "description": "Export your data in multiple formats (CSV, PDF) and integrate via RESTful API."
-                        }
-                    }
-                ]
-            }
-        }
-</script>
-
+    
     <!-- Hero Section -->
     <section class="hero-gradient py-20">
         <div class="container mx-auto px-4">

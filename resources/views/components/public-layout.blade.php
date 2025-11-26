@@ -131,11 +131,7 @@
     </nav>
 
     {{-- Main Content --}}
-    @if(isset($slot))
-        {{ $slot }}
-    @else
-        @yield('content')
-    @endif
+    {{ $slot }}
 
     <x-footer />
 

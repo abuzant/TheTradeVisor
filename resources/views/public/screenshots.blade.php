@@ -1,9 +1,8 @@
-@extends('components.public-layout')
+<x-public-layout>
+    <x-slot name="title">Platform Screenshots - See TheTradeVisor in Action</x-slot>
+    <x-slot name="description">Explore real screenshots of TheTradeVisor\'s powerful trading analytics platform.</x-slot>
+    <x-slot name="keywords">trading platform screenshots, MT5 analytics, trading dashboard</x-slot>
 
-@section('title', 'Platform Screenshots - See TheTradeVisor in Action')
-@section('description', 'Explore real screenshots of TheTradeVisor\'s powerful trading analytics platform.')
-
-@section('content')
 <section class="bg-gradient-to-br from-blue-50 via-white to-purple-50 py-20">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
@@ -283,4 +282,4 @@
         </div>
     </div>
 </section>
-@endsection
+</x-public-layout>

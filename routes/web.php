@@ -81,7 +81,15 @@ Route::get('/top-traders', [\App\Http\Controllers\PublicProfileController::class
     ->name('leaderboard');
 
 Route::get('/', [App\Http\Controllers\PublicController::class, 'landing'])->name('landing');
-Route::get('/features', [App\Http\Controllers\PublicController::class, 'features'])->name('features');
+Route::get('/features', function() {
+    return view('public.features');
+})->name('features');
+Route::get('/features-working', function() {
+    return view('public.features');
+});
+Route::get('/features-v2', function() {
+    return view('public.features-test');
+});
 Route::get('/screenshots', [App\Http\Controllers\PublicController::class, 'screenshots'])->name('screenshots');
 Route::get('/pricing', [App\Http\Controllers\PublicController::class, 'pricing'])->name('pricing');
 Route::get('/about', [App\Http\Controllers\PublicController::class, 'about'])->name('about');
