@@ -164,7 +164,7 @@ TheTradeVisor is an enterprise-grade trading analytics platform that aggregates,
 
 ### Security & Protection
 
-- [🛡️ Security Hardening Guide](SECURITY_HARDENING_GUIDE.md) - Complete security implementation tutorial
+- [🛡️ Security Hardening Guide](docs/security/SECURITY_HARDENING_GUIDE.md) - Complete security implementation tutorial
 - [Rate Limiting](docs/technical/RATE_LIMITING_COMPLETE.md) - Request rate limiting
 - [Circuit Breakers](docs/technical/CIRCUIT_BREAKER_IMPLEMENTATION.md) - System overload protection
 - [Query Optimization](docs/technical/SLOW_QUERY_LOGGING.md) - Database performance
