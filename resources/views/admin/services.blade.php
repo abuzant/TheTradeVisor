@@ -220,20 +220,8 @@
                         </h4>
                         <div class="bg-gray-900 rounded-md p-4 space-y-3">
                             <div>
-                                <p class="text-xs text-gray-400 mb-1">🚀 Start all backend instances:</p>
-                                <code class="text-sm text-green-400 font-mono">./start-backends.sh</code>
-                            </div>
-                            <div>
-                                <p class="text-xs text-gray-400 mb-1">🛑 Stop all backend instances:</p>
-                                <code class="text-sm text-green-400 font-mono">./stop-backends.sh</code>
-                            </div>
-                            <div>
-                                <p class="text-xs text-gray-400 mb-1">📊 Check backend instances status:</p>
-                                <code class="text-sm text-green-400 font-mono">./status-backends.sh</code>
-                            </div>
-                            <div>
-                                <p class="text-xs text-gray-400 mb-1">🔄 Restart individual backend (example for backend 1):</p>
-                                <code class="text-sm text-green-400 font-mono">sudo kill -QUIT $(cat /run/nginx-backend-1.pid) && sudo nginx -c /etc/nginx/backends/nginx-backend-1-master.conf</code>
+                                <p class="text-xs text-gray-400 mb-1">ℹ️ Backend instances removed in architecture change</p>
+                                <p class="text-xs text-gray-500">System now uses direct Nginx → PHP-FPM connection for better performance</p>
                             </div>
                         </div>
                     </div>
@@ -372,7 +360,7 @@
                             </div>
                             <div>
                                 <p class="text-xs text-gray-400 mb-1">🧹 Complete cache refresh (all caches + services):</p>
-                                <code class="text-sm text-green-400 font-mono">./refurbish.sh</code>
+                                <code class="text-sm text-green-400 font-mono">./scripts/refurbish.sh</code>
                             </div>
                         </div>
                     </div>

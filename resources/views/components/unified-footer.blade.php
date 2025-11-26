@@ -44,7 +44,7 @@
         </div>
 
         {{-- Bottom Section --}}
-        <div class="border-t border-gray-800 pt-8 text-center text-sm">
+        <div class="border-t border-gray-800 pt-8 text-left text-sm">
             <p>&copy; {{ date('Y') }} TheTradeVisor. The Professional Trading Analytics Platform for MetaTrader 4/5.</p>
             <p class="mt-2 text-xs text-gray-500">
                 MetaTrader, MT4 and MT5 are registered Trademarks of MetaQuotes Ltd.
