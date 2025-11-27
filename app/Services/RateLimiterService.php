@@ -57,6 +57,12 @@ class RateLimiterService
             return $user->rate_limit;
         }
         
+        // Check if this is a data collection request (more generous limit)
+        $request = request();
+        if ($request && $request->is('api/v1/data/collect')) {
+            return RateLimitSetting::get('data_collection_api_key_limit', 300);
+        }
+        
         // For API key requests, use subscription tier-based limits
         if ($type === 'api_key' && $user) {
             return $this->getTierBasedLimit($user);
@@ -64,12 +70,6 @@ class RateLimiterService
         
         // Get default limit based on type for IP-based requests
         $key = $type === 'ip' ? 'global_ip_limit' : 'global_api_key_limit';
-        
-        // Check if this is a data collection request (more generous limit)
-        $request = request();
-        if ($request && $request->is('api/v1/data/collect')) {
-            return RateLimitSetting::get('data_collection_api_key_limit', 100);
-        }
         
         return RateLimitSetting::get($key, $type === 'ip' ? 60 : 100);
     }

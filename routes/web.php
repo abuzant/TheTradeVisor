@@ -52,7 +52,9 @@ Route::middleware(['enterprise.subdomain', 'auth:enterprise', 'enterprise.admin'
     Route::get('/accounts', [App\Http\Controllers\EnterpriseController::class, 'accounts'])->name('accounts');
     Route::get('/settings', [App\Http\Controllers\EnterpriseController::class, 'settings'])->name('settings');
     Route::post('/settings', [App\Http\Controllers\EnterpriseController::class, 'updateSettings'])->name('settings.update');
-    Route::post('/api-key/regenerate', [App\Http\Controllers\EnterpriseController::class, 'regenerateApiKey'])->name('api-key.regenerate');
+    Route::post('/api-key/regenerate', [App\Http\Controllers\EnterpriseController::class, 'regenerateApiKey'])
+        ->middleware('throttle:3,1')
+        ->name('api-key.regenerate');
     Route::get('/admins', [App\Http\Controllers\EnterpriseController::class, 'admins'])->name('admins');
     Route::post('/admins', [App\Http\Controllers\EnterpriseController::class, 'storeAdmin'])->name('admins.store');
     Route::put('/admins/{admin}', [App\Http\Controllers\EnterpriseController::class, 'updateAdmin'])->name('admins.update');
@@ -156,10 +158,13 @@ Route::get('/broker/{broker}', [App\Http\Controllers\BrokerDetailsController::cl
     Route::get('/accounts', [App\Http\Controllers\AccountManagementController::class, 'index'])
         ->name('accounts.index');
     Route::post('/accounts/{account}/pause', [App\Http\Controllers\AccountManagementController::class, 'pause'])
+        ->middleware('account.ownership')
         ->name('accounts.pause');
     Route::post('/accounts/{account}/unpause', [App\Http\Controllers\AccountManagementController::class, 'unpause'])
+        ->middleware('account.ownership')
         ->name('accounts.unpause');
     Route::delete('/accounts/{account}', [App\Http\Controllers\AccountManagementController::class, 'destroy'])
+        ->middleware('account.ownership')
         ->name('accounts.destroy');
 
     Route::get('/account/{accountId}', [DashboardController::class, 'account'])->name('account.show');
@@ -170,7 +175,9 @@ Route::get('/broker/{broker}', [App\Http\Controllers\BrokerDetailsController::cl
 
     // API Key management
     Route::get('/settings/api-key', [ApiKeyController::class, 'index'])->name('settings.api-key');
-    Route::post('/settings/api-key/regenerate', [ApiKeyController::class, 'regenerate'])->name('settings.api-key.regenerate');
+    Route::post('/settings/api-key/regenerate', [ApiKeyController::class, 'regenerate'])
+        ->middleware('throttle:3,1')
+        ->name('settings.api-key.regenerate');
 
     // Trades
     Route::get('/trades', [App\Http\Controllers\TradesController::class, 'index'])

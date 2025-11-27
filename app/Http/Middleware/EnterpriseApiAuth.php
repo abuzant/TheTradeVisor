@@ -2,11 +2,12 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\EnterpriseApiKey;
+use App\Support\ApiKeyValidator;
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
-use App\Models\EnterpriseApiKey;
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpFoundation\Response;
 
 class EnterpriseApiAuth
 {
@@ -18,10 +19,15 @@ class EnterpriseApiAuth
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Get API key from Authorization header
-        $authHeader = $request->header('Authorization');
-        
-        if (!$authHeader) {
+        $authorizationHeader = $request->header('Authorization');
+
+        if (!ApiKeyValidator::hasAuthorizationHeader($authorizationHeader)) {
+            Log::warning('Enterprise API key validation failed: Missing Authorization header', [
+                'ip' => $request->ip(),
+                'url' => $request->fullUrl(),
+                'headers' => $request->headers->all(),
+            ]);
+
             return response()->json([
                 'success' => false,
                 'error' => 'UNAUTHORIZED',
@@ -29,8 +35,15 @@ class EnterpriseApiAuth
             ], 401);
         }
 
-        // Extract token from "Bearer ent_..."
-        if (!preg_match('/^Bearer\s+(ent_\S+)$/i', $authHeader, $matches)) {
+        $trimmedAuthorization = trim($authorizationHeader);
+
+        if (!str_starts_with(strtolower($trimmedAuthorization), 'bearer ')) {
+            Log::warning('Enterprise API key validation failed: Invalid authorization header format', [
+                'ip' => $request->ip(),
+                'url' => $request->fullUrl(),
+                'authorization_header' => $authorizationHeader,
+            ]);
+
             return response()->json([
                 'success' => false,
                 'error' => 'INVALID_TOKEN_FORMAT',
@@ -38,10 +51,30 @@ class EnterpriseApiAuth
             ], 401);
         }
 
-        $apiKey = $matches[1];
+        $apiKey = ApiKeyValidator::extractKeyFromAuthorization($authorizationHeader);
+        $keyType = ApiKeyValidator::detectKeyType($apiKey);
+
+        if ($keyType !== 'enterprise') {
+            Log::warning('Enterprise API key validation failed: Malformed API key format', [
+                'api_key_prefix' => substr($apiKey, 0, 10) . '...',
+                'api_key_length' => is_string($apiKey) ? strlen($apiKey) : null,
+                'ip' => $request->ip(),
+                'url' => $request->fullUrl(),
+                'user_agent' => $request->userAgent(),
+                'detected_prefix' => is_string($apiKey) ? substr($apiKey, 0, 4) : null,
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'INVALID_API_KEY_FORMAT',
+                'message' => 'The provided enterprise API key format is invalid'
+            ], 401);
+        }
 
         // Validate API key exists and is valid
-        $enterpriseApiKey = EnterpriseApiKey::where('key', $apiKey)->first();
+        $enterpriseApiKey = EnterpriseApiKey::where('key', $apiKey)
+            ->with('enterpriseBroker')
+            ->first();
 
         if (!$enterpriseApiKey) {
             Log::warning('Invalid enterprise API key attempt', [
@@ -57,7 +90,7 @@ class EnterpriseApiAuth
         }
 
         // Check if the broker is still active
-        if (!$enterpriseApiKey->isValid()) {
+        if (!$enterpriseApiKey->isValid() || !$enterpriseApiKey->enterpriseBroker || !$enterpriseApiKey->enterpriseBroker->is_active) {
             Log::warning('Inactive enterprise broker API key used', [
                 'broker_id' => $enterpriseApiKey->enterprise_broker_id,
                 'ip' => $request->ip(),

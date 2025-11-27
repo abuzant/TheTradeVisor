@@ -39,28 +39,68 @@ class DataCollectionController extends Controller
             // Get raw JSON data
             $data = $request->all();
 
+            // Validate basic structure early
+            if (!is_array($data['meta'] ?? null) || !is_array($data['account'] ?? null)) {
+                Log::warning('Data collect rejected: missing required meta/account structure', [
+                    'user_id' => $user->id,
+                    'ip' => $clientIp,
+                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Invalid data structure',
+                    'message' => 'Required fields: meta (object), account (object)',
+                ], 400);
+            }
+
+            $accountInfo = $data['account'];
+            $metaInfo = $data['meta'];
+
+            // Normalize required account fields
+            $accountNumber = $accountInfo['account_number'] ?? null;
+            $accountHash = $accountInfo['account_hash'] ?? null;
+            $brokerName = $accountInfo['broker'] ?? null;
+            $serverName = $accountInfo['server'] ?? null;
+
+            if (!$accountNumber && !$accountHash) {
+                Log::warning('Data collect rejected: missing account identifiers', [
+                    'user_id' => $user->id,
+                    'ip' => $clientIp,
+                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Invalid account payload',
+                    'message' => 'Account number or account hash is required',
+                ], 400);
+            }
+
+            if (!$brokerName) {
+                Log::warning('Data collect rejected: missing broker name', [
+                    'user_id' => $user->id,
+                    'ip' => $clientIp,
+                ]);
+
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Invalid account payload',
+                    'message' => 'Account broker field is required',
+                ], 400);
+            }
+
             // Add metadata
             $data['received_at'] = now()->toIso8601String();
             $data['client_ip'] = $clientIp;
             $data['user_id'] = $user->id;
 
-            // Validate basic structure
-            if (!isset($data['meta']) || !isset($data['account'])) {
-                return response()->json([
-                    'success' => false,
-                    'error' => 'Invalid data structure',
-                    'message' => 'Required fields: meta, account'
-                ], 400);
-            }
-
             // REJECT DEMO ACCOUNTS IMMEDIATELY
-            $accountTypeCode = $data['account']['trade_mode'] ?? $data['account']['account_type'] ?? 0;
+            $accountTypeCode = $accountInfo['trade_mode'] ?? $accountInfo['account_type'] ?? 0;
             $accountType = $this->getAccountType($accountTypeCode);
 
             if ($accountType === 'demo' || $accountType === 'contest') {
                 Log::warning('Demo/Contest account rejected at API level', [
-                    'account' => $data['account']['account_number'] ?? $data['account']['account_hash'] ?? 'unknown',
-                    'broker' => $data['account']['broker'] ?? 'unknown',
+                    'account' => $accountNumber ?? $accountHash ?? 'unknown',
+                    'broker' => $brokerName,
                     'type' => $accountType,
                     'user_id' => $user->id,
                 ]);
@@ -73,9 +113,7 @@ class DataCollectionController extends Controller
                 ], 403);
             }
 
-            // Extract account info
-            $accountInfo = $data['account'];
-            $accountHash = $accountInfo['account_hash'] ?? hash('sha256', ($accountInfo['account_number'] ?? '') . ($accountInfo['server'] ?? ''));
+            $accountHash = $accountHash ?? hash('sha256', ($accountNumber ?? '') . ($serverName ?? ''));
 
             // CHECK: Check if this specific account is paused
             $existingAccount = TradingAccount::where('user_id', $user->id)
@@ -92,7 +130,7 @@ class DataCollectionController extends Controller
             }
 
             // CHECK: Check if broker is whitelisted (enterprise)
-            $brokerName = $accountInfo['broker'] ?? 'unknown';
+            $brokerName = $brokerName ?? 'unknown';
             $whitelistedBroker = EnterpriseBroker::where('official_broker_name', $brokerName)->first();
             
             $bypassLimits = false;
@@ -178,9 +216,18 @@ class DataCollectionController extends Controller
                 ]);
             }
 
+            $warnings = [];
+
             // Track whitelisted broker usage (for broker analytics)
             if ($whitelistedBroker && $bypassLimits) {
-                $this->trackWhitelistedUsage($user, $whitelistedBroker, $accountInfo, $tradingAccount);
+                $usageResult = $this->trackWhitelistedUsage($user, $whitelistedBroker, $accountInfo, $tradingAccount);
+
+                if ($usageResult !== true) {
+                    $warnings[] = [
+                        'type' => 'whitelisted_usage',
+                        'message' => 'Failed to record whitelisted broker usage. Analytics may be incomplete.',
+                    ];
+                }
             }
 
             // Determine max days view based on broker status
@@ -189,7 +236,16 @@ class DataCollectionController extends Controller
             // Check for missing data gaps (only for current data, not historical uploads)
             $missingDataInfo = null;
             if (!$isHistorical && $tradingAccount) {
-                $missingDataInfo = $this->checkForMissingData($tradingAccount);
+                $missingDataCheck = $this->checkForMissingData($tradingAccount);
+
+                if (isset($missingDataCheck['error'])) {
+                    $warnings[] = [
+                        'type' => 'missing_data_detection',
+                        'message' => $missingDataCheck['error'],
+                    ];
+                } else {
+                    $missingDataInfo = $missingDataCheck;
+                }
             }
             
             $response = [
@@ -216,6 +272,10 @@ class DataCollectionController extends Controller
 
             if ($gracePeriodMessage) {
                 $response['grace_period_warning'] = $gracePeriodMessage;
+            }
+
+            if (!empty($warnings)) {
+                $response['warnings'] = $warnings;
             }
 
             return response()->json($response, 200);
@@ -265,29 +325,36 @@ class DataCollectionController extends Controller
      */
     private function trackWhitelistedUsage($user, $whitelistedBroker, $accountInfo, $tradingAccount)
     {
+        if (!$tradingAccount) {
+            return true; // Nothing to track yet
+        }
+
         try {
-            if ($tradingAccount) {
-                // Update or create usage record
-                WhitelistedBrokerUsage::updateOrCreate(
-                    [
-                        'user_id' => $user->id,
-                        'trading_account_id' => $tradingAccount->id,
-                    ],
-                    [
-                        'enterprise_broker_id' => $whitelistedBroker->id,
-                        'account_number' => $accountInfo['account_number'] ?? 0,
-                        'last_seen_at' => now(),
-                        'first_seen_at' => DB::raw('COALESCE(first_seen_at, NOW())'),
-                    ]
-                );
-            }
-        } catch (\Exception $e) {
-            // Don't fail the request if tracking fails
+            WhitelistedBrokerUsage::updateOrCreate(
+                [
+                    'user_id' => $user->id,
+                    'trading_account_id' => $tradingAccount->id,
+                ],
+                [
+                    'enterprise_broker_id' => $whitelistedBroker->id,
+                    'account_number' => $accountInfo['account_number'] ?? 0,
+                    'last_seen_at' => now(),
+                    'first_seen_at' => DB::raw('COALESCE(first_seen_at, NOW())'),
+                ]
+            );
+
+            return true;
+        } catch (\Throwable $e) {
+            report($e);
+
             Log::warning('Failed to track whitelisted broker usage', [
                 'error' => $e->getMessage(),
                 'user_id' => $user->id,
                 'broker_id' => $whitelistedBroker->id,
+                'account_id' => $tradingAccount->id,
             ]);
+
+            return false;
         }
     }
 
@@ -352,12 +419,17 @@ class DataCollectionController extends Controller
             
             return null; // No gaps detected
             
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
+            report($e);
+
             Log::warning('Failed to check for missing data', [
                 'trading_account_id' => $tradingAccount->id,
                 'error' => $e->getMessage(),
             ]);
-            return null; // Don't trigger backfill if we can't detect gaps
+
+            return [
+                'error' => 'Unable to determine data gaps at this time.',
+            ];
         }
     }
 }

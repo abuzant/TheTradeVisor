@@ -7,6 +7,7 @@ use App\Models\TradingAccount;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class PerformanceMetricsService
@@ -27,11 +28,21 @@ class PerformanceMetricsService
             $accountIds = [$accountIds];
         }
 
-        // Create cache key from account IDs, days, and currency
-        $cacheKey = 'performance.' . md5(implode(',', $accountIds)) . ".{$days}.{$displayCurrency}";
+        $cacheKey = $this->buildCacheKey('performance.metrics', [
+            'account_ids' => array_map('intval', $accountIds),
+            'days' => $days,
+            'currency' => $displayCurrency,
+        ]);
 
-        // Cache for 5 minutes (heavy calculations)
-        return Cache::remember($cacheKey, 300, function() use ($accountIds, $days, $displayCurrency) {
+        $ttl = (int) config('analytics.cache.performance_ttl', 300);
+
+        return Cache::remember($cacheKey, $ttl, function() use ($accountIds, $days, $displayCurrency) {
+            Log::info('Performance metrics cache rebuild', [
+                'account_ids' => $accountIds,
+                'days' => $days,
+                'currency' => $displayCurrency,
+            ]);
+
             return [
                 'trade_analysis' => $this->getTradeAnalysis($accountIds, $days, $displayCurrency),
                 'symbol_performance' => $this->getSymbolPerformance($accountIds, $days, $displayCurrency),
@@ -45,6 +56,20 @@ class PerformanceMetricsService
                 'display_currency' => $displayCurrency,
             ];
         });
+    }
+
+    private function buildCacheKey(string $prefix, array $payload): string
+    {
+        ksort($payload);
+        $normalized = json_encode($payload);
+        $userId = auth()->id() ?? 'guest';
+
+        return sprintf(
+            'tradevisor:%s:user:%s:%s',
+            $prefix,
+            $userId,
+            hash('sha256', $normalized)
+        );
     }
 
     /**
@@ -76,11 +101,15 @@ class PerformanceMetricsService
 
         // Convert all profits to display currency
         $convertedDeals = $deals->map(function($deal) use ($displayCurrency) {
-            $deal->converted_profit = $this->currencyService->convert(
+            $converted = $this->currencyService->safeConvert(
                 $deal->profit,
                 $deal->tradingAccount->account_currency ?? 'USD',
                 $displayCurrency
             );
+
+            // Skip deals we cannot convert
+            $deal->converted_profit = $converted ?? 0.0;
+
             return $deal;
         });
 
@@ -147,11 +176,14 @@ class PerformanceMetricsService
         $symbols = $symbolGroups->map(function($symbolDeals, $symbol) use ($displayCurrency) {
             // Convert all profits to display currency
             $convertedDeals = $symbolDeals->map(function($deal) use ($displayCurrency) {
-                $deal->converted_profit = $this->currencyService->convert(
+                $converted = $this->currencyService->safeConvert(
                     $deal->profit,
                     $deal->tradingAccount->account_currency ?? 'USD',
                     $displayCurrency
                 );
+
+                $deal->converted_profit = $converted ?? 0.0;
+
                 return $deal;
             });
 
@@ -220,11 +252,14 @@ class PerformanceMetricsService
 
         // Convert profits to display currency
         $convertedDeals = $deals->map(function($deal) use ($displayCurrency) {
-            $deal->converted_profit = $this->currencyService->convert(
+            $converted = $this->currencyService->safeConvert(
                 $deal->profit,
                 $deal->tradingAccount->account_currency ?? 'USD',
                 $displayCurrency
             );
+
+            $deal->converted_profit = $converted ?? 0.0;
+
             return $deal;
         });
 
@@ -320,11 +355,14 @@ class PerformanceMetricsService
 
         // Convert profits
         $convertedDeals = $deals->map(function($deal) use ($displayCurrency) {
-            $deal->converted_profit = $this->currencyService->convert(
+            $converted = $this->currencyService->safeConvert(
                 $deal->profit,
                 $deal->tradingAccount->account_currency ?? 'USD',
                 $displayCurrency
             );
+
+            $deal->converted_profit = $converted ?? 0.0;
+
             return $deal;
         });
 
@@ -418,30 +456,34 @@ class PerformanceMetricsService
         
         // Convert current balances and calculate starting balance
         $currentBalance = $accounts->sum(function($account) use ($displayCurrency) {
-            return $this->currencyService->convert(
+            $converted = $this->currencyService->safeConvert(
                 $account->balance,
                 $account->account_currency,
                 $displayCurrency
             );
+
+            return $converted ?? 0.0;
         });
 
         $totalProfit = $deals->sum(function($deal) use ($displayCurrency) {
-            return $this->currencyService->convert(
+            $converted = $this->currencyService->safeConvert(
                 $deal->profit,
                 $deal->tradingAccount->account_currency ?? 'USD',
                 $displayCurrency
             );
+
+            return $converted ?? 0.0;
         });
 
         $startingBalance = $currentBalance - $totalProfit;
         $runningBalance = $startingBalance;
 
         foreach ($deals as $deal) {
-            $convertedProfit = $this->currencyService->convert(
+            $convertedProfit = $this->currencyService->safeConvert(
                 $deal->profit,
                 $deal->tradingAccount->account_currency ?? 'USD',
                 $displayCurrency
-            );
+            ) ?? 0.0;
             
             $runningBalance += $convertedProfit;
             
@@ -583,15 +625,25 @@ class PerformanceMetricsService
         });
 
         $countrySentiment = $countryGroups->map(function($countryDeals, $country) use ($displayCurrency) {
-            // Convert profits to display currency
+            // Convert profits to display currency, skip unconvertible deals
             $convertedDeals = $countryDeals->map(function($deal) use ($displayCurrency) {
-                $deal->converted_profit = $this->currencyService->convert(
+                $converted = $this->currencyService->safeConvert(
                     $deal->profit,
                     $deal->tradingAccount->account_currency ?? 'USD',
                     $displayCurrency
                 );
+
+                if ($converted === null) {
+                    return null;
+                }
+
+                $deal->converted_profit = $converted;
                 return $deal;
-            });
+            })->filter()->values();
+
+            if ($convertedDeals->isEmpty()) {
+                return null;
+            }
 
             $buyTrades = $convertedDeals->where('type', 'buy');
             $sellTrades = $convertedDeals->where('type', 'sell');
@@ -638,6 +690,7 @@ class PerformanceMetricsService
                 'profit_per_trade' => $totalTrades > 0 ? round($totalProfit / $totalTrades, 2) : 0,
             ];
         })
+        ->filter()
         ->filter(function($country) {
             return $country['total_trades'] >= 5; // Only show countries with at least 5 trades
         })
@@ -676,15 +729,25 @@ class PerformanceMetricsService
             // Parse platform and mode from key
             list($platform, $mode) = explode('_', $platformKey);
             
-            // Convert profits to display currency
+            // Convert profits to display currency, skip unconvertible deals
             $convertedDeals = $platformDeals->map(function($deal) use ($displayCurrency) {
-                $deal->converted_profit = $this->currencyService->convert(
+                $converted = $this->currencyService->safeConvert(
                     $deal->profit,
                     $deal->tradingAccount->account_currency ?? 'USD',
                     $displayCurrency
                 );
+
+                if ($converted === null) {
+                    return null;
+                }
+
+                $deal->converted_profit = $converted;
                 return $deal;
-            });
+            })->filter()->values();
+
+            if ($convertedDeals->isEmpty()) {
+                return null;
+            }
 
             $buyTrades = $convertedDeals->where('type', 'buy');
             $sellTrades = $convertedDeals->where('type', 'sell');
@@ -728,6 +791,7 @@ class PerformanceMetricsService
                 'volume_per_trade' => $totalTrades > 0 ? round($totalVolume / $totalTrades, 2) : 0,
             ];
         })
+        ->filter()
         ->filter(function($platform) {
             return $platform['total_trades'] >= 1; // Show all platforms with at least 1 trade
         })

@@ -72,11 +72,6 @@ class AccountManagementController extends Controller
 
     public function pause(Request $request, TradingAccount $account)
     {
-        // Ensure account belongs to user
-        if ($account->user_id !== $request->user()->id) {
-            abort(403);
-        }
-
         $request->validate([
             'reason' => 'nullable|string|max:255',
         ]);
@@ -88,11 +83,6 @@ class AccountManagementController extends Controller
 
     public function unpause(Request $request, TradingAccount $account)
     {
-        // Ensure account belongs to user
-        if ($account->user_id !== $request->user()->id) {
-            abort(403);
-        }
-
         $account->unpause();
 
         return redirect()->back()->with('success', 'Account resumed successfully.');
@@ -100,11 +90,6 @@ class AccountManagementController extends Controller
 
     public function destroy(Request $request, TradingAccount $account)
     {
-        // Ensure account belongs to user
-        if ($account->user_id !== $request->user()->id) {
-            abort(403);
-        }
-
         // Get the Anonymous user
         $anonymousUser = \App\Models\User::where('email', 'hello@thetradevisor.com')->first();
         

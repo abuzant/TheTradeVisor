@@ -40,6 +40,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'rate.limit.analytics' => \App\Http\Middleware\RateLimitAnalytics::class,
             'rate.limit.exports' => \App\Http\Middleware\RateLimitExports::class,
             'rate.limit.broker' => \App\Http\Middleware\RateLimitBrokerAnalytics::class,
+            'account.ownership' => \App\Http\Middleware\EnsureAccountOwnership::class,
             'circuit.breaker' => \App\Http\Middleware\CircuitBreakerMiddleware::class,
             'enterprise.api' => \App\Http\Middleware\EnterpriseApiAuth::class,
             'enterprise.admin' => \App\Http\Middleware\EnterpriseAdminMiddleware::class,

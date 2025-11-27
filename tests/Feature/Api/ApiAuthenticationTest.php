@@ -42,7 +42,7 @@ class ApiAuthenticationTest extends TestCase
             'meta' => ['test' => true],
             'account' => ['trade_mode' => 0],
         ], [
-            'Authorization' => 'Bearer invalid_key_123',
+            'Authorization' => 'Bearer tvsr_' . str_repeat('a', 64),
         ]);
 
         $response->assertStatus(401)
@@ -52,11 +52,28 @@ class ApiAuthenticationTest extends TestCase
                  ]);
     }
 
+    public function test_api_rejects_malformed_key_format(): void
+    {
+        $response = $this->postJson('/api/v1/data/collect', [
+            'meta' => ['test' => true],
+            'account' => ['trade_mode' => 0],
+        ], [
+            'Authorization' => 'Bearer invalid_key_123',
+        ]);
+
+        $response->assertStatus(401)
+                 ->assertJson([
+                     'success' => false,
+                     'error' => 'Invalid API key',
+                     'message' => 'The provided API key format is invalid',
+                 ]);
+    }
+
     public function test_api_accepts_valid_key(): void
     {
         $user = User::factory()->create([
             'is_active' => true,
-            'api_key' => 'tvsr_test_key_' . str_repeat('x', 50),
+            'api_key' => User::generateApiKey(),
         ]);
 
         // Test that valid key passes authentication (doesn't get 401)
@@ -101,7 +118,7 @@ class ApiAuthenticationTest extends TestCase
     {
         $user = User::factory()->create([
             'is_active' => false,
-            'api_key' => 'tvsr_test_key_' . str_repeat('x', 50),
+            'api_key' => User::generateApiKey(),
         ]);
 
         $response = $this->postJson('/api/v1/data/collect', [
@@ -122,7 +139,7 @@ class ApiAuthenticationTest extends TestCase
     {
         $user = User::factory()->create([
             'is_active' => true,
-            'api_key' => 'tvsr_test_key_' . str_repeat('x', 50),
+            'api_key' => User::generateApiKey(),
         ]);
 
         $response = $this->withoutMiddleware([

@@ -141,11 +141,16 @@ class TradeAnalyticsService
 
         foreach ($deals as $deal) {
             $accountCurrency = $deal->tradingAccount->account_currency ?? 'USD';
-            $convertedProfit = $this->currencyService->convert(
+            $convertedProfit = $this->currencyService->safeConvert(
                 $deal->profit,
                 $accountCurrency,
                 $targetCurrency
             );
+
+            if ($convertedProfit === null) {
+                continue;
+            }
+
             $totalProfit += $convertedProfit;
         }
 
@@ -271,13 +276,18 @@ class TradeAnalyticsService
 
             foreach ($symbolDeals as $deal) {
                 $accountCurrency = $deal->tradingAccount->account_currency ?? 'USD';
-                $convertedProfit = $this->currencyService->convert(
+                $convertedProfit = $this->currencyService->safeConvert(
                     $deal->profit,
                     $accountCurrency,
                     $targetCurrency
                 );
+
+                if ($convertedProfit === null) {
+                    continue;
+                }
+
                 $totalProfit += $convertedProfit;
-                
+
                 if ($convertedProfit > 0) {
                     $winningTrades++;
                 }
@@ -338,11 +348,16 @@ class TradeAnalyticsService
 
         foreach ($deals as $deal) {
             $accountCurrency = $deal->tradingAccount->account_currency ?? 'USD';
-            $convertedProfit = $this->currencyService->convert(
+            $convertedProfit = $this->currencyService->safeConvert(
                 $deal->profit,
                 $accountCurrency,
                 $targetCurrency
             );
+
+            if ($convertedProfit === null) {
+                continue;
+            }
+
             $convertedProfits[] = $convertedProfit;
             $totalVolume += $deal->volume;
         }
@@ -420,11 +435,15 @@ class TradeAnalyticsService
 
         foreach ($deals as $deal) {
             $accountCurrency = $deal->tradingAccount->account_currency ?? 'USD';
-            $convertedProfit = $this->currencyService->convert(
+            $convertedProfit = $this->currencyService->safeConvert(
                 $deal->profit,
                 $accountCurrency,
                 $targetCurrency
             );
+
+            if ($convertedProfit === null) {
+                continue;
+            }
 
             if ($convertedProfit > $maxProfit) {
                 $maxProfit = $convertedProfit;
@@ -437,6 +456,13 @@ class TradeAnalyticsService
                 $worstTrade = $deal;
                 $worstTrade->converted_profit = $convertedProfit;
             }
+        }
+
+        if ($bestTrade === null && $worstTrade === null) {
+            return [
+                'best_trade' => null,
+                'worst_trade' => null,
+            ];
         }
 
         return [

@@ -6,6 +6,7 @@ use App\Models\TradingAccount;
 use App\Models\Deal;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 
 class BrokerAnalyticsService
@@ -18,13 +19,70 @@ class BrokerAnalyticsService
     }
 
     /**
+     * Safely convert an amount and track skipped conversions.
+     */
+    private function convertAmountSafely(
+        float|int|string $amount,
+        ?string $fromCurrency,
+        string $toCurrency,
+        array &$stats,
+        string $context
+    ): ?float {
+        $stats['attempted'] = ($stats['attempted'] ?? 0) + 1;
+
+        $converted = $this->currencyService->safeConvert($amount, $fromCurrency, $toCurrency);
+
+        if ($converted === null) {
+            $stats['skipped'] = ($stats['skipped'] ?? 0) + 1;
+            Log::warning('Broker analytics conversion skipped', [
+                'context' => $context,
+                'amount' => $amount,
+                'from' => $fromCurrency,
+                'to' => $toCurrency,
+            ]);
+
+            return null;
+        }
+
+        $stats['success'] = ($stats['success'] ?? 0) + 1;
+
+        return $converted;
+    }
+
+    private function buildCacheKey(string $prefix, array $payload): string
+    {
+        ksort($payload);
+        $normalized = json_encode($payload);
+        $userId = auth()->id() ?? 'guest';
+
+        return sprintf(
+            'tradevisor:%s:user:%s:%s',
+            $prefix,
+            $userId,
+            hash('sha256', $normalized)
+        );
+    }
+
+    /**
      * Get comprehensive broker comparison analytics
      */
     public function getBrokerComparison($days = 30, $displayCurrency = 'USD')
     {
-        $cacheKey = "broker_analytics_{$days}_{$displayCurrency}";
+        $cacheKey = $this->buildCacheKey('broker.analytics', [
+            'days' => $days,
+            'currency' => $displayCurrency,
+            'broker_count' => TradingAccount::where('is_active', true)->distinct('broker_name')->count(),
+        ]);
         
-        return Cache::remember($cacheKey, 1800, function() use ($days, $displayCurrency) {
+        $ttl = (int) config('analytics.cache.broker_ttl', 1800);
+
+        return Cache::remember($cacheKey, $ttl, function() use ($days, $displayCurrency, $cacheKey) {
+            Log::info('Broker analytics cache rebuild', [
+                'cache_key' => $cacheKey,
+                'days' => $days,
+                'currency' => $displayCurrency,
+            ]);
+
             $brokers = $this->getActiveBrokers();
             
             $analytics = [];
@@ -248,37 +306,64 @@ class BrokerAnalyticsService
             return null;
         }
 
-        $totalCommission = 0;
-        $totalSwap = 0;
-        $totalFees = 0;
+        $conversionStats = ['attempted' => 0, 'success' => 0, 'skipped' => 0];
+        $totalCommission = 0.0;
+        $totalSwap = 0.0;
+        $totalFees = 0.0;
 
         // Convert all costs to display currency
         foreach ($deals as $deal) {
-            $commission = $this->currencyService->convert(
+            $accountCurrency = $deal->tradingAccount->account_currency ?? 'USD';
+
+            $commission = $this->convertAmountSafely(
                 abs($deal->commission),
-                $deal->tradingAccount->account_currency ?? 'USD',
-                $displayCurrency
-            );
-            
-            $swap = $this->currencyService->convert(
-                $deal->swap,
-                $deal->tradingAccount->account_currency ?? 'USD',
-                $displayCurrency
-            );
-            
-            $fee = $this->currencyService->convert(
-                abs($deal->fee),
-                $deal->tradingAccount->account_currency ?? 'USD',
-                $displayCurrency
+                $accountCurrency,
+                $displayCurrency,
+                $conversionStats,
+                'broker_costs_commission'
             );
 
-            $totalCommission += $commission;
-            $totalSwap += $swap;
-            $totalFees += $fee;
+            if ($commission !== null) {
+                $totalCommission += $commission;
+            }
+
+            $swap = $this->convertAmountSafely(
+                $deal->swap,
+                $accountCurrency,
+                $displayCurrency,
+                $conversionStats,
+                'broker_costs_swap'
+            );
+
+            if ($swap !== null) {
+                $totalSwap += $swap;
+            }
+
+            $fee = $this->convertAmountSafely(
+                abs($deal->fee),
+                $accountCurrency,
+                $displayCurrency,
+                $conversionStats,
+                'broker_costs_fee'
+            );
+
+            if ($fee !== null) {
+                $totalFees += $fee;
+            }
         }
 
         $totalVolume = $deals->sum('volume');
-        $tradeCount = $deals->count();
+        $tradeCount = $conversionStats['success'];
+
+        if ($conversionStats['skipped'] > 0) {
+            Log::warning('Broker cost analysis conversions skipped', [
+                'broker' => $brokerName,
+                'days' => $days,
+                'attempted' => $conversionStats['attempted'],
+                'successful' => $conversionStats['success'],
+                'skipped' => $conversionStats['skipped'],
+            ]);
+        }
 
         return [
             'total_commission' => round($totalCommission, 2),
@@ -288,6 +373,9 @@ class BrokerAnalyticsService
             'avg_commission_per_lot' => $totalVolume > 0 ? round($totalCommission / $totalVolume, 2) : 0,
             'total_cost' => round($totalCommission + abs($totalSwap) + $totalFees, 2),
             'cost_per_trade' => $tradeCount > 0 ? round(($totalCommission + abs($totalSwap) + $totalFees) / $tradeCount, 2) : 0,
+            'conversion_attempts' => $conversionStats['attempted'],
+            'conversion_successful' => $conversionStats['success'],
+            'conversion_skipped' => $conversionStats['skipped'],
         ];
     }
 
@@ -383,21 +471,31 @@ class BrokerAnalyticsService
             return null;
         }
 
-        // Convert all profits to display currency
-        $totalProfit = 0;
+        $conversionStats = ['attempted' => 0, 'success' => 0, 'skipped' => 0];
+        $totalProfit = 0.0;
         $winningTradesCount = 0;
         $losingTradesCount = 0;
-        $grossProfit = 0;
-        $grossLoss = 0;
+        $grossProfit = 0.0;
+        $grossLoss = 0.0;
+        $totalVolume = 0.0;
 
         foreach ($deals as $deal) {
-            $convertedProfit = $this->currencyService->convert(
+            $accountCurrency = $deal->tradingAccount->account_currency ?? 'USD';
+
+            $convertedProfit = $this->convertAmountSafely(
                 $deal->profit,
-                $deal->tradingAccount->account_currency ?? 'USD',
-                $displayCurrency
+                $accountCurrency,
+                $displayCurrency,
+                $conversionStats,
+                'broker_performance_profit'
             );
 
+            if ($convertedProfit === null) {
+                continue;
+            }
+
             $totalProfit += $convertedProfit;
+            $totalVolume += $deal->volume;
 
             if ($convertedProfit > 0) {
                 $winningTradesCount++;
@@ -407,22 +505,46 @@ class BrokerAnalyticsService
                 $grossLoss += abs($convertedProfit);
             }
         }
-        
-        $winRate = $deals->count() > 0 
-            ? round(($winningTradesCount / $deals->count()) * 100, 1) 
-            : 0;
-        
-        $profitFactor = $grossLoss > 0 
-            ? round($grossProfit / $grossLoss, 2) 
+
+        $countedTrades = $conversionStats['success'];
+
+        if ($countedTrades === 0) {
+            Log::warning('Broker performance conversions all skipped', [
+                'broker' => $brokerName,
+                'days' => $days,
+                'attempted' => $conversionStats['attempted'],
+                'skipped' => $conversionStats['skipped'],
+            ]);
+
+            return null;
+        }
+
+        if ($conversionStats['skipped'] > 0) {
+            Log::warning('Broker performance conversions partial skip', [
+                'broker' => $brokerName,
+                'days' => $days,
+                'attempted' => $conversionStats['attempted'],
+                'successful' => $conversionStats['success'],
+                'skipped' => $conversionStats['skipped'],
+            ]);
+        }
+
+        $winRate = round(($winningTradesCount / $countedTrades) * 100, 1);
+
+        $profitFactor = $grossLoss > 0
+            ? round($grossProfit / $grossLoss, 2)
             : ($grossProfit > 0 ? 999 : 0);
 
         return [
-            'total_trades' => $deals->count(),
+            'total_trades' => $countedTrades,
             'total_profit' => round($totalProfit, 2),
             'win_rate' => $winRate,
             'profit_factor' => $profitFactor,
-            'avg_profit_per_trade' => round($totalProfit / $deals->count(), 2),
-            'total_volume' => round($deals->sum('volume'), 2),
+            'avg_profit_per_trade' => round($totalProfit / $countedTrades, 2),
+            'total_volume' => round($totalVolume, 2),
+            'conversion_attempts' => $conversionStats['attempted'],
+            'conversion_successful' => $conversionStats['success'],
+            'conversion_skipped' => $conversionStats['skipped'],
         ];
     }
 

@@ -10,25 +10,65 @@ use Illuminate\Support\Facades\Log;
 class CurrencyService
 {
     /**
-     * Convert an amount from one currency to another
-     * 
-     * @param float $amount The amount to convert
-     * @param string $from Source currency code (e.g., 'AED')
-     * @param string $to Target currency code (e.g., 'USD')
-     * @return float Converted amount
+     * Convert an amount from one currency to another.
+     * A thin wrapper that expects validated inputs; callers should prefer safeConvert().
      */
     public function convert(float $amount, string $from, string $to): float
     {
-        // If same currency, no conversion needed
         if ($from === $to) {
             return $amount;
         }
 
-        // Get the exchange rate
         $rate = $this->getRate($from, $to);
-        
-        // Convert and round to 2 decimal places
+
         return round($amount * $rate, 2);
+    }
+
+    /**
+     * Safely convert an amount between currencies.
+     * Returns null when conversion is not possible so callers can skip aggregation gracefully.
+     */
+    public function safeConvert($amount, ?string $from, ?string $to): ?float
+    {
+        if (!is_numeric($amount)) {
+            Log::warning('Currency conversion skipped: non-numeric amount', [
+                'amount' => $amount,
+                'from' => $from,
+                'to' => $to,
+            ]);
+            return null;
+        }
+
+        $amount = (float) $amount;
+
+        if ($amount === 0.0) {
+            return 0.0;
+        }
+
+        if (!$from || !$to) {
+            Log::warning('Currency conversion skipped: missing currency code', [
+                'amount' => $amount,
+                'from' => $from,
+                'to' => $to,
+            ]);
+            return null;
+        }
+
+        if ($from === $to) {
+            return $amount;
+        }
+
+        try {
+            return $this->convert($amount, $from, $to);
+        } catch (\Throwable $e) {
+            Log::error('Currency conversion failed', [
+                'amount' => $amount,
+                'from' => $from,
+                'to' => $to,
+                'error' => $e->getMessage(),
+            ]);
+            return null;
+        }
     }
 
     /**

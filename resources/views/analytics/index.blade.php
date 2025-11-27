@@ -188,7 +188,7 @@
                                 <div class="flex items-center space-x-2 text-xs">
                                     <span class="font-medium">{{ $item['total_trades'] }} trades</span>
                                     <span class="{{ $item['total_profit'] >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                        {{ $displayCurrency }}{{ number_format($item['total_profit'], 0) }}
+                                        {{ $displayCurrency }} {{ number_format($item['total_profit'], 0) }}
                                     </span>
                                     <span class="px-2 py-1 rounded text-xs font-semibold {{ $item['win_rate'] >= 50 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
                                         {{ $item['win_rate'] }}%
@@ -488,7 +488,7 @@
                                         <div class="text-right">
                                             <div class="text-sm font-medium">{{ $item['trades_last_hour'] }} trades</div>
                                             <div class="text-xs {{ $item['profit_last_hour'] >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                                {{ $displayCurrency }}{{ number_format($item['profit_last_hour'], 0) }}
+                                                {{ $displayCurrency }} {{ number_format($item['profit_last_hour'], 0) }}
                                             </div>
                                         </div>
                                     </div>
@@ -509,7 +509,7 @@
                                         <div class="text-right">
                                             <div class="text-sm font-medium">{{ $item['open_positions'] }} positions</div>
                                             <div class="text-xs {{ $item['total_profit'] >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                                {{ $displayCurrency }}{{ number_format($item['total_profit'], 0) }}
+                                                {{ $displayCurrency }} {{ number_format($item['total_profit'], 0) }}
                                             </div>
                                         </div>
                                     </div>
@@ -708,7 +708,7 @@
                                         </div>
                                         <div class="text-right">
                                             <div class="text-sm font-bold {{ $item['total_profit'] >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                                {{ $displayCurrency }}{{ number_format($item['total_profit'], 0) }}
+                                                {{ $displayCurrency }} {{ number_format($item['total_profit'], 0) }}
                                             </div>
                                             <div class="text-xs text-gray-500">{{ $item['total_trades'] }} trades</div>
                                         </div>
@@ -757,7 +757,7 @@
                                         <div class="text-right">
                                             <div class="text-sm font-medium">{{ $item['count'] }} trades</div>
                                             <div class="text-xs {{ $item['avg_profit'] >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                                {{ $displayCurrency }}{{ number_format($item['avg_profit'], 2) }}/trade
+                                                {{ $displayCurrency }} {{ number_format($item['avg_profit'], 2) }}/trade
                                             </div>
                                         </div>
                                     </div>

@@ -2,26 +2,24 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
+use App\Support\ApiKeyValidator;
 use Closure;
 use Illuminate\Http\Request;
-use App\Models\User;
 use Symfony\Component\HttpFoundation\Response;
 
 class ValidateApiKey
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $apiKey = $request->header('Authorization');
-        
-        // Remove 'Bearer ' prefix if present
-        if (str_starts_with($apiKey, 'Bearer ')) {
-            $apiKey = substr($apiKey, 7);
-        }
-        
+        $authorizationHeader = $request->header('Authorization');
+        $apiKey = ApiKeyValidator::extractKeyFromAuthorization($authorizationHeader);
+
         if (!$apiKey) {
             \Log::warning('API key validation failed: No API key provided', [
                 'ip' => $request->ip(),
                 'url' => $request->fullUrl(),
+                'authorization_header_present' => $authorizationHeader !== null,
                 'headers' => $request->headers->all(),
             ]);
             
@@ -31,7 +29,26 @@ class ValidateApiKey
                 'message' => 'Please provide your API key in the Authorization header'
             ], 401);
         }
-        
+
+        $keyType = ApiKeyValidator::detectKeyType($apiKey);
+
+        if (!$keyType) {
+            \Log::warning('API key validation failed: Malformed API key format', [
+                'api_key_prefix' => substr($apiKey, 0, 10) . '...',
+                'api_key_length' => strlen($apiKey),
+                'ip' => $request->ip(),
+                'url' => $request->fullUrl(),
+                'user_agent' => $request->userAgent(),
+                'detected_prefix' => substr($apiKey, 0, 4),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Invalid API key',
+                'message' => 'The provided API key format is invalid'
+            ], 401);
+        }
+
         // Validate API key
         $user = User::where('api_key', $apiKey)
                     ->where('is_active', true)
@@ -45,6 +62,7 @@ class ValidateApiKey
                 'ip' => $request->ip(),
                 'url' => $request->fullUrl(),
                 'user_agent' => $request->userAgent(),
+                'key_type' => $keyType,
             ]);
             
             // Check if key exists but user is inactive
