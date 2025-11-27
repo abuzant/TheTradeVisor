@@ -23,6 +23,7 @@
 - **[Protection Summary](technical/PROTECTION_SUMMARY.md)** - All active protections overview
 - **[Circuit Breaker Implementation](technical/CIRCUIT_BREAKER_IMPLEMENTATION.md)** - High-load protection
 - **[Rate Limiting](technical/RATE_LIMITING_COMPLETE.md)** - Request rate limiting
+- **[Analytics Hardening Playbook](guides/ANALYTICS_HARDENING_PLAYBOOK.md)** - Implemented safeguards for analytics & credentials
 - **[Pagination Implementation](features/PAGINATION_IMPLEMENTATION.md)** - Query pagination
 - **[Slow Query Logging](technical/SLOW_QUERY_LOGGING.md)** - Performance monitoring
 - **[Redis Caching](technical/REDIS_CACHING_OPTIMIZATION.md)** - 90% load reduction
