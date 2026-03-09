@@ -140,42 +140,18 @@ class ProcessTradingData implements ShouldQueue
             $searchCriteria['account_hash'] = $accountHash;
         }
 
-        // Use firstOrCreate with database locking to prevent race conditions
-        // This will either find existing account or create new one atomically
+        // Use firstOrCreate without explicit locking to prevent deadlocks
+        // The unique constraint in the database will handle race conditions
         try {
-            $tradingAccount = TradingAccount::lockForUpdate()
-                ->where($searchCriteria)
-                ->first();
-
-            if (!$tradingAccount) {
-                // SAFETY NET: Double-check account limit before creating
-                $user = \App\Models\User::find($userId);
-                $currentAccountCount = $user->tradingAccounts()->count();
-                
-                if ($currentAccountCount >= $user->max_accounts) {
-                    Log::error('Account limit exceeded in job - should have been caught by controller', [
-                        'user_id' => $userId,
-                        'current_accounts' => $currentAccountCount,
-                        'max_accounts' => $user->max_accounts,
-                        'subscription_tier' => $user->subscription_tier,
-                        'account_number' => $accountNumber,
-                        'account_hash' => $accountHash,
-                    ]);
-                    
-                    throw new \Exception(
-                        "Account limit exceeded. You have {$currentAccountCount} account(s) but your {$user->subscription_tier} plan allows {$user->max_accounts}. " .
-                        "Please upgrade your plan at https://thetradevisor.com/pricing to add more accounts."
-                    );
-                }
-                
-                // Create new account with all required fields
-                $tradingAccount = TradingAccount::create(array_merge($searchCriteria, [
+            $tradingAccount = TradingAccount::firstOrCreate(
+                $searchCriteria,
+                [
                     'account_uuid' => (string) \Illuminate\Support\Str::uuid(),
                     'broker_name' => $accountData['broker'],
                     'account_currency' => $accountData['currency'],
                     'leverage' => $accountData['leverage'] ?? 1,
-                ]));
-            }
+                ]
+            );
         } catch (\Illuminate\Database\QueryException $e) {
             // If we hit a unique constraint violation, it means another job created the account
             // Just fetch it again

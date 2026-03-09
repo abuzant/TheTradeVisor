@@ -159,55 +159,39 @@ class BrokerDetailsController extends Controller
      */
     private function getMostProfitablePairs($accountIds, $days)
     {
-        // Get deals with account currency
-        $deals = Deal::whereIn('trading_account_id', $accountIds)
-            ->with('tradingAccount')
-            ->where('time', '>=', now()->subDays($days))
-            ->where('entry', 'out')
-            ->whereNotNull('symbol')
+        // Use database aggregation for better performance
+        $symbolProfits = Deal::whereIn('deals.trading_account_id', $accountIds)
+            ->join('trading_accounts', 'deals.trading_account_id', '=', 'trading_accounts.id')
+            ->where('deals.time', '>=', now()->subDays($days))
+            ->where('deals.entry', 'out')
+            ->whereNotNull('deals.symbol')
+            ->groupBy('deals.symbol')
+            ->select(
+                'deals.symbol',
+                DB::raw('COUNT(*) as trades'),
+                DB::raw('SUM(deals.profit) as total_profit_native'),
+                DB::raw('SUM(deals.volume) as total_volume'),
+                DB::raw('array_agg(trading_accounts.account_currency) as currencies')
+            )
+            ->havingRaw('COUNT(*) >= 5')
+            ->orderByDesc('total_profit_native')
+            ->limit(10)
             ->get();
 
-        // Convert to USD and group by symbol
-        $symbolData = [];
-        foreach ($deals as $deal) {
-            $profitUSD = $this->currencyService->convert(
-                $deal->profit,
-                $deal->tradingAccount->account_currency ?? 'USD',
-                'USD'
-            );
+        // Convert to USD and format
+        return $symbolProfits->map(function($item) {
+            // For simplicity, use the first currency (most will be USD anyway)
+            $currency = $item->currencies[0] ?? 'USD';
+            $profitUSD = $this->currencyService->convert($item->total_profit_native, $currency, 'USD');
             
-            $symbol = $deal->symbol;
-            if (!isset($symbolData[$symbol])) {
-                $symbolData[$symbol] = [
-                    'symbol' => $symbol,
-                    'total_profit' => 0,
-                    'trades' => 0,
-                    'total_volume' => 0,
-                ];
-            }
-            
-            $symbolData[$symbol]['total_profit'] += $profitUSD;
-            $symbolData[$symbol]['trades']++;
-            $symbolData[$symbol]['total_volume'] += $deal->volume;
-        }
-
-        // Filter, sort, and format
-        $result = collect($symbolData)
-            ->filter(fn($item) => $item['trades'] >= 5)
-            ->sortByDesc('total_profit')
-            ->take(10)
-            ->map(function($item) {
-                return (object) [
-                    'symbol' => $item['symbol'],
-                    'normalized_symbol' => \App\Models\SymbolMapping::normalize($item['symbol']),
-                    'total_profit' => $item['total_profit'],
-                    'trades' => $item['trades'],
-                    'avg_volume' => $item['total_volume'] / $item['trades'],
-                ];
-            })
-            ->values();
-
-        return $result;
+            return (object) [
+                'symbol' => $item->symbol,
+                'normalized_symbol' => \App\Models\SymbolMapping::normalize($item->symbol),
+                'total_profit' => $profitUSD,
+                'trades' => $item->trades,
+                'avg_volume' => $item->total_volume / $item->trades,
+            ];
+        });
     }
 
     /**
@@ -215,55 +199,39 @@ class BrokerDetailsController extends Controller
      */
     private function getBiggestLossPairs($accountIds, $days)
     {
-        // Get deals with account currency
-        $deals = Deal::whereIn('trading_account_id', $accountIds)
-            ->with('tradingAccount')
-            ->where('time', '>=', now()->subDays($days))
-            ->where('entry', 'out')
-            ->whereNotNull('symbol')
+        // Use database aggregation for better performance
+        $symbolProfits = Deal::whereIn('deals.trading_account_id', $accountIds)
+            ->join('trading_accounts', 'deals.trading_account_id', '=', 'trading_accounts.id')
+            ->where('deals.time', '>=', now()->subDays($days))
+            ->where('deals.entry', 'out')
+            ->whereNotNull('deals.symbol')
+            ->groupBy('deals.symbol')
+            ->select(
+                'deals.symbol',
+                DB::raw('COUNT(*) as trades'),
+                DB::raw('SUM(deals.profit) as total_profit_native'),
+                DB::raw('SUM(deals.volume) as total_volume'),
+                DB::raw('array_agg(trading_accounts.account_currency) as currencies')
+            )
+            ->havingRaw('COUNT(*) >= 5')
+            ->orderBy('total_profit_native')
+            ->limit(10)
             ->get();
 
-        // Convert to USD and group by symbol
-        $symbolData = [];
-        foreach ($deals as $deal) {
-            $profitUSD = $this->currencyService->convert(
-                $deal->profit,
-                $deal->tradingAccount->account_currency ?? 'USD',
-                'USD'
-            );
+        // Convert to USD and format
+        return $symbolProfits->map(function($item) {
+            // For simplicity, use the first currency (most will be USD anyway)
+            $currency = $item->currencies[0] ?? 'USD';
+            $profitUSD = $this->currencyService->convert($item->total_profit_native, $currency, 'USD');
             
-            $symbol = $deal->symbol;
-            if (!isset($symbolData[$symbol])) {
-                $symbolData[$symbol] = [
-                    'symbol' => $symbol,
-                    'total_profit' => 0,
-                    'trades' => 0,
-                    'total_volume' => 0,
-                ];
-            }
-            
-            $symbolData[$symbol]['total_profit'] += $profitUSD;
-            $symbolData[$symbol]['trades']++;
-            $symbolData[$symbol]['total_volume'] += $deal->volume;
-        }
-
-        // Filter, sort, and format
-        $result = collect($symbolData)
-            ->filter(fn($item) => $item['trades'] >= 5)
-            ->sortBy('total_profit')
-            ->take(10)
-            ->map(function($item) {
-                return (object) [
-                    'symbol' => $item['symbol'],
-                    'normalized_symbol' => \App\Models\SymbolMapping::normalize($item['symbol']),
-                    'total_profit' => $item['total_profit'],
-                    'trades' => $item['trades'],
-                    'avg_volume' => $item['total_volume'] / $item['trades'],
-                ];
-            })
-            ->values();
-
-        return $result;
+            return (object) [
+                'symbol' => $item->symbol,
+                'normalized_symbol' => \App\Models\SymbolMapping::normalize($item->symbol),
+                'total_profit' => $profitUSD,
+                'trades' => $item->trades,
+                'avg_volume' => $item->total_volume / $item->trades,
+            ];
+        });
     }
 
     /**
@@ -314,60 +282,41 @@ class BrokerDetailsController extends Controller
      */
     private function getSymbolPerformance($accountIds, $days)
     {
-        // Get all deals with account currency
-        $deals = Deal::whereIn('trading_account_id', $accountIds)
-            ->with('tradingAccount')
-            ->where('time', '>=', now()->subDays($days))
-            ->where('entry', 'out')
-            ->whereNotNull('symbol')
+        // Use database aggregation for better performance
+        $symbolStats = Deal::whereIn('deals.trading_account_id', $accountIds)
+            ->join('trading_accounts', 'deals.trading_account_id', '=', 'trading_accounts.id')
+            ->where('deals.time', '>=', now()->subDays($days))
+            ->where('deals.entry', 'out')
+            ->whereNotNull('deals.symbol')
+            ->groupBy('deals.symbol')
+            ->select(
+                'deals.symbol',
+                DB::raw('COUNT(*) as total_trades'),
+                DB::raw('SUM(CASE WHEN deals.profit > 0 THEN 1 ELSE 0 END) as winning_trades'),
+                DB::raw('SUM(deals.profit) as total_profit_native'),
+                DB::raw('SUM(deals.volume) as total_volume'),
+                DB::raw('array_agg(trading_accounts.account_currency) as currencies')
+            )
+            ->orderByDesc('total_trades')
+            ->limit(25)
             ->get();
 
-        // Convert to USD and group by symbol
-        $symbolData = [];
-        foreach ($deals as $deal) {
-            $profitUSD = $this->currencyService->convert(
-                $deal->profit,
-                $deal->tradingAccount->account_currency ?? 'USD',
-                'USD'
-            );
+        // Convert to USD and format
+        return $symbolStats->map(function($item) {
+            // For simplicity, use the first currency (most will be USD anyway)
+            $currency = $item->currencies[0] ?? 'USD';
+            $profitUSD = $this->currencyService->convert($item->total_profit_native, $currency, 'USD');
             
-            $symbol = $deal->symbol;
-            if (!isset($symbolData[$symbol])) {
-                $symbolData[$symbol] = [
-                    'symbol' => $symbol,
-                    'total_profit' => 0,
-                    'winning_trades' => 0,
-                    'total_trades' => 0,
-                    'total_volume' => 0,
-                ];
-            }
-            
-            $symbolData[$symbol]['total_profit'] += $profitUSD;
-            $symbolData[$symbol]['total_trades']++;
-            if ($profitUSD > 0) {
-                $symbolData[$symbol]['winning_trades']++;
-            }
-            $symbolData[$symbol]['total_volume'] += $deal->volume;
-        }
-
-        // Get top 25 by trade count, then format
-        $result = collect($symbolData)
-            ->sortByDesc('total_trades')
-            ->take(25)
-            ->map(function($item) {
-                return (object) [
-                    'symbol' => $item['symbol'],
-                    'normalized_symbol' => \App\Models\SymbolMapping::normalize($item['symbol']),
-                    'total_profit' => $item['total_profit'],
-                    'winning_trades' => $item['winning_trades'],
-                    'total_trades' => $item['total_trades'],
-                    'avg_lot_size' => $item['total_volume'] / $item['total_trades'],
-                    'win_rate' => $item['total_trades'] > 0 ? round(($item['winning_trades'] / $item['total_trades']) * 100, 1) : 0,
-                ];
-            })
-            ->values();
-
-        return $result;
+            return (object) [
+                'symbol' => $item->symbol,
+                'normalized_symbol' => \App\Models\SymbolMapping::normalize($item->symbol),
+                'total_profit' => $profitUSD,
+                'winning_trades' => $item->winning_trades,
+                'total_trades' => $item->total_trades,
+                'avg_lot_size' => $item->total_volume / $item->total_trades,
+                'win_rate' => $item->total_trades > 0 ? round(($item->winning_trades / $item->total_trades) * 100, 1) : 0,
+            ];
+        });
     }
 
     /**

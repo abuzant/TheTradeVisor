@@ -134,29 +134,26 @@ class ProcessHistoricalData implements ShouldQueue
             $searchCriteria['account_hash'] = $accountHash;
         }
 
-        // Try to find existing account first with locking
+        // Use firstOrCreate without explicit locking to prevent deadlocks
+        // The unique constraint in the database will handle race conditions
         try {
-            $tradingAccount = TradingAccount::lockForUpdate()
-                ->where($searchCriteria)
-                ->first();
-
-            // If not found, create it
-            if (!$tradingAccount) {
-                // Extract broker name from server if not provided
-                $brokerName = $accountData['broker'] ?? $accountData['broker_name'] ?? null;
-                if (!$brokerName && $brokerServer) {
-                    // Try to extract from server name (e.g., "ICMarkets-Live" -> "ICMarkets")
-                    $brokerName = explode('-', $brokerServer)[0];
-                }
-                
-                $tradingAccount = TradingAccount::create(array_merge($searchCriteria, [
+            // Extract broker name from server if not provided
+            $brokerName = $accountData['broker'] ?? $accountData['broker_name'] ?? null;
+            if (!$brokerName && $brokerServer) {
+                // Try to extract from server name (e.g., "ICMarkets-Live" -> "ICMarkets")
+                $brokerName = explode('-', $brokerServer)[0];
+            }
+            
+            $tradingAccount = TradingAccount::firstOrCreate(
+                $searchCriteria,
+                [
                     'account_uuid' => (string) \Illuminate\Support\Str::uuid(),
                     'broker_name' => $brokerName ?: 'Unknown Broker',
                     'account_name' => $accountData['name'] ?? $accountData['account_name'] ?? 'Trading Account',
                     'account_currency' => $accountData['currency'] ?? $accountData['account_currency'] ?? 'USD',
                     'leverage' => $accountData['leverage'] ?? 100,
-                ]));
-            }
+                ]
+            );
         } catch (\Illuminate\Database\QueryException $e) {
             // If we hit a unique constraint violation, fetch the existing account
             if (str_contains($e->getMessage(), 'unique_user_broker')) {
