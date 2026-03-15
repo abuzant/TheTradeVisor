@@ -59,6 +59,7 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\ExtendedRememberMe::class,
             \App\Http\Middleware\TrackWebCountryMiddleware::class,
             \App\Http\Middleware\QueryOptimizationMiddleware::class,
+            // \App\Http\Middleware\SetCspHeaders::class, // DISABLED - nginx handles CSP
         ]);
 
         // Add to api middleware group
