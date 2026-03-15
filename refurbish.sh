@@ -1,1 +1,1 @@
-/www/scripts/refurbish.sh
+scripts/refurbish.sh
