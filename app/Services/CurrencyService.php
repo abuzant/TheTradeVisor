@@ -10,6 +10,41 @@ use Illuminate\Support\Facades\Log;
 class CurrencyService
 {
     /**
+     * Static in-memory rate cache: avoids per-pair Redis/DB lookups.
+     * Key format: "FROM_TO" e.g. "EUR_USD"
+     */
+    protected static $ratesCache = null;
+
+    /**
+     * Preload all known currency rates into memory in a single DB query.
+     * Call this once at the start of heavy analytics requests.
+     */
+    public static function preloadRates(): void
+    {
+        if (static::$ratesCache !== null) {
+            return; // Already loaded this request
+        }
+
+        static::$ratesCache = [];
+
+        $rates = CurrencyRate::where('updated_at', '>=', now()->subDay())->get();
+
+        foreach ($rates as $rate) {
+            $key = $rate->from_currency . '_' . $rate->to_currency;
+            static::$ratesCache[$key] = (float) $rate->rate;
+        }
+
+        Log::debug('CurrencyService: preloaded ' . count(static::$ratesCache) . ' rates');
+    }
+
+    /**
+     * Reset the static cache (useful for testing or long-running processes).
+     */
+    public static function resetCache(): void
+    {
+        static::$ratesCache = null;
+    }
+    /**
      * Convert an amount from one currency to another.
      * A thin wrapper that expects validated inputs; callers should prefer safeConvert().
      */
@@ -81,9 +116,17 @@ class CurrencyService
      */
     public function getRate(string $from, string $to): float
     {
+        // Check static in-memory cache first (zero overhead)
+        if (static::$ratesCache !== null) {
+            $key = $from . '_' . $to;
+            if (isset(static::$ratesCache[$key])) {
+                return static::$ratesCache[$key];
+            }
+        }
+
         $cacheKey = "currency_rate_{$from}_{$to}";
         
-        // Check cache first (1 hour TTL)
+        // Check Redis cache (1 hour TTL)
         return Cache::remember($cacheKey, 3600, function () use ($from, $to) {
             // Try to get from database (last 24 hours)
             $rate = CurrencyRate::where('from_currency', $from)
@@ -93,7 +136,12 @@ class CurrencyService
                 ->first();
 
             if ($rate) {
-                return (float) $rate->rate;
+                $r = (float) $rate->rate;
+                // Store in static cache for rest of request
+                if (static::$ratesCache !== null) {
+                    static::$ratesCache[$from . '_' . $to] = $r;
+                }
+                return $r;
             }
 
             // If not in cache or DB, fetch fresh rate

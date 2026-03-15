@@ -34,7 +34,7 @@ def resolve_link(md_file_path, link):
     """Resolve relative link to absolute path"""
     if link.startswith('/'):
         # Absolute from project root
-        return os.path.join('/www', link.lstrip('/'))
+        return os.path.join('/vhosts/thetradevisor.com', link.lstrip('/'))
     
     # Remove anchor
     link_without_anchor = link.split('#')[0]
@@ -48,7 +48,7 @@ def resolve_link(md_file_path, link):
     return resolved
 
 def main():
-    root_dir = '/www'
+    root_dir = '/vhosts/thetradevisor.com'
     
     print("🔍 Finding all .md files...")
     md_files = find_md_files(root_dir)

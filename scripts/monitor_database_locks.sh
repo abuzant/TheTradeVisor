@@ -8,9 +8,6 @@ ALERT_FILE="/var/log/thetradevisor/alerts.log"
 MAX_LOCK_WAIT_TIME=30  # seconds
 MAX_CONCURRENT_LOCKS=5
 
-# Create log directory if it doesn't exist
-mkdir -p "$(dirname "$LOG_FILE")"
-
 log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOG_FILE"
 }
@@ -21,7 +18,8 @@ check_locks() {
     WAITING_LOCKS=$(docker exec postgres psql -U pgsql_user -d thetradevisor_app -t -c "SELECT COUNT(*) FROM pg_locks WHERE NOT granted;" 2>/dev/null | tr -d ' ')
     
     # Ensure we have a valid number
-    if [[ ! "$WAITING_LOCKS" =~ ^[0-9]+$ ]]; then
+    WAITING_LOCKS=${WAITING_LOCKS:-0}
+    if ! [[ "$WAITING_LOCKS" =~ ^[0-9]+$ ]]; then
         WAITING_LOCKS=0
     fi
     
@@ -53,7 +51,8 @@ check_locks() {
     TRADING_LOCKS=$(docker exec postgres psql -U pgsql_user -d thetradevisor_app -t -c "SELECT COUNT(*) FROM pg_locks l JOIN pg_class c ON l.relation = c.oid WHERE c.relname = 'trading_accounts' AND NOT l.granted;" 2>/dev/null | tr -d ' ')
     
     # Ensure we have a valid number
-    if [[ ! "$TRADING_LOCKS" =~ ^[0-9]+$ ]]; then
+    TRADING_LOCKS=${TRADING_LOCKS:-0}
+    if ! [[ "$TRADING_LOCKS" =~ ^[0-9]+$ ]]; then
         TRADING_LOCKS=0
     fi
     

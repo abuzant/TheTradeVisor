@@ -14,12 +14,15 @@
     <meta property="og:description" content="{{ $ogDescription ?? $description ?? 'Enterprise-grade trading analytics platform' }}">
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ url()->current() }}">
-    <meta property="og:site_name" content="TheTradeVisor">
+    <meta property="og:site_name" content="TheTradeVisor - Professional Trading Analytics">
     
     {{-- Twitter Card --}}
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{{ $ogTitle ?? $title ?? 'TheTradeVisor' }}">
     <meta name="twitter:description" content="{{ $ogDescription ?? $description ?? 'Professional Trading Analytics' }}">
+
+    {{-- Facebook Domain Verification --}}
+    <meta name="facebook-domain-verification" content="npd5p37f147risohyzqfakiktarmr5" />
     
     {{-- Canonical URL --}}
     <link rel="canonical" href="{{ url()->current() }}">

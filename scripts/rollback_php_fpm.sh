@@ -12,12 +12,16 @@ fi
 
 echo "Restoring original PHP-FPM configurations..."
 
-# Restore backup files
-cp /etc/php/8.3/fpm/pool.d/www.conf.backup /etc/php/8.3/fpm/pool.d/www.conf
-cp /etc/php/8.3/fpm/pool.d/pool1.conf.backup /etc/php/8.3/fpm/pool.d/pool1.conf
-cp /etc/php/8.3/fpm/pool.d/pool2.conf.backup /etc/php/8.3/fpm/pool.d/pool2.conf
-cp /etc/php/8.3/fpm/pool.d/pool3.conf.backup /etc/php/8.3/fpm/pool.d/pool3.conf
-cp /etc/php/8.3/fpm/pool.d/pool4.conf.backup /etc/php/8.3/fpm/pool.d/pool4.conf
+# Restore backup files (current server pools: www, thetradevisor, sarcastic)
+POOL_DIR="/etc/php/8.3/fpm/pool.d"
+for pool in www.conf thetradevisor.conf sarcastic.conf; do
+    if [ -f "$POOL_DIR/${pool}.backup" ]; then
+        cp "$POOL_DIR/${pool}.backup" "$POOL_DIR/$pool"
+        echo "  ✓ Restored $pool"
+    else
+        echo "  ⚠ No backup found for $pool"
+    fi
+done
 
 echo "Restarting PHP-FPM service..."
 systemctl restart php8.3-fpm

@@ -612,7 +612,7 @@
                         beginAtZero: false,
                         ticks: {
                             callback: function(value) {
-                                return '$' + value.toLocaleString();
+                                return '{{ $account->account_currency }}' + ' ' + value.toLocaleString();
                             }
                         }
                     }

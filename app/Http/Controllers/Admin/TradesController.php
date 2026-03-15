@@ -82,6 +82,24 @@ class TradesController extends Controller
 
         $deals = $query->paginate($perPage)->appends($request->query());
         
+        // OPTIMIZED: Batch-load open positions for 'in' deals to avoid N+1 queries
+        $inDeals = $deals->where('entry', 'in')->filter(fn($d) => $d->position_id);
+        $positionIds = $inDeals->pluck('position_id')->unique()->values()->toArray();
+        $accountIds = $inDeals->pluck('trading_account_id')->unique()->values()->toArray();
+
+        // Load all matching open positions in 2 queries (by position_identifier and ticket)
+        $openPositionsByIdentifier = !empty($positionIds) ? \App\Models\Position::whereIn('trading_account_id', $accountIds)
+            ->whereIn('position_identifier', $positionIds)
+            ->where('is_open', true)
+            ->get()
+            ->keyBy(fn($p) => $p->trading_account_id . '_' . $p->position_identifier) : collect();
+
+        $openPositionsByTicket = !empty($positionIds) ? \App\Models\Position::whereIn('trading_account_id', $accountIds)
+            ->whereIn('ticket', $positionIds)
+            ->where('is_open', true)
+            ->get()
+            ->keyBy(fn($p) => $p->trading_account_id . '_' . $p->ticket) : collect();
+
         // Group deals by position_id for better UX
         $groupedDeals = [];
         foreach ($deals as $deal) {
@@ -101,18 +119,10 @@ class TradesController extends Controller
                 $groupedDeals[$posId]['in_deal'] = $deal;
                 $groupedDeals[$posId]['is_open'] = true;
                 
-                // Try to find open position for floating profit
-                $position = \App\Models\Position::where('trading_account_id', $deal->trading_account_id)
-                    ->where('position_identifier', $deal->position_id)
-                    ->where('is_open', true)
-                    ->first();
-                
-                if (!$position) {
-                    $position = \App\Models\Position::where('trading_account_id', $deal->trading_account_id)
-                        ->where('ticket', $deal->position_id)
-                        ->where('is_open', true)
-                        ->first();
-                }
+                // Look up open position from pre-loaded collections (zero queries)
+                $lookupKey = $deal->trading_account_id . '_' . $deal->position_id;
+                $position = $openPositionsByIdentifier->get($lookupKey)
+                    ?? $openPositionsByTicket->get($lookupKey);
                 
                 if ($position) {
                     $deal->openPosition = $position;
@@ -139,24 +149,25 @@ class TradesController extends Controller
 
         $users = User::orderBy('name')->limit(1000)->get();
 
-        // Calculate totals with currency conversion to USD
+        // Calculate totals with currency conversion to USD (aggregate at DB level per currency)
         $currencyService = app(CurrencyService::class);
-        $dealsForTotals = $totalsQuery->with('tradingAccount')->get();
-        
+        $currencyTotals = (clone $totalsQuery)
+            ->join('trading_accounts', 'deals.trading_account_id', '=', 'trading_accounts.id')
+            ->selectRaw("COALESCE(trading_accounts.account_currency, 'USD') as currency, SUM(deals.profit) as total_profit, SUM(deals.commission) as total_commission, SUM(deals.fee) as total_fee, SUM(deals.swap) as total_swap")
+            ->groupByRaw("COALESCE(trading_accounts.account_currency, 'USD')")
+            ->get();
+
         $totalProfitUSD = 0;
         $totalCommissionUSD = 0;
         $totalFeesUSD = 0;
         $totalSwapUSD = 0;
-        
-        foreach ($dealsForTotals as $deal) {
-            if ($deal->tradingAccount) {
-                $currency = $deal->tradingAccount->account_currency ?? 'USD';
-                
-                $totalProfitUSD += $currencyService->convert($deal->profit ?? 0, $currency, 'USD');
-                $totalCommissionUSD += $currencyService->convert($deal->commission ?? 0, $currency, 'USD');
-                $totalFeesUSD += $currencyService->convert($deal->fee ?? 0, $currency, 'USD');
-                $totalSwapUSD += $currencyService->convert($deal->swap ?? 0, $currency, 'USD');
-            }
+
+        foreach ($currencyTotals as $row) {
+            $currency = $row->currency ?: 'USD';
+            $totalProfitUSD += $currencyService->convert((float) ($row->total_profit ?? 0), $currency, 'USD');
+            $totalCommissionUSD += $currencyService->convert((float) ($row->total_commission ?? 0), $currency, 'USD');
+            $totalFeesUSD += $currencyService->convert((float) ($row->total_fee ?? 0), $currency, 'USD');
+            $totalSwapUSD += $currencyService->convert((float) ($row->total_swap ?? 0), $currency, 'USD');
         }
 
         $totals = [

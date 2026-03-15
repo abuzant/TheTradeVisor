@@ -90,6 +90,7 @@
             <x-footer />
         </div>
         @stack('scripts')
+        <x-cloudflare-fix />
     </body>
 </html>
 

@@ -65,6 +65,7 @@ class BrokerAnalyticsService
 
     /**
      * Get comprehensive broker comparison analytics
+     * OPTIMIZED: Single-pass architecture — loads all data once, groups by broker.
      */
     public function getBrokerComparison($days = 30, $displayCurrency = 'USD')
     {
@@ -77,27 +78,67 @@ class BrokerAnalyticsService
         $ttl = (int) config('analytics.cache.broker_ttl', 1800);
 
         return Cache::remember($cacheKey, $ttl, function() use ($days, $displayCurrency, $cacheKey) {
-            Log::info('Broker analytics cache rebuild', [
+            Log::info('Broker analytics cache rebuild (optimized single-pass)', [
                 'cache_key' => $cacheKey,
                 'days' => $days,
                 'currency' => $displayCurrency,
             ]);
 
-            $brokers = $this->getActiveBrokers();
-            
+            // Preload all currency rates in one query to avoid per-pair Redis lookups
+            CurrencyService::preloadRates();
+
+            // === SINGLE-PASS: Load ALL data upfront ===
+            $allAccounts = TradingAccount::whereNotNull('broker_name')
+                ->where('broker_name', '!=', '')
+                ->get();
+
+            $accountsByBroker = $allAccounts->groupBy('broker_name');
+
+            $activeBrokerNames = $allAccounts->where('is_active', true)
+                ->pluck('broker_name')->unique()->values();
+
+            // Load ALL closed deals for the period with their trading account (one query)
+            $allDeals = Deal::closedTrades()
+                ->dateRange(now()->subDays($days))
+                ->with('tradingAccount')
+                ->get();
+
+            // Group deals by broker_name via their trading account
+            $dealsByBroker = $allDeals->groupBy(function ($deal) {
+                return $deal->tradingAccount->broker_name ?? '__unknown__';
+            });
+
+            // DB-level cost aggregation per broker per currency (for getCostAnalysis)
+            $costAggregates = $this->getCostAggregatesByBroker($days);
+
+            // DB-level performance aggregation per broker per currency (for getPerformanceMetrics)
+            $perfAggregates = $this->getPerformanceAggregatesByBroker($days);
+
+            Log::info('Broker analytics data loaded', [
+                'total_accounts' => $allAccounts->count(),
+                'total_deals' => $allDeals->count(),
+                'active_brokers' => $activeBrokerNames->count(),
+            ]);
+
             $analytics = [];
             
-            foreach ($brokers as $broker) {
+            foreach ($activeBrokerNames as $brokerName) {
+                $brokerAccounts = $accountsByBroker->get($brokerName, collect());
+                $brokerDeals = $dealsByBroker->get($brokerName, collect());
+
                 $analytics[] = [
-                    'broker_name' => $broker->broker_name,
-                    'accounts' => $this->getAccountStats($broker->broker_name, $days, $displayCurrency),
-                    'spreads' => $this->getSpreadAnalysis($broker->broker_name, $days),
-                    'costs' => $this->getCostAnalysis($broker->broker_name, $days, $displayCurrency),
-                    'slippage' => $this->getSlippageStats($broker->broker_name, $days),
-                    'reliability' => $this->getReliabilityMetrics($broker->broker_name, $days),
-                    'performance' => $this->getPerformanceMetrics($broker->broker_name, $days, $displayCurrency),
+                    'broker_name' => $brokerName,
+                    'accounts' => $this->getAccountStats($brokerName, $days, $displayCurrency, $brokerAccounts),
+                    'spreads' => $this->getSpreadAnalysis($brokerName, $days, $brokerDeals),
+                    'costs' => $this->getCostAnalysis($brokerName, $days, $displayCurrency, $costAggregates),
+                    'slippage' => $this->getSlippageStats($brokerName, $days, $brokerDeals),
+                    'reliability' => $this->getReliabilityMetrics($brokerName, $days, $brokerAccounts),
+                    'performance' => $this->getPerformanceMetrics($brokerName, $days, $displayCurrency, $perfAggregates),
                 ];
             }
+
+            // Free memory early
+            unset($allDeals, $dealsByBroker, $allAccounts);
             
             return [
                 'brokers' => $analytics,
@@ -106,6 +147,62 @@ class BrokerAnalyticsService
                 'display_currency' => $displayCurrency,
             ];
         });
+    }
+
+    /**
+     * DB-level cost aggregation grouped by broker and currency.
+     * Returns a nested collection: broker_name -> currency -> {commission, swap, fee, volume, count}
+     */
+    private function getCostAggregatesByBroker($days)
+    {
+        $rows = DB::table('deals')
+            ->join('trading_accounts', 'deals.trading_account_id', '=', 'trading_accounts.id')
+            ->select(
+                'trading_accounts.broker_name',
+                DB::raw("COALESCE(trading_accounts.account_currency, 'USD') as currency"),
+                DB::raw('SUM(ABS(deals.commission)) as total_commission'),
+                DB::raw('SUM(deals.swap) as total_swap'),
+                DB::raw('SUM(ABS(deals.fee)) as total_fee'),
+                DB::raw('SUM(deals.volume) as total_volume'),
+                DB::raw('COUNT(*) as trade_count')
+            )
+            ->whereNotNull('deals.symbol')
+            ->where('deals.symbol', '!=', '')
+            ->whereIn('deals.entry', ['out', 'inout'])
+            ->where('deals.time', '>=', now()->subDays($days))
+            ->groupBy('trading_accounts.broker_name', DB::raw("COALESCE(trading_accounts.account_currency, 'USD')"))
+            ->get();
+
+        return $rows->groupBy('broker_name');
+    }
+
+    /**
+     * DB-level performance aggregation grouped by broker and currency.
+     * Returns a nested collection: broker_name -> [{currency, total_profit, winning, losing, volume, count}]
+     */
+    private function getPerformanceAggregatesByBroker($days)
+    {
+        $rows = DB::table('deals')
+            ->join('trading_accounts', 'deals.trading_account_id', '=', 'trading_accounts.id')
+            ->select(
+                'trading_accounts.broker_name',
+                DB::raw("COALESCE(trading_accounts.account_currency, 'USD') as currency"),
+                DB::raw('SUM(deals.profit) as total_profit'),
+                DB::raw('SUM(CASE WHEN deals.profit > 0 THEN deals.profit ELSE 0 END) as gross_profit'),
+                DB::raw('SUM(CASE WHEN deals.profit < 0 THEN ABS(deals.profit) ELSE 0 END) as gross_loss'),
+                DB::raw('SUM(CASE WHEN deals.profit > 0 THEN 1 ELSE 0 END) as winning_trades'),
+                DB::raw('SUM(CASE WHEN deals.profit < 0 THEN 1 ELSE 0 END) as losing_trades'),
+                DB::raw('SUM(deals.volume) as total_volume'),
+                DB::raw('COUNT(*) as trade_count')
+            )
+            ->whereNotNull('deals.symbol')
+            ->where('deals.symbol', '!=', '')
+            ->whereIn('deals.entry', ['out', 'inout'])
+            ->where('deals.time', '>=', now()->subDays($days))
+            ->groupBy('trading_accounts.broker_name', DB::raw("COALESCE(trading_accounts.account_currency, 'USD')"))
+            ->get();
+
+        return $rows->groupBy('broker_name');
     }
 
     /**
@@ -123,16 +220,19 @@ class BrokerAnalyticsService
 
     /**
      * Get account statistics for a broker
+     * OPTIMIZED: Accepts pre-loaded accounts collection
      */
-    private function getAccountStats($brokerName, $days, $displayCurrency)
+    private function getAccountStats($brokerName, $days, $displayCurrency, $accounts = null)
     {
-        $accounts = TradingAccount::where('broker_name', $brokerName)->get();
+        if ($accounts === null) {
+            $accounts = TradingAccount::where('broker_name', $brokerName)->get();
+        }
         $totalAccounts = $accounts->count();
         $activeAccounts = $accounts->where('is_active', true)->count();
         
-        $recentlyActive = TradingAccount::where('broker_name', $brokerName)
-            ->where('last_sync_at', '>=', now()->subDays($days))
-            ->count();
+        $recentlyActive = $accounts->filter(function ($account) use ($days) {
+            return $account->last_sync_at && $account->last_sync_at->gte(now()->subDays($days));
+        })->count();
 
         // Get native currency balances (no conversion)
         $activeAccountsList = $accounts->where('is_active', true);
@@ -179,19 +279,20 @@ class BrokerAnalyticsService
 
     /**
      * Calculate average spreads from real trade data
-     * FIXED: Proper spread calculation
+     * OPTIMIZED: Accepts pre-loaded deals collection
      */
-    private function getSpreadAnalysis($brokerName, $days)
+    private function getSpreadAnalysis($brokerName, $days, $brokerDeals = null)
     {
-        $accountIds = TradingAccount::where('broker_name', $brokerName)
-            ->pluck('id');
+        if ($brokerDeals === null) {
+            $accountIds = TradingAccount::where('broker_name', $brokerName)->pluck('id');
+            $brokerDeals = Deal::closedTrades()
+                ->whereIn('trading_account_id', $accountIds)
+                ->dateRange(now()->subDays($days))
+                ->orderBy('time')
+                ->get();
+        }
 
-        // Get all deals for this broker
-        $allDeals = Deal::closedTrades()
-            ->whereIn('trading_account_id', $accountIds)
-            ->dateRange(now()->subDays($days))
-            ->orderBy('time')
-            ->get();
+        $allDeals = $brokerDeals->sortBy('time');
 
         if ($allDeals->isEmpty()) {
             return [];
@@ -289,20 +390,35 @@ class BrokerAnalyticsService
 
     /**
      * Calculate commission and fee costs
-     * FIXED: Using display currency
+     * OPTIMIZED: Uses pre-aggregated DB data (GROUP BY broker, currency) instead of iterating deals
      */
-    private function getCostAnalysis($brokerName, $days, $displayCurrency)
+    private function getCostAnalysis($brokerName, $days, $displayCurrency, $costAggregates = null)
     {
-        $accountIds = TradingAccount::where('broker_name', $brokerName)
-            ->pluck('id');
+        // Use pre-aggregated data if available
+        if ($costAggregates !== null) {
+            $brokerRows = $costAggregates->get($brokerName, collect());
+        } else {
+            // Fallback: run the aggregation query for just this broker
+            $brokerRows = DB::table('deals')
+                ->join('trading_accounts', 'deals.trading_account_id', '=', 'trading_accounts.id')
+                ->select(
+                    DB::raw("COALESCE(trading_accounts.account_currency, 'USD') as currency"),
+                    DB::raw('SUM(ABS(deals.commission)) as total_commission'),
+                    DB::raw('SUM(deals.swap) as total_swap'),
+                    DB::raw('SUM(ABS(deals.fee)) as total_fee'),
+                    DB::raw('SUM(deals.volume) as total_volume'),
+                    DB::raw('COUNT(*) as trade_count')
+                )
+                ->where('trading_accounts.broker_name', $brokerName)
+                ->whereNotNull('deals.symbol')
+                ->where('deals.symbol', '!=', '')
+                ->whereIn('deals.entry', ['out', 'inout'])
+                ->where('deals.time', '>=', now()->subDays($days))
+                ->groupBy(DB::raw("COALESCE(trading_accounts.account_currency, 'USD')"))
+                ->get();
+        }
 
-        $deals = Deal::closedTrades()
-            ->whereIn('trading_account_id', $accountIds)
-            ->with('tradingAccount')
-            ->dateRange(now()->subDays($days))
-            ->get();
-
-        if ($deals->isEmpty()) {
+        if ($brokerRows->isEmpty()) {
             return null;
         }
 
@@ -310,50 +426,50 @@ class BrokerAnalyticsService
         $totalCommission = 0.0;
         $totalSwap = 0.0;
         $totalFees = 0.0;
+        $totalVolume = 0.0;
+        $totalTradeCount = 0;
 
-        // Convert all costs to display currency
-        foreach ($deals as $deal) {
-            $accountCurrency = $deal->tradingAccount->account_currency ?? 'USD';
+        // Convert aggregated totals per currency (a few rows) instead of per deal (thousands)
+        foreach ($brokerRows as $row) {
+            $currency = $row->currency ?: 'USD';
+            $totalTradeCount += $row->trade_count;
+            $totalVolume += $row->total_volume;
 
             $commission = $this->convertAmountSafely(
-                abs($deal->commission),
-                $accountCurrency,
+                (float) $row->total_commission,
+                $currency,
                 $displayCurrency,
                 $conversionStats,
                 'broker_costs_commission'
             );
-
             if ($commission !== null) {
                 $totalCommission += $commission;
             }
 
             $swap = $this->convertAmountSafely(
-                $deal->swap,
-                $accountCurrency,
+                (float) $row->total_swap,
+                $currency,
                 $displayCurrency,
                 $conversionStats,
                 'broker_costs_swap'
             );
-
             if ($swap !== null) {
                 $totalSwap += $swap;
             }
 
             $fee = $this->convertAmountSafely(
-                abs($deal->fee),
-                $accountCurrency,
+                (float) $row->total_fee,
+                $currency,
                 $displayCurrency,
                 $conversionStats,
                 'broker_costs_fee'
             );
-
             if ($fee !== null) {
                 $totalFees += $fee;
             }
         }
 
-        $totalVolume = $deals->sum('volume');
-        $tradeCount = $conversionStats['success'];
+        $tradeCount = $totalTradeCount;
 
         if ($conversionStats['skipped'] > 0) {
             Log::warning('Broker cost analysis conversions skipped', [
@@ -381,16 +497,19 @@ class BrokerAnalyticsService
 
     /**
      * Calculate slippage statistics
+     * OPTIMIZED: Accepts pre-loaded deals collection
      */
-    private function getSlippageStats($brokerName, $days)
+    private function getSlippageStats($brokerName, $days, $brokerDeals = null)
     {
-        $accountIds = TradingAccount::where('broker_name', $brokerName)
-            ->pluck('id');
+        if ($brokerDeals === null) {
+            $accountIds = TradingAccount::where('broker_name', $brokerName)->pluck('id');
+            $brokerDeals = Deal::closedTrades()
+                ->whereIn('trading_account_id', $accountIds)
+                ->dateRange(now()->subDays($days))
+                ->get();
+        }
 
-        $deals = Deal::closedTrades()
-            ->whereIn('trading_account_id', $accountIds)
-            ->dateRange(now()->subDays($days))
-            ->get();
+        $deals = $brokerDeals;
 
         if ($deals->isEmpty()) {
             return null;
@@ -409,11 +528,13 @@ class BrokerAnalyticsService
 
     /**
      * Get reliability metrics (uptime, sync success rate)
+     * OPTIMIZED: Accepts pre-loaded accounts collection
      */
-    private function getReliabilityMetrics($brokerName, $days)
+    private function getReliabilityMetrics($brokerName, $days, $accounts = null)
     {
-        $accounts = TradingAccount::where('broker_name', $brokerName)
-            ->get();
+        if ($accounts === null) {
+            $accounts = TradingAccount::where('broker_name', $brokerName)->get();
+        }
 
         if ($accounts->isEmpty()) {
             return null;
@@ -454,20 +575,37 @@ class BrokerAnalyticsService
 
     /**
      * Get overall performance metrics for broker
-     * FIXED: Using display currency
+     * OPTIMIZED: Uses pre-aggregated DB data (GROUP BY broker, currency) instead of iterating deals
      */
-    private function getPerformanceMetrics($brokerName, $days, $displayCurrency)
+    private function getPerformanceMetrics($brokerName, $days, $displayCurrency, $perfAggregates = null)
     {
-        $accountIds = TradingAccount::where('broker_name', $brokerName)
-            ->pluck('id');
+        // Use pre-aggregated data if available
+        if ($perfAggregates !== null) {
+            $brokerRows = $perfAggregates->get($brokerName, collect());
+        } else {
+            // Fallback: run the aggregation query for just this broker
+            $brokerRows = DB::table('deals')
+                ->join('trading_accounts', 'deals.trading_account_id', '=', 'trading_accounts.id')
+                ->select(
+                    DB::raw("COALESCE(trading_accounts.account_currency, 'USD') as currency"),
+                    DB::raw('SUM(deals.profit) as total_profit'),
+                    DB::raw('SUM(CASE WHEN deals.profit > 0 THEN deals.profit ELSE 0 END) as gross_profit'),
+                    DB::raw('SUM(CASE WHEN deals.profit < 0 THEN ABS(deals.profit) ELSE 0 END) as gross_loss'),
+                    DB::raw('SUM(CASE WHEN deals.profit > 0 THEN 1 ELSE 0 END) as winning_trades'),
+                    DB::raw('SUM(CASE WHEN deals.profit < 0 THEN 1 ELSE 0 END) as losing_trades'),
+                    DB::raw('SUM(deals.volume) as total_volume'),
+                    DB::raw('COUNT(*) as trade_count')
+                )
+                ->where('trading_accounts.broker_name', $brokerName)
+                ->whereNotNull('deals.symbol')
+                ->where('deals.symbol', '!=', '')
+                ->whereIn('deals.entry', ['out', 'inout'])
+                ->where('deals.time', '>=', now()->subDays($days))
+                ->groupBy(DB::raw("COALESCE(trading_accounts.account_currency, 'USD')"))
+                ->get();
+        }
 
-        $deals = Deal::closedTrades()
-            ->whereIn('trading_account_id', $accountIds)
-            ->with('tradingAccount')
-            ->dateRange(now()->subDays($days))
-            ->get();
-
-        if ($deals->isEmpty()) {
+        if ($brokerRows->isEmpty()) {
             return null;
         }
 
@@ -478,42 +616,57 @@ class BrokerAnalyticsService
         $grossProfit = 0.0;
         $grossLoss = 0.0;
         $totalVolume = 0.0;
+        $totalTradeCount = 0;
 
-        foreach ($deals as $deal) {
-            $accountCurrency = $deal->tradingAccount->account_currency ?? 'USD';
+        // Convert aggregated totals per currency (a few rows) instead of per deal (thousands)
+        foreach ($brokerRows as $row) {
+            $currency = $row->currency ?: 'USD';
+            $totalTradeCount += $row->trade_count;
+            $totalVolume += $row->total_volume;
+            $winningTradesCount += $row->winning_trades;
+            $losingTradesCount += $row->losing_trades;
 
             $convertedProfit = $this->convertAmountSafely(
-                $deal->profit,
-                $accountCurrency,
+                (float) $row->total_profit,
+                $currency,
                 $displayCurrency,
                 $conversionStats,
                 'broker_performance_profit'
             );
 
-            if ($convertedProfit === null) {
-                continue;
+            if ($convertedProfit !== null) {
+                $totalProfit += $convertedProfit;
             }
 
-            $totalProfit += $convertedProfit;
-            $totalVolume += $deal->volume;
+            $convertedGrossProfit = $this->convertAmountSafely(
+                (float) $row->gross_profit,
+                $currency,
+                $displayCurrency,
+                $conversionStats,
+                'broker_performance_gross_profit'
+            );
+            if ($convertedGrossProfit !== null) {
+                $grossProfit += $convertedGrossProfit;
+            }
 
-            if ($convertedProfit > 0) {
-                $winningTradesCount++;
-                $grossProfit += $convertedProfit;
-            } elseif ($convertedProfit < 0) {
-                $losingTradesCount++;
-                $grossLoss += abs($convertedProfit);
+            $convertedGrossLoss = $this->convertAmountSafely(
+                (float) $row->gross_loss,
+                $currency,
+                $displayCurrency,
+                $conversionStats,
+                'broker_performance_gross_loss'
+            );
+            if ($convertedGrossLoss !== null) {
+                $grossLoss += $convertedGrossLoss;
             }
         }
 
-        $countedTrades = $conversionStats['success'];
+        $countedTrades = $totalTradeCount;
 
         if ($countedTrades === 0) {
-            Log::warning('Broker performance conversions all skipped', [
+            Log::warning('Broker performance: no trades found', [
                 'broker' => $brokerName,
                 'days' => $days,
-                'attempted' => $conversionStats['attempted'],
-                'skipped' => $conversionStats['skipped'],
             ]);
 
             return null;
@@ -582,37 +735,30 @@ class BrokerAnalyticsService
 
     /**
      * Get top traded symbols across all brokers
+     * OPTIMIZED: SQL-level JOIN with symbol_mappings for normalization
      */
     private function getTopSymbols($days)
     {
-        // Get all deals with their symbols
-        $deals = Deal::closedTrades()
-            ->dateRange(now()->subDays($days))
-            ->select('symbol')
-            ->get();
-        
-        // Group by normalized symbol in PHP
-        $symbolCounts = [];
-        
-        foreach ($deals as $deal) {
-            $normalizedSymbol = $deal->normalized_symbol; // Uses accessor
-            
-            if (!isset($symbolCounts[$normalizedSymbol])) {
-                $symbolCounts[$normalizedSymbol] = 0;
-            }
-            $symbolCounts[$normalizedSymbol]++;
-        }
-        
-        // Sort and take top 10
-        arsort($symbolCounts);
-        $symbolCounts = array_slice($symbolCounts, 0, 10, true);
-        
-        return collect($symbolCounts)->map(function($count, $symbol) {
-            return [
-                'symbol' => $symbol,
-                'trades' => $count,
-            ];
-        })->values();
+        return DB::table('deals')
+            ->leftJoin('symbol_mappings', 'deals.symbol', '=', 'symbol_mappings.raw_symbol')
+            ->select(
+                DB::raw('COALESCE(symbol_mappings.normalized_symbol, deals.symbol) as normalized_symbol'),
+                DB::raw('COUNT(*) as trades')
+            )
+            ->whereNotNull('deals.symbol')
+            ->where('deals.symbol', '!=', '')
+            ->whereIn('deals.entry', ['out', 'inout'])
+            ->where('deals.time', '>=', now()->subDays($days))
+            ->groupBy(DB::raw('COALESCE(symbol_mappings.normalized_symbol, deals.symbol)'))
+            ->orderBy('trades', 'desc')
+            ->limit(10)
+            ->get()
+            ->map(function ($row) {
+                return [
+                    'symbol' => $row->normalized_symbol,
+                    'trades' => (int) $row->trades,
+                ];
+            });
     }
 
     /**

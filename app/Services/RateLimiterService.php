@@ -102,8 +102,18 @@ class RateLimiterService
             // First attempt, set with 60 second TTL
             Cache::put($key, 1, 60);
         } else {
-            // Increment existing counter
-            Cache::increment($key);
+            // Increment existing counter while preserving TTL
+            // Cache::increment() removes TTL in Redis, so we need to handle it differently
+            $redis = Cache::getStore()->getRedis();
+            $ttl = $redis->ttl($key);
+            
+            // If TTL is -1 (no expiry) or -2 (key doesn't exist), set it to 60
+            if ($ttl <= 0) {
+                $ttl = 60;
+            }
+            
+            $redis->incr($key);
+            $redis->expire($key, $ttl);
         }
     }
     

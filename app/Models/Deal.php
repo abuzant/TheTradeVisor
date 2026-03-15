@@ -53,19 +53,20 @@ class Deal extends Model
 
 
     /**
+     * Cached symbol mappings (loaded once per request)
+     */
+    protected static $symbolMappingsCache = null;
+
+    /**
      * Get the normalized symbol (accessor)
      */
     public function getNormalizedSymbolAttribute()
     {
-        // Try to find the mapping
-        $mapping = \App\Models\SymbolMapping::where('raw_symbol', $this->symbol)->first();
-        
-        if ($mapping) {
-            return $mapping->normalized_symbol;
+        if (static::$symbolMappingsCache === null) {
+            static::$symbolMappingsCache = \App\Models\SymbolMapping::pluck('normalized_symbol', 'raw_symbol')->toArray();
         }
-        
-        // If no mapping, return the raw symbol
-        return $this->symbol;
+
+        return static::$symbolMappingsCache[$this->symbol] ?? $this->symbol;
     }
 
     //  Time Fomatting with Carbn

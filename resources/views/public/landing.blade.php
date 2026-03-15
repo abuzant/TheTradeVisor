@@ -43,8 +43,7 @@
                 "url": "https://thetradevisor.com",
                 "logo": "{{ url('/logo.svg') }}",
                 "sameAs": [
-                    "https://twitter.com/thetradevisor",
-                    "https://linkedin.com/company/thetradevisor"
+                    "https://www.facebook.com/profile.php?id=61584368789832"
                 ],
                 "contactPoint": {
                     "@type": "ContactPoint",

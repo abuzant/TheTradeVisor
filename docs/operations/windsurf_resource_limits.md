@@ -22,9 +22,9 @@ Resource limits have been implemented to prevent Windsurf IDE processes from con
 
 | Resource | Limit | Description |
 |----------|-------|-------------|
-| **MemoryMax** | 3.8GB | Hard limit - process killed if exceeded |
-| **MemoryHigh** | 3.4GB | Soft limit - process throttled if exceeded |
-| **CPUQuota** | 50% | Maximum 0.5 cores (50% of 1 core) |
+| **MemoryMax** | 3.0GB | Hard limit - process killed if exceeded |
+| **MemoryHigh** | 2.5GB | Soft limit - process throttled if exceeded |
+| **CPUQuota** | 35% | Maximum 0.35 cores |
 | **TasksMax** | 200 | Maximum number of processes/threads |
 
 **Scope**: All processes running under user slice (UID 1001 - tradeadmin)
@@ -35,11 +35,12 @@ Resource limits have been implemented to prevent Windsurf IDE processes from con
 
 **Function**: 
 - Monitors Windsurf processes every 5 minutes
-- Kills processes exceeding 3GB memory
+- Kills processes exceeding 2.5GB memory or 150% CPU
+- Aggregates total Windsurf memory footprint
 - Sends email alerts on violations
 - Logs all actions to `/var/log/thetradevisor/windsurf_monitor.log`
 
-**Cron Schedule**: Every 5 minutes (to be configured)
+**Cron Schedule**: Every 5 minutes via `/etc/cron.d/windsurf_monitor`
 
 ---
 
@@ -120,12 +121,12 @@ journalctl -u user@1001.service | grep -i "killed\|oom"
 
 ## Current Status
 
-**As of November 21, 2025 14:41 UTC**:
+**As of November 27, 2025 13:05 UTC**:
 
-- ✅ Systemd limits: ACTIVE
-- ✅ Monitoring script: CREATED (cron pending)
-- ✅ Current Windsurf usage: 1.8GB (23% of system memory)
-- ✅ Processes: 13 Windsurf-related processes
+- ✅ Systemd limits: ACTIVE (3.0G/2.5G, 35% CPU)
+- ✅ Monitoring script: ACTIVE (cron enabled)
+- ✅ Current Windsurf usage: 1.4GB (18% of system memory)
+- ✅ Processes: 9 Windsurf-related processes
 - ✅ Status: HEALTHY
 
 ---

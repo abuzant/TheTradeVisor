@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Add author credits to all .md files in /www/docs
+# Add author credits to all .md files in /vhosts/thetradevisor.com/docs
 
 CREDITS='
 
@@ -19,8 +19,8 @@ For project support and inquiries:
 🌐 [https://thetradevisor.com](https://thetradevisor.com)
 '
 
-# Find all .md files in /www/docs
-find /www/docs -type f -name "*.md" | while read file; do
+# Find all .md files in /vhosts/thetradevisor.com/docs
+find /vhosts/thetradevisor.com/docs -type f -name "*.md" | while read file; do
     # Check if credits already exist
     if ! grep -q "Ruslan Abuzant" "$file"; then
         # Remove any existing author sections

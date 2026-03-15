@@ -8,8 +8,8 @@ ALERT_MESSAGE="$2"
 ALERT_DETAILS="$3"
 
 # Load environment variables
-if [ -f /www/.env ]; then
-    export $(grep -v '^#' /www/.env | xargs)
+if [ -f /vhosts/thetradevisor.com/.env ]; then
+    export $(grep -v '^#' /vhosts/thetradevisor.com/.env | xargs)
 fi
 
 # Default email if not set
@@ -89,7 +89,7 @@ send_email() {
     fi
     
     # Use Laravel's mail system with SES configuration
-    /www/scripts/send_email_alert.php "$ALERT_LEVEL" "$ALERT_MESSAGE" "$ALERT_DETAILS"
+    /vhosts/thetradevisor.com/scripts/send_email_alert.php "$ALERT_LEVEL" "$ALERT_MESSAGE" "$ALERT_DETAILS"
     return $?
 }
 

@@ -6,11 +6,11 @@
 echo "Setting up TheTradeVisor system monitoring..."
 
 # Make health monitor executable
-chmod +x /www/scripts/monitor_system_health.sh
+chmod +x /vhosts/thetradevisor.com/scripts/monitor_system_health.sh
 
 # Create log directory
 sudo mkdir -p /var/log/thetradevisor
-sudo chown tradeadmin:www-data /var/log/thetradevisor
+sudo chown ubuntu:www-data /var/log/thetradevisor
 sudo chmod 775 /var/log/thetradevisor
 
 # Install required tools if not present
@@ -27,7 +27,7 @@ if ! command -v nc &> /dev/null; then
 fi
 
 # Setup cron job for health monitoring (every 2 minutes)
-CRON_JOB="*/2 * * * * /www/scripts/monitor_system_health.sh"
+CRON_JOB="*/2 * * * * /vhosts/thetradevisor.com/scripts/monitor_system_health.sh"
 
 # Check if cron job already exists
 if ! crontab -l 2>/dev/null | grep -q "monitor_system_health.sh"; then
@@ -40,11 +40,11 @@ fi
 
 # Configure PostgreSQL statement timeout
 echo "Configuring PostgreSQL query timeout..."
-sudo -u postgres psql -d thetradevisor -c "ALTER DATABASE thetradevisor SET statement_timeout = '30s';" 2>/dev/null || echo "Note: PostgreSQL timeout already configured or requires manual setup"
+docker exec postgres psql -U ${POSTGRES_USER:-postgres} -d thetradevisor -c "ALTER DATABASE thetradevisor SET statement_timeout = '30s';" 2>/dev/null || echo "Note: PostgreSQL timeout already configured or requires manual setup"
 
 # Configure PHP-FPM slow log threshold
 echo "Configuring PHP-FPM slow request logging..."
-PHP_FPM_CONF="/etc/php/8.3/fpm/pool.d/www.conf"
+PHP_FPM_CONF="/etc/php/8.3/fpm/pool.d/thetradevisor.conf"
 
 if [ -f "$PHP_FPM_CONF" ]; then
     # Check if slow log is already configured
@@ -70,7 +70,7 @@ sudo tee /etc/logrotate.d/thetradevisor > /dev/null <<EOF
     delaycompress
     missingok
     notifempty
-    create 0644 tradeadmin www-data
+    create 0644 ubuntu www-data
 }
 EOF
 
@@ -79,7 +79,7 @@ echo "✓ Log rotation configured"
 # Test the health monitor
 echo ""
 echo "Running initial health check..."
-/www/scripts/monitor_system_health.sh
+/vhosts/thetradevisor.com/scripts/monitor_system_health.sh
 
 echo ""
 echo "=========================================="

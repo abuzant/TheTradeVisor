@@ -3,32 +3,55 @@
 # TheTradeVisor System Health Monitor
 # Prevents resource exhaustion and system hangs
 
-LOG_FILE="/var/log/thetradevisor/health_monitor.log"
-ALERT_FILE="/var/log/thetradevisor/alerts.log"
+LOG_DIR="/var/log/thetradevisor"
+LOG_FILE="${LOG_DIR}/health_monitor.log"
+ALERT_FILE="${LOG_DIR}/alerts.log"
 MAX_CPU=80
 MAX_MEMORY=85
 MAX_DISK_IO=1500
 MAX_PHP_SLOW_REQUESTS=5
+CPU_SAMPLE_SECONDS=${CPU_SAMPLE_SECONDS:-10}
 
 # Create log directory if it doesn't exist
-mkdir -p /var/log/thetradevisor
+mkdir -p "$LOG_DIR"
+chmod 755 "$LOG_DIR"
 
 log() {
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | tee -a "$LOG_FILE"
+    local message="[$(date '+%Y-%m-%d %H:%M:%S')] $1"
+    # Check if running from cron (no terminal attached)
+    if [ -t 1 ]; then
+        # Running from terminal - show output
+        echo "$message" | tee -a "$LOG_FILE"
+    else
+        # Running from cron - log only
+        echo "$message" >> "$LOG_FILE"
+    fi
 }
 
 alert() {
     local level="${2:-WARNING}"  # Default to WARNING if not specified
     local message="$1"
-    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $level: $message" | tee -a "$ALERT_FILE"
+    local alert_message="[$(date '+%Y-%m-%d %H:%M:%S')] $level: $message"
+    
+    # Always log to alert file
+    echo "$alert_message" >> "$ALERT_FILE"
+    
+    # Show output if running from terminal
+    if [ -t 1 ]; then
+        echo "$alert_message"
+    fi
     
     # Send notification via Slack/Email
-    /www/scripts/send_alert.sh "$level" "$message" "" &
+    /vhosts/thetradevisor.com/scripts/send_alert.sh "$level" "$message" "" &
 }
 
 # Check CPU usage
 check_cpu() {
-    CPU_USAGE=$(top -bn1 | grep "Cpu(s)" | awk '{print $2}' | cut -d'%' -f1 | cut -d'.' -f1)
+    CPU_USAGE=$(mpstat "$CPU_SAMPLE_SECONDS" 1 2>/dev/null | awk 'NR>3 && $12 ~ /^[0-9.]+$/ {usage=int(100 - $12 + 0.5)} END {if (usage == "") usage=-1; print usage}')
+
+    if [ "$CPU_USAGE" -lt 0 ]; then
+        CPU_USAGE=$(top -bn1 | awk '/Cpu\(s\)/ {sub(/%,/, "", $2); print int($2)}')
+    fi
     if [ "$CPU_USAGE" -gt "$MAX_CPU" ]; then
         local details=$(ps aux --sort=-%cpu | head -10)
         alert "High CPU usage: ${CPU_USAGE}%" "CRITICAL"
@@ -81,13 +104,13 @@ check_disk_io() {
 # Check PostgreSQL health
 check_postgres() {
     # Check for long-running queries (>30 seconds)
-    LONG_QUERIES=$(sudo -u postgres psql -t -c "SELECT COUNT(*) FROM pg_stat_activity WHERE state = 'active' AND now() - query_start > interval '30 seconds';" 2>/dev/null || echo 0)
+    LONG_QUERIES=$(docker exec postgres psql -U pgsql_user -t -c "SELECT COUNT(*) FROM pg_stat_activity WHERE state = 'active' AND now() - query_start > interval '30 seconds';" 2>/dev/null || echo 0)
     
     if [ "$LONG_QUERIES" -gt 0 ]; then
         alert "Long-running PostgreSQL queries detected: $LONG_QUERIES" "WARNING"
         
         # Log the queries
-        sudo -u postgres psql -c "SELECT pid, now() - query_start as duration, query FROM pg_stat_activity WHERE state = 'active' AND now() - query_start > interval '30 seconds';" >> "$ALERT_FILE" 2>/dev/null
+        docker exec postgres psql -U pgsql_user -c "SELECT pid, now() - query_start as duration, query FROM pg_stat_activity WHERE state = 'active' AND now() - query_start > interval '30 seconds';" >> "$ALERT_FILE" 2>/dev/null
         
         return 1
     fi
@@ -140,7 +163,7 @@ main() {
             alert "CRITICAL: Multiple system issues detected! ($ISSUES issues)" "CRITICAL"
             
             # Clear Laravel cache to reduce load
-            cd /www && php artisan cache:clear >> "$ALERT_FILE" 2>&1
+            cd /vhosts/thetradevisor.com && php artisan cache:clear >> "$ALERT_FILE" 2>&1
             
             # Restart PHP-FPM if needed
             if [ "${SLOW_REQUESTS:-0}" -gt 10 ]; then

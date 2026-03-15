@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Backup cleanup script - Keep only last 5 backups
-BACKUP_DIR="/var/www/thetradevisor.com/backups"
+BACKUP_DIR="/vhosts/thetradevisor.com/backups"
 MAX_BACKUPS=5
 
 echo "Cleaning up backups - keeping last $MAX_BACKUPS..."

@@ -20,6 +20,7 @@
                     <li><a href="/faq" class="hover:text-white transition-colors">FAQ</a></li>
                     <li><a href="/documentation" class="hover:text-white transition-colors">Documentation</a></li>
                     <li><a href="/api-docs" class="hover:text-white transition-colors">API</a></li>
+                    <li><a href="https://github.com/abuzant/TheTradeVisor" target="_blank" class="hover:text-white transition-colors">@GitHub</a></li>
                 </ul>
             </div>
 

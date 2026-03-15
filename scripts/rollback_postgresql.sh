@@ -4,22 +4,24 @@ echo "=== POSTGRESQL ROLLBACK SCRIPT ==="
 echo "Use this if you experience issues after PostgreSQL optimization"
 echo ""
 
-# Check if running as sudo
-if [ "$EUID" -ne 0 ]; then
-    echo "Please run with sudo: sudo ./rollback_postgresql.sh"
+DOCKER_COMPOSE_DIR="/home/ubuntu/docker-apps"
+PG_CONF="$DOCKER_COMPOSE_DIR/postgres/postgresql.conf"
+PG_BACKUP="$PG_CONF.backup"
+
+if [ ! -f "$PG_BACKUP" ]; then
+    echo "❌ No backup found at $PG_BACKUP"
     exit 1
 fi
 
 echo "Restoring original PostgreSQL configuration..."
+cp "$PG_BACKUP" "$PG_CONF"
 
-# Restore backup file
-cp /etc/postgresql/16/main/postgresql.conf.backup /etc/postgresql/16/main/postgresql.conf
+echo "Restarting PostgreSQL container..."
+docker restart postgres
 
-echo "Restarting PostgreSQL service..."
-systemctl restart postgresql
-
-echo "Verifying rollback..."
-echo "Configuration restored to original settings"
+echo "Waiting for PostgreSQL to be ready..."
+sleep 3
+docker exec postgres pg_isready -U postgres && echo "✅ PostgreSQL is ready" || echo "⚠ PostgreSQL may still be starting"
 
 echo ""
 echo "✅ POSTGRESQL ROLLBACK COMPLETED"

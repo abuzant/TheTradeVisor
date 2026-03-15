@@ -98,6 +98,9 @@ class AnalyticsController extends Controller
         
         // Try to get cached data first
         return Cache::remember($cacheKey, 300, function () use ($days) {
+            // Preload all currency rates in one query to avoid per-pair lookups
+            \App\Services\CurrencyService::preloadRates();
+
             return [
                 'overview' => $this->getOverviewStats($days),
                 'popular_pairs' => $this->getPopularPairs($days),
@@ -215,86 +218,115 @@ class AnalyticsController extends Controller
 
     /**
      * Get regional trading activity
+     * OPTIMIZED: DB-level GROUP BY country, currency with SUM(balance) for scalability
      */
     private function getRegionalActivity()
     {
-        // Try new country_code field first, fallback to detected_country
-        $query = TradingAccount::where('is_active', true);
-        
         // Check if we have any country data
-        $hasCountryCode = TradingAccount::whereNotNull('country_code')->exists();
-        $hasDetectedCountry = TradingAccount::whereNotNull('detected_country')->exists();
-        
+        $hasCountryCode = TradingAccount::whereNotNull('country_code')->where('is_active', true)->exists();
+        $hasDetectedCountry = TradingAccount::whereNotNull('detected_country')->where('is_active', true)->exists();
+
+        $currencyService = app(\App\Services\CurrencyService::class);
+
         if ($hasCountryCode) {
-            $accounts = $query->whereNotNull('country_code')->limit(100)->get();
-            $grouped = $accounts->groupBy('country_code');
-            
-            $data = $grouped->map(function($accountsByCountry, $countryCode) {
-                $totalBalanceUSD = 0;
-                $currencyService = app(\App\Services\CurrencyService::class);
-                
-                foreach ($accountsByCountry as $account) {
-                    // Convert each account's balance to USD
-                    $balanceUSD = $currencyService->convert(
-                        $account->balance,
-                        $account->account_currency ?? 'USD',
-                        'USD'
-                    );
-                    $totalBalanceUSD += $balanceUSD;
+            // DB-level aggregation: GROUP BY country_code, account_currency
+            $rows = DB::table('trading_accounts')
+                ->select(
+                    'country_code',
+                    DB::raw('MAX(country_name) as country_name'),
+                    DB::raw("COALESCE(account_currency, 'USD') as currency"),
+                    DB::raw('COUNT(*) as account_count'),
+                    DB::raw('SUM(balance) as total_balance')
+                )
+                ->where('is_active', true)
+                ->whereNotNull('country_code')
+                ->groupBy('country_code', DB::raw("COALESCE(account_currency, 'USD')"))
+                ->get();
+
+            // Aggregate by country, converting each currency group to USD
+            $countryData = [];
+            foreach ($rows as $row) {
+                $cc = $row->country_code;
+                if (!isset($countryData[$cc])) {
+                    $countryData[$cc] = [
+                        'country' => $row->country_name ?? $cc,
+                        'country_code' => $cc,
+                        'accounts' => 0,
+                        'balance' => 0.0,
+                    ];
                 }
-                
-                return [
-                    'country' => $accountsByCountry->first()->country_name ?? $countryCode,
-                    'country_code' => $countryCode,
-                    'accounts' => $accountsByCountry->count(),
-                    'balance' => round($totalBalanceUSD, 2),
-                ];
-            })->sortByDesc('accounts')->take(10)->values();
-        } elseif ($hasDetectedCountry) {
-            $accounts = $query->whereNotNull('detected_country')->limit(100)->get();
-            $grouped = $accounts->groupBy('detected_country');
-            
-            $data = $grouped->map(function($accountsByCountry, $country) {
-                $totalBalanceUSD = 0;
-                $currencyService = app(\App\Services\CurrencyService::class);
-                
-                foreach ($accountsByCountry as $account) {
-                    // Convert each account's balance to USD
-                    $balanceUSD = $currencyService->convert(
-                        $account->balance,
-                        $account->account_currency ?? 'USD',
-                        'USD'
-                    );
-                    $totalBalanceUSD += $balanceUSD;
-                }
-                
-                return [
-                    'country' => $country,
-                    'country_code' => null,
-                    'accounts' => $accountsByCountry->count(),
-                    'balance' => round($totalBalanceUSD, 2),
-                ];
-            })->sortByDesc('accounts')->take(10)->values();
-        } else {
-            // No country data available - return a message
-            $accounts = TradingAccount::where('is_active', true)->limit(100)->get();
-            $totalBalanceUSD = 0;
-            $currencyService = app(\App\Services\CurrencyService::class);
-            
-            foreach ($accounts as $account) {
-                $balanceUSD = $currencyService->convert(
-                    $account->balance,
-                    $account->account_currency ?? 'USD',
-                    'USD'
+                $countryData[$cc]['accounts'] += $row->account_count;
+                $countryData[$cc]['balance'] += $currencyService->convert(
+                    (float) $row->total_balance, $row->currency, 'USD'
                 );
-                $totalBalanceUSD += $balanceUSD;
             }
-            
+
+            $data = collect($countryData)->map(function ($item) {
+                $item['balance'] = round($item['balance'], 2);
+                return $item;
+            })->sortByDesc('accounts')->take(10)->values();
+
+        } elseif ($hasDetectedCountry) {
+            $rows = DB::table('trading_accounts')
+                ->select(
+                    'detected_country',
+                    DB::raw("COALESCE(account_currency, 'USD') as currency"),
+                    DB::raw('COUNT(*) as account_count'),
+                    DB::raw('SUM(balance) as total_balance')
+                )
+                ->where('is_active', true)
+                ->whereNotNull('detected_country')
+                ->groupBy('detected_country', DB::raw("COALESCE(account_currency, 'USD')"))
+                ->get();
+
+            $countryData = [];
+            foreach ($rows as $row) {
+                $c = $row->detected_country;
+                if (!isset($countryData[$c])) {
+                    $countryData[$c] = [
+                        'country' => $c,
+                        'country_code' => null,
+                        'accounts' => 0,
+                        'balance' => 0.0,
+                    ];
+                }
+                $countryData[$c]['accounts'] += $row->account_count;
+                $countryData[$c]['balance'] += $currencyService->convert(
+                    (float) $row->total_balance, $row->currency, 'USD'
+                );
+            }
+
+            $data = collect($countryData)->map(function ($item) {
+                $item['balance'] = round($item['balance'], 2);
+                return $item;
+            })->sortByDesc('accounts')->take(10)->values();
+
+        } else {
+            // No country data available
+            $row = DB::table('trading_accounts')
+                ->select(
+                    DB::raw("COALESCE(account_currency, 'USD') as currency"),
+                    DB::raw('COUNT(*) as account_count'),
+                    DB::raw('SUM(balance) as total_balance')
+                )
+                ->where('is_active', true)
+                ->groupBy(DB::raw("COALESCE(account_currency, 'USD')"))
+                ->get();
+
+            $totalBalanceUSD = 0;
+            $totalAccounts = 0;
+            foreach ($row as $r) {
+                $totalAccounts += $r->account_count;
+                $totalBalanceUSD += $currencyService->convert(
+                    (float) $r->total_balance, $r->currency, 'USD'
+                );
+            }
+
             return collect([
                 [
                     'country' => 'No location data available',
                     'country_code' => null,
-                    'accounts' => $accounts->count(),
+                    'accounts' => $totalAccounts,
                     'balance' => round($totalBalanceUSD, 2),
                     'note' => 'Country detection requires IP geolocation to be enabled'
                 ]
@@ -486,30 +518,37 @@ class AnalyticsController extends Controller
 
     /**
      * Get trading costs analysis (converted to USD for global multi-account view)
+     * OPTIMIZED: DB-level GROUP BY currency instead of loading all deals into PHP
      */
     private function getTradingCosts($days = 30)
     {
-        $deals = Deal::closedTrades()
-            ->dateRange(now()->subDays($days))
-            ->with('tradingAccount')
+        $currencyTotals = DB::table('deals')
+            ->join('trading_accounts', 'deals.trading_account_id', '=', 'trading_accounts.id')
+            ->select(
+                DB::raw("COALESCE(trading_accounts.account_currency, 'USD') as currency"),
+                DB::raw('SUM(deals.commission) as total_commission'),
+                DB::raw('SUM(deals.swap) as total_swap'),
+                DB::raw('COUNT(*) as trade_count')
+            )
+            ->whereNotNull('deals.symbol')
+            ->where('deals.symbol', '!=', '')
+            ->whereIn('deals.entry', ['out', 'inout'])
+            ->where('deals.time', '>=', now()->subDays($days))
+            ->groupBy(DB::raw("COALESCE(trading_accounts.account_currency, 'USD')"))
             ->get();
 
         $currencyService = app(\App\Services\CurrencyService::class);
         $totalCommissionUSD = 0;
         $totalSwapUSD = 0;
-        
-        foreach ($deals as $deal) {
-            if ($deal->tradingAccount) {
-                $currency = $deal->tradingAccount->account_currency ?? 'USD';
-                $totalCommissionUSD += $currencyService->convert($deal->commission ?? 0, $currency, 'USD');
-                $totalSwapUSD += $currencyService->convert($deal->swap ?? 0, $currency, 'USD');
-            } else {
-                $totalCommissionUSD += $deal->commission ?? 0;
-                $totalSwapUSD += $deal->swap ?? 0;
-            }
+        $totalTrades = 0;
+
+        foreach ($currencyTotals as $row) {
+            $currency = $row->currency ?: 'USD';
+            $totalTrades += $row->trade_count;
+            $totalCommissionUSD += $currencyService->convert((float) ($row->total_commission ?? 0), $currency, 'USD');
+            $totalSwapUSD += $currencyService->convert((float) ($row->total_swap ?? 0), $currency, 'USD');
         }
-        
-        $totalTrades = $deals->count();
+
         $totalCosts = $totalCommissionUSD + $totalSwapUSD;
 
         return [
@@ -787,22 +826,25 @@ class AnalyticsController extends Controller
         return $data->map(function($item) {
             $winRate = $item->total_trades > 0 ? round(($item->winning_trades / $item->total_trades) * 100, 1) : 0;
             $lossRate = $item->total_trades > 0 ? round(($item->losing_trades / $item->total_trades) * 100, 1) : 0;
-            $profitFactor = $item->avg_loss < 0 ? round(abs($item->avg_win / $item->avg_loss), 2) : 0;
-            $riskReward = $item->avg_loss < 0 ? round(abs($item->avg_win / $item->avg_loss), 2) : 0;
-            $riskScore = $this->calculateRiskScore($winRate, $profitFactor, $item->volatility);
+            $avgWin = $item->avg_win ?? 0;
+            $avgLoss = $item->avg_loss ?? 0;
+            $volatility = $item->volatility ?? 0;
+            $profitFactor = $avgLoss < 0 ? round(abs($avgWin / $avgLoss), 2) : 0;
+            $riskReward = $avgLoss < 0 ? round(abs($avgWin / $avgLoss), 2) : 0;
+            $riskScore = $this->calculateRiskScore($winRate, $profitFactor, $volatility);
             
             return [
                 'symbol' => \App\Models\SymbolMapping::normalize($item->symbol),
                 'total_trades' => $item->total_trades,
                 'win_rate' => $winRate,
                 'loss_rate' => $lossRate,
-                'avg_win' => round($item->avg_win, 2),
-                'avg_loss' => round($item->avg_loss, 2),
-                'max_win' => round($item->max_win, 2),
-                'max_loss' => round($item->max_loss, 2),
+                'avg_win' => round($avgWin, 2),
+                'avg_loss' => round($avgLoss, 2),
+                'max_win' => round($item->max_win ?? 0, 2),
+                'max_loss' => round($item->max_loss ?? 0, 2),
                 'profit_factor' => $profitFactor,
                 'risk_reward_ratio' => $riskReward,
-                'volatility' => round($item->volatility, 2),
+                'volatility' => round($volatility, 2),
                 'total_profit' => round($item->total_profit, 2),
                 'risk_score' => $riskScore,
                 'risk_level' => $this->getRiskLevel($riskScore),
@@ -1125,15 +1167,31 @@ class AnalyticsController extends Controller
 
     /**
      * Profit/Loss Distribution
+     * OPTIMIZED: DB-level aggregation instead of loading all profits into PHP
      */
     private function getProfitLossDistribution($days = 30)
     {
-        $data = Deal::select('profit')
+        // Get all stats in a single DB query
+        $stats = DB::table('deals')
+            ->select(
+                DB::raw('COUNT(*) as total_trades'),
+                DB::raw('SUM(CASE WHEN profit > 0 THEN 1 ELSE 0 END) as profitable_trades'),
+                DB::raw('SUM(CASE WHEN profit < 0 THEN 1 ELSE 0 END) as losing_trades'),
+                DB::raw('SUM(CASE WHEN profit = 0 THEN 1 ELSE 0 END) as breakeven_trades'),
+                DB::raw('AVG(CASE WHEN profit > 0 THEN profit END) as avg_profit'),
+                DB::raw('AVG(CASE WHEN profit < 0 THEN profit END) as avg_loss'),
+                DB::raw('MAX(profit) as largest_win'),
+                DB::raw('MIN(profit) as largest_loss'),
+                DB::raw('MIN(CASE WHEN profit > 0 THEN profit END) as min_profit'),
+                DB::raw('MAX(CASE WHEN profit > 0 THEN profit END) as max_profit'),
+                DB::raw('MIN(CASE WHEN profit < 0 THEN profit END) as min_loss'),
+                DB::raw('MAX(CASE WHEN profit < 0 THEN profit END) as max_loss')
+            )
             ->where('time', '>=', now()->subDays($days))
             ->where('symbol', '!=', '')
-            ->pluck('profit');
+            ->first();
 
-        if ($data->isEmpty()) {
+        if (!$stats || $stats->total_trades == 0) {
             return [
                 'total_trades' => 0,
                 'profitable_trades' => 0,
@@ -1147,24 +1205,77 @@ class AnalyticsController extends Controller
             ];
         }
 
-        $profitableTrades = $data->filter(fn($p) => $p > 0);
-        $losingTrades = $data->filter(fn($p) => $p < 0);
-        $breakevenTrades = $data->filter(fn($p) => $p == 0);
+        // Build distribution buckets using DB-level bucketing
+        $bucketCount = 10;
+        $profitBuckets = collect([]);
+        $lossBuckets = collect([]);
 
-        // Create distribution buckets
-        $profitBuckets = $this->createDistributionBuckets($profitableTrades, true);
-        $lossBuckets = $this->createDistributionBuckets($losingTrades, false);
+        if ($stats->profitable_trades > 0 && $stats->min_profit !== null && $stats->max_profit !== null) {
+            $profitRange = $stats->max_profit - $stats->min_profit;
+            if ($profitRange > 0) {
+                $bucketSize = $profitRange / $bucketCount;
+                $profitBuckets = DB::table('deals')
+                    ->select(
+                        DB::raw("FLOOR((profit - {$stats->min_profit}) / {$bucketSize}) as bucket"),
+                        DB::raw('COUNT(*) as count')
+                    )
+                    ->where('time', '>=', now()->subDays($days))
+                    ->where('symbol', '!=', '')
+                    ->where('profit', '>', 0)
+                    ->groupBy('bucket')
+                    ->orderBy('bucket')
+                    ->get()
+                    ->map(function ($row) use ($stats, $bucketSize, $bucketCount) {
+                        $bucketIdx = min((int) $row->bucket, $bucketCount - 1);
+                        $start = $stats->min_profit + ($bucketIdx * $bucketSize);
+                        $end = $start + $bucketSize;
+                        return [
+                            'range' => sprintf('%.2f - %.2f', $start, $end),
+                            'count' => $row->count,
+                            'percentage' => round(($row->count / $stats->profitable_trades) * 100, 1),
+                        ];
+                    });
+            }
+        }
+
+        if ($stats->losing_trades > 0 && $stats->min_loss !== null && $stats->max_loss !== null) {
+            $lossRange = $stats->max_loss - $stats->min_loss;
+            if ($lossRange > 0) {
+                $bucketSize = $lossRange / $bucketCount;
+                $lossBuckets = DB::table('deals')
+                    ->select(
+                        DB::raw("FLOOR((profit - ({$stats->min_loss})) / {$bucketSize}) as bucket"),
+                        DB::raw('COUNT(*) as count')
+                    )
+                    ->where('time', '>=', now()->subDays($days))
+                    ->where('symbol', '!=', '')
+                    ->where('profit', '<', 0)
+                    ->groupBy('bucket')
+                    ->orderBy('bucket')
+                    ->get()
+                    ->map(function ($row) use ($stats, $bucketSize, $bucketCount) {
+                        $bucketIdx = min((int) $row->bucket, $bucketCount - 1);
+                        $start = $stats->min_loss + ($bucketIdx * $bucketSize);
+                        $end = $start + $bucketSize;
+                        return [
+                            'range' => sprintf('-%.2f - -%.2f', abs($start), abs($end)),
+                            'count' => $row->count,
+                            'percentage' => round(($row->count / $stats->losing_trades) * 100, 1),
+                        ];
+                    });
+            }
+        }
 
         return [
-            'total_trades' => $data->count(),
-            'profitable_trades' => $profitableTrades->count(),
-            'losing_trades' => $losingTrades->count(),
-            'breakeven_trades' => $breakevenTrades->count(),
-            'win_rate' => round(($profitableTrades->count() / $data->count()) * 100, 1),
-            'avg_profit' => round($profitableTrades->avg(), 2),
-            'avg_loss' => round($losingTrades->avg(), 2),
-            'largest_win' => round($profitableTrades->max(), 2),
-            'largest_loss' => round($losingTrades->min(), 2),
+            'total_trades' => (int) $stats->total_trades,
+            'profitable_trades' => (int) $stats->profitable_trades,
+            'losing_trades' => (int) $stats->losing_trades,
+            'breakeven_trades' => (int) $stats->breakeven_trades,
+            'win_rate' => round(($stats->profitable_trades / $stats->total_trades) * 100, 1),
+            'avg_profit' => round($stats->avg_profit, 2),
+            'avg_loss' => round($stats->avg_loss, 2),
+            'largest_win' => round($stats->largest_win, 2),
+            'largest_loss' => round($stats->largest_loss, 2),
             'profit_distribution' => $profitBuckets,
             'loss_distribution' => $lossBuckets,
         ];

@@ -20,6 +20,33 @@ class SymbolMapping extends Model
     protected $casts = [
         'is_verified' => 'boolean',
     ];
+
+    /**
+     * Static in-memory cache for normalize() lookups.
+     * Loaded once per request with all mappings.
+     */
+    protected static $normalizeCache = null;
+
+    /**
+     * Preload all symbol mappings into memory in a single query.
+     * Called automatically on first normalize() call.
+     */
+    public static function preloadMappings(): void
+    {
+        if (static::$normalizeCache !== null) {
+            return;
+        }
+
+        static::$normalizeCache = self::pluck('normalized_symbol', 'raw_symbol')->toArray();
+    }
+
+    /**
+     * Reset the static cache (for testing or long-running processes).
+     */
+    public static function resetMappingCache(): void
+    {
+        static::$normalizeCache = null;
+    }
     
 
     /**
@@ -107,15 +134,19 @@ public static function normalize($rawSymbol)
     if (strlen($rawSymbol) === 0) {
         return 'UNKNOWN';
     }
-    
-    $mapping = self::where('raw_symbol', $rawSymbol)->first();
-    
-    if ($mapping) {
-        return $mapping->normalized_symbol;
+
+    // Lazy-load all mappings on first call
+    static::preloadMappings();
+
+    // Check static cache first (zero overhead)
+    if (isset(static::$normalizeCache[$rawSymbol])) {
+        return static::$normalizeCache[$rawSymbol];
     }
     
-    // Auto-create if doesn't exist
-    return self::normalizeAndStore($rawSymbol);
+    // Auto-create if doesn't exist, and cache the result
+    $normalized = self::normalizeAndStore($rawSymbol);
+    static::$normalizeCache[$rawSymbol] = $normalized;
+    return $normalized;
 }
 
 }

@@ -11,7 +11,8 @@
                     Download TradeVisor EA
                 </h1>
                 <p class="text-xl text-gray-600 max-w-3xl mx-auto">
-                    Automatic installation for MetaTrader 4 & 5. One installer detects all your terminals and sets everything up for you.
+                    Automatic installation for MetaTrader 4 & 5. One installer detects all your terminals and sets everything up for you.<br /><br />
+                    <small>As seen on <a href="https://www.producthunt.com/products/thetradevisor" target="_blank" class="hover:text-blue transition-colors"><span style="display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; background-color: #ff6a4d; color: #ffffff; font-weight: 700; font-family: "Inter", Arial, sans-serif; line-height: 1;">P</span>&nbsp;@ProductHunt</a></small>
                 </p>
             </div>
 

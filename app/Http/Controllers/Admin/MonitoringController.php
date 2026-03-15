@@ -133,7 +133,7 @@ class MonitoringController extends Controller
                 'memory_used' => round($info['used_memory'] / 1024 / 1024, 2) . ' MB',
                 'memory_peak' => round($info['used_memory_peak'] / 1024 / 1024, 2) . ' MB',
                 'memory_limit' => round($info['maxmemory'] / 1024 / 1024, 2) . ' MB',
-                'memory_percentage' => round(($info['used_memory'] / $info['maxmemory']) * 100, 1),
+                'memory_percentage' => $info['maxmemory'] > 0 ? round(($info['used_memory'] / $info['maxmemory']) * 100, 1) : 0,
                 'hit_ratio' => $this->calculateRedisHitRatio($info),
                 'keyspace_hits' => $info['keyspace_hits'] ?? 0,
                 'keyspace_misses' => $info['keyspace_misses'] ?? 0,
@@ -356,7 +356,8 @@ class MonitoringController extends Controller
     private function getDatabaseSize()
     {
         try {
-            $size = DB::select("SELECT pg_size_pretty(pg_database_size('thetradevisor')) as size")[0]->size;
+            $dbName = config('database.connections.pgsql.database', 'thetradevisor_app');
+            $size = DB::select("SELECT pg_size_pretty(pg_database_size(?)) as size", [$dbName])[0]->size;
             return $size;
         } catch (\Exception $e) {
             return 'Unknown';
@@ -366,7 +367,10 @@ class MonitoringController extends Controller
     private function getDatabaseCacheHitRatio()
     {
         try {
-            $stats = DB::select("SELECT blks_hit, blks_read FROM pg_stat_database WHERE datname = 'thetradevisor'")[0];
+            $dbName = config('database.connections.pgsql.database', 'thetradevisor_app');
+            $results = DB::select("SELECT blks_hit, blks_read FROM pg_stat_database WHERE datname = ?", [$dbName]);
+            if (empty($results)) return 0;
+            $stats = $results[0];
             $total = $stats->blks_hit + $stats->blks_read;
             return $total > 0 ? round(($stats->blks_hit / $total) * 100, 2) : 0;
         } catch (\Exception $e) {

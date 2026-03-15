@@ -43,14 +43,26 @@ class PerformanceMetricsService
                 'currency' => $displayCurrency,
             ]);
 
+            $equityCurve = $this->getEquityCurve($accountIds, $days, $displayCurrency);
+            $equityCurveDaily = $this->aggregateSeriesByDay($equityCurve, 'balance');
+            $equityCurveDailySmoothed = $this->smoothSeries($equityCurveDaily, 'balance');
+
+            $drawdown = $this->getDrawdownAnalysis($accountIds, $days, $displayCurrency, $equityCurve);
+            if ($drawdown) {
+                $drawdown['drawdown_periods_daily'] = $this->aggregateSeriesByDay($drawdown['drawdown_periods'], 'drawdown');
+                $drawdown['drawdown_periods_daily_smoothed'] = $this->smoothSeries($drawdown['drawdown_periods_daily'], 'drawdown');
+            }
+
             return [
                 'trade_analysis' => $this->getTradeAnalysis($accountIds, $days, $displayCurrency),
                 'symbol_performance' => $this->getSymbolPerformance($accountIds, $days, $displayCurrency),
                 'timing_analysis' => $this->getTimingAnalysis($accountIds, $days, $displayCurrency),
                 'risk_metrics' => $this->getRiskMetrics($accountIds, $days, $displayCurrency),
                 'streaks' => $this->getStreakAnalysis($accountIds, $days),
-                'equity_curve' => $this->getEquityCurve($accountIds, $days, $displayCurrency),
-                'drawdown' => $this->getDrawdownAnalysis($accountIds, $days, $displayCurrency),
+                'equity_curve' => $equityCurve,
+                'equity_curve_daily' => $equityCurveDaily,
+                'equity_curve_daily_smoothed' => $equityCurveDailySmoothed,
+                'drawdown' => $drawdown,
                 'country_sentiment' => $this->getCountryBasedMarketSentiment($accountIds, $days, $displayCurrency),
                 'platform_performance' => $this->getPlatformPerformanceMatrix($accountIds, $days, $displayCurrency),
                 'display_currency' => $displayCurrency,
@@ -500,9 +512,11 @@ class PerformanceMetricsService
     /**
      * Drawdown Analysis
      */
-    private function getDrawdownAnalysis($accountIds, $days, $displayCurrency)
+    private function getDrawdownAnalysis($accountIds, $days, $displayCurrency, ?array $equityCurve = null)
     {
-        $equityCurve = $this->getEquityCurve($accountIds, $days, $displayCurrency);
+        if ($equityCurve === null) {
+            $equityCurve = $this->getEquityCurve($accountIds, $days, $displayCurrency);
+        }
 
         if (empty($equityCurve)) {
             return null;
@@ -537,6 +551,65 @@ class PerformanceMetricsService
             'current_drawdown' => round($currentDrawdown, 2),
             'drawdown_periods' => $drawdownPeriods,
         ];
+    }
+
+    /**
+     * Helper: Aggregate series by calendar day using average values
+     */
+    private function aggregateSeriesByDay(array $series, string $valueKey): array
+    {
+        if (empty($series)) {
+            return [];
+        }
+
+        return collect($series)
+            ->groupBy(function ($point) {
+                return Carbon::parse($point['date'])->format('Y-m-d');
+            })
+            ->sortKeys()
+            ->map(function ($points, $date) use ($valueKey) {
+                $average = collect($points)->avg($valueKey) ?? 0;
+
+                return [
+                    'date' => $date,
+                    $valueKey => round($average, 2),
+                ];
+            })
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Helper: Smooth series using trailing moving average
+     */
+    private function smoothSeries(array $series, string $valueKey, int $window = 3): array
+    {
+        $count = count($series);
+        if ($count <= 1 || $window <= 1) {
+            return $series;
+        }
+
+        $window = max(2, $window);
+
+        $smoothed = [];
+        for ($i = 0; $i < $count; $i++) {
+            $start = max(0, $i - ($window - 1));
+            $length = $i - $start + 1;
+            $sum = 0;
+
+            for ($j = $start; $j <= $i; $j++) {
+                $sum += $series[$j][$valueKey] ?? 0;
+            }
+
+            $average = $length > 0 ? round($sum / $length, 2) : ($series[$i][$valueKey] ?? 0);
+
+            $smoothed[] = [
+                'date' => $series[$i]['date'] ?? null,
+                $valueKey => $average,
+            ];
+        }
+
+        return $smoothed;
     }
 
     /**

@@ -17,7 +17,7 @@ For project support and inquiries:
 🌐 [https://thetradevisor.com](https://thetradevisor.com)'
 
 # Find all .md files
-find /www/docs -type f -name "*.md" | while read file; do
+find /vhosts/thetradevisor.com/docs -type f -name "*.md" | while read file; do
     # Remove any existing Author & Contact section (everything after the last ---)
     # Find the last occurrence of "## 👨‍💻 Author" or "## Author" and remove from there to end
     if grep -q "## 👨‍💻 Author\|## Author & Contact" "$file"; then

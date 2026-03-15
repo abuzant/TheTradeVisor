@@ -605,19 +605,40 @@
         @if(!empty($metrics['equity_curve']))
         const equityCurveCtx = document.getElementById('equityCurveChart');
         if (equityCurveCtx) {
+            const rawEquitySeries = @json(collect($metrics['equity_curve'])->map(function($point) {
+                return ['x' => $point['date'], 'y' => $point['balance']];
+            }));
+            const dailyEquitySeries = @json(collect($metrics['equity_curve_daily'] ?? [])->map(function($point) {
+                return ['x' => $point['date'], 'y' => $point['balance']];
+            }));
+            const smoothedEquitySeries = @json(collect($metrics['equity_curve_daily_smoothed'] ?? [])->map(function($point) {
+                return ['x' => $point['date'], 'y' => $point['balance']];
+            }));
+
+            const equityCurveSeries = smoothedEquitySeries.length ? smoothedEquitySeries : (dailyEquitySeries.length ? dailyEquitySeries : rawEquitySeries);
+
+            const showPoints = equityCurveSeries.length > 10;
+
             new Chart(equityCurveCtx, {
                 type: 'line',
                 data: {
                     datasets: [{
                         label: 'Balance',
-                        data: @json(collect($metrics['equity_curve'])->map(function($point) {
-                            return ['x' => $point['date'], 'y' => $point['balance']];
-                        })),
+                        data: equityCurveSeries,
                         borderColor: 'rgb(79, 70, 229)',
                         backgroundColor: 'rgba(79, 70, 229, 0.1)',
                         borderWidth: 2,
                         fill: true,
-                        tension: 0.4,
+                        tension: 0.5,
+                        segment: {
+                            borderDash: ctx => ctx.p0.skip || ctx.p1.skip ? [4, 4] : undefined,
+                        },
+                        pointRadius: showPoints ? 2 : 0,
+                        pointHoverRadius: showPoints ? 5 : 4,
+                        pointBorderWidth: 0,
+                        pointHoverBorderWidth: showPoints ? 2 : 0,
+                        pointBackgroundColor: 'rgb(99, 102, 241)',
+                        spanGaps: true,
                     }]
                 },
                 options: {
@@ -706,19 +727,39 @@
         @if($metrics['drawdown'])
         const drawdownCtx = document.getElementById('drawdownChart');
         if (drawdownCtx) {
+            const rawDrawdownSeries = @json(collect($metrics['drawdown']['drawdown_periods'])->map(function($point) {
+                return ['x' => $point['date'], 'y' => -$point['drawdown']];
+            }));
+            const dailyDrawdownSeries = @json(collect($metrics['drawdown']['drawdown_periods_daily'] ?? [])->map(function($point) {
+                return ['x' => $point['date'], 'y' => -$point['drawdown']];
+            }));
+            const smoothedDrawdownSeries = @json(collect($metrics['drawdown']['drawdown_periods_daily_smoothed'] ?? [])->map(function($point) {
+                return ['x' => $point['date'], 'y' => -$point['drawdown']];
+            }));
+
+            const drawdownSeries = smoothedDrawdownSeries.length ? smoothedDrawdownSeries : (dailyDrawdownSeries.length ? dailyDrawdownSeries : rawDrawdownSeries);
+            const showDrawdownPoints = drawdownSeries.length > 10;
+
             new Chart(drawdownCtx, {
                 type: 'line',
                 data: {
                     datasets: [{
                         label: 'Drawdown %',
-                        data: @json(collect($metrics['drawdown']['drawdown_periods'])->map(function($point) {
-                            return ['x' => $point['date'], 'y' => -$point['drawdown']];
-                        })),
+                        data: drawdownSeries,
                         borderColor: 'rgb(239, 68, 68)',
                         backgroundColor: 'rgba(239, 68, 68, 0.1)',
                         borderWidth: 2,
                         fill: true,
-                        tension: 0.4,
+                        tension: 0.5,
+                        segment: {
+                            borderDash: ctx => ctx.p0.skip || ctx.p1.skip ? [4, 4] : undefined,
+                        },
+                        pointRadius: showDrawdownPoints ? 2 : 0,
+                        pointHoverRadius: showDrawdownPoints ? 5 : 4,
+                        pointBorderWidth: 0,
+                        pointHoverBorderWidth: showDrawdownPoints ? 2 : 0,
+                        pointBackgroundColor: 'rgb(248, 113, 113)',
+                        spanGaps: true,
                     }]
                 },
                 options: {

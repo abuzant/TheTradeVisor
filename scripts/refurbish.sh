@@ -2,7 +2,7 @@
 
 # TheTradeVisor Cache Refurbish Script - UPDATED
 # Clears all caches: Laravel, Redis, Nginx, PHP-FPM, PostgreSQL, and rebuilds optimized caches
-# Updated for current system configuration (5 PHP-FPM pools, optimized Redis/PostgreSQL)
+# Updated for current system configuration (Docker-based PostgreSQL/Redis, 3 PHP-FPM pools)
 
 echo "🧹 TheTradeVisor Cache Refurbish Script (Updated)"
 echo "=================================================="
@@ -26,16 +26,16 @@ php artisan optimize:clear
 echo "✓ Laravel caches cleared"
 echo ""
 
-# Redis Cache (flush all but preserve critical sessions)
+# Redis Cache (flush all)
 echo "🔴 Flushing Redis cache..."
 redis-cli FLUSHDB
 echo "✓ Redis cache flushed"
 echo ""
 
-# Restart Redis to apply optimizations
-echo "🔄 Restarting Redis service..."
-$USE_SUDO systemctl restart redis
-echo "✓ Redis restarted with optimizations"
+# Restart Redis container
+echo "🔄 Restarting Redis container..."
+docker restart redis
+echo "✓ Redis container restarted"
 echo ""
 
 # Nginx FastCGI Cache
@@ -44,31 +44,25 @@ $USE_SUDO rm -rf /var/cache/nginx/fastcgi/*
 echo "✓ Nginx cache cleared"
 echo ""
 
-# PHP-FPM (restart main service - all 5 pools)
-echo "🐘 Restarting PHP-FPM (all 5 pools: www + pool1-4)..."
+# PHP-FPM (restart service with 3 pools)
+echo "🐘 Restarting PHP-FPM (thetradevisor + www + sarcastic pools)..."
 $USE_SUDO systemctl restart php8.3-fpm
-echo "✓ PHP-FPM restarted with optimized settings"
+echo "✓ PHP-FPM restarted"
 echo ""
 
-# PostgreSQL (restart to apply optimizations)
-echo "🐘 Restarting PostgreSQL with optimizations..."
-$USE_SUDO systemctl restart postgresql
-echo "✓ PostgreSQL restarted with performance optimizations"
+# PostgreSQL (restart container)
+echo "🐘 Restarting PostgreSQL container..."
+docker restart postgres
+echo "✓ PostgreSQL container restarted"
 echo ""
 
-# Main Nginx (includes load balancer functionality)
-echo "🌐 Restarting main Nginx service..."
+# Nginx (restart web server)
+echo "🌐 Restarting Nginx web server..."
 $USE_SUDO systemctl restart nginx
-echo "✓ Main Nginx restarted"
+echo "✓ Nginx restarted"
 echo ""
 
-# Reload backend nginx instances (if they exist)
-echo "🌐 Reloading backend Nginx instances..."
-for backend_pid in $(ps aux | grep nginx | grep "backend" | grep "master" | awk '{print $2}'); do
-    $USE_SUDO kill -HUP $backend_pid 2>/dev/null || true
-done
-echo "✓ Backend instances reloaded"
-echo ""
+# Note: Backend nginx instances removed - now using direct PHP-FPM connection
 
 # Rebuild Optimized Caches
 echo "⚡ Rebuilding optimized caches..."
@@ -82,8 +76,13 @@ echo ""
 # Restart Horizon (if running)
 if pgrep -f "artisan horizon" > /dev/null; then
     echo "🔄 Restarting Horizon..."
-    $USE_SUDO supervisorctl restart horizon
+    cd /vhosts/thetradevisor.com && php artisan horizon:terminate >> /dev/null 2>&1
+    sleep 2
+    cd /vhosts/thetradevisor.com && php artisan horizon >> /dev/null 2>&1 &
     echo "✓ Horizon restarted"
+    echo ""
+else
+    echo "⚠ Horizon not running - skipping"
     echo ""
 fi
 
@@ -101,17 +100,14 @@ echo "✅ Refurbish complete!"
 echo ""
 echo "📊 System Status:"
 echo "  - Laravel: Fresh caches rebuilt"
-echo "  - Redis: Flushed & restarted (64MB optimized)"
-echo "  - Nginx: Cleared & restarted (all instances)"
-echo "  - PHP-FPM: Restarted (5 pools optimized)"
-echo "  - PostgreSQL: Restarted (performance tuned)"
+echo "  - Redis: Flushed & restarted (Docker container)"
+echo "  - Nginx: Cleared & restarted"
+echo "  - PHP-FPM: Restarted (thetradevisor + www + sarcastic pools)"
+echo "  - PostgreSQL: Restarted (Docker container)"
 echo "  - Horizon: Restarted (if running)"
 echo "  - Log Rotation: Checked/forced"
 echo "  - Optimized caches: Rebuilt"
 echo ""
-echo "💾 Memory Savings Active:"
-echo "  - PHP-FPM: ~2GB saved"
-echo "  - Redis: 192MB saved"
-echo "  - Total: ~2.2GB freed"
+echo "💾 Note: Memory savings may vary based on current usage"
 echo ""
 echo "🚀 Your application is now running with clean caches and optimizations!"

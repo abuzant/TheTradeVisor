@@ -50,6 +50,19 @@
                                 </select>
                             </div>
 
+                            {{-- Hide Zero Accounts --}}
+                            <div class="flex items-end">
+                                <label class="flex items-center cursor-pointer">
+                                    <input type="checkbox"
+                                           name="hide_zero_accounts"
+                                           value="1"
+                                           {{ $hideZeroAccounts ? 'checked' : '' }}
+                                           onchange="this.form.submit()"
+                                           class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded">
+                                    <span class="ml-2 text-sm text-gray-700">Hide users with 0 accounts</span>
+                                </label>
+                            </div>
+
                             {{-- Submit --}}
                             <div class="flex items-end space-x-2">
                                 <button type="submit" class="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">

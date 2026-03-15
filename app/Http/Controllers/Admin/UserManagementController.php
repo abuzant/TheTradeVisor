@@ -18,6 +18,7 @@ class UserManagementController extends Controller
     {
         $search = $request->get('search');
         $status = $request->get('status');
+        $hideZeroAccounts = $request->get('hide_zero_accounts', false);
 
         // Define sortable columns (removed subscription_tier and max_accounts)
         $sortableColumns = [
@@ -40,6 +41,9 @@ class UserManagementController extends Controller
             })
             ->when($status !== null, function($query) use ($status) {
                 $query->where('is_active', $status === 'active');
+            })
+            ->when($hideZeroAccounts, function($query) {
+                $query->whereHas('tradingAccounts');
             });
 
         // Apply sorting using the trait
@@ -56,6 +60,7 @@ class UserManagementController extends Controller
             'users', 
             'search', 
             'status',
+            'hideZeroAccounts',
             'sortBy',
             'sortDirection'
         ));

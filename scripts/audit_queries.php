@@ -4,7 +4,7 @@
  * Audit all controllers for dangerous unbounded queries
  */
 
-$controllersPath = '/www/app/Http/Controllers';
+$controllersPath = '/vhosts/thetradevisor.com/app/Http/Controllers';
 $dangerousPatterns = [
     'get()' => 'Unbounded get() without limit/take/paginate',
     'all()' => 'Unbounded all() - loads everything',
@@ -37,7 +37,7 @@ foreach ($iterator as $file) {
             
             if (!preg_match('/->(?:limit|take|paginate|first)\(/', $context)) {
                 $findings[] = [
-                    'file' => str_replace('/www/', '', $filepath),
+                    'file' => str_replace('/vhosts/thetradevisor.com/', '', $filepath),
                     'line' => $lineNum,
                     'code' => trim($line),
                     'issue' => 'Unbounded ->get()',
@@ -50,7 +50,7 @@ foreach ($iterator as $file) {
         // Check for ->all()
         if (preg_match('/->all\(\)/', $line)) {
             $findings[] = [
-                'file' => str_replace('/www/', '', $filepath),
+                'file' => str_replace('/vhosts/thetradevisor.com/', '', $filepath),
                 'line' => $lineNum,
                 'code' => trim($line),
                 'issue' => 'Unbounded ->all()',
