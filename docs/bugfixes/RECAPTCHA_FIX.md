@@ -38,8 +38,8 @@ if ($response->getScore() < 0.5) {
 Current keys in `.env`:
 ```
 RECAPTCHA_ENABLED=true
-RECAPTCHA_SITE_KEY=6Ld8IfwrAAAAAKZtBJhBbXoXEoQu_3C4Ws9iZe2V
-RECAPTCHA_SECRET_KEY=6Ld8IfwrAAAAAALNowJdEemlLbSsr3TXhA0N4NSZ
+RECAPTCHA_SITE_KEY=your_recaptcha_v2_site_key
+RECAPTCHA_SECRET_KEY=your_recaptcha_v2_secret_key
 ```
 
 ### If Keys Are Invalid
