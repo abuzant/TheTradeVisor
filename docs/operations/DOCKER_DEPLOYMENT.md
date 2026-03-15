@@ -169,7 +169,7 @@ DB_HOST=postgres
 DB_PORT=5432
 DB_DATABASE=thetradevisor
 DB_USERNAME=thetradevisor
-DB_PASSWORD=secure_password_123
+DB_PASSWORD=your_secure_password_here
 
 REDIS_HOST=redis
 REDIS_PORT=6379

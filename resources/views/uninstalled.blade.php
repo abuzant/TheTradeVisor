@@ -323,7 +323,7 @@
 
                 <!-- reCAPTCHA -->
                 <div class="mb-6">
-                    <div class="g-recaptcha" data-sitekey="6LdbKwssAAAAANvWRniOD6J3QJYEYbtq62qUIehx"></div>
+                    <div class="g-recaptcha" data-sitekey="{{ config('services.recaptcha.site_key') }}"></div>
                 </div>
 
                 <!-- Submit Button -->
