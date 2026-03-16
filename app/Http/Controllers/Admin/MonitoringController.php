@@ -183,7 +183,7 @@ class MonitoringController extends Controller
         }
 
         $oneHourAgo = now()->subHour();
-        $twentyFourHoursAgo = now()->subDay(24);
+        $twentyFourHoursAgo = now()->subHours(24);
         
         $errorsLastHour = 0;
         $errorsLast24h = 0;
@@ -220,8 +220,8 @@ class MonitoringController extends Controller
             }
         }
         
-        // Calculate error rate (errors per 1000 requests)
-        $errorRate = $totalLines > 0 ? round(($errorsLast24h / max($totalLines, 1)) * 1000, 2) : 0;
+        // Error rate = errors in the last hour (simple, meaningful metric)
+        $errorRate = $errorsLastHour;
         
         return [
             'errors_last_hour' => $errorsLastHour,
